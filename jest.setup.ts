@@ -3,7 +3,7 @@ import { cleanup } from "@testing-library/react";
 
 Object.defineProperty(window, "matchMedia", {
     writable: true,
-    value: jest.fn().mockImplementation((query) => ({
+    value: jest.fn().mockImplementation((query: string) => ({
         matches: false,
         media: query,
         onchange: null,
@@ -17,16 +17,15 @@ Object.defineProperty(window, "matchMedia", {
 
 // runs before every test
 beforeEach(() => {
-    console.log("Setting up test environment")
+    console.log("Setting up test environment");
     jest.clearAllMocks();
 });
 
 // runs after each test
 afterEach(() => {
-    console.log("Cleaning up after each test")
+    console.log("Cleaning up after each test");
     cleanup();
     jest.clearAllMocks();
-
 });
 
 // runs once before all tests
