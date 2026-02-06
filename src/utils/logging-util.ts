@@ -3,11 +3,11 @@ export const logger = pino({
     level: process.env.LOG_LEVEL || "info",
 });
 
-export function withLogging<T extends (...args: any[]) => any>(
+export function withLogging<T extends (...args: unknown[]) => unknown>(
     name: string,
     fn: T
 ): T {
-    return (async (...args: any[]) => {
+    return (async (...args: unknown[]) => {
         logger.info({ args }, `${name} started`);
         try {
             const result = await fn(...args);
