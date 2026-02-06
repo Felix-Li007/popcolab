@@ -1,6 +1,6 @@
-"use client";
+'use client';
 // TODO: This is demo component for testing purposes, not intended for production use.
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth, useUser } from '@clerk/nextjs';
 
 export const ClientComponent = () => {
   // Get the authentication state and user information using Clerk's hooks

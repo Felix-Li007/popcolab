@@ -1,22 +1,15 @@
 {
-    "default": {
-        "paths": [
-            "tests/bdd/features/"
-        ],
-        "require": [
-            "tests/bdd/steps/*.js"
-        ],
-        "formatOptions": {
-            "snippetInterface": "async-await"
-        },
-        "format": [
-            [
-                "html",
-                "./test-reports/bdd/cucumber-report.html"
-            ],
-            "summary",
-            "progress-bar",
-            "json:./test-reports/bdd/cucumber-report.json"
-        ]
-    }
+  "default": {
+    "paths": ["tests/bdd/features/"],
+    "require": ["tests/bdd/steps/*.js"],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "format": [
+      ["html", "./test-reports/bdd/cucumber-report.html"],
+      "summary",
+      "progress-bar",
+      "json:./test-reports/bdd/cucumber-report.json"
+    ]
+  }
 }
