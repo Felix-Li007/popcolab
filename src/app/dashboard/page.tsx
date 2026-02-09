@@ -1,5 +1,5 @@
 // TODO : This is a demo page for testing purposes, not intended for production use.
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from '@clerk/nextjs/server';
 
 export default async function Dashboard() {
   // Get the auth object and the current user object

@@ -1,21 +1,21 @@
-import pino from "pino";
+import pino from 'pino';
 export const logger = pino({
-    level: process.env.LOG_LEVEL || "info",
+  level: process.env.LOG_LEVEL || 'info',
 });
 
-export function withLogging<T extends (...args: any[]) => any>(
-    name: string,
-    fn: T
+export function withLogging<T extends (...args: unknown[]) => unknown>(
+  name: string,
+  fn: T
 ): T {
-    return (async (...args: any[]) => {
-        logger.info({ args }, `${name} started`);
-        try {
-            const result = await fn(...args);
-            logger.info({ result }, `${name} exited`);
-            return result;
-        } catch (error) {
-            logger.error({ error }, `${name} errored`);
-            throw error;
-        }
-    }) as T;
+  return (async (...args: unknown[]) => {
+    logger.info({ args }, `${name} started`);
+    try {
+      const result = await fn(...args);
+      logger.info({ result }, `${name} exited`);
+      return result;
+    } catch (error) {
+      logger.error({ error }, `${name} errored`);
+      throw error;
+    }
+  }) as T;
 }
