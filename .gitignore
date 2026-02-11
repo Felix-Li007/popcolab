@@ -58,3 +58,11 @@ node_modules/
 
 package-lock.json
 yarn.lock
+
+# terraform
+/terraform/terraform.tfstate
+/terraform/terraform.tfstate.*
+/terraform/terraform.tfstate.d/
+/terraform/.terraform.tfstate
+/terraform/.terraform/
+/terraform/.terraform.lock.hcl
