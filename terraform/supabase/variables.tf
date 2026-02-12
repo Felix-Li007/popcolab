@@ -34,12 +34,3 @@ variable "region_id" {
   type        = string
   default     = "ca-central-1"
 }
-
-variable "environment" {
-  description = "Environment (development or production)"
-  type        = string
-  validation {
-    condition     = contains(["development", "production"], var.environment)
-    error_message = "Environment must be 'development' or 'production'."
-  }
-}

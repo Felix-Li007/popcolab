@@ -57,7 +57,7 @@ You should see the Terraform version number displayed.
 Navigate to the `terraform/` directory and initialize it:
 
 ```bash
-cd terraform/
+cd terraform/supabase (or terraform/vercel)
 terraform init
 ```
 
