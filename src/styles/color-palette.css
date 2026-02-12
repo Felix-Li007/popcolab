@@ -1,0 +1,25 @@
+:root {
+  --palette-background: #ffffff;
+  --palette-foreground: #171717;
+
+  --palette-teal-deep: #19464d;
+  --palette-teal-medium: #6390a4;
+  --palette-teal-accent: #3b6b77;
+
+  --palette-pink-bright: #ff8de6;
+  --palette-pink-light: #ffbbf0;
+  --palette-pink-medium: #ffa4eb;
+
+  --palette-magenta-bold: #f52e81;
+  --palette-yellow: #f5dd42;
+  --palette-lavender-light: #f9dbf2;
+  --palette-grey-light: #dddddd;
+
+  --palette-coral-soft: #f9dbd2;
+  --palette-coral-medium: #fbe2db;
+  --palette-coral-light: #fcf9e4;
+
+  --palette-coral-pink: #ef9792;
+  --palette-coral-red: #e9756e;
+  --palette-coral-vibe: #e4524a;
+}
