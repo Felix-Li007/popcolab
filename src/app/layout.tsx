@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Poppins } from 'next/font/google';
 import {
   ClerkProvider,
   SignInButton,
@@ -10,14 +10,11 @@ import {
 } from '@clerk/nextjs';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const poppins = Poppins({
+  // This is a font designated by the client
+  variable: '--font-poppins',
   subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  weight: ['600' /* semi-bold */, '700' /* bold */],
 });
 
 export const metadata: Metadata = {
@@ -33,9 +30,8 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
+        <body className={`${poppins.variable} antialiased`}>
+          <p className="font-bold text-sm">This is a test</p>
           <header className="flex justify-end items-center p-4 gap-4 h-16">
             {/* Show the sign-in and sign-up buttons when the user is signed out */}
             <SignedOut>
