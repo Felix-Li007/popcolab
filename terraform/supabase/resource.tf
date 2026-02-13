@@ -1,4 +1,4 @@
-resource "supabase_project" "main" {
+resource "supabase_project" "postgres-db" {
   organization_id   = var.organization_id
   name              = var.project_name
   database_password = var.db_password

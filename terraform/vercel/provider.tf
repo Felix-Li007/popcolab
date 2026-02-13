@@ -2,8 +2,8 @@ terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
-    supabase = {
-      source  = "supabase/supabase"
+    vercel = {
+      source  = "vercel/vercel"
       version = "~> 1.0"
     }
   }
@@ -13,6 +13,6 @@ terraform {
   }
 }
 
-provider "supabase" {
-  access_token = var.access_token
+provider "vercel" {
+  api_token = var.api_token
 }
