@@ -10,6 +10,8 @@ This directory contains individual model definitions for documentation and refer
 - **Company.prisma** - Company model definition (corporate/company information for users)
 - **Team.prisma** - Team model definition (team entity)
 - **TeamMate.prisma** - TeamMate model definition (junction table for team membership)
+- **DimensionCategory.prisma** - DimensionCategory model definition (categories for dimension indexes)
+- **DimensionIndex.prisma** - DimensionIndex model definition (dimension indexes for data analysis and filtering)
 
 ## Note
 

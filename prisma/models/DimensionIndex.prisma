@@ -1,0 +1,18 @@
+// DimensionIndex Model
+// This model represents dimension indexes used for data analysis and filtering
+
+model DimensionIndex {
+    id          Int               @id @default(autoincrement())
+    index_key   String?           @db.VarChar(50)
+    category_id Int
+    index_name  String            @db.VarChar(50)
+    data_type   String            @db.VarChar(20)
+    hard_filter Boolean           @db.Boolean()
+    scale_min   Int?
+    scale_max   Int?
+    created_at  DateTime          @default(now()) @db.Timestamp()
+    updated_at  DateTime          @updatedAt @db.Timestamp()
+    category    DimensionCategory @relation(fields: [category_id], references: [id])
+
+    @@map("dimension_index")
+}
