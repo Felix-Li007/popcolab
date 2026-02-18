@@ -1,0 +1,18 @@
+// Profile Model
+// This model represents user profile information
+
+model Profile {
+    id                Int       @id @default(autoincrement())
+    user_id           Int       @unique
+    first_name        String?   @db.VarChar(50)
+    last_name         String?   @db.VarChar(50)
+    phone_number      String?   @db.VarChar(20)
+    preferred_contact String?   @db.VarChar(20)
+    consent_given     Int       @db.SmallInt
+    privacy_notes     String?   @db.VarChar(255)
+    created_at        DateTime? @default(now()) @db.Timestamp()
+    updated_at        DateTime  @updatedAt @db.Timestamp()
+    user              User      @relation(fields: [user_id], references: [id])
+
+    @@map("profile")
+}

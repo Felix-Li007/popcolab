@@ -1,0 +1,16 @@
+// UserVector Model
+// This model represents vector representations of user responses
+
+model UserVector {
+    id          Int      @id @default(autoincrement())
+    vector_json String   @db.VarChar(500)
+    vector_type String   @db.VarChar(50)
+    response_id Int
+    user_id     Int      @unique
+    created_at  DateTime @default(now()) @db.Timestamp()
+    updated_at  DateTime @updatedAt @db.Timestamp()
+    response    Response @relation(fields: [response_id], references: [id])
+    user        User     @relation(fields: [user_id], references: [id])
+
+    @@map("user_vector")
+}
