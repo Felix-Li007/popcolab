@@ -1,0 +1,13 @@
+// TeamVector Model
+// This model represents vector representations of team data
+
+model TeamVector {
+    id          Int      @id @default(autoincrement())
+    team_id     Int      @unique
+    vector_json String   @db.VarChar(500)
+    created_at  DateTime @default(now()) @db.Timestamp()
+    updated_at  DateTime @updatedAt @db.Timestamp()
+    team        Team     @relation(fields: [team_id], references: [id])
+
+    @@map("team_vector")
+}
