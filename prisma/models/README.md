@@ -15,6 +15,10 @@ This directory contains individual model definitions for documentation and refer
 - **Question.prisma** - Question model definition (questions in the system)
 - **QuestionOption.prisma** - QuestionOption model definition (options/choices for questions)
 - **QuestionDimension.prisma** - QuestionDimension model definition (relationship between questions and dimensions)
+- **Response.prisma** - Response model definition (user response session to questionnaire)
+- **Answer.prisma** - Answer model definition (individual answers to questions)
+- **UserScore.prisma** - UserScore model definition (calculated scores across dimensions)
+- **UserVector.prisma** - UserVector model definition (vector representations of user responses)
 
 ## Note
 

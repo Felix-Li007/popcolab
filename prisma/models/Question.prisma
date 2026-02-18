@@ -11,4 +11,7 @@ model Question {
     order_index   Int?
     options       QuestionOption[]
     dimensions    QuestionDimension[]
+    answers       Answer[]
+
+    @@map("question")
 }
