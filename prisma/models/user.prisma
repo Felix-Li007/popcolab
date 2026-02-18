@@ -1,0 +1,16 @@
+// User Model
+// This model represents a user in the system
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique @db.VarChar(50)
+  name       String?    @db.VarChar(50)
+  created_at DateTime   @default(now()) @db.Timestamp()
+  updated_at DateTime   @updatedAt @db.Timestamp()
+  profile    Profile?
+  corporate  Company?
+  teams      Team[]
+  team_mates TeamMate[]
+
+  @@map("user")
+}

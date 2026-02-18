@@ -1,0 +1,15 @@
+// Team Model
+// This model represents a team created by a user
+
+model Team {
+    id         Int        @id @default(autoincrement())
+    team_name  String     @db.VarChar(50)
+    created_at DateTime   @default(now()) @db.Timestamp()
+    updated_at DateTime   @updatedAt @db.Timestamp()
+    created_by Int
+    team_code  String     @db.VarChar(20)
+    creator    User       @relation(fields: [created_by], references: [id])
+    team_mates TeamMate[]
+
+    @@map("team")
+}
