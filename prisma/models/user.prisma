@@ -12,6 +12,7 @@ model User {
   teams       Team[]
   team_mates  TeamMate[]
   user_vector UserVector?
+  requests    Request[]
 
   @@map("user")
 }
