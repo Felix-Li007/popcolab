@@ -12,6 +12,9 @@ This directory contains individual model definitions for documentation and refer
 - **TeamMate.prisma** - TeamMate model definition (junction table for team membership)
 - **DimensionCategory.prisma** - DimensionCategory model definition (categories for dimension indexes)
 - **DimensionIndex.prisma** - DimensionIndex model definition (dimension indexes for data analysis and filtering)
+- **Question.prisma** - Question model definition (questions in the system)
+- **QuestionOption.prisma** - QuestionOption model definition (options/choices for questions)
+- **QuestionDimension.prisma** - QuestionDimension model definition (relationship between questions and dimensions)
 
 ## Note
 
