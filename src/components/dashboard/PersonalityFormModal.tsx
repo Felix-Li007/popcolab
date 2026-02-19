@@ -130,7 +130,9 @@ export default function PersonalityFormModal({
         </div>
 
         {/* Scrollable form */}
-        <div className="px-6 pb-5 space-y-4 overflow-y-auto flex-1">
+        <div
+          className={`px-6 pb-5 space-y-4 overflow-y-auto flex-1 ${styles.scrollArea}`}
+        >
           {/* NAME */}
           <div>
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
