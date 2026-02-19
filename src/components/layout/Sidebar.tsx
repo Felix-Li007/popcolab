@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from '@/styles/sidebar.module.css';
 
 type NavItem = {
@@ -249,9 +250,13 @@ export default function Sidebar({
       {/* Logo */}
       <div className="px-4 h-14 flex items-center border-b border-white/10">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-magenta to-pink-bright flex items-center justify-center text-white text-xs font-bold">
-            P
-          </div>
+          <Image
+            src="/logo/logo-icon.png"
+            alt="Pop CoLab"
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
           <div>
             <div className="text-sm font-bold leading-tight">Pop CoLab</div>
             <div className="text-[10px] text-white/60 leading-tight">

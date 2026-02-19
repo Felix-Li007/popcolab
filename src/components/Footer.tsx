@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const adminLinks = [
   { label: 'Dashboard', href: '/admin' },
@@ -25,9 +26,13 @@ export default function AdminFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-magenta to-pink-bright flex items-center justify-center text-white text-xs font-bold">
-                P
-              </div>
+              <Image
+                src="/logo/logo-icon.png"
+                alt="Pop CoLab"
+                width={32}
+                height={32}
+                className="rounded-full"
+              />
               <span className="font-bold text-sm">Pop CoLab</span>
             </div>
             <p className="text-white/60 text-xs leading-relaxed">
