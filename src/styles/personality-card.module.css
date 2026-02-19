@@ -1,5 +1,3 @@
-/* All styles handled by Tailwind CSS */
-
 .card {
   position: relative;
   transition:
@@ -30,4 +28,58 @@
 
 .card:hover .orb {
   transform: scale(2.2);
+}
+
+.cardGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-auto-rows: 256px;
+  align-content: start;
+}
+
+/* Per-type CSS variable overrides */
+.typeJOKER {
+  --orb-color: #d0e9eb;
+  --glow-color: rgba(25, 70, 77, 0.35);
+}
+
+.typeKINESTHETE {
+  --orb-color: #fde0ef;
+  --glow-color: rgba(245, 46, 129, 0.35);
+}
+
+.typeEXPLORER {
+  --orb-color: #fdf7d0;
+  --glow-color: rgba(245, 221, 66, 0.45);
+}
+
+.typeCOMPETITOR {
+  --orb-color: #ffe6fb;
+  --glow-color: rgba(255, 141, 230, 0.45);
+}
+
+.typeCOLLECTOR {
+  --orb-color: #ffedfb;
+  --glow-color: rgba(255, 164, 235, 0.45);
+}
+
+.typeCREATOR {
+  --orb-color: #fde4e3;
+  --glow-color: rgba(228, 82, 74, 0.35);
+}
+
+.typeDIRECTOR {
+  --orb-color: #ddedf0;
+  --glow-color: rgba(59, 107, 119, 0.35);
+}
+
+.typeSTORYTELLER {
+  --orb-color: #fde8e7;
+  --glow-color: rgba(233, 117, 110, 0.4);
+}
+
+.typeDefault {
+  --orb-color: #ede9fe;
+  --glow-color: rgba(0, 0, 0, 0.15);
 }

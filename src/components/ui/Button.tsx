@@ -33,7 +33,7 @@ const variantStyles: Record<ButtonVariant, string> = {
 
 const activeTabStyle = 'bg-teal-deep text-white';
 
-// 所有按钮统一高度为 h-10 (40px)，只通过水平 padding 区分尺寸，设置最小宽度确保视觉平衡
+// All buttons share a fixed height of h-10 (40px); size variants only adjust horizontal padding and min-width
 const sizeStyles: Record<ButtonSize, string> = {
   xs: 'h-10 min-w-[60px] px-3 text-xs gap-1',
   sm: 'h-10 min-w-[80px] px-4 text-xs gap-1.5',

@@ -283,6 +283,7 @@ export type DimensionIndexWhereInput = {
   >;
   experience_dimensions?: Prisma.ExperienceDimensionListRelationFilter;
   request_preferences?: Prisma.RequestPreferenceListRelationFilter;
+  question_dimensions?: Prisma.QuestionDimensionListRelationFilter;
 };
 
 export type DimensionIndexOrderByWithRelationInput = {
@@ -299,6 +300,7 @@ export type DimensionIndexOrderByWithRelationInput = {
   category?: Prisma.DimensionCategoryOrderByWithRelationInput;
   experience_dimensions?: Prisma.ExperienceDimensionOrderByRelationAggregateInput;
   request_preferences?: Prisma.RequestPreferenceOrderByRelationAggregateInput;
+  question_dimensions?: Prisma.QuestionDimensionOrderByRelationAggregateInput;
 };
 
 export type DimensionIndexWhereUniqueInput = Prisma.AtLeast<
@@ -322,6 +324,7 @@ export type DimensionIndexWhereUniqueInput = Prisma.AtLeast<
     >;
     experience_dimensions?: Prisma.ExperienceDimensionListRelationFilter;
     request_preferences?: Prisma.RequestPreferenceListRelationFilter;
+    question_dimensions?: Prisma.QuestionDimensionListRelationFilter;
   },
   'id'
 >;
@@ -391,6 +394,7 @@ export type DimensionIndexCreateInput = {
   category: Prisma.DimensionCategoryCreateNestedOneWithoutIndexesInput;
   experience_dimensions?: Prisma.ExperienceDimensionCreateNestedManyWithoutDimension_indexInput;
   request_preferences?: Prisma.RequestPreferenceCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexUncheckedCreateInput = {
@@ -406,6 +410,7 @@ export type DimensionIndexUncheckedCreateInput = {
   updated_at?: Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUncheckedCreateNestedManyWithoutDimension_indexInput;
   request_preferences?: Prisma.RequestPreferenceUncheckedCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexUpdateInput = {
@@ -420,6 +425,7 @@ export type DimensionIndexUpdateInput = {
   category?: Prisma.DimensionCategoryUpdateOneRequiredWithoutIndexesNestedInput;
   experience_dimensions?: Prisma.ExperienceDimensionUpdateManyWithoutDimension_indexNestedInput;
   request_preferences?: Prisma.RequestPreferenceUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexUncheckedUpdateInput = {
@@ -435,6 +441,7 @@ export type DimensionIndexUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUncheckedUpdateManyWithoutDimension_indexNestedInput;
   request_preferences?: Prisma.RequestPreferenceUncheckedUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexCreateManyInput = {
@@ -683,6 +690,33 @@ export type DimensionIndexUpdateOneRequiredWithoutExperience_dimensionsNestedInp
     >;
   };
 
+export type DimensionIndexCreateNestedOneWithoutQuestion_dimensionsInput = {
+  create?: Prisma.XOR<
+    Prisma.DimensionIndexCreateWithoutQuestion_dimensionsInput,
+    Prisma.DimensionIndexUncheckedCreateWithoutQuestion_dimensionsInput
+  >;
+  connectOrCreate?: Prisma.DimensionIndexCreateOrConnectWithoutQuestion_dimensionsInput;
+  connect?: Prisma.DimensionIndexWhereUniqueInput;
+};
+
+export type DimensionIndexUpdateOneRequiredWithoutQuestion_dimensionsNestedInput =
+  {
+    create?: Prisma.XOR<
+      Prisma.DimensionIndexCreateWithoutQuestion_dimensionsInput,
+      Prisma.DimensionIndexUncheckedCreateWithoutQuestion_dimensionsInput
+    >;
+    connectOrCreate?: Prisma.DimensionIndexCreateOrConnectWithoutQuestion_dimensionsInput;
+    upsert?: Prisma.DimensionIndexUpsertWithoutQuestion_dimensionsInput;
+    connect?: Prisma.DimensionIndexWhereUniqueInput;
+    update?: Prisma.XOR<
+      Prisma.XOR<
+        Prisma.DimensionIndexUpdateToOneWithWhereWithoutQuestion_dimensionsInput,
+        Prisma.DimensionIndexUpdateWithoutQuestion_dimensionsInput
+      >,
+      Prisma.DimensionIndexUncheckedUpdateWithoutQuestion_dimensionsInput
+    >;
+  };
+
 export type DimensionIndexCreateNestedOneWithoutRequest_preferencesInput = {
   create?: Prisma.XOR<
     Prisma.DimensionIndexCreateWithoutRequest_preferencesInput,
@@ -721,6 +755,7 @@ export type DimensionIndexCreateWithoutCategoryInput = {
   updated_at?: Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionCreateNestedManyWithoutDimension_indexInput;
   request_preferences?: Prisma.RequestPreferenceCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexUncheckedCreateWithoutCategoryInput = {
@@ -735,6 +770,7 @@ export type DimensionIndexUncheckedCreateWithoutCategoryInput = {
   updated_at?: Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUncheckedCreateNestedManyWithoutDimension_indexInput;
   request_preferences?: Prisma.RequestPreferenceUncheckedCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexCreateOrConnectWithoutCategoryInput = {
@@ -811,6 +847,7 @@ export type DimensionIndexCreateWithoutExperience_dimensionsInput = {
   updated_at?: Date | string;
   category: Prisma.DimensionCategoryCreateNestedOneWithoutIndexesInput;
   request_preferences?: Prisma.RequestPreferenceCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexUncheckedCreateWithoutExperience_dimensionsInput = {
@@ -825,6 +862,7 @@ export type DimensionIndexUncheckedCreateWithoutExperience_dimensionsInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   request_preferences?: Prisma.RequestPreferenceUncheckedCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexCreateOrConnectWithoutExperience_dimensionsInput = {
@@ -867,6 +905,7 @@ export type DimensionIndexUpdateWithoutExperience_dimensionsInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   category?: Prisma.DimensionCategoryUpdateOneRequiredWithoutIndexesNestedInput;
   request_preferences?: Prisma.RequestPreferenceUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexUncheckedUpdateWithoutExperience_dimensionsInput = {
@@ -881,6 +920,94 @@ export type DimensionIndexUncheckedUpdateWithoutExperience_dimensionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   request_preferences?: Prisma.RequestPreferenceUncheckedUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutDimensionNestedInput;
+};
+
+export type DimensionIndexCreateWithoutQuestion_dimensionsInput = {
+  index_key?: string | null;
+  index_name: string;
+  data_type: string;
+  hard_filter: boolean;
+  scale_min?: number | null;
+  scale_max?: number | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  category: Prisma.DimensionCategoryCreateNestedOneWithoutIndexesInput;
+  experience_dimensions?: Prisma.ExperienceDimensionCreateNestedManyWithoutDimension_indexInput;
+  request_preferences?: Prisma.RequestPreferenceCreateNestedManyWithoutDimension_indexInput;
+};
+
+export type DimensionIndexUncheckedCreateWithoutQuestion_dimensionsInput = {
+  id?: number;
+  index_key?: string | null;
+  category_id: number;
+  index_name: string;
+  data_type: string;
+  hard_filter: boolean;
+  scale_min?: number | null;
+  scale_max?: number | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  experience_dimensions?: Prisma.ExperienceDimensionUncheckedCreateNestedManyWithoutDimension_indexInput;
+  request_preferences?: Prisma.RequestPreferenceUncheckedCreateNestedManyWithoutDimension_indexInput;
+};
+
+export type DimensionIndexCreateOrConnectWithoutQuestion_dimensionsInput = {
+  where: Prisma.DimensionIndexWhereUniqueInput;
+  create: Prisma.XOR<
+    Prisma.DimensionIndexCreateWithoutQuestion_dimensionsInput,
+    Prisma.DimensionIndexUncheckedCreateWithoutQuestion_dimensionsInput
+  >;
+};
+
+export type DimensionIndexUpsertWithoutQuestion_dimensionsInput = {
+  update: Prisma.XOR<
+    Prisma.DimensionIndexUpdateWithoutQuestion_dimensionsInput,
+    Prisma.DimensionIndexUncheckedUpdateWithoutQuestion_dimensionsInput
+  >;
+  create: Prisma.XOR<
+    Prisma.DimensionIndexCreateWithoutQuestion_dimensionsInput,
+    Prisma.DimensionIndexUncheckedCreateWithoutQuestion_dimensionsInput
+  >;
+  where?: Prisma.DimensionIndexWhereInput;
+};
+
+export type DimensionIndexUpdateToOneWithWhereWithoutQuestion_dimensionsInput =
+  {
+    where?: Prisma.DimensionIndexWhereInput;
+    data: Prisma.XOR<
+      Prisma.DimensionIndexUpdateWithoutQuestion_dimensionsInput,
+      Prisma.DimensionIndexUncheckedUpdateWithoutQuestion_dimensionsInput
+    >;
+  };
+
+export type DimensionIndexUpdateWithoutQuestion_dimensionsInput = {
+  index_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  index_name?: Prisma.StringFieldUpdateOperationsInput | string;
+  data_type?: Prisma.StringFieldUpdateOperationsInput | string;
+  hard_filter?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  scale_min?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  scale_max?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  category?: Prisma.DimensionCategoryUpdateOneRequiredWithoutIndexesNestedInput;
+  experience_dimensions?: Prisma.ExperienceDimensionUpdateManyWithoutDimension_indexNestedInput;
+  request_preferences?: Prisma.RequestPreferenceUpdateManyWithoutDimension_indexNestedInput;
+};
+
+export type DimensionIndexUncheckedUpdateWithoutQuestion_dimensionsInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number;
+  index_key?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  category_id?: Prisma.IntFieldUpdateOperationsInput | number;
+  index_name?: Prisma.StringFieldUpdateOperationsInput | string;
+  data_type?: Prisma.StringFieldUpdateOperationsInput | string;
+  hard_filter?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+  scale_min?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  scale_max?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  experience_dimensions?: Prisma.ExperienceDimensionUncheckedUpdateManyWithoutDimension_indexNestedInput;
+  request_preferences?: Prisma.RequestPreferenceUncheckedUpdateManyWithoutDimension_indexNestedInput;
 };
 
 export type DimensionIndexCreateWithoutRequest_preferencesInput = {
@@ -894,6 +1021,7 @@ export type DimensionIndexCreateWithoutRequest_preferencesInput = {
   updated_at?: Date | string;
   category: Prisma.DimensionCategoryCreateNestedOneWithoutIndexesInput;
   experience_dimensions?: Prisma.ExperienceDimensionCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexUncheckedCreateWithoutRequest_preferencesInput = {
@@ -908,6 +1036,7 @@ export type DimensionIndexUncheckedCreateWithoutRequest_preferencesInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUncheckedCreateNestedManyWithoutDimension_indexInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutDimensionInput;
 };
 
 export type DimensionIndexCreateOrConnectWithoutRequest_preferencesInput = {
@@ -950,6 +1079,7 @@ export type DimensionIndexUpdateWithoutRequest_preferencesInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   category?: Prisma.DimensionCategoryUpdateOneRequiredWithoutIndexesNestedInput;
   experience_dimensions?: Prisma.ExperienceDimensionUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexUncheckedUpdateWithoutRequest_preferencesInput = {
@@ -964,6 +1094,7 @@ export type DimensionIndexUncheckedUpdateWithoutRequest_preferencesInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUncheckedUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexCreateManyCategoryInput = {
@@ -989,6 +1120,7 @@ export type DimensionIndexUpdateWithoutCategoryInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUpdateManyWithoutDimension_indexNestedInput;
   request_preferences?: Prisma.RequestPreferenceUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexUncheckedUpdateWithoutCategoryInput = {
@@ -1003,6 +1135,7 @@ export type DimensionIndexUncheckedUpdateWithoutCategoryInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   experience_dimensions?: Prisma.ExperienceDimensionUncheckedUpdateManyWithoutDimension_indexNestedInput;
   request_preferences?: Prisma.RequestPreferenceUncheckedUpdateManyWithoutDimension_indexNestedInput;
+  question_dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutDimensionNestedInput;
 };
 
 export type DimensionIndexUncheckedUpdateManyWithoutCategoryInput = {
@@ -1024,6 +1157,7 @@ export type DimensionIndexUncheckedUpdateManyWithoutCategoryInput = {
 export type DimensionIndexCountOutputType = {
   experience_dimensions: number;
   request_preferences: number;
+  question_dimensions: number;
 };
 
 export type DimensionIndexCountOutputTypeSelect<
@@ -1036,6 +1170,9 @@ export type DimensionIndexCountOutputTypeSelect<
   request_preferences?:
     | boolean
     | DimensionIndexCountOutputTypeCountRequest_preferencesArgs;
+  question_dimensions?:
+    | boolean
+    | DimensionIndexCountOutputTypeCountQuestion_dimensionsArgs;
 };
 
 /**
@@ -1071,6 +1208,16 @@ export type DimensionIndexCountOutputTypeCountRequest_preferencesArgs<
   where?: Prisma.RequestPreferenceWhereInput;
 };
 
+/**
+ * DimensionIndexCountOutputType without action
+ */
+export type DimensionIndexCountOutputTypeCountQuestion_dimensionsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  where?: Prisma.QuestionDimensionWhereInput;
+};
+
 export type DimensionIndexSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
@@ -1093,6 +1240,9 @@ export type DimensionIndexSelect<
     request_preferences?:
       | boolean
       | Prisma.DimensionIndex$request_preferencesArgs<ExtArgs>;
+    question_dimensions?:
+      | boolean
+      | Prisma.DimensionIndex$question_dimensionsArgs<ExtArgs>;
     _count?: boolean | Prisma.DimensionIndexCountOutputTypeDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['dimensionIndex']
@@ -1178,6 +1328,9 @@ export type DimensionIndexInclude<
   request_preferences?:
     | boolean
     | Prisma.DimensionIndex$request_preferencesArgs<ExtArgs>;
+  question_dimensions?:
+    | boolean
+    | Prisma.DimensionIndex$question_dimensionsArgs<ExtArgs>;
   _count?: boolean | Prisma.DimensionIndexCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type DimensionIndexIncludeCreateManyAndReturn<
@@ -1202,6 +1355,7 @@ export type $DimensionIndexPayload<
     category: Prisma.$DimensionCategoryPayload<ExtArgs>;
     experience_dimensions: Prisma.$ExperienceDimensionPayload<ExtArgs>[];
     request_preferences: Prisma.$RequestPreferencePayload<ExtArgs>[];
+    question_dimensions: Prisma.$QuestionDimensionPayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -1820,6 +1974,22 @@ export interface Prisma__DimensionIndexClient<
       >
     | Null
   >;
+  question_dimensions<
+    T extends Prisma.DimensionIndex$question_dimensionsArgs<ExtArgs> = {},
+  >(
+    args?: Prisma.Subset<
+      T,
+      Prisma.DimensionIndex$question_dimensionsArgs<ExtArgs>
+    >
+  ): Prisma.PrismaPromise<
+    | runtime.Types.Result.GetResult<
+        Prisma.$QuestionDimensionPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    | Null
+  >;
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2402,6 +2572,37 @@ export type DimensionIndex$request_preferencesArgs<
   distinct?:
     | Prisma.RequestPreferenceScalarFieldEnum
     | Prisma.RequestPreferenceScalarFieldEnum[];
+};
+
+/**
+ * DimensionIndex.question_dimensions
+ */
+export type DimensionIndex$question_dimensionsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  /**
+   * Select specific fields to fetch from the QuestionDimension
+   */
+  select?: Prisma.QuestionDimensionSelect<ExtArgs> | null;
+  /**
+   * Omit specific fields from the QuestionDimension
+   */
+  omit?: Prisma.QuestionDimensionOmit<ExtArgs> | null;
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.QuestionDimensionInclude<ExtArgs> | null;
+  where?: Prisma.QuestionDimensionWhereInput;
+  orderBy?:
+    | Prisma.QuestionDimensionOrderByWithRelationInput
+    | Prisma.QuestionDimensionOrderByWithRelationInput[];
+  cursor?: Prisma.QuestionDimensionWhereUniqueInput;
+  take?: number;
+  skip?: number;
+  distinct?:
+    | Prisma.QuestionDimensionScalarFieldEnum
+    | Prisma.QuestionDimensionScalarFieldEnum[];
 };
 
 /**

@@ -40,3 +40,14 @@ body {
   /* Set the default font weight to 600 (semi-bold) for all text */
   font-weight: 600;
 }
+
+/* Hide scrollbars globally while preserving scroll functionality */
+* {
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  /* Chrome / Safari / Edge */
+}

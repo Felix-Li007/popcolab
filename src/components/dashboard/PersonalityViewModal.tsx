@@ -1,26 +1,16 @@
 'use client';
 
 import { createPortal } from 'react-dom';
-import type { PersonalityData } from '@/actions/personality-actions';
+import type { PersonalityData } from '@/types/personality';
 import styles from '@/styles/personality-view-modal.module.css';
 import { Button, Badge } from '@/components/ui';
+import { getPersonalityStyle } from '@/constants/personality-styles';
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   onEdit: () => void;
   personality: PersonalityData;
-};
-
-const typeStyles: Record<string, { bg: string; text: string }> = {
-  JOKER: { bg: 'bg-teal-deep', text: 'text-white' },
-  KINESTHETE: { bg: 'bg-magenta', text: 'text-white' },
-  EXPLORER: { bg: 'bg-brand-yellow', text: 'text-gray-800' },
-  COMPETITOR: { bg: 'bg-pink-bright', text: 'text-gray-800' },
-  COLLECTOR: { bg: 'bg-pink-medium', text: 'text-gray-800' },
-  CREATOR: { bg: 'bg-coral-vibe', text: 'text-white' },
-  DIRECTOR: { bg: 'bg-teal-accent', text: 'text-white' },
-  STORYTELLER: { bg: 'bg-coral-red', text: 'text-white' },
 };
 
 export default function PersonalityViewModal({
@@ -31,57 +21,18 @@ export default function PersonalityViewModal({
 }: Props) {
   if (!isOpen || typeof window === 'undefined') return null;
 
-  const style = typeStyles[personality.type] ?? {
-    bg: 'bg-gray-200',
-    text: 'text-gray-800',
-  };
+  const style = getPersonalityStyle(personality.type);
 
   return createPortal(
     <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 9998,
-          background: 'rgba(0,0,0,0.45)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-        }}
-      />
+      <div className={styles.backdrop} onClick={onClose} />
 
-      {/* Card — centered via transform */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 9999,
-          width: 'min(28rem, calc(100vw - 2rem))',
-          maxHeight: '92vh',
-          margin: 0,
-          padding: 0,
-          boxSizing: 'border-box',
-          backgroundColor: '#ffffff',
-          borderRadius: '1rem',
-          border: '1px solid #f3e8ff',
-          boxShadow: '0 20px 60px -10px rgba(0,0,0,0.25)',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          fontFamily: 'var(--font-poppins), sans-serif',
-        }}
-      >
-        {/* Gradient header */}
+      <div className={styles.modal}>
         <div
           className={`bg-gradient-to-r from-lavender via-white to-coral-light px-6 border-b border-pink-light/50 flex items-center justify-between rounded-t-2xl shrink-0 ${styles.header}`}
         >
           <div className="flex items-center gap-3">
-            <span style={{ fontSize: '2.25rem', lineHeight: 1 }}>
-              {personality.emoji}
-            </span>
+            <span className={styles.emoji}>{personality.emoji}</span>
             <div>
               <h2 className="text-base font-black text-gray-800 leading-tight">
                 {personality.name}
@@ -119,11 +70,9 @@ export default function PersonalityViewModal({
           />
         </div>
 
-        {/* Scrollable content */}
         <div
           className={`px-6 space-y-4 overflow-y-auto flex-1 ${styles.content} ${styles.scrollArea}`}
         >
-          {/* Status + stars row */}
           <div className="flex items-center justify-between">
             <Badge
               variant={personality.status === 'active' ? 'success' : 'default'}
@@ -145,7 +94,6 @@ export default function PersonalityViewModal({
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
               Description
@@ -156,7 +104,6 @@ export default function PersonalityViewModal({
           </div>
         </div>
 
-        {/* Sticky footer */}
         <div
           className={`px-6 border-t border-gray-100 bg-white flex items-center gap-3 shrink-0 ${styles.footer}`}
         >

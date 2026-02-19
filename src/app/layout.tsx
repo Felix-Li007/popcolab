@@ -4,10 +4,9 @@ import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 
 const poppins = Poppins({
-  // This is a font designated by the client
   variable: '--font-poppins',
   subsets: ['latin'],
-  weight: ['600' /* semi-bold */, '700' /* bold */],
+  weight: ['600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -23,7 +22,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${poppins.variable} antialiased`}>{children}</body>
+        <body
+          className={`${poppins.variable} antialiased`}
+          suppressHydrationWarning
+        >
+          {children}
+        </body>
       </html>
     </ClerkProvider>
   );

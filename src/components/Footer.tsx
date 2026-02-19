@@ -3,7 +3,7 @@ import Link from 'next/link';
 const adminLinks = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Personalities', href: '/admin/personalities' },
-  { label: 'Surveys', href: '/admin/quiz' },
+  { label: 'Surveys', href: '/admin/surveys' },
   { label: 'Events', href: '/admin/events' },
   { label: 'Bookings', href: '/admin/bookings' },
   { label: 'Settings', href: '/admin/settings' },

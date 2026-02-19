@@ -1,19 +1,17 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '@/components/layout/AdminLayout';
-import PersonalityCard from '@/components/dashboard/PersonalityCard';
+import PersonalityCardGrid from '@/components/dashboard/PersonalityCardGrid';
 import StatsCard from '@/components/dashboard/StatsCard';
 import PersonalityFormModal from '@/components/dashboard/PersonalityFormModal';
 import PersonalityViewModal from '@/components/dashboard/PersonalityViewModal';
 import AdminFooter from '@/components/Footer';
+import PageHeader from '@/components/dashboard/PageHeader';
 import { Button, Badge } from '@/components/ui';
-import { type PersonalityData } from '@/actions/personality-actions';
-import {
-  createPersonalityAction,
-  updatePersonalityAction,
-  deletePersonalityAction,
-} from '@/actions/personality-actions';
+import { type PersonalityData } from '@/types/personality';
+import { usePersonalityModals } from '@/hooks/usePersonalityModals';
+import cardStyles from '@/styles/personality-card.module.css';
 
 const filterTabs = ['All', 'Active', 'Draft'] as const;
 type FilterTab = (typeof filterTabs)[number];
@@ -27,18 +25,24 @@ export default function PersonalitiesClient({
   initialData,
   personalitiesCount,
 }: Props) {
-  const [isPendingDelete, startDeleteTransition] = useTransition();
   const [personalities, setPersonalities] =
     useState<PersonalityData[]>(initialData);
   const [filter, setFilter] = useState<FilterTab>('All');
-  const [formModal, setFormModal] = useState<{ open: boolean; id?: number }>({
-    open: false,
-  });
-  const [viewModal, setViewModal] = useState<{ open: boolean; id?: number }>({
-    open: false,
-  });
 
-  // 当 Server Component 重新获取数据后同步到本地状态
+  const {
+    formModal,
+    viewModal,
+    openCreate,
+    openEdit,
+    openView,
+    closeForm,
+    closeView,
+    handleDelete,
+    formAction,
+    selectedPersonality,
+    viewedPersonality,
+  } = usePersonalityModals(personalities);
+
   useEffect(() => {
     setPersonalities(initialData);
   }, [initialData]);
@@ -54,58 +58,19 @@ export default function PersonalitiesClient({
     Draft: personalities.filter(p => p.status === 'draft').length,
   };
 
-  function openCreate() {
-    setFormModal({ open: true });
-  }
-
-  function openEdit(id: number) {
-    setViewModal({ open: false });
-    setFormModal({ open: true, id });
-  }
-
-  function openView(id: number) {
-    setViewModal({ open: true, id });
-  }
-
-  function handleDelete(id: number, name: string) {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete "${name}"?\n\nThis action cannot be undone.`
-      )
-    )
-      return;
-    startDeleteTransition(async () => {
-      try {
-        await deletePersonalityAction(id);
-        setViewModal({ open: false });
-      } catch {
-        alert('Failed to delete personality. Please try again.');
-      }
-    });
-  }
-
-  // Derive the correct server action for the modal
-  const formAction =
-    formModal.id !== undefined
-      ? updatePersonalityAction.bind(null, formModal.id)
-      : createPersonalityAction;
-
   return (
     <AdminLayout personalitiesCount={personalitiesCount}>
       <div className="flex flex-col min-h-full">
         <div className="flex-1 p-4 flex flex-col gap-5 min-h-0">
-          {/* Page header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-lavender via-white to-coral-light rounded-2xl p-4 border border-pink-light/50 shadow-sm">
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">
-                🎭 Play <span className="text-magenta">Personalities</span>
-              </h1>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {counts.All} types · {counts.Active} active · last updated 2
-                hours ago
-              </p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
+          <PageHeader
+            emoji="🎭"
+            title={
+              <>
+                Play <span className="text-magenta">Personalities</span>
+              </>
+            }
+            subtitle={`${counts.All} types · ${counts.Active} active · last updated 2 hours ago`}
+            actions={
               <Button
                 onClick={openCreate}
                 variant="primary"
@@ -114,10 +79,9 @@ export default function PersonalitiesClient({
               >
                 New Personality
               </Button>
-            </div>
-          </div>
+            }
+          />
 
-          {/* Stats row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatsCard
               bgColor="bg-pink-light"
@@ -155,7 +119,6 @@ export default function PersonalitiesClient({
             />
           </div>
 
-          {/* Filter tabs */}
           <div className="flex items-center gap-1 border-b border-gray-100 pb-1">
             {filterTabs.map(tab => (
               <Button
@@ -178,13 +141,8 @@ export default function PersonalitiesClient({
             ))}
           </div>
 
-          {/* Personalities grid */}
           <div
-            className="grid gap-4 flex-1 min-h-0 overflow-y-auto content-start"
-            style={{
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gridAutoRows: '256px',
-            }}
+            className={`flex-1 min-h-0 overflow-y-auto ${cardStyles.cardGrid}`}
           >
             {filtered.map(p => (
               <div key={p.id} className="relative h-full">
@@ -197,16 +155,11 @@ export default function PersonalitiesClient({
                     DRAFT
                   </Badge>
                 )}
-                <PersonalityCard
-                  type={p.type}
-                  name={p.name}
-                  description={p.description}
-                  emoji={p.emoji}
-                  stars={p.stars}
-                  threshold={p.threshold}
-                  onEdit={() => openEdit(p.id!)}
-                  onView={() => openView(p.id!)}
-                  onDelete={() => handleDelete(p.id!, p.name)}
+                <PersonalityCardGrid
+                  personalities={[p]}
+                  onEdit={openEdit}
+                  onView={openView}
+                  onDelete={handleDelete}
                 />
               </div>
             ))}
@@ -216,27 +169,21 @@ export default function PersonalitiesClient({
         <AdminFooter />
       </div>
 
-      {/* Create / Edit modal — key forces re-mount when switching targets */}
       <PersonalityFormModal
         key={formModal.id ?? 'create'}
         isOpen={formModal.open}
-        onClose={() => setFormModal({ open: false })}
+        onClose={closeForm}
         action={formAction}
         isEdit={formModal.id !== undefined}
-        initial={
-          formModal.id !== undefined
-            ? personalities.find(p => p.id === formModal.id)
-            : undefined
-        }
+        initial={selectedPersonality}
       />
 
-      {/* View modal */}
-      {viewModal.id !== undefined && (
+      {viewedPersonality && (
         <PersonalityViewModal
           isOpen={viewModal.open}
-          onClose={() => setViewModal({ open: false })}
+          onClose={closeView}
           onEdit={() => openEdit(viewModal.id!)}
-          personality={personalities.find(p => p.id === viewModal.id)!}
+          personality={viewedPersonality}
         />
       )}
     </AdminLayout>

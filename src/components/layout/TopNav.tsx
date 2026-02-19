@@ -13,7 +13,7 @@ type Tab = {
 const tabs: Tab[] = [
   { label: 'Overview', href: '/admin' },
   { label: 'Personalities', href: '/admin/personalities', badge: 8 },
-  { label: 'Surveys', href: '/admin/quiz', badge: 12 },
+  { label: 'Surveys', href: '/admin/surveys', badge: 12 },
   { label: 'Events', href: '/admin/events', badge: 3 },
   { label: 'Users', href: '/admin/users' },
   { label: 'Bookings', href: '/admin/bookings' },

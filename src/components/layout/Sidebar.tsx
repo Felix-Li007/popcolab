@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import styles from '@/styles/sidebar.module.css';
 
@@ -62,7 +62,7 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Surveys',
-        href: '/admin/quiz',
+        href: '/admin/surveys',
         badge: 12,
         icon: (
           <NavIcon>
@@ -242,7 +242,7 @@ export default function Sidebar({
 }: {
   personalitiesCount?: number;
 }) {
-  const [activeItem, setActiveItem] = useState('Dashboard');
+  const pathname = usePathname();
 
   return (
     <aside className="w-56 shrink-0 bg-teal-deep text-white flex flex-col min-h-screen">
@@ -272,9 +272,12 @@ export default function Sidebar({
               <Link
                 key={item.label}
                 href={item.href}
-                onClick={() => setActiveItem(item.label)}
                 className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs mb-0.5 transition-colors ${
-                  activeItem === item.label
+                  (
+                    item.href === '/admin'
+                      ? pathname === '/admin'
+                      : pathname.startsWith(item.href)
+                  )
                     ? 'bg-white/15 text-white'
                     : 'text-white/70 hover:bg-white/10 hover:text-white'
                 }`}

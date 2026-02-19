@@ -4,7 +4,7 @@ import { useEffect, useState, useActionState } from 'react';
 import { createPortal } from 'react-dom';
 import styles from '@/styles/personality-form-modal.module.css';
 import { Button, Input, TextArea } from '@/components/ui';
-import type { PersonalityFormState } from '@/actions/personality-actions';
+import type { PersonalityFormState } from '@/types/personality';
 
 const EMPTY_STATE: PersonalityFormState = { errors: {} };
 
@@ -77,12 +77,9 @@ export default function PersonalityFormModal({
 
   return createPortal(
     <>
-      {/* Backdrop */}
       <div onClick={onClose} className={styles.backdrop} />
 
-      {/* Card */}
       <form action={formAction} className={styles.card}>
-        {/* Header */}
         <div
           className={`px-6 bg-gradient-to-r from-lavender via-white to-coral-light border-b border-pink-light/50 flex items-center justify-between ${styles.header}`}
         >
@@ -117,7 +114,6 @@ export default function PersonalityFormModal({
           />
         </div>
 
-        {/* Scrollable body */}
         <div
           className={`px-6 pt-4 pb-4 space-y-3 overflow-y-auto flex-1 ${styles.scrollArea}`}
         >
@@ -128,7 +124,6 @@ export default function PersonalityFormModal({
             </div>
           )}
 
-          {/* NAME */}
           <Input
             label="Name"
             name="name"
@@ -163,7 +158,6 @@ export default function PersonalityFormModal({
             />
           </div>
 
-          {/* DESCRIPTION */}
           <TextArea
             label="Description"
             name="description"
@@ -293,7 +287,6 @@ export default function PersonalityFormModal({
           </div>
         </div>
 
-        {/* Footer */}
         <div
           className={`px-6 flex items-center gap-3 shrink-0 ${styles.footer}`}
         >

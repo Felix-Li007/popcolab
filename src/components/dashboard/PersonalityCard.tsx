@@ -1,13 +1,9 @@
 import { Badge, Button } from '@/components/ui';
 import styles from '@/styles/personality-card.module.css';
+import { getPersonalityStyle } from '@/constants/personality-styles';
+import type { PersonalityType } from '@/types/personality';
 
-export type PersonalityType =
-  | 'JOKER'
-  | 'KINESTHETE'
-  | 'EXPLORER'
-  | 'COMPETITOR'
-  | 'COLLECTOR'
-  | string;
+export type { PersonalityType };
 
 export type PersonalityCardProps = {
   type: PersonalityType;
@@ -21,68 +17,6 @@ export type PersonalityCardProps = {
   onDelete?: () => void;
 };
 
-const typeStyles: Record<
-  string,
-  { bg: string; text: string; border: string; orb: string; glow: string }
-> = {
-  JOKER: {
-    bg: 'bg-teal-deep',
-    text: 'text-white',
-    border: 'border-teal-deep',
-    orb: '#d0e9eb',
-    glow: 'rgba(25,70,77,0.35)',
-  },
-  KINESTHETE: {
-    bg: 'bg-magenta',
-    text: 'text-white',
-    border: 'border-magenta',
-    orb: '#fde0ef',
-    glow: 'rgba(245,46,129,0.35)',
-  },
-  EXPLORER: {
-    bg: 'bg-brand-yellow',
-    text: 'text-gray-800',
-    border: 'border-brand-yellow',
-    orb: '#fdf7d0',
-    glow: 'rgba(245,221,66,0.45)',
-  },
-  COMPETITOR: {
-    bg: 'bg-pink-bright',
-    text: 'text-gray-800',
-    border: 'border-pink-bright',
-    orb: '#ffe6fb',
-    glow: 'rgba(255,141,230,0.45)',
-  },
-  COLLECTOR: {
-    bg: 'bg-pink-medium',
-    text: 'text-gray-800',
-    border: 'border-pink-medium',
-    orb: '#ffedfb',
-    glow: 'rgba(255,164,235,0.45)',
-  },
-  CREATOR: {
-    bg: 'bg-coral-vibe',
-    text: 'text-white',
-    border: 'border-coral-vibe',
-    orb: '#fde4e3',
-    glow: 'rgba(228,82,74,0.35)',
-  },
-  DIRECTOR: {
-    bg: 'bg-teal-accent',
-    text: 'text-white',
-    border: 'border-teal-accent',
-    orb: '#ddedf0',
-    glow: 'rgba(59,107,119,0.35)',
-  },
-  STORYTELLER: {
-    bg: 'bg-coral-red',
-    text: 'text-white',
-    border: 'border-coral-red',
-    orb: '#fde8e7',
-    glow: 'rgba(233,117,110,0.4)',
-  },
-};
-
 export default function PersonalityCard({
   type,
   name,
@@ -94,27 +28,16 @@ export default function PersonalityCard({
   onView,
   onDelete,
 }: PersonalityCardProps) {
-  const style = typeStyles[type] ?? {
-    bg: 'bg-gray-200',
-    text: 'text-gray-800',
-    border: 'border-gray-200',
-    orb: '#ede9fe',
-    glow: 'rgba(0,0,0,0.15)',
-  };
+  const style = getPersonalityStyle(type);
+  const typeKey = type.toUpperCase().replace(/\s+/g, '') as string;
+  const typeClass =
+    (styles as Record<string, string>)[`type${typeKey}`] ?? styles.typeDefault;
 
   return (
     <div
-      className={`bg-white rounded-xl border border-gray-100 shadow-sm h-full flex flex-col w-full overflow-hidden ${styles.card}`}
-      style={
-        {
-          '--orb-color': style.orb,
-          '--glow-color': style.glow,
-        } as React.CSSProperties
-      }
+      className={`bg-white rounded-xl border border-gray-100 shadow-sm h-full flex flex-col w-full overflow-hidden ${styles.card} ${typeClass}`}
     >
-      {/* Decorative orb — top-right corner, grows on hover */}
       <div className={styles.orb} aria-hidden="true" />
-      {/* Card header - flexible content area */}
       <div className="relative z-10 px-3 pt-3 pb-2 flex-1 flex flex-col min-h-0">
         <div className="flex items-start justify-between mb-2 flex-shrink-0">
           <Badge
@@ -139,7 +62,6 @@ export default function PersonalityCard({
           </div>
         </div>
 
-        {/* Icon + Threshold */}
         <div className="flex items-center justify-between mb-2 flex-shrink-0">
           <div
             className={`w-10 h-10 rounded-xl ${style.bg} flex items-center justify-center text-xl`}
@@ -171,14 +93,12 @@ export default function PersonalityCard({
           )}
         </div>
 
-        {/* Name & description */}
         <div className="flex-1 min-h-0 overflow-hidden">
           <h3 className="text-sm font-bold text-gray-800 mb-1">{name}</h3>
           <p className="text-xs text-gray-500 line-clamp-3">{description}</p>
         </div>
       </div>
 
-      {/* Actions - fixed at bottom */}
       <div className="relative z-10 px-3 py-2 border-t border-gray-100 flex items-center justify-between flex-nowrap flex-shrink-0">
         <Button
           onClick={onEdit}
