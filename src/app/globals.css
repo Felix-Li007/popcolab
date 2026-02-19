@@ -35,10 +35,97 @@
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  /* Make sure using the designated font grobally*/
-  font-family: var(--font-poppins);
-  /* Set the default font weight to 600 (semi-bold) for all text */
-  font-weight: 600;
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  /* 14px — base size for dashboard UI */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography scale ────────────────────────────────────────────────────── */
+:root {
+  /* sizes */
+  --text-display: 1.75rem;
+  /* 28px — hero / large headings */
+  --text-title: 1.125rem;
+  /* 18px — page title (h1) */
+  --text-heading: 0.9375rem;
+  /* 15px — section heading (h2) */
+  --text-subhead: 0.875rem;
+  /* 14px — card title, strong label */
+  --text-body: 0.8125rem;
+  /* 13px — body copy, descriptions */
+  --text-caption: 0.75rem;
+  /* 12px — secondary meta, hints */
+  --text-badge: 0.625rem;
+  /* 10px — type badges, tiny labels */
+
+  /* weights */
+  --weight-light: 300;
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+}
+
+/* Ensure ALL elements use Poppins — inputs & buttons don't inherit by default */
+*,
+*::before,
+*::after {
+  font-family: inherit;
+}
+
+/* Heading defaults */
+h1 {
+  font-size: var(--text-title);
+  font-weight: var(--weight-bold);
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: var(--text-heading);
+  font-weight: var(--weight-bold);
+  line-height: 1.4;
+}
+
+h3 {
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+}
+
+h5,
+h6 {
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+}
+
+/* Form controls */
+input,
+select,
+textarea,
+button {
+  font-family: var(--font-poppins), sans-serif;
+  font-size: var(--text-body);
+  font-weight: var(--weight-normal);
+}
+
+button,
+[role='button'] {
+  font-weight: var(--weight-semibold);
+}
+
+label {
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
 }
 
 /* Hide scrollbars globally while preserving scroll functionality */

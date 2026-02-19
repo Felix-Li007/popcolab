@@ -184,7 +184,7 @@ export default function QuestionEditPanel({
           <label className="block text-xs font-bold text-gray-600 mb-2">
             QUESTION TYPE <span className="text-magenta">*</span>
           </label>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="flex flex-wrap gap-2">
             {QUESTION_TYPES.map(t => {
               const meta = QUESTION_TYPE_META[t];
               return (
@@ -192,7 +192,7 @@ export default function QuestionEditPanel({
                   key={t}
                   type="button"
                   onClick={() => setQType(t)}
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
+                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all flex-1 min-w-[120px] ${
                     qType === t
                       ? 'border-magenta bg-magenta/5 text-magenta'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'

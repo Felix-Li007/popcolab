@@ -4,7 +4,7 @@ import {
   getAvailableDimensions,
 } from '@/services/question-service';
 import type { QuestionData, DimensionIndexData } from '@/types/question';
-import SurveysClient from './SurveysClient';
+import SurveysClient from '@/app/admin/surveys/SurveysClient';
 
 export default async function SurveysPage() {
   const [questions, availableDimensions] = await Promise.all([
