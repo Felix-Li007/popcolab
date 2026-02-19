@@ -1,0 +1,22 @@
+.footer {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.header {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.content {
+  padding-top: 1.5rem;
+  padding-bottom: 1.25rem;
+}
+
+.btnClose {
+  flex: 1;
+}
+
+.btnEdit {
+  flex: 2;
+}

@@ -21,10 +21,10 @@ export default clerkMiddleware(async (auth, req) => {
     // Protect the route by ensuring the user is authenticated
     await auth.protect();
   }
-  if (adminRoutes(req) && (await auth()).sessionClaims?.role !== 'admin') {
-    const targetUrl = new URL('/', req.url);
-    return NextResponse.redirect(targetUrl); // Redirect non-admin users to the home page
-  }
+  // if (adminRoutes(req) && (await auth()).sessionClaims?.role !== 'admin') {
+  //   const targetUrl = new URL('/', req.url);
+  //   return NextResponse.redirect(targetUrl); // Redirect non-admin users to the home page
+  // }
 });
 
 export const config = {

@@ -5,6 +5,24 @@
   --color-background: var(--palette-background);
   --color-foreground: var(--palette-foreground);
   --font-poppins: var(--font-poppins);
+
+  /* Pop CoLab brand palette — all utilities (bg-*, text-*, border-*, etc.) are generated */
+  --color-teal-deep: var(--palette-teal-deep);
+  --color-teal-medium: var(--palette-teal-medium);
+  --color-teal-accent: var(--palette-teal-accent);
+  --color-pink-bright: var(--palette-pink-bright);
+  --color-pink-light: var(--palette-pink-light);
+  --color-pink-medium: var(--palette-pink-medium);
+  --color-magenta: var(--palette-magenta-bold);
+  --color-brand-yellow: var(--palette-yellow);
+  --color-lavender: var(--palette-lavender-light);
+  --color-grey-light: var(--palette-grey-light);
+  --color-coral-soft: var(--palette-coral-soft);
+  --color-coral-medium: var(--palette-coral-medium);
+  --color-coral-light: var(--palette-coral-light);
+  --color-coral-pink: var(--palette-coral-pink);
+  --color-coral-red: var(--palette-coral-red);
+  --color-coral-vibe: var(--palette-coral-vibe);
 }
 
 @media (prefers-color-scheme: dark) {

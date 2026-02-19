@@ -1,0 +1,18 @@
+/* Hide scrollbar on the tab bar — Tailwind has no scrollbar-none cross-browser support */
+.tabBar {
+  scrollbar-width: none;
+  background-color: #f5dd42;
+}
+
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.badge {
+  background-color: #1f2937;
+  color: #ffffff;
+  font-size: 10px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  font-weight: 700;
+}

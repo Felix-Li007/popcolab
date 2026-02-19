@@ -1,0 +1,38 @@
+/* Grow-from-bottom animation on mount — Tailwind has no custom keyframe support */
+@keyframes growUp {
+  from {
+    transform: scaleY(0);
+    transform-origin: bottom;
+  }
+  to {
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+}
+
+.bar {
+  transform-origin: bottom;
+  animation: growUp 0.5s ease-out both;
+}
+
+.bar:nth-child(1) {
+  animation-delay: 0ms;
+}
+.bar:nth-child(2) {
+  animation-delay: 60ms;
+}
+.bar:nth-child(3) {
+  animation-delay: 120ms;
+}
+.bar:nth-child(4) {
+  animation-delay: 180ms;
+}
+.bar:nth-child(5) {
+  animation-delay: 240ms;
+}
+.bar:nth-child(6) {
+  animation-delay: 300ms;
+}
+.bar:nth-child(7) {
+  animation-delay: 360ms;
+}
