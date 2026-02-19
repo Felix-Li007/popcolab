@@ -1,3 +1,5 @@
+import styles from '@/styles/stats-card.module.css';
+
 export type StatsCardProps = {
   icon: React.ReactNode;
   value: string | number;
@@ -5,6 +7,7 @@ export type StatsCardProps = {
   trend?: string;
   trendLabel?: string;
   bgColor?: string;
+  glowColor?: string;
 };
 
 export default function StatsCard({
@@ -14,11 +17,15 @@ export default function StatsCard({
   trend,
   trendLabel,
   bgColor = 'bg-pink-50',
+  glowColor = 'rgba(196, 181, 253, 0.4)',
 }: StatsCardProps) {
   const isPositive = trend && !trend.startsWith('-');
 
   return (
-    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-start gap-3 hover:shadow-md transition-shadow">
+    <div
+      className={`bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-start gap-3 ${styles.card}`}
+      style={{ '--stat-glow': glowColor } as React.CSSProperties}
+    >
       <div
         className={`w-10 h-10 rounded-xl ${bgColor} flex items-center justify-center shrink-0`}
       >

@@ -26,11 +26,21 @@ const topTabs = [
   { label: 'Facilitators & Partners +', href: '#' },
 ];
 
-export default function TopNav() {
+export default function TopNav({
+  personalitiesCount,
+}: {
+  personalitiesCount?: number;
+}) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
+
+  const resolvedTabs = tabs.map(tab =>
+    tab.label === 'Personalities' && personalitiesCount !== undefined
+      ? { ...tab, badge: personalitiesCount }
+      : tab
+  );
 
   return (
     <header className="bg-teal-deep text-white">
@@ -118,7 +128,7 @@ export default function TopNav() {
       <div
         className={`flex items-center gap-1 px-4 overflow-x-auto ${styles.tabBar}`}
       >
-        {tabs.map(tab => (
+        {resolvedTabs.map(tab => (
           <Link
             key={tab.label}
             href={tab.href}

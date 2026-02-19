@@ -48,7 +48,6 @@ const navSections: NavSection[] = [
       {
         label: 'Personalities',
         href: '/admin/personalities',
-        badge: 8,
         icon: (
           <NavIcon>
             <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -238,7 +237,11 @@ const navSections: NavSection[] = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({
+  personalitiesCount,
+}: {
+  personalitiesCount?: number;
+}) {
   const [activeItem, setActiveItem] = useState('Dashboard');
 
   return (
@@ -278,17 +281,23 @@ export default function Sidebar() {
               >
                 {item.icon}
                 <span className="flex-1 truncate">{item.label}</span>
-                {item.badge !== undefined && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                      item.badgeVariant === 'live'
-                        ? 'bg-magenta text-white'
-                        : 'bg-white/20 text-white'
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
+                {(() => {
+                  const badge =
+                    item.label === 'Personalities'
+                      ? (personalitiesCount ?? item.badge)
+                      : item.badge;
+                  return badge !== undefined ? (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                        item.badgeVariant === 'live'
+                          ? 'bg-magenta text-white'
+                          : 'bg-white/20 text-white'
+                      }`}
+                    >
+                      {badge}
+                    </span>
+                  ) : null;
+                })()}
               </Link>
             ))}
           </div>

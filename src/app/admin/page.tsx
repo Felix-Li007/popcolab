@@ -1,38 +1,32 @@
-import AdminLayout from '@/components/layout/AdminLayout';
-import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import StatsGrid from '@/components/dashboard/StatsGrid';
-import PersonalitySection from '@/components/dashboard/PersonalitySection';
-import EventsTable from '@/components/dashboard/EventsTable';
-import QuickActions from '@/components/dashboard/QuickActions';
-import RecentActivity from '@/components/dashboard/RecentActivity';
-import QuizChart from '@/components/dashboard/QuizChart';
-import AdminFooter from '@/components/Footer';
+import { prisma } from '@/libs/prisma-client';
+import { type PersonalityData } from '@/actions/personality-actions';
+import AdminClient from './AdminClient';
 
-export default function Admin() {
+export default async function AdminPage() {
+  const [rows, personalitiesCount, personalitiesActiveCount] =
+    await Promise.all([
+      prisma.personalityType.findMany({ orderBy: { id: 'asc' }, take: 4 }),
+      prisma.personalityType.count(),
+      prisma.personalityType.count({ where: { status: 'active' } }),
+    ]);
+
+  const personalities: PersonalityData[] = rows.map(p => ({
+    id: p.id,
+    type: p.personality_key,
+    name: p.personality_name,
+    description: p.personality_desc ?? '',
+    emoji: p.emoji ?? '',
+    stars: p.stars,
+    status: p.status as 'active' | 'draft',
+    accentColor: p.accent_color ?? undefined,
+    threshold: p.score_threshold,
+  }));
+
   return (
-    <AdminLayout>
-      <div className="flex flex-col min-h-full">
-        {/* Main content area */}
-        <div className="flex flex-1 gap-0">
-          {/* Left: main dashboard */}
-          <div className="flex-1 min-w-0 p-4 space-y-5">
-            <DashboardHeader />
-            <StatsGrid />
-            <PersonalitySection />
-            <EventsTable />
-          </div>
-
-          {/* Right: sidebar panel */}
-          <aside className="w-56 shrink-0 p-4 space-y-4 border-l border-gray-100 hidden lg:block">
-            <QuickActions />
-            <RecentActivity />
-            <QuizChart />
-          </aside>
-        </div>
-
-        {/* Footer */}
-        <AdminFooter />
-      </div>
-    </AdminLayout>
+    <AdminClient
+      initialPersonalities={personalities}
+      personalitiesCount={personalitiesCount}
+      personalitiesActiveCount={personalitiesActiveCount}
+    />
   );
 }
