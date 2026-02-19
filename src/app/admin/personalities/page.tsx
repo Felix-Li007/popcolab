@@ -153,7 +153,7 @@ export default function PersonalitiesPage() {
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={openCreate}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-magenta hover:bg-teal-deep transition-colors"
+                className="flex items-center gap-1.5 px-2 py-3.5 rounded-full text-xs font-bold text-white bg-magenta hover:bg-teal-deep transition-colors"
               >
                 <span>+</span> New Personality
               </button>

@@ -20,3 +20,11 @@
 .btnEdit {
   flex: 2;
 }
+
+.scrollArea {
+  scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}

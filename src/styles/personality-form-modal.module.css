@@ -44,3 +44,11 @@
 .btnCancel {
   flex: 1;
 }
+
+.scrollArea {
+  scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}

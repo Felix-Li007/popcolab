@@ -114,7 +114,7 @@ export default function PersonalityViewModal({
 
         {/* Scrollable content */}
         <div
-          className={`px-6 space-y-4 overflow-y-auto flex-1 ${styles.content}`}
+          className={`px-6 space-y-4 overflow-y-auto flex-1 ${styles.content} ${styles.scrollArea}`}
         >
           {/* Status + stars row */}
           <div className="flex items-center justify-between">
