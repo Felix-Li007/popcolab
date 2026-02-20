@@ -281,7 +281,7 @@ export default function SurveysClient({
                           }}
                           className={`w-full text-left px-4 py-3 flex items-start gap-2.5 transition-all border-l-4 ${
                             isSelected
-                              ? 'border-magenta'
+                              ? 'border-magenta bg-magenta/[.06]'
                               : 'border-transparent hover:bg-magenta/[.03]'
                           }`}
                         >
