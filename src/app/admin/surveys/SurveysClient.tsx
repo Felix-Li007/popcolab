@@ -217,6 +217,7 @@ export default function SurveysClient({
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search…"
+                  data-testid="survey-search"
                   className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white placeholder-gray-400 transition"
                 />
               </div>
@@ -257,7 +258,10 @@ export default function SurveysClient({
               {filtered.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center gap-2">
                   <span className="text-3xl">📋</span>
-                  <p className="text-xs text-gray-500">
+                  <p
+                    className="text-xs text-gray-500"
+                    data-testid="survey-empty"
+                  >
                     {search ? 'No matches found.' : 'No questions yet.'}
                   </p>
                 </div>
