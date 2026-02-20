@@ -16,15 +16,6 @@ import {
   deleteQuestion,
 } from '@/services/question-service';
 
-export type {
-  QuestionType,
-  QuestionData,
-  QuestionOptionData,
-  QuestionDimensionData,
-  DimensionIndexData,
-  QuestionFormState,
-};
-
 // ─── Form Data Parsers ────────────────────────────────────────────────────────
 
 function parseOptions(formData: FormData): QuestionOptionData[] {
