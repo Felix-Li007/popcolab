@@ -3,9 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import type {
   QuestionType,
-  QuestionData,
   QuestionOptionData,
-  QuestionDimensionData,
   DimensionIndexData,
   QuestionFormState,
 } from '@/types/question';

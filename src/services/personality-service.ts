@@ -1,10 +1,10 @@
 import { prisma } from '@/libs/prisma-client';
 import type {
-  PersonalityData,
+  PersonalityType,
   PersonalityFormState,
-} from '@/types/personality';
+} from '@/types/personality-type';
 
-export type { PersonalityData, PersonalityFormState };
+export type { PersonalityType, PersonalityFormState };
 
 type CreatePersonalityInput = {
   type: string;
@@ -25,7 +25,7 @@ type PersonalityRow = NonNullable<
   Awaited<ReturnType<typeof prisma.personalityType.findFirst>>
 >;
 
-export function mapPersonalityRow(row: PersonalityRow): PersonalityData {
+export function mapPersonalityRow(row: PersonalityRow): PersonalityType {
   return {
     id: row.id,
     type: row.personality_key,
@@ -74,7 +74,7 @@ export function validatePersonalityFields(fields: {
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-export async function getPersonalities(): Promise<PersonalityData[]> {
+export async function getPersonalities(): Promise<PersonalityType[]> {
   const rows = await prisma.personalityType.findMany({
     orderBy: { id: 'asc' },
   });
@@ -83,7 +83,7 @@ export async function getPersonalities(): Promise<PersonalityData[]> {
 
 export async function getDashboardPersonalities(
   take = 4
-): Promise<PersonalityData[]> {
+): Promise<PersonalityType[]> {
   const rows = await prisma.personalityType.findMany({
     orderBy: { id: 'asc' },
     take,

@@ -1,10 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type {
-  PersonalityData,
-  PersonalityFormState,
-} from '@/types/personality';
+import type { PersonalityFormState } from '@/types/personality-type';
 import {
   validatePersonalityFields,
   createPersonality,
