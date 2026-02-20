@@ -12,8 +12,6 @@ import {
   deletePersonality,
 } from '@/services/personality-service';
 
-export type { PersonalityData, PersonalityFormState };
-
 const ADMIN_PATHS = ['/admin', '/admin/personalities'];
 
 function revalidateAdminPaths() {

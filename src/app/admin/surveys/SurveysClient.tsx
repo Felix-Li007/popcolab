@@ -182,7 +182,9 @@ export default function SurveysClient({
         </div>
 
         <div className="flex flex-1 min-h-0 px-4 py-3 gap-4">
-          <div className="w-[27rem] min-w-[27rem] border border-gray-200 flex flex-col bg-white shrink-0 z-10 shadow-[2px_0_12px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden">
+          <div
+            className={`${styles.listPanel} border border-gray-200 flex flex-col bg-white z-10 shadow-[2px_0_12px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden`}
+          >
             <div className="px-4 py-3 border-b border-gray-100 shrink-0">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold text-gray-700">
@@ -304,7 +306,7 @@ export default function SurveysClient({
                               {q.text}
                             </p>
                             {q.dimensions.length > 0 && (
-                              <p className="text-[9px] text-teal-600 mt-0.5">
+                              <p className="text-xs text-teal-600 mt-0.5">
                                 {q.dimensions.length} dimension
                                 {q.dimensions.length > 1 ? 's' : ''}
                               </p>
@@ -365,7 +367,9 @@ export default function SurveysClient({
             )}
           </div>
 
-          <div className="flex-1 min-w-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+          <div
+            className={`${styles.editPanel} bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm`}
+          >
             {showPanel ? (
               <QuestionEditPanel
                 key={isCreating ? 'new' : String(selectedId)}
