@@ -311,21 +311,6 @@ export default function Sidebar({
           </div>
         ))}
       </nav>
-
-      {/* Footer version */}
-      <div className="px-4 py-3 border-t border-white/10 text-[10px] text-white/40">
-        <div>Pop CoLab Admin</div>
-        <div>v2.4.1</div>
-        <div className="flex gap-2 mt-1">
-          <a href="#" className="underline hover:text-white/60">
-            Changelog
-          </a>
-          <span>·</span>
-          <a href="#" className="underline hover:text-white/60">
-            Help
-          </a>
-        </div>
-      </div>
     </aside>
   );
 }
