@@ -15,6 +15,7 @@ model DimensionIndex {
     category              DimensionCategory     @relation(fields: [category_id], references: [id])
     experience_dimensions ExperienceDimension[]
     request_preferences   RequestPreference[]
+    question_dimensions   QuestionDimension[]
 
     @@map("dimension_index")
 }

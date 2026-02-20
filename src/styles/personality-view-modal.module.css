@@ -1,0 +1,62 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: 92vh;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  border: 1px solid #f3e8ff;
+  box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.emoji {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.footer {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.header {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.content {
+  padding-top: 1.5rem;
+  padding-bottom: 1.25rem;
+}
+
+.btnClose {
+  flex: 1;
+}
+
+.btnEdit {
+  flex: 2;
+}
+
+.scrollArea {
+  scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}

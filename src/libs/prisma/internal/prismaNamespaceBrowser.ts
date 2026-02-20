@@ -54,8 +54,29 @@ export const JsonNull = runtime.JsonNull;
 export const AnyNull = runtime.AnyNull;
 
 export const ModelName = {
+  Answer: 'Answer',
+  Company: 'Company',
+  DimensionCategory: 'DimensionCategory',
+  DimensionIndex: 'DimensionIndex',
+  ExperienceDimension: 'ExperienceDimension',
+  Experience: 'Experience',
+  PersonalityType: 'PersonalityType',
+  Profile: 'Profile',
+  Proposal: 'Proposal',
+  Provider: 'Provider',
+  QuestionDimension: 'QuestionDimension',
+  QuestionOption: 'QuestionOption',
+  Question: 'Question',
+  RequestPreference: 'RequestPreference',
+  Request: 'Request',
+  ResponseScore: 'ResponseScore',
+  Response: 'Response',
+  TeamAggregate: 'TeamAggregate',
+  TeamMate: 'TeamMate',
+  TeamVector: 'TeamVector',
+  Team: 'Team',
+  UserVector: 'UserVector',
   User: 'User',
-  Post: 'Post',
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -74,25 +95,308 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel =
   (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel];
 
+export const AnswerScalarFieldEnum = {
+  id: 'id',
+  question_id: 'question_id',
+  response_id: 'response_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  raw_value: 'raw_value',
+  numeric_value: 'numeric_value',
+} as const;
+
+export type AnswerScalarFieldEnum =
+  (typeof AnswerScalarFieldEnum)[keyof typeof AnswerScalarFieldEnum];
+
+export const CompanyScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  corporate_name: 'corporate_name',
+  department_name: 'department_name',
+  role_title: 'role_title',
+  work_mode: 'work_mode',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type CompanyScalarFieldEnum =
+  (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum];
+
+export const DimensionCategoryScalarFieldEnum = {
+  id: 'id',
+  category_name: 'category_name',
+  category_desc: 'category_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type DimensionCategoryScalarFieldEnum =
+  (typeof DimensionCategoryScalarFieldEnum)[keyof typeof DimensionCategoryScalarFieldEnum];
+
+export const DimensionIndexScalarFieldEnum = {
+  id: 'id',
+  index_key: 'index_key',
+  category_id: 'category_id',
+  index_name: 'index_name',
+  data_type: 'data_type',
+  hard_filter: 'hard_filter',
+  scale_min: 'scale_min',
+  scale_max: 'scale_max',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type DimensionIndexScalarFieldEnum =
+  (typeof DimensionIndexScalarFieldEnum)[keyof typeof DimensionIndexScalarFieldEnum];
+
+export const ExperienceDimensionScalarFieldEnum = {
+  id: 'id',
+  experience_id: 'experience_id',
+  dimension_id: 'dimension_id',
+  original_score: 'original_score',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type ExperienceDimensionScalarFieldEnum =
+  (typeof ExperienceDimensionScalarFieldEnum)[keyof typeof ExperienceDimensionScalarFieldEnum];
+
+export const ExperienceScalarFieldEnum = {
+  id: 'id',
+  provider_id: 'provider_id',
+  experience_name: 'experience_name',
+  duration_min: 'duration_min',
+  duration_max: 'duration_max',
+  capacity_max: 'capacity_max',
+  starting_price: 'starting_price',
+  starting_hour: 'starting_hour',
+  adding_price: 'adding_price',
+  lead_type: 'lead_type',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type ExperienceScalarFieldEnum =
+  (typeof ExperienceScalarFieldEnum)[keyof typeof ExperienceScalarFieldEnum];
+
+export const PersonalityTypeScalarFieldEnum = {
+  id: 'id',
+  personality_key: 'personality_key',
+  personality_name: 'personality_name',
+  personality_desc: 'personality_desc',
+  emoji: 'emoji',
+  stars: 'stars',
+  status: 'status',
+  accent_color: 'accent_color',
+  score_threshold: 'score_threshold',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type PersonalityTypeScalarFieldEnum =
+  (typeof PersonalityTypeScalarFieldEnum)[keyof typeof PersonalityTypeScalarFieldEnum];
+
+export const ProfileScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  first_name: 'first_name',
+  last_name: 'last_name',
+  phone_number: 'phone_number',
+  preferred_contact: 'preferred_contact',
+  consent_given: 'consent_given',
+  privacy_notes: 'privacy_notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type ProfileScalarFieldEnum =
+  (typeof ProfileScalarFieldEnum)[keyof typeof ProfileScalarFieldEnum];
+
+export const ProposalScalarFieldEnum = {
+  id: 'id',
+  request_id: 'request_id',
+  experience_id: 'experience_id',
+  objective_alignment: 'objective_alignment',
+  base_score: 'base_score',
+  risk_adjustment: 'risk_adjustment',
+  rationale_desc: 'rationale_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type ProposalScalarFieldEnum =
+  (typeof ProposalScalarFieldEnum)[keyof typeof ProposalScalarFieldEnum];
+
+export const ProviderScalarFieldEnum = {
+  id: 'id',
+  provider_name: 'provider_name',
+  provider_type: 'provider_type',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type ProviderScalarFieldEnum =
+  (typeof ProviderScalarFieldEnum)[keyof typeof ProviderScalarFieldEnum];
+
+export const QuestionDimensionScalarFieldEnum = {
+  id: 'id',
+  question_id: 'question_id',
+  dimension_id: 'dimension_id',
+  weight_rate: 'weight_rate',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type QuestionDimensionScalarFieldEnum =
+  (typeof QuestionDimensionScalarFieldEnum)[keyof typeof QuestionDimensionScalarFieldEnum];
+
+export const QuestionOptionScalarFieldEnum = {
+  id: 'id',
+  question_id: 'question_id',
+  option_label: 'option_label',
+  option_value: 'option_value',
+  option_score: 'option_score',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type QuestionOptionScalarFieldEnum =
+  (typeof QuestionOptionScalarFieldEnum)[keyof typeof QuestionOptionScalarFieldEnum];
+
+export const QuestionScalarFieldEnum = {
+  id: 'id',
+  question_type: 'question_type',
+  question_text: 'question_text',
+  question_desc: 'question_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  order_index: 'order_index',
+} as const;
+
+export type QuestionScalarFieldEnum =
+  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
+
+export const RequestPreferenceScalarFieldEnum = {
+  id: 'id',
+  dimension_id: 'dimension_id',
+  request_id: 'request_id',
+  desired_score: 'desired_score',
+  weight_rate: 'weight_rate',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type RequestPreferenceScalarFieldEnum =
+  (typeof RequestPreferenceScalarFieldEnum)[keyof typeof RequestPreferenceScalarFieldEnum];
+
+export const RequestScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  objective_category: 'objective_category',
+  budget_min: 'budget_min',
+  budget_max: 'budget_max',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  delivery_method: 'delivery_method',
+  duration_max: 'duration_max',
+} as const;
+
+export type RequestScalarFieldEnum =
+  (typeof RequestScalarFieldEnum)[keyof typeof RequestScalarFieldEnum];
+
+export const ResponseScoreScalarFieldEnum = {
+  id: 'id',
+  response_id: 'response_id',
+  dimension_id: 'dimension_id',
+  original_score: 'original_score',
+  normalized_score: 'normalized_score',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type ResponseScoreScalarFieldEnum =
+  (typeof ResponseScoreScalarFieldEnum)[keyof typeof ResponseScoreScalarFieldEnum];
+
+export const ResponseScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  created_at: 'created_at',
+  completed_at: 'completed_at',
+} as const;
+
+export type ResponseScalarFieldEnum =
+  (typeof ResponseScalarFieldEnum)[keyof typeof ResponseScalarFieldEnum];
+
+export const TeamAggregateScalarFieldEnum = {
+  id: 'id',
+  team_id: 'team_id',
+  dimension_id: 'dimension_id',
+  average_score: 'average_score',
+  standard_score: 'standard_score',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type TeamAggregateScalarFieldEnum =
+  (typeof TeamAggregateScalarFieldEnum)[keyof typeof TeamAggregateScalarFieldEnum];
+
+export const TeamMateScalarFieldEnum = {
+  id: 'id',
+  team_id: 'team_id',
+  user_id: 'user_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type TeamMateScalarFieldEnum =
+  (typeof TeamMateScalarFieldEnum)[keyof typeof TeamMateScalarFieldEnum];
+
+export const TeamVectorScalarFieldEnum = {
+  id: 'id',
+  team_id: 'team_id',
+  vector_json: 'vector_json',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type TeamVectorScalarFieldEnum =
+  (typeof TeamVectorScalarFieldEnum)[keyof typeof TeamVectorScalarFieldEnum];
+
+export const TeamScalarFieldEnum = {
+  id: 'id',
+  team_name: 'team_name',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  created_by: 'created_by',
+  team_code: 'team_code',
+} as const;
+
+export type TeamScalarFieldEnum =
+  (typeof TeamScalarFieldEnum)[keyof typeof TeamScalarFieldEnum];
+
+export const UserVectorScalarFieldEnum = {
+  id: 'id',
+  vector_json: 'vector_json',
+  vector_type: 'vector_type',
+  response_id: 'response_id',
+  user_id: 'user_id',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+} as const;
+
+export type UserVectorScalarFieldEnum =
+  (typeof UserVectorScalarFieldEnum)[keyof typeof UserVectorScalarFieldEnum];
+
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
 } as const;
 
 export type UserScalarFieldEnum =
   (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
-
-export const PostScalarFieldEnum = {
-  id: 'id',
-  title: 'title',
-  content: 'content',
-  published: 'published',
-  authorId: 'authorId',
-} as const;
-
-export type PostScalarFieldEnum =
-  (typeof PostScalarFieldEnum)[keyof typeof PostScalarFieldEnum];
 
 export const SortOrder = {
   asc: 'asc',
@@ -101,16 +405,16 @@ export const SortOrder = {
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 
-export const QueryMode = {
-  default: 'default',
-  insensitive: 'insensitive',
-} as const;
-
-export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode];
-
 export const NullsOrder = {
   first: 'first',
   last: 'last',
 } as const;
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive',
+} as const;
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode];
