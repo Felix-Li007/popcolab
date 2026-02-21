@@ -1,4 +1,4 @@
-export type PersonalityType = {
+export type Personality = {
   id?: number;
   type: string;
   name: string;

@@ -3,10 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import type {
   QuestionType,
-  QuestionOptionData,
-  DimensionIndexData,
+  QuestionOption,
+  DimensionIndex,
   QuestionFormState,
-} from '@/types/question';
+} from '@/types/question-type';
 import {
   getAvailableDimensions,
   createQuestion,
@@ -16,7 +16,7 @@ import {
 
 // ─── Form Data Parsers ────────────────────────────────────────────────────────
 
-function parseOptions(formData: FormData): QuestionOptionData[] {
+function parseOptions(formData: FormData): QuestionOption[] {
   const labels = formData.getAll('option_label') as string[];
   const values = formData.getAll('option_value') as string[];
   const scores = formData.getAll('option_score') as string[];
@@ -44,9 +44,7 @@ function parseDimensions(
     .filter(d => !isNaN(d.dimensionId));
 }
 
-export async function getDimensionIndexesAction(): Promise<
-  DimensionIndexData[]
-> {
+export async function getDimensionIndexesAction(): Promise<DimensionIndex[]> {
   return getAvailableDimensions();
 }
 

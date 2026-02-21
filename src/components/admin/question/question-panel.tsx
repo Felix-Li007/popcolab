@@ -3,11 +3,11 @@
 import { useEffect, useState, useActionState } from 'react';
 import { Button, Input, TextArea } from '@/ui';
 import type {
-  QuestionData,
+  Question,
   QuestionFormState,
   QuestionType,
-  DimensionIndexData,
-} from '@/types/question';
+  DimensionIndex,
+} from '@/types/question-type';
 import { QUESTION_TYPE_META } from './question-card';
 
 const EMPTY_STATE: QuestionFormState = { errors: {} };
@@ -17,11 +17,11 @@ type FormAction = (
   formData: FormData
 ) => Promise<QuestionFormState>;
 
-type Props = {
+type QuestionPanelProps = {
   action: FormAction;
   isEdit?: boolean;
-  initial?: QuestionData;
-  availableDimensions: DimensionIndexData[];
+  initial?: Question;
+  availableDimensions: DimensionIndex[];
   onSuccess: () => void;
   onDelete?: () => void;
 };
@@ -50,7 +50,7 @@ export default function QuestionPanel({
   availableDimensions,
   onSuccess,
   onDelete,
-}: Props) {
+}: QuestionPanelProps) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
 
   const [qType, setQType] = useState<QuestionType>(
@@ -89,7 +89,7 @@ export default function QuestionPanel({
 
   // Group available dimensions by category
   const dimsByCategory = availableDimensions.reduce<
-    Record<string, DimensionIndexData[]>
+    Record<string, DimensionIndex[]>
   >((acc, d) => {
     const key = d.categoryName;
     if (!acc[key]) acc[key] = [];
@@ -99,11 +99,9 @@ export default function QuestionPanel({
 
   const selectedIds = new Set(dims.map(d => d.dimensionId));
 
-  // Notify parent on success
   useEffect(() => {
     if (state.success) onSuccess();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.success]);
+  }, [state.success, onSuccess]);
 
   function addOption() {
     setOptions(prev => [...prev, { label: '', value: '', score: '' }]);

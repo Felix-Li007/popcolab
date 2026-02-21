@@ -1,19 +1,19 @@
 import { prisma } from '@/libs/prisma-client';
 import type {
   QuestionType,
-  QuestionOptionData,
-  QuestionDimensionData,
-  DimensionIndexData,
-  QuestionData,
+  QuestionOption,
+  QuestionDimension,
+  DimensionIndex,
+  Question,
   QuestionFormState,
-} from '@/types/question';
+} from '@/types/question-type';
 
 export type {
   QuestionType,
-  QuestionOptionData,
-  QuestionDimensionData,
-  DimensionIndexData,
-  QuestionData,
+  QuestionOption as QuestionOptionData,
+  QuestionDimension as QuestionDimensionData,
+  DimensionIndex as DimensionIndexData,
+  Question as QuestionData,
   QuestionFormState,
 };
 
@@ -22,7 +22,7 @@ type CreateQuestionInput = {
   description: string;
   type: QuestionType;
   orderIndex: number | null;
-  options: QuestionOptionData[];
+  options: QuestionOption[];
   dimensions: { dimensionId: number; weight: number | null }[];
 };
 
@@ -53,10 +53,10 @@ export function mapQuestionRow(
       };
     }[];
   }
-): QuestionData {
+): Question {
   return {
     id: q.id,
-    type: q.question_type as QuestionData['type'],
+    type: q.question_type as Question['type'],
     text: q.question_text,
     description: q.question_desc,
     orderIndex: q.order_index,
@@ -81,7 +81,7 @@ export function mapQuestionRow(
 
 export function mapDimensionRow(
   d: DimensionRow & { category: { category_name: string } }
-): DimensionIndexData {
+): DimensionIndex {
   return {
     id: d.id,
     indexKey: d.index_key,
@@ -97,7 +97,7 @@ export function mapDimensionRow(
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-export async function getQuestions(): Promise<QuestionData[]> {
+export async function getQuestions(): Promise<Question[]> {
   const rows = await prisma.question.findMany({
     orderBy: [{ order_index: 'asc' }, { id: 'asc' }],
     include: {
@@ -111,7 +111,7 @@ export async function getQuestions(): Promise<QuestionData[]> {
   return rows.map(mapQuestionRow);
 }
 
-export async function getAvailableDimensions(): Promise<DimensionIndexData[]> {
+export async function getAvailableDimensions(): Promise<DimensionIndex[]> {
   const rows = await prisma.dimensionIndex.findMany({
     orderBy: [{ category_id: 'asc' }, { id: 'asc' }],
     include: { category: true },
@@ -119,7 +119,7 @@ export async function getAvailableDimensions(): Promise<DimensionIndexData[]> {
   return rows.map(mapDimensionRow);
 }
 
-export async function getDashboardQuestions(take = 4): Promise<QuestionData[]> {
+export async function getDashboardQuestions(take = 4): Promise<Question[]> {
   const rows = await prisma.question.findMany({
     take,
     orderBy: [{ order_index: 'asc' }, { id: 'asc' }],

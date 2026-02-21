@@ -3,7 +3,7 @@ import {
   getQuestions,
   getAvailableDimensions,
 } from '@/services/question-service';
-import type { QuestionData, DimensionIndexData } from '@/types/question';
+import type { Question, DimensionIndex } from '@/types/question-type';
 import QuestionContent from '@/components/admin/question/question-content';
 
 export default async function SurveysPage() {
@@ -15,9 +15,9 @@ export default async function SurveysPage() {
   return (
     <Suspense>
       <QuestionContent
-        initialData={questions as QuestionData[]}
+        initialData={questions as Question[]}
         questionsCount={questions.length}
-        availableDimensions={availableDimensions as DimensionIndexData[]}
+        availableDimensions={availableDimensions as DimensionIndex[]}
       />
     </Suspense>
   );

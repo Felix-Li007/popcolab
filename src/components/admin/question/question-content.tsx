@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import AdminLayout from '@/components/layout/admin-layout';
 import PageFooter from '@/components/layout/page-footer';
 import QuestionPanel from '@/components/admin/question/question-panel';
-import type { QuestionData, DimensionIndexData } from '@/types/question';
+import type { Question, DimensionIndex } from '@/types/question-type';
 import {
   createQuestionAction,
   updateQuestionAction,
@@ -18,9 +17,9 @@ import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
 import styles from '@/styles/surveys.module.css';
 
 type Props = {
-  initialData: QuestionData[];
+  initialData: Question[];
   questionsCount?: number;
-  availableDimensions: DimensionIndexData[];
+  availableDimensions: DimensionIndex[];
 };
 
 const PAGE_SIZE = 10;
@@ -42,7 +41,7 @@ export default function QuestionContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
-  const [questions, setQuestions] = useState<QuestionData[]>(initialData);
+  const [questions, setQuestions] = useState<Question[]>(initialData);
   const [filter, setFilter] = useState<TypeFilter>('All');
   const [search, setSearch] = useState('');
   const initialId = Number(searchParams.get('id')) || null;

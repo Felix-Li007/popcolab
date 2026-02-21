@@ -1,9 +1,9 @@
 import PersonalityCard from './personality-card';
-import type { PersonalityType } from '@/types/personality-type';
+import type { Personality } from '@/types/personality-type';
 import styles from '@/styles/personality-card.module.css';
 
-type Props = {
-  personalities: PersonalityType[];
+type PersonalityGridProps = {
+  personalities: Personality[];
   onEdit: (id: number) => void;
   onView: (id: number) => void;
   onDelete: (id: number, name: string) => void;
@@ -14,7 +14,7 @@ export default function PersonalityGrid({
   onEdit,
   onView,
   onDelete,
-}: Props) {
+}: PersonalityGridProps) {
   return (
     <div className={styles.cardGrid}>
       {personalities.map(p => (

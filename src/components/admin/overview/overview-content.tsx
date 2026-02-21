@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AdminLayout from '@/components/layout/admin-layout';
 import DashboardHeader from '@/components/admin/dashboard-header';
 import StatsGrid from '@/components/admin/stats-grid';
 import EventsTable from '@/components/admin/event-table';
@@ -14,16 +13,16 @@ import PersonalityGrid from '@/components/admin/personality/personality-grid';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
-import { type PersonalityType } from '@/types/personality-type';
-import { type QuestionData } from '@/types/question';
+import { type Personality } from '@/types/personality-type';
+import { type Question } from '@/types/question-type';
 import { usePersonality } from '@/hooks/usePersonality';
 import surveysStyles from '@/styles/surveys.module.css';
 
-type Props = {
-  initialPersonalities: PersonalityType[];
+type OverviewContentProps = {
+  initialPersonalities: Personality[];
   personalitiesCount?: number;
   personalitiesActiveCount?: number;
-  initialQuestions?: QuestionData[];
+  initialQuestions?: Question[];
 };
 
 export default function OverviewContent({
@@ -31,9 +30,9 @@ export default function OverviewContent({
   personalitiesCount,
   personalitiesActiveCount,
   initialQuestions = [],
-}: Props) {
+}: OverviewContentProps) {
   const [personalities, setPersonalities] =
-    useState<PersonalityType[]>(initialPersonalities);
+    useState<Personality[]>(initialPersonalities);
 
   const {
     formModal,
@@ -91,10 +90,10 @@ export default function OverviewContent({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📋</span>
-                  <h2 className="text-sm font-bold text-gray-800">Surveys</h2>
+                  <h2 className="text-sm font-bold text-gray-800">Questions</h2>
                 </div>
                 <Link
-                  href="/admin/surveys"
+                  href="/admin/questions"
                   className="text-xs text-magenta hover:text-teal-deep hover:underline font-semibold transition-colors"
                 >
                   View all →
