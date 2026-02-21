@@ -1,14 +1,11 @@
 import SidenavMenu from '@/components/layout/sidenav-menu';
 import TopnavMenu from '@/components/layout/topnav-menu';
 import { getBadgeCounts } from '@/services/statistic-service';
-import { BadgeCounts } from '@/types/navmenu-type';
 
 export default async function AdminLayout({
   children,
-  //   badgeCounts,
 }: {
   children: React.ReactNode;
-  //   badgeCounts?: BadgeCounts;
 }) {
   const badgeCounts = await getBadgeCounts();
   return (

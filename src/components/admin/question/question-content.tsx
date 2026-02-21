@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import AdminLayout from '@/components/layout/admin-layout';
 import PageFooter from '@/components/layout/page-footer';
 import QuestionPanel from '@/components/admin/question/question-panel';
 import type { Question, DimensionIndex } from '@/types/question-type';

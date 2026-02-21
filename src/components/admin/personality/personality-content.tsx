@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminLayout from '@/components/layout/admin-layout';
 import PersonalityCardGrid from '@/components/admin/personality/personality-grid';
 import StatsCard from '@/components/admin/stats-card';
 import PersonalityForm from '@/components/admin/personality/personality-form';
@@ -18,13 +17,9 @@ type FilterTab = (typeof filterTabs)[number];
 
 type Props = {
   initialData: PersonalityType[];
-  personalitiesCount?: number;
 };
 
-export default function PersonalityContent({
-  initialData,
-  personalitiesCount,
-}: Props) {
+export default function PersonalityContent({ initialData }: Props) {
   const [personalities, setPersonalities] =
     useState<PersonalityType[]>(initialData);
   const [filter, setFilter] = useState<FilterTab>('All');

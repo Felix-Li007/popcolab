@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import AdminLayout from '@/components/layout/admin-layout';
 import DashboardHeader from '@/components/admin/dashboard-header';
 import StatsGrid from '@/components/admin/stats-grid';
 import EventsTable from '@/components/admin/event-table';
