@@ -4,7 +4,7 @@ import {
 } from '@/services/personality-service';
 import { getDashboardQuestions } from '@/services/question-service';
 import type { PersonalityType } from '@/types/personality-type';
-import type { QuestionData } from '@/types/question';
+import type { Question } from '@/types/question-type';
 import OverviewContent from '@/components/admin/overview/overview-content';
 
 export default async function OverviewPage() {
@@ -19,7 +19,7 @@ export default async function OverviewPage() {
       initialPersonalities={personalities as PersonalityType[]}
       personalitiesCount={count}
       personalitiesActiveCount={activeCount}
-      initialQuestions={questions as QuestionData[]}
+      initialQuestions={questions as Question[]}
     />
   );
 }

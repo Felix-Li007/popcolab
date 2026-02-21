@@ -15,7 +15,7 @@ import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
 import { type PersonalityType } from '@/types/personality-type';
-import { type QuestionData } from '@/types/question';
+import { type Question } from '@/types/question-type';
 import { usePersonality } from '@/hooks/usePersonality';
 import surveysStyles from '@/styles/surveys.module.css';
 
@@ -23,7 +23,7 @@ type Props = {
   initialPersonalities: PersonalityType[];
   personalitiesCount?: number;
   personalitiesActiveCount?: number;
-  initialQuestions?: QuestionData[];
+  initialQuestions?: Question[];
 };
 
 export default function OverviewContent({

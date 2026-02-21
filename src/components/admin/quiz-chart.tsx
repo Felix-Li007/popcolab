@@ -1,5 +1,3 @@
-'use client';
-
 import styles from '@/styles/quiz-chart.module.css';
 
 const weekData = [

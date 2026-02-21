@@ -4,14 +4,14 @@ export type QuestionType =
   | 'scale'
   | 'text_input';
 
-export type QuestionOptionData = {
+export type QuestionOption = {
   id?: number;
   label: string;
   value: string;
   score?: number | null;
 };
 
-export type QuestionDimensionData = {
+export type QuestionDimension = {
   id?: number;
   dimensionId: number;
   dimensionName: string;
@@ -20,7 +20,7 @@ export type QuestionDimensionData = {
   weight: number | null;
 };
 
-export type DimensionIndexData = {
+export type DimensionIndex = {
   id: number;
   indexKey?: string | null;
   indexName: string;
@@ -32,14 +32,14 @@ export type DimensionIndexData = {
   scaleMax?: number | null;
 };
 
-export type QuestionData = {
+export type Question = {
   id?: number;
   type: QuestionType;
   text: string;
   description: string;
   orderIndex?: number | null;
-  options: QuestionOptionData[];
-  dimensions: QuestionDimensionData[];
+  options: QuestionOption[];
+  dimensions: QuestionDimension[];
   createdAt?: Date;
   updatedAt?: Date;
 };

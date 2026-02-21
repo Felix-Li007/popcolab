@@ -1,10 +1,10 @@
 'use client';
 
 import { Badge, Button } from '@/ui';
-import type { QuestionData, QuestionType } from '@/types/question';
+import type { Question, QuestionType } from '@/types/question-type';
 
 type Props = {
-  question: QuestionData;
+  question: Question;
   onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number, text: string) => void;

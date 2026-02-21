@@ -4,11 +4,11 @@ import { useEffect, useState, useActionState } from 'react';
 import { createPortal } from 'react-dom';
 import { Button, Input, TextArea } from '@/ui';
 import type {
-  QuestionData,
+  Question,
   QuestionFormState,
   QuestionType,
-  DimensionIndexData,
-} from '@/types/question';
+  DimensionIndex,
+} from '@/types/question-type';
 import { QUESTION_TYPE_META } from './question-card';
 import styles from '@/styles/personality-form-modal.module.css';
 
@@ -24,8 +24,8 @@ type Props = {
   onClose: () => void;
   action: FormAction;
   isEdit?: boolean;
-  initial?: QuestionData;
-  availableDimensions: DimensionIndexData[];
+  initial?: Question;
+  availableDimensions: DimensionIndex[];
 };
 
 type OptionRow = { label: string; value: string; score: string };
@@ -81,7 +81,7 @@ export default function QuestionForm({
 
   // Grouped available dimensions by category
   const dimsByCategory = availableDimensions.reduce<
-    Record<string, DimensionIndexData[]>
+    Record<string, DimensionIndex[]>
   >((acc, d) => {
     const key = d.categoryName;
     if (!acc[key]) acc[key] = [];

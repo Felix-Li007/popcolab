@@ -2,13 +2,13 @@
 
 import { createPortal } from 'react-dom';
 import { Button, Badge } from '@/ui';
-import type { QuestionData } from '@/types/question';
+import type { Question } from '@/types/question-type';
 import { QUESTION_TYPE_META } from './question-card';
 import styles from '@/styles/personality-form-modal.module.css';
 
 type Props = {
   isOpen: boolean;
-  question: QuestionData | null;
+  question: Question | null;
   onClose: () => void;
   onEdit: (id: number) => void;
   onDelete: (id: number, text: string) => void;
