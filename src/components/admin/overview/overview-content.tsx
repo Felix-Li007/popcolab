@@ -91,10 +91,10 @@ export default function OverviewContent({
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">📋</span>
-                  <h2 className="text-sm font-bold text-gray-800">Surveys</h2>
+                  <h2 className="text-sm font-bold text-gray-800">Questions</h2>
                 </div>
                 <Link
-                  href="/admin/surveys"
+                  href="/admin/questions"
                   className="text-xs text-magenta hover:text-teal-deep hover:underline font-semibold transition-colors"
                 >
                   View all →
