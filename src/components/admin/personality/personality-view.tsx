@@ -1,16 +1,16 @@
 'use client';
 
 import { createPortal } from 'react-dom';
-import type { PersonalityType } from '@/types/personality-type';
+import type { Personality } from '@/types/personality-type';
 import styles from '@/styles/personality-view-modal.module.css';
 import { Button, Badge } from '@/ui';
 import { getPersonalityStyle } from '@/constants/personality-styles';
 
-type Props = {
+type PersonalityViewProps = {
   isOpen: boolean;
   onClose: () => void;
   onEdit: () => void;
-  personality: PersonalityType;
+  personality: Personality;
 };
 
 export default function PersonalityView({
@@ -18,7 +18,7 @@ export default function PersonalityView({
   onClose,
   onEdit,
   personality,
-}: Props) {
+}: PersonalityViewProps) {
   if (!isOpen || typeof window === 'undefined') return null;
 
   const style = getPersonalityStyle(personality.type);

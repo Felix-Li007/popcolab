@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import type {
-  PersonalityType,
+  Personality,
   PersonalityFormState,
 } from '@/types/personality-type';
 import {
@@ -18,7 +18,7 @@ type FormAction = (
 
 export type ModalState = { open: boolean; id?: number };
 
-export function usePersonality(personalities: PersonalityType[]) {
+export function usePersonality(personalities: Personality[]) {
   const [, startDeleteTransition] = useTransition();
   const [formModal, setFormModal] = useState<ModalState>({ open: false });
   const [viewModal, setViewModal] = useState<ModalState>({ open: false });

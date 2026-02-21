@@ -8,7 +8,7 @@ import PersonalityView from '@/components/admin/personality/personality-view';
 import PageFooter from '@/components/layout/page-footer';
 import ContentHeader from '@/components/admin/content-header';
 import { Button, Badge } from '@/ui';
-import { PersonalityType } from '@/types/personality-type';
+import { Personality } from '@/types/personality-type';
 import { usePersonality } from '@/hooks/usePersonality';
 import cardStyles from '@/styles/personality-card.module.css';
 
@@ -16,12 +16,12 @@ const filterTabs = ['All', 'Active', 'Draft'] as const;
 type FilterTab = (typeof filterTabs)[number];
 
 type Props = {
-  initialData: PersonalityType[];
+  initialData: Personality[];
 };
 
 export default function PersonalityContent({ initialData }: Props) {
   const [personalities, setPersonalities] =
-    useState<PersonalityType[]>(initialData);
+    useState<Personality[]>(initialData);
   const [filter, setFilter] = useState<FilterTab>('All');
 
   const {

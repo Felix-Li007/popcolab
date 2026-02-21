@@ -13,13 +13,13 @@ import PersonalityGrid from '@/components/admin/personality/personality-grid';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
-import { type PersonalityType } from '@/types/personality-type';
+import { type Personality } from '@/types/personality-type';
 import { type Question } from '@/types/question-type';
 import { usePersonality } from '@/hooks/usePersonality';
 import surveysStyles from '@/styles/surveys.module.css';
 
-type Props = {
-  initialPersonalities: PersonalityType[];
+type OverviewContentProps = {
+  initialPersonalities: Personality[];
   personalitiesCount?: number;
   personalitiesActiveCount?: number;
   initialQuestions?: Question[];
@@ -30,9 +30,9 @@ export default function OverviewContent({
   personalitiesCount,
   personalitiesActiveCount,
   initialQuestions = [],
-}: Props) {
+}: OverviewContentProps) {
   const [personalities, setPersonalities] =
-    useState<PersonalityType[]>(initialPersonalities);
+    useState<Personality[]>(initialPersonalities);
 
   const {
     formModal,
