@@ -112,7 +112,7 @@ export default function QuestionContent({
       : createQuestionAction;
 
   return (
-    <AdminLayout personalitiesCount={undefined}>
+    <>
       <div className="flex flex-col h-full overflow-hidden">
         <div className="p-4 pb-0 shrink-0">
           <PageHeader
@@ -396,6 +396,6 @@ export default function QuestionContent({
 
         <PageFooter />
       </div>
-    </AdminLayout>
+    </>
   );
 }

@@ -3,15 +3,19 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import styles from '@/styles/top-nav.module.css';
-import { NavItem } from '@/types/navmenu-type';
+import { BadgeCounts, NavItem } from '@/types/navmenu-type';
 
 const tabs: NavItem[] = [
-  { label: 'Overview', href: '/admin' },
-  { label: 'Personalities', href: '/admin/personalities', badge: 8 },
-  { label: 'Surveys', href: '/admin/surveys', badge: 12 },
-  { label: 'Events', href: '/admin/events', badge: 3 },
-  { label: 'Users', href: '/admin/users' },
-  { label: 'Bookings', href: '/admin/bookings' },
+  { label: 'Overview', countKey: 'overview', href: '/admin' },
+  {
+    label: 'Personalities',
+    countKey: 'personalities',
+    href: '/admin/personalities',
+  },
+  { label: 'Questions', countKey: 'questions', href: '/admin/questions' },
+  { label: 'Events', countKey: 'events', href: '/admin/events' },
+  { label: 'Users', countKey: 'users', href: '/admin/users' },
+  { label: 'Bookings', countKey: 'bookings', href: '/admin/bookings' },
   { label: 'Settings', href: '/admin/settings' },
 ];
 
@@ -21,21 +25,32 @@ const topTabs: NavItem[] = [
   { label: 'Facilitators & Partners +', href: '#' },
 ];
 
+function getBadge(item: NavItem, counts?: BadgeCounts) {
+  if (
+    item.countKey &&
+    counts &&
+    counts[item.countKey as keyof BadgeCounts] !== undefined
+  ) {
+    return counts[item.countKey as keyof BadgeCounts];
+  }
+  return item.badge;
+}
+
 export default function TopnavMenu({
-  personalitiesCount,
+  badgeCounts,
 }: {
   personalitiesCount?: number;
+  badgeCounts?: BadgeCounts;
 }) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
 
-  const resolvedTabs = tabs.map(tab =>
-    tab.label === 'Personalities' && personalitiesCount !== undefined
-      ? { ...tab, badge: personalitiesCount }
-      : tab
-  );
+  const resolvedTabs = tabs.map(tab => ({
+    ...tab,
+    badge: getBadge(tab, badgeCounts),
+  }));
 
   return (
     <header className="bg-teal-deep text-white">

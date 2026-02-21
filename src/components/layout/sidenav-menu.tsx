@@ -4,7 +4,8 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import styles from '@/styles/sidebar.module.css';
-import { NavItem } from '@/types/navmenu-type';
+import { NavItem, BadgeCounts } from '@/types/navmenu-type';
+import { getBadge } from '@/utils/menu-helper';
 
 type NavSection = {
   title: string;
@@ -25,6 +26,7 @@ const navSections: NavSection[] = [
     items: [
       {
         label: 'Dashboard',
+        countKey: 'overview',
         href: '/admin',
         icon: (
           <NavIcon>
@@ -41,6 +43,7 @@ const navSections: NavSection[] = [
     items: [
       {
         label: 'Personalities',
+        countKey: 'personalities',
         href: '/admin/personalities',
         icon: (
           <NavIcon>
@@ -57,6 +60,7 @@ const navSections: NavSection[] = [
       {
         label: 'Questions',
         href: '/admin/questions',
+        countKey: 'questions',
         badge: 12,
         icon: (
           <NavIcon>
@@ -72,6 +76,7 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Experiences',
+        countKey: 'experiences',
         href: '/admin/experiences',
         badge: '50+',
         icon: (
@@ -84,6 +89,7 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Dimensions',
+        countKey: 'dimensions',
         href: '/admin/dimensions',
         icon: (
           <NavIcon>
@@ -104,6 +110,7 @@ const navSections: NavSection[] = [
     items: [
       {
         label: 'Users',
+        countKey: 'users',
         href: '/admin/users',
         icon: (
           <NavIcon>
@@ -115,6 +122,7 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Facilitators',
+        countKey: 'facilitators',
         href: '/admin/facilitators',
         icon: (
           <NavIcon>
@@ -130,6 +138,7 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Teams',
+        countKey: 'teams',
         href: '/admin/teams',
         icon: (
           <NavIcon>
@@ -141,6 +150,7 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Events',
+        countKey: 'events',
         href: '/admin/events',
         badge: 3,
         icon: (
@@ -162,6 +172,7 @@ const navSections: NavSection[] = [
     items: [
       {
         label: 'Bookings',
+        countKey: 'bookings',
         href: '/admin/bookings',
         icon: (
           <NavIcon>
@@ -178,8 +189,8 @@ const navSections: NavSection[] = [
       },
       {
         label: 'Requests',
+        countKey: 'requests',
         href: '/admin/requests',
-        badge: 5,
         icon: (
           <NavIcon>
             <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -247,9 +258,9 @@ const navSections: NavSection[] = [
 ];
 
 export default function Sidebar({
-  personalitiesCount,
+  badgeCounts,
 }: {
-  personalitiesCount?: number;
+  badgeCounts?: BadgeCounts;
 }) {
   const pathname = usePathname();
 
@@ -298,10 +309,7 @@ export default function Sidebar({
                 {item.icon}
                 <span className="flex-1 truncate">{item.label}</span>
                 {(() => {
-                  const badge =
-                    item.label === 'Personalities'
-                      ? (personalitiesCount ?? item.badge)
-                      : item.badge;
+                  const badge = getBadge(item, badgeCounts);
                   return badge !== undefined ? (
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${

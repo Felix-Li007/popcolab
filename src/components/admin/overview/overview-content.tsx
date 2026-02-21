@@ -54,9 +54,7 @@ export default function OverviewContent({
   }, [initialPersonalities]);
 
   return (
-    <AdminLayout
-      personalitiesCount={personalitiesCount ?? personalities.length}
-    >
+    <>
       <div className="flex flex-col min-h-full">
         <div className="flex flex-1 gap-0">
           <div className="flex-1 min-w-0 p-4 space-y-5">
@@ -220,6 +218,6 @@ export default function OverviewContent({
           personality={viewedPersonality}
         />
       )}
-    </AdminLayout>
+    </>
   );
 }

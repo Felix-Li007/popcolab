@@ -59,7 +59,7 @@ export default function PersonalityContent({
   };
 
   return (
-    <AdminLayout personalitiesCount={personalitiesCount}>
+    <>
       <div className="flex flex-col min-h-full">
         <div className="flex-1 p-4 flex flex-col gap-5 min-h-0">
           <ContentHeader
@@ -186,6 +186,6 @@ export default function PersonalityContent({
           personality={viewedPersonality}
         />
       )}
-    </AdminLayout>
+    </>
   );
 }
