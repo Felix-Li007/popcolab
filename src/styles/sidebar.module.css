@@ -1,8 +1,4 @@
-/* Custom scrollbar for the sidebar nav — Tailwind has no ::-webkit-scrollbar support */
-.nav {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-}
+@reference "../app/globals.css";
 
 .nav::-webkit-scrollbar {
   width: 4px;

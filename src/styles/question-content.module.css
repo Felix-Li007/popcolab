@@ -1,3 +1,4 @@
+@reference "../app/globals.css";
 .listPanel {
   flex: 1;
   min-width: 0;

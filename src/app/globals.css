@@ -28,8 +28,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --palette-background: #0a0a0a;
-    /* --palette-foreground: #780909; */
-    /* --palette-foreground: #ededed; */
+    --palette-teal-deep: #09191b;
+    --palette-yellow: #e5d139;
   }
 }
 

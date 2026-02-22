@@ -14,7 +14,7 @@ import { Button, Badge } from '@/ui';
 import StatsCard from '@/components/admin/stats-card';
 import PageHeader from '@/components/admin/content-header';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
-import styles from '@/styles/surveys.module.css';
+import styles from '@/styles/question-content.module.css';
 
 type Props = {
   initialData: Question[];
