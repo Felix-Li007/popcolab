@@ -9,7 +9,7 @@ export default async function AdminLayout({
 }) {
   const badgeCounts = await getBadgeCounts();
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-200">
       <SidenavMenu badgeCounts={badgeCounts} />
       <div className="flex-1 flex flex-col min-w-0">
         <TopnavMenu badgeCounts={badgeCounts} />

@@ -16,7 +16,7 @@ import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
 import { type Personality } from '@/types/personality-type';
 import { type Question } from '@/types/question-type';
 import { usePersonality } from '@/hooks/usePersonality';
-import surveysStyles from '@/styles/surveys.module.css';
+import QuestionStyles from '@/styles/question-content.module.css';
 
 type OverviewContentProps = {
   initialPersonalities: Personality[];
@@ -105,7 +105,7 @@ export default function OverviewContent({
                   <p className="text-xs text-gray-400">No questions yet.</p>
                 </div>
               ) : (
-                <div className={surveysStyles.previewGrid}>
+                <div className={QuestionStyles.previewGrid}>
                   {initialQuestions.map(q => {
                     const meta = QUESTION_TYPE_META[q.type];
                     return (
@@ -114,7 +114,7 @@ export default function OverviewContent({
                         href={`/admin/questions?id=${q.id}`}
                         className="block h-full"
                       >
-                        <div className={surveysStyles.previewCard}>
+                        <div className={QuestionStyles.previewCard}>
                           <div className="flex items-center gap-2 shrink-0">
                             <span className="text-base leading-none">
                               {meta.icon}
@@ -130,7 +130,7 @@ export default function OverviewContent({
                               </span>
                             )}
                           </div>
-                          <div className={surveysStyles.previewCardBody}>
+                          <div className={QuestionStyles.previewCardBody}>
                             <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
                               {q.text}
                             </p>
@@ -141,7 +141,7 @@ export default function OverviewContent({
                             )}
                             {q.dimensions.length > 0 && (
                               <div
-                                className={surveysStyles.previewCardDimensions}
+                                className={QuestionStyles.previewCardDimensions}
                               >
                                 {q.dimensions.map((d, i) => (
                                   <span

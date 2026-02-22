@@ -90,7 +90,11 @@ export default function TopnavMenu({
             </svg>
           </div>
           {/* Notifications */}
-          <button className="relative w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+          <button
+            type="button"
+            aria-label="View notifications"
+            className="relative w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+          >
             <svg
               className="w-3.5 h-3.5"
               fill="currentColor"
@@ -104,7 +108,7 @@ export default function TopnavMenu({
           {/* User avatar */}
           <button className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-lg hover:bg-white/10 transition-colors group">
             <div className="relative shrink-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-magenta to-pink-bright flex items-center justify-center text-xs font-bold shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-magenta to-pink-bright flex items-center justify-center text-xs font-bold shadow-sm">
                 DT
               </div>
               <span className="absolute bottom-0 right-0 w-2 h-2 bg-green-400 rounded-full border-[1.5px] border-teal-deep" />

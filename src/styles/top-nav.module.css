@@ -1,7 +1,8 @@
-/* Hide scrollbar on the tab bar — Tailwind has no scrollbar-none cross-browser support */
+@reference "../app/globals.css";
+
 .tabBar {
-  scrollbar-width: none;
-  background-color: #f5dd42;
+  /* background-color: #f5dd42; */
+  @apply bg-brand-yellow;
 }
 
 .tabBar::-webkit-scrollbar {
