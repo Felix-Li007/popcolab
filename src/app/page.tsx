@@ -1,19 +1,21 @@
-'use client';
+import Header from "@/components/Header";
+import HeroSection from "@/components/Hero";
+import EventsSection from "@/components/EventsSection";
+import CTASection from "@/components/CTASection";
+import Footer from "@/components/Footer";
+import ExperiencesCarousel from "@/components/Experiences";
+import ImageGallerySection from "@/components/ImageGallerySection";
 
 export default function Home() {
-  const createUser = async () => {
-    const res = await fetch('/apis/demo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'alice@example.com', name: 'Alice' }),
-    });
-    const data = await res.json();
-    console.log(data);
-  };
-
   return (
-    <div>
-      <button onClick={createUser}>Create User</button>
-    </div>
+    <>
+      <Header />
+      <HeroSection />
+      <EventsSection />
+      <ExperiencesCarousel/>
+      <ImageGallerySection/>
+      <CTASection />
+      <Footer />
+    </>
   );
 }

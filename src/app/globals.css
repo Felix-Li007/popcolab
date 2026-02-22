@@ -1,12 +1,7 @@
-@import '../styles/color-palette.css';
-@import 'tailwindcss';
+@import "../styles/color-palette.css";
+@import "tailwindcss";
 
-@theme inline {
-  --color-background: var(--palette-background);
-  --color-foreground: var(--palette-foreground);
-  --font-poppins: var(--font-poppins);
-}
-
+/* Light / Dark mode palette */
 @media (prefers-color-scheme: dark) {
   :root {
     --palette-background: #0a0a0a;
@@ -15,10 +10,8 @@
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  /* Make sure using the designated font grobally*/
+  background: var(--palette-background);
+  color: var(--palette-foreground);
   font-family: var(--font-poppins);
-  /* Set the default font weight to 600 (semi-bold) for all text */
   font-weight: 600;
 }

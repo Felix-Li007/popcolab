@@ -25,12 +25,15 @@
     "@clerk/nextjs": "^6.37.3",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "core-js": "^3.48.0",
     "dotenv": "^17.2.4",
-    "next": "16.1.6",
+    "lucide-react": "^0.575.0",
+    "next": "^16.1.6",
     "pg": "^8.18.0",
     "pino": "^10.3.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
@@ -47,21 +50,34 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "babel-jest": "^30.2.0",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "babel-jest": "^23.6.0",
+    "eslint": "^9.39.3",
+    "eslint-config-next": "^16.1.6",
     "eslint-config-prettier": "^10.1.8",
+    "eslint-define-config": "^2.1.0",
+    "eslint-plugin-next": "^0.0.0",
     "husky": "^9.1.7",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.2.0",
+    "jest": "^25.0.0",
     "jest-environment-jsdom": "^30.2.0",
-    "jest-html-reporter": "^4.3.0",
+    "jest-html-reporter": "^3.10.2",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
-    "prisma": "^7.3.0",
+    "prisma": "^6.19.2",
     "supabase": "^2.76.7",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css,scss,md}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
