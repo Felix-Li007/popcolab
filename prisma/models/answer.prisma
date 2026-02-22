@@ -1,16 +1,13 @@
-// Answer Model
-// This model represents individual answers to questions in a response
-
 model Answer {
-    id            Int      @id @default(autoincrement())
-    question_id   Int
-    response_id   Int
-    created_at    DateTime @default(now()) @db.Timestamp()
-    updated_at    DateTime @updatedAt @db.Timestamp()
-    raw_value     Int?
-    numeric_value Int?
-    question      Question @relation(fields: [question_id], references: [id])
-    response      Response @relation(fields: [response_id], references: [id])
+  id            Int      @id @default(autoincrement())
+  question_id   Int
+  response_id   Int
+  created_at    DateTime @default(now()) @db.Timestamp(6)
+  updated_at    DateTime @updatedAt @db.Timestamp(6)
+  raw_value     Int?
+  numeric_value Int?
+  question      Question @relation(fields: [question_id], references: [id])
+  response      Response @relation(fields: [response_id], references: [id])
 
-    @@map("answer")
+  @@map("answer")
 }

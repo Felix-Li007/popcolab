@@ -1,15 +1,12 @@
-// TeamAggregate Model
-// This model represents aggregated statistics for teams across dimensions
-
 model TeamAggregate {
-    id             Int      @id @default(autoincrement())
-    team_id        Int
-    dimension_id   Int
-    average_score  Decimal  @db.Decimal(19, 0)
-    standard_score Decimal  @db.Decimal(19, 0)
-    created_at     DateTime @default(now()) @db.Timestamp()
-    updated_at     DateTime @updatedAt @db.Timestamp()
-    team           Team     @relation(fields: [team_id], references: [id])
+  id             Int      @id @default(autoincrement())
+  team_id        Int
+  dimension_id   Int
+  average_score  Decimal  @db.Decimal(19, 0)
+  standard_score Decimal  @db.Decimal(19, 0)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @updatedAt @db.Timestamp(6)
+  team           Team     @relation(fields: [team_id], references: [id])
 
-    @@map("team_aggregate")
+  @@map("team_aggregate")
 }
