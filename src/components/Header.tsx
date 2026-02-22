@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import Link from 'next/link';
+import { Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,7 +11,6 @@ export default function Header() {
     <header className="bg-[#19464d] text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-
           {/* Logo */}
           <Link href="/" className="text-2xl font-bold">
             PopColab
@@ -26,10 +25,7 @@ export default function Header() {
           </nav>
 
           {/* Mobile Button */}
-          <button
-            className="md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
+          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X /> : <Menu />}
           </button>
         </div>

@@ -1,5 +1,5 @@
-@import "../styles/color-palette.css";
-@import "tailwindcss";
+@import '../styles/color-palette.css';
+@import 'tailwindcss';
 
 /* Light / Dark mode palette */
 @media (prefers-color-scheme: dark) {

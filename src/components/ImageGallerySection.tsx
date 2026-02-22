@@ -1,33 +1,33 @@
 const galleryItems = [
   {
     id: 1,
-    title: "Creative Spaces",
-    image: "🏢",
+    title: 'Creative Spaces',
+    image: '🏢',
   },
   {
     id: 2,
-    title: "Team Collaboration",
-    image: "👥",
+    title: 'Team Collaboration',
+    image: '👥',
   },
   {
     id: 3,
-    title: "Innovation Hub",
-    image: "💡",
+    title: 'Innovation Hub',
+    image: '💡',
   },
   {
     id: 4,
-    title: "Play & Learn",
-    image: "🎓",
+    title: 'Play & Learn',
+    image: '🎓',
   },
   {
     id: 5,
-    title: "Community",
-    image: "🤝",
+    title: 'Community',
+    image: '🤝',
   },
   {
     id: 6,
-    title: "Creative Expression",
-    image: "🎨",
+    title: 'Creative Expression',
+    image: '🎨',
   },
 ];
 
@@ -47,7 +47,7 @@ export default function ImageGallerySection() {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {galleryItems.map((item) => (
+          {galleryItems.map(item => (
             <div
               key={item.id}
               className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 h-64 cursor-pointer"

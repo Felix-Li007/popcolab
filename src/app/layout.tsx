@@ -7,7 +7,7 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
-} from "@clerk/nextjs";
+} from '@clerk/nextjs';
 import './globals.css';
 
 const poppins = Poppins({

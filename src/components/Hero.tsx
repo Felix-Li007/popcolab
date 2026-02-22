@@ -1,10 +1,34 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from 'lucide-react';
 
 const personalities = [
-  { id: 1, name: "Creator", color: "bg-[#ffbbf0]", icon: "🎨", textColor: "text-[#19464d]" },
-  { id: 2, name: "Inspirer", color: "bg-[#f9dbf2]", icon: "✨", textColor: "text-[#19464d]" },
-  { id: 3, name: "Companion", color: "bg-[#f5dd42]", icon: "🤗", textColor: "text-[#19464d]" },
-  { id: 4, name: "Connector", color: "bg-[#ffa4eb]", icon: "🤝", textColor: "text-white" },
+  {
+    id: 1,
+    name: 'Creator',
+    color: 'bg-[#ffbbf0]',
+    icon: '🎨',
+    textColor: 'text-[#19464d]',
+  },
+  {
+    id: 2,
+    name: 'Inspirer',
+    color: 'bg-[#f9dbf2]',
+    icon: '✨',
+    textColor: 'text-[#19464d]',
+  },
+  {
+    id: 3,
+    name: 'Companion',
+    color: 'bg-[#f5dd42]',
+    icon: '🤗',
+    textColor: 'text-[#19464d]',
+  },
+  {
+    id: 4,
+    name: 'Connector',
+    color: 'bg-[#ffa4eb]',
+    icon: '🤝',
+    textColor: 'text-white',
+  },
 ];
 
 export default function HeroSection() {
@@ -24,10 +48,13 @@ export default function HeroSection() {
             {/* Main Heading */}
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-5xl font-bold text-black leading-tight">
-                Discover Your<br />Play Personality
+                Discover Your
+                <br />
+                Play Personality
               </h1>
               <p className="text-base text-gray-700 leading-relaxed max-w-md">
-                Find out how you play best. Take our 2-minute assessment and discover your unique play style — no sign up required.
+                Find out how you play best. Take our 2-minute assessment and
+                discover your unique play style — no sign up required.
               </p>
             </div>
 
@@ -43,15 +70,21 @@ export default function HeroSection() {
             <div className="space-y-3 pt-4">
               <div className="flex items-center gap-3">
                 <span className="text-[#19464d] text-xl font-bold">●</span>
-                <span className="text-gray-700 font-medium">No account needed</span>
+                <span className="text-gray-700 font-medium">
+                  No account needed
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[#19464d] text-xl font-bold">●</span>
-                <span className="text-gray-700 font-medium">Only 2 minutes</span>
+                <span className="text-gray-700 font-medium">
+                  Only 2 minutes
+                </span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-[#19464d] text-xl font-bold">●</span>
-                <span className="text-gray-700 font-medium">Instant results</span>
+                <span className="text-gray-700 font-medium">
+                  Instant results
+                </span>
               </div>
             </div>
           </div>
@@ -66,31 +99,55 @@ export default function HeroSection() {
             {/* Personality Cards arranged in grid */}
             <div className="grid grid-cols-2 gap-8 w-full">
               {/* Top-left - Creator */}
-              <div className={`${personalities[0].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[0].textColor} shadow-lg transform hover:scale-105 transition h-48`}>
+              <div
+                className={`${personalities[0].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[0].textColor} shadow-lg transform hover:scale-105 transition h-48`}
+              >
                 <span className="text-6xl mb-3">{personalities[0].icon}</span>
-                <h3 className="font-bold text-lg text-center">{personalities[0].name}</h3>
-                <p className="text-xs opacity-80 text-center pt-1">Unique Strengths</p>
+                <h3 className="font-bold text-lg text-center">
+                  {personalities[0].name}
+                </h3>
+                <p className="text-xs opacity-80 text-center pt-1">
+                  Unique Strengths
+                </p>
               </div>
 
               {/* Top-right - Inspirer */}
-              <div className={`${personalities[1].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[1].textColor} shadow-lg transform hover:scale-105 transition h-48`}>
+              <div
+                className={`${personalities[1].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[1].textColor} shadow-lg transform hover:scale-105 transition h-48`}
+              >
                 <span className="text-6xl mb-3">{personalities[1].icon}</span>
-                <h3 className="font-bold text-lg text-center">{personalities[1].name}</h3>
-                <p className="text-xs opacity-80 text-center pt-1">Unique Strengths</p>
+                <h3 className="font-bold text-lg text-center">
+                  {personalities[1].name}
+                </h3>
+                <p className="text-xs opacity-80 text-center pt-1">
+                  Unique Strengths
+                </p>
               </div>
 
               {/* Bottom-left - Companion */}
-              <div className={`${personalities[2].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[2].textColor} shadow-lg transform hover:scale-105 transition h-48`}>
+              <div
+                className={`${personalities[2].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[2].textColor} shadow-lg transform hover:scale-105 transition h-48`}
+              >
                 <span className="text-6xl mb-3">{personalities[2].icon}</span>
-                <h3 className="font-bold text-lg text-center">{personalities[2].name}</h3>
-                <p className="text-xs opacity-80 text-center pt-1">Unique Strengths</p>
+                <h3 className="font-bold text-lg text-center">
+                  {personalities[2].name}
+                </h3>
+                <p className="text-xs opacity-80 text-center pt-1">
+                  Unique Strengths
+                </p>
               </div>
 
               {/* Bottom-right - Connector */}
-              <div className={`${personalities[3].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[3].textColor} shadow-lg transform hover:scale-105 transition h-48`}>
+              <div
+                className={`${personalities[3].color} rounded-3xl p-8 flex flex-col items-center justify-center ${personalities[3].textColor} shadow-lg transform hover:scale-105 transition h-48`}
+              >
                 <span className="text-6xl mb-3">{personalities[3].icon}</span>
-                <h3 className="font-bold text-lg text-center">{personalities[3].name}</h3>
-                <p className="text-xs opacity-80 text-center pt-1">Unique Strengths</p>
+                <h3 className="font-bold text-lg text-center">
+                  {personalities[3].name}
+                </h3>
+                <p className="text-xs opacity-80 text-center pt-1">
+                  Unique Strengths
+                </p>
               </div>
             </div>
           </div>

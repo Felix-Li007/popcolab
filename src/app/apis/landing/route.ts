@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   return NextResponse.json({
     success: true,
-    message: "Landing API working",
+    message: 'Landing API working',
   });
 }
 
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     success: true,
-    message: "Data received",
+    message: 'Data received',
     data: body,
   });
 }
