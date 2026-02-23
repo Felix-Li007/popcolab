@@ -1,31 +1,52 @@
 'use client';
 
+import type { Question, QuestionType } from '@/types/question-type';
+
 type Props = {
   current: number;
   total: number;
+  questions: Question[];
 };
 
-const MILESTONES = [
-  { label: 'Play Style', message: null },
-  { label: 'Preferences', message: 'Great job!' },
-  { label: 'Halfway', message: 'Halfway through!' },
-  { label: 'Almost There', message: 'Almost there!' },
-  { label: 'Results', message: 'One more to go!' },
+const TYPE_LABELS: Record<QuestionType, string> = {
+  single_choice: 'Choice',
+  multi_choice: 'Multi-Select',
+  scale: 'Scale',
+  text_input: 'Reflection',
+};
+
+const MILESTONE_MESSAGES = [
+  null,
+  'Great job!',
+  'Halfway through!',
+  'Almost there!',
+  'One more to go!',
 ];
 
-export default function TestProgress({ current, total }: Props) {
-  const nodeCount = MILESTONES.length;
+const NODE_COUNT = 5;
 
+// Pick the question at each milestone position and return its readable type label
+function getLabelForNode(nodeIndex: number, questions: Question[]): string {
+  const qIndex = Math.round(
+    (nodeIndex / (NODE_COUNT - 1)) * (questions.length - 1)
+  );
+  const q = questions[Math.min(qIndex, questions.length - 1)];
+  return q ? TYPE_LABELS[q.type] : '';
+}
+
+export default function TestProgress({ current, total, questions }: Props) {
   const progress = total <= 1 ? 1 : (current - 1) / (total - 1);
 
-  const activeNodeIndex = MILESTONES.reduce((last, _, i) => {
-    const threshold = i / (nodeCount - 1);
-    return progress >= threshold - 0.001 ? i : last;
-  }, 0);
+  const activeNodeIndex = Array.from({ length: NODE_COUNT }).reduce<number>(
+    (last: number, _: unknown, i: number) => {
+      const threshold = i / (NODE_COUNT - 1);
+      return progress >= threshold - 0.001 ? i : last;
+    },
+    0
+  );
 
-  const currentMessage = MILESTONES[activeNodeIndex].message;
-
-  const lineFill = Math.min(100, (activeNodeIndex / (nodeCount - 1)) * 100);
+  const currentMessage = MILESTONE_MESSAGES[activeNodeIndex];
+  const lineFill = Math.min(100, (activeNodeIndex / (NODE_COUNT - 1)) * 100);
 
   return (
     <div className="w-full flex flex-col gap-3">
@@ -60,7 +81,7 @@ export default function TestProgress({ current, total }: Props) {
         />
 
         {/* Nodes */}
-        {MILESTONES.map((node, i) => {
+        {Array.from({ length: NODE_COUNT }).map((_, i) => {
           const isCompleted = i < activeNodeIndex;
           const isCurrent = i === activeNodeIndex;
 
@@ -101,7 +122,7 @@ export default function TestProgress({ current, total }: Props) {
                   isCurrent ? 'text-teal-deep' : 'text-gray-400'
                 }`}
               >
-                {node.label}
+                {getLabelForNode(i, questions)}
               </span>
             </div>
           );

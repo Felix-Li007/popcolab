@@ -211,7 +211,9 @@ export async function computeTestResult(answers: UserAnswer[]): Promise<{
   const dimensionScoreMap = new Map<number, number>();
   for (const item of scored) {
     if (item.numericValue === null) continue;
-    const dims = dimMappings.filter(d => d.questionId === item.answer.questionId);
+    const dims = dimMappings.filter(
+      d => d.questionId === item.answer.questionId
+    );
     for (const dim of dims) {
       const current = dimensionScoreMap.get(dim.dimensionId) ?? 0;
       dimensionScoreMap.set(
@@ -231,7 +233,9 @@ export async function computeTestResult(answers: UserAnswer[]): Promise<{
   return { personalityKey, totalScore, personality };
 }
 
-export async function getPersonalityByKey(key: string): Promise<Personality | null> {
+export async function getPersonalityByKey(
+  key: string
+): Promise<Personality | null> {
   const row = await prisma.personalityType.findFirst({
     where: { personality_key: key, status: 'active' },
   });

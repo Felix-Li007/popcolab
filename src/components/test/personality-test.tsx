@@ -59,7 +59,11 @@ export default function PersonalityTest({ questions }: Props) {
 
   return (
     <div className="flex flex-col gap-8">
-      <TestProgress current={currentIndex + 1} total={questions.length} />
+      <TestProgress
+        current={currentIndex + 1}
+        total={questions.length}
+        questions={questions}
+      />
 
       <QuestionStep
         question={question}
