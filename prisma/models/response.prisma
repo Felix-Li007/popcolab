@@ -1,0 +1,14 @@
+// Response Model
+// This model represents a user's response session to a questionnaire
+
+model Response {
+    id              Int             @id @default(autoincrement())
+    user_id         Int
+    created_at      DateTime        @default(now()) @db.Timestamp()
+    completed_at    DateTime?       @db.Timestamp()
+    answers         Answer[]
+    response_scores ResponseScore[]
+    userVectors     UserVector[]
+
+    @@map("response")
+}

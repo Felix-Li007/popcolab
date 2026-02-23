@@ -1,0 +1,14 @@
+// Team_Mate Model
+// This model represents the membership relationship between users and teams
+
+model TeamMate {
+    id         Int      @id @default(autoincrement())
+    team_id    Int
+    user_id    Int
+    created_at DateTime @default(now()) @db.Timestamp()
+    updated_at DateTime @updatedAt @db.Timestamp()
+    team       Team     @relation(fields: [team_id], references: [id])
+    user       User     @relation(fields: [user_id], references: [id])
+
+    @@map("team_mate")
+}

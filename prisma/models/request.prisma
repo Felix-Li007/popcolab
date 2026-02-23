@@ -1,0 +1,19 @@
+// Request Model
+// This model represents user requests for experiences
+
+model Request {
+  id                 Int                 @id @default(autoincrement())
+  user_id            Int
+  objective_category Int?
+  budget_min         Int?
+  budget_max         Int?
+  created_at         DateTime?           @default(now()) @db.Timestamp()
+  updated_at         DateTime?           @updatedAt @db.Timestamp()
+  delivery_method    Int?
+  duration_max       Int?
+  user               User                @relation(fields: [user_id], references: [id])
+  proposals          Proposal[]
+  request_preferences RequestPreference[]
+
+  @@map("request")
+}

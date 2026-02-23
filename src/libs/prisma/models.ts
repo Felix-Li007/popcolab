@@ -7,6 +7,27 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Answer';
+export type * from './models/Company';
+export type * from './models/DimensionCategory';
+export type * from './models/DimensionIndex';
+export type * from './models/ExperienceDimension';
+export type * from './models/Experience';
+export type * from './models/PersonalityType';
+export type * from './models/Profile';
+export type * from './models/Proposal';
+export type * from './models/Provider';
+export type * from './models/QuestionDimension';
+export type * from './models/QuestionOption';
+export type * from './models/Question';
+export type * from './models/RequestPreference';
+export type * from './models/Request';
+export type * from './models/ResponseScore';
+export type * from './models/Response';
+export type * from './models/TeamAggregate';
+export type * from './models/TeamMate';
+export type * from './models/TeamVector';
+export type * from './models/Team';
+export type * from './models/UserVector';
 export type * from './models/User';
-export type * from './models/Post';
 export type * from './commonInputTypes';

@@ -1,0 +1,15 @@
+// UserScore Model
+// This model represents calculated scores for users across different dimensions
+
+model ResponseScore {
+    id               Int      @id @default(autoincrement())
+    response_id      Int
+    dimension_id     Int
+    original_score   Int?
+    normalized_score Int?
+    created_at       DateTime @default(now()) @db.Timestamp()
+    updated_at       DateTime @updatedAt @db.Timestamp()
+    response         Response @relation(fields: [response_id], references: [id])
+
+    @@map("response_score")
+}

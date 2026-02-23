@@ -28,8 +28,8 @@ export * from './enums';
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Users
- * const users = await prisma.user.findMany()
+ * // Fetch zero or more Answers
+ * const answers = await prisma.answer.findMany()
  * ```
  *
  * Read more in our [docs](https://pris.ly/d/client).
@@ -45,12 +45,117 @@ export type PrismaClient<
 export { Prisma };
 
 /**
+ * Model Answer
+ *
+ */
+export type Answer = Prisma.AnswerModel;
+/**
+ * Model Company
+ *
+ */
+export type Company = Prisma.CompanyModel;
+/**
+ * Model DimensionCategory
+ *
+ */
+export type DimensionCategory = Prisma.DimensionCategoryModel;
+/**
+ * Model DimensionIndex
+ *
+ */
+export type DimensionIndex = Prisma.DimensionIndexModel;
+/**
+ * Model ExperienceDimension
+ *
+ */
+export type ExperienceDimension = Prisma.ExperienceDimensionModel;
+/**
+ * Model Experience
+ *
+ */
+export type Experience = Prisma.ExperienceModel;
+/**
+ * Model PersonalityType
+ *
+ */
+export type PersonalityType = Prisma.PersonalityTypeModel;
+/**
+ * Model Profile
+ *
+ */
+export type Profile = Prisma.ProfileModel;
+/**
+ * Model Proposal
+ *
+ */
+export type Proposal = Prisma.ProposalModel;
+/**
+ * Model Provider
+ *
+ */
+export type Provider = Prisma.ProviderModel;
+/**
+ * Model QuestionDimension
+ *
+ */
+export type QuestionDimension = Prisma.QuestionDimensionModel;
+/**
+ * Model QuestionOption
+ *
+ */
+export type QuestionOption = Prisma.QuestionOptionModel;
+/**
+ * Model Question
+ *
+ */
+export type Question = Prisma.QuestionModel;
+/**
+ * Model RequestPreference
+ *
+ */
+export type RequestPreference = Prisma.RequestPreferenceModel;
+/**
+ * Model Request
+ *
+ */
+export type Request = Prisma.RequestModel;
+/**
+ * Model ResponseScore
+ *
+ */
+export type ResponseScore = Prisma.ResponseScoreModel;
+/**
+ * Model Response
+ *
+ */
+export type Response = Prisma.ResponseModel;
+/**
+ * Model TeamAggregate
+ *
+ */
+export type TeamAggregate = Prisma.TeamAggregateModel;
+/**
+ * Model TeamMate
+ *
+ */
+export type TeamMate = Prisma.TeamMateModel;
+/**
+ * Model TeamVector
+ *
+ */
+export type TeamVector = Prisma.TeamVectorModel;
+/**
+ * Model Team
+ *
+ */
+export type Team = Prisma.TeamModel;
+/**
+ * Model UserVector
+ *
+ */
+export type UserVector = Prisma.UserVectorModel;
+/**
  * Model User
  *
  */
 export type User = Prisma.UserModel;
-/**
- * Model Post
- *
- */
-export type Post = Prisma.PostModel;

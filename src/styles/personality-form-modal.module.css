@@ -1,0 +1,74 @@
+@reference "../app/globals.css";
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.card {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: 88vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 64px -8px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+}
+
+.footer {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.btnCreate {
+  flex: 2;
+}
+
+.btnCancel {
+  flex: 1;
+}
+
+.wideCard {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  width: min(48rem, calc(100vw - 2rem));
+  max-height: 90vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 64px -8px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.scrollArea {
+  scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}

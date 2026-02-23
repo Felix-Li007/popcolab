@@ -1,19 +1,19 @@
-import { defineConfig } from 'eslint-define-config';
-import next from 'eslint-plugin-next';
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 
-export default defineConfig({
-  plugins: {
-    next,
-  },
-  rules: {
-    'no-unused-vars': 'warn',
-    'react/react-in-jsx-scope': 'off',
-  },
-  ignores: [
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
     '.next/**',
     'out/**',
     'build/**',
-    'node_modules/**',
+    "src/libs/prisma/**",
     'next-env.d.ts',
-  ],
-});
+  ]),
+]);
+
+export default eslintConfig;
