@@ -28,12 +28,6 @@ This directory contains individual model definitions for documentation and refer
 - **Proposal.prisma** - Proposal model definition (proposals matching requests with experiences)
 - **RequestPreference.prisma** - RequestPreference model definition (user preferences for dimensions in a request)
 
-## Note
-
-These files are for **reference only**. The actual Prisma schema that is used by the application is located in the parent directory at `schema.prisma`.
-
-Prisma does not natively support splitting schemas across multiple files. All models must be defined in the main `schema.prisma` file to be recognized by Prisma.
-
 ## Usage
 
 These individual model files can be useful for:
