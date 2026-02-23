@@ -1,3 +1,5 @@
+import '../styles/landing-CTASection.css';
+
 export default function CTASection() {
   return (
     <section className="py-20 md:py-32 bg-gradient-to-br from-[#19464d] to-[#3b6b77] overflow-hidden relative">
@@ -14,7 +16,7 @@ export default function CTASection() {
 
           {/* Subheading */}
           <p className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-3xl mx-auto">
-            Join thousands who've uncovered their unique play personality
+            Join thousands who have uncovered their unique play personality
           </p>
 
           {/* CTA Buttons */}
