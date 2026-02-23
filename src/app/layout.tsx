@@ -30,37 +30,6 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${poppins.variable} antialiased`}>
-          {/* Header */}
-          <header className="flex justify-between items-center p-3 md:p-4 h-16 bg-[#19464d]">
-            {/* Logo on top-left */}
-            <div className="flex items-center">
-              <img
-                src="https://popcolab-o8tgen0k2-felix-li078s-projects.vercel.app/_next/image?url=%2Flogo%2Flogo-icon.png&w=64&q=75"
-                alt="Pop CoLab logo"
-                className="h-10 w-auto"
-              />
-            </div>
-
-            {/* Sign In / Sign Up / User Button on top-right */}
-            <div className="flex items-center gap-3 md:gap-4">
-              <SignedOut>
-                <SignInButton>
-                  <button className="text-white font-medium text-sm md:text-base px-3 py-1 md:px-4 md:py-2 rounded hover:underline">
-                    Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton>
-                  <button className="bg-[#6c47ff] text-white rounded-full font-medium text-sm md:text-base h-8 md:h-10 px-3 md:px-5 cursor-pointer">
-                    Sign Up
-                  </button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton />
-              </SignedIn>
-            </div>
-          </header>
-
           {/* Page content */}
           {children}
         </body>
