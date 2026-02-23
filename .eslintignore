@@ -1,5 +1,0 @@
-src/
-.next/
-node_modules/
-eslint.config.mjs
-tailwind.config.js
