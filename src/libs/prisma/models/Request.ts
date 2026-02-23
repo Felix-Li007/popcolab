@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -276,8 +276,8 @@ export type RequestWhereInput = {
   updated_at?: Prisma.DateTimeNullableFilter<'Request'> | Date | string | null;
   delivery_method?: Prisma.IntNullableFilter<'Request'> | number | null;
   duration_max?: Prisma.IntNullableFilter<'Request'> | number | null;
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
   proposals?: Prisma.ProposalListRelationFilter;
+  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
   request_preferences?: Prisma.RequestPreferenceListRelationFilter;
 };
 
@@ -291,8 +291,8 @@ export type RequestOrderByWithRelationInput = {
   updated_at?: Prisma.SortOrderInput | Prisma.SortOrder;
   delivery_method?: Prisma.SortOrderInput | Prisma.SortOrder;
   duration_max?: Prisma.SortOrderInput | Prisma.SortOrder;
-  user?: Prisma.UserOrderByWithRelationInput;
   proposals?: Prisma.ProposalOrderByRelationAggregateInput;
+  user?: Prisma.UserOrderByWithRelationInput;
   request_preferences?: Prisma.RequestPreferenceOrderByRelationAggregateInput;
 };
 
@@ -318,8 +318,8 @@ export type RequestWhereUniqueInput = Prisma.AtLeast<
       | null;
     delivery_method?: Prisma.IntNullableFilter<'Request'> | number | null;
     duration_max?: Prisma.IntNullableFilter<'Request'> | number | null;
-    user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
     proposals?: Prisma.ProposalListRelationFilter;
+    user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
     request_preferences?: Prisma.RequestPreferenceListRelationFilter;
   },
   'id'
@@ -392,8 +392,8 @@ export type RequestCreateInput = {
   updated_at?: Date | string | null;
   delivery_method?: number | null;
   duration_max?: number | null;
-  user: Prisma.UserCreateNestedOneWithoutRequestsInput;
   proposals?: Prisma.ProposalCreateNestedManyWithoutRequestInput;
+  user: Prisma.UserCreateNestedOneWithoutRequestsInput;
   request_preferences?: Prisma.RequestPreferenceCreateNestedManyWithoutRequestInput;
 };
 
@@ -433,8 +433,8 @@ export type RequestUpdateInput = {
     | number
     | null;
   duration_max?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  user?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput;
   proposals?: Prisma.ProposalUpdateManyWithoutRequestNestedInput;
+  user?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput;
   request_preferences?: Prisma.RequestPreferenceUpdateManyWithoutRequestNestedInput;
 };
 
@@ -859,8 +859,8 @@ export type RequestCreateWithoutRequest_preferencesInput = {
   updated_at?: Date | string | null;
   delivery_method?: number | null;
   duration_max?: number | null;
-  user: Prisma.UserCreateNestedOneWithoutRequestsInput;
   proposals?: Prisma.ProposalCreateNestedManyWithoutRequestInput;
+  user: Prisma.UserCreateNestedOneWithoutRequestsInput;
 };
 
 export type RequestUncheckedCreateWithoutRequest_preferencesInput = {
@@ -926,8 +926,8 @@ export type RequestUpdateWithoutRequest_preferencesInput = {
     | number
     | null;
   duration_max?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  user?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput;
   proposals?: Prisma.ProposalUpdateManyWithoutRequestNestedInput;
+  user?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput;
 };
 
 export type RequestUncheckedUpdateWithoutRequest_preferencesInput = {
@@ -1193,8 +1193,8 @@ export type RequestSelect<
     updated_at?: boolean;
     delivery_method?: boolean;
     duration_max?: boolean;
-    user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     proposals?: boolean | Prisma.Request$proposalsArgs<ExtArgs>;
+    user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     request_preferences?:
       | boolean
       | Prisma.Request$request_preferencesArgs<ExtArgs>;
@@ -1272,8 +1272,8 @@ export type RequestInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
   proposals?: boolean | Prisma.Request$proposalsArgs<ExtArgs>;
+  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
   request_preferences?:
     | boolean
     | Prisma.Request$request_preferencesArgs<ExtArgs>;
@@ -1298,8 +1298,8 @@ export type $RequestPayload<
 > = {
   name: 'Request';
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>;
     proposals: Prisma.$ProposalPayload<ExtArgs>[];
+    user: Prisma.$UserPayload<ExtArgs>;
     request_preferences: Prisma.$RequestPreferencePayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
@@ -1863,6 +1863,17 @@ export interface Prisma__RequestClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
+  proposals<T extends Prisma.Request$proposalsArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.Request$proposalsArgs<ExtArgs>>
+  ): Prisma.PrismaPromise<
+    | runtime.Types.Result.GetResult<
+        Prisma.$ProposalPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    | Null
+  >;
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(
     args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>
   ): Prisma.Prisma__UserClient<
@@ -1876,17 +1887,6 @@ export interface Prisma__RequestClient<
     Null,
     ExtArgs,
     GlobalOmitOptions
-  >;
-  proposals<T extends Prisma.Request$proposalsArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.Request$proposalsArgs<ExtArgs>>
-  ): Prisma.PrismaPromise<
-    | runtime.Types.Result.GetResult<
-        Prisma.$ProposalPayload<ExtArgs>,
-        T,
-        'findMany',
-        GlobalOmitOptions
-      >
-    | Null
   >;
   request_preferences<
     T extends Prisma.Request$request_preferencesArgs<ExtArgs> = {},

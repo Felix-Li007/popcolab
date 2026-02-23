@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -412,10 +412,6 @@ export type DimensionCategorySumOrderByAggregateInput = {
 export type DimensionCategoryScalarRelationFilter = {
   is?: Prisma.DimensionCategoryWhereInput;
   isNot?: Prisma.DimensionCategoryWhereInput;
-};
-
-export type StringFieldUpdateOperationsInput = {
-  set?: string;
 };
 
 export type DimensionCategoryCreateNestedOneWithoutIndexesInput = {

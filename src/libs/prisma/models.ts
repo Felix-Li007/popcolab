@@ -7,6 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Question';
 export type * from './models/Answer';
 export type * from './models/Company';
 export type * from './models/DimensionCategory';
@@ -19,7 +20,6 @@ export type * from './models/Proposal';
 export type * from './models/Provider';
 export type * from './models/QuestionDimension';
 export type * from './models/QuestionOption';
-export type * from './models/Question';
 export type * from './models/RequestPreference';
 export type * from './models/Request';
 export type * from './models/ResponseScore';

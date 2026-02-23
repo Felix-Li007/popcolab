@@ -1,16 +1,13 @@
-// Company Model
-// This model represents corporate/company information for users
-
 model Company {
-    id              Int      @id @default(autoincrement())
-    user_id         Int      @unique
-    corporate_name  String?  @db.VarChar(255)
-    department_name String?  @db.VarChar(100)
-    role_title      String?  @db.VarChar(50)
-    work_mode       String?  @db.VarChar(10)
-    created_at      DateTime @default(now()) @db.Timestamp()
-    updated_at      DateTime @updatedAt @db.Timestamp()
-    user            User     @relation(fields: [user_id], references: [id])
+  id              Int      @id @default(autoincrement())
+  user_id         Int      @unique
+  corporate_name  String?  @db.VarChar(255)
+  department_name String?  @db.VarChar(100)
+  role_title      String?  @db.VarChar(50)
+  work_mode       String?  @db.VarChar(10)
+  created_at      DateTime @default(now()) @db.Timestamp(6)
+  updated_at      DateTime @updatedAt @db.Timestamp(6)
+  user            User     @relation(fields: [user_id], references: [id])
 
-    @@map("company")
+  @@map("company")
 }

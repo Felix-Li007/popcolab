@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -219,21 +219,21 @@ export type UserWhereInput = {
   name?: Prisma.StringNullableFilter<'User'> | string | null;
   created_at?: Prisma.DateTimeFilter<'User'> | Date | string;
   updated_at?: Prisma.DateTimeFilter<'User'> | Date | string;
-  profile?: Prisma.XOR<
-    Prisma.ProfileNullableScalarRelationFilter,
-    Prisma.ProfileWhereInput
-  > | null;
   corporate?: Prisma.XOR<
     Prisma.CompanyNullableScalarRelationFilter,
     Prisma.CompanyWhereInput
   > | null;
+  profile?: Prisma.XOR<
+    Prisma.ProfileNullableScalarRelationFilter,
+    Prisma.ProfileWhereInput
+  > | null;
+  requests?: Prisma.RequestListRelationFilter;
   teams?: Prisma.TeamListRelationFilter;
   team_mates?: Prisma.TeamMateListRelationFilter;
   user_vector?: Prisma.XOR<
     Prisma.UserVectorNullableScalarRelationFilter,
     Prisma.UserVectorWhereInput
   > | null;
-  requests?: Prisma.RequestListRelationFilter;
 };
 
 export type UserOrderByWithRelationInput = {
@@ -242,12 +242,12 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder;
   created_at?: Prisma.SortOrder;
   updated_at?: Prisma.SortOrder;
-  profile?: Prisma.ProfileOrderByWithRelationInput;
   corporate?: Prisma.CompanyOrderByWithRelationInput;
+  profile?: Prisma.ProfileOrderByWithRelationInput;
+  requests?: Prisma.RequestOrderByRelationAggregateInput;
   teams?: Prisma.TeamOrderByRelationAggregateInput;
   team_mates?: Prisma.TeamMateOrderByRelationAggregateInput;
   user_vector?: Prisma.UserVectorOrderByWithRelationInput;
-  requests?: Prisma.RequestOrderByRelationAggregateInput;
 };
 
 export type UserWhereUniqueInput = Prisma.AtLeast<
@@ -260,21 +260,21 @@ export type UserWhereUniqueInput = Prisma.AtLeast<
     name?: Prisma.StringNullableFilter<'User'> | string | null;
     created_at?: Prisma.DateTimeFilter<'User'> | Date | string;
     updated_at?: Prisma.DateTimeFilter<'User'> | Date | string;
-    profile?: Prisma.XOR<
-      Prisma.ProfileNullableScalarRelationFilter,
-      Prisma.ProfileWhereInput
-    > | null;
     corporate?: Prisma.XOR<
       Prisma.CompanyNullableScalarRelationFilter,
       Prisma.CompanyWhereInput
     > | null;
+    profile?: Prisma.XOR<
+      Prisma.ProfileNullableScalarRelationFilter,
+      Prisma.ProfileWhereInput
+    > | null;
+    requests?: Prisma.RequestListRelationFilter;
     teams?: Prisma.TeamListRelationFilter;
     team_mates?: Prisma.TeamMateListRelationFilter;
     user_vector?: Prisma.XOR<
       Prisma.UserVectorNullableScalarRelationFilter,
       Prisma.UserVectorWhereInput
     > | null;
-    requests?: Prisma.RequestListRelationFilter;
   },
   'id' | 'email'
 >;
@@ -312,12 +312,12 @@ export type UserCreateInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateInput = {
@@ -326,12 +326,12 @@ export type UserUncheckedCreateInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorUncheckedCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserUpdateInput = {
@@ -339,12 +339,12 @@ export type UserUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateInput = {
@@ -353,12 +353,12 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUncheckedUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUncheckedUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateManyInput = {
@@ -583,10 +583,10 @@ export type UserCreateWithoutCorporateInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutCorporateInput = {
@@ -596,10 +596,10 @@ export type UserUncheckedCreateWithoutCorporateInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorUncheckedCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutCorporateInput = {
@@ -636,10 +636,10 @@ export type UserUpdateWithoutCorporateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutCorporateInput = {
@@ -649,10 +649,10 @@ export type UserUncheckedUpdateWithoutCorporateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUncheckedUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUncheckedUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutProfileInput = {
@@ -661,10 +661,10 @@ export type UserCreateWithoutProfileInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   corporate?: Prisma.CompanyCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -674,10 +674,10 @@ export type UserUncheckedCreateWithoutProfileInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   corporate?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorUncheckedCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -714,10 +714,10 @@ export type UserUpdateWithoutProfileInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   corporate?: Prisma.CompanyUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -727,10 +727,10 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   corporate?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUncheckedUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUncheckedUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutRequestsInput = {
@@ -738,8 +738,8 @@ export type UserCreateWithoutRequestsInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
   teams?: Prisma.TeamCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorCreateNestedOneWithoutUserInput;
@@ -751,8 +751,8 @@ export type UserUncheckedCreateWithoutRequestsInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorUncheckedCreateNestedOneWithoutUserInput;
@@ -791,8 +791,8 @@ export type UserUpdateWithoutRequestsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
   teams?: Prisma.TeamUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUpdateOneWithoutUserNestedInput;
@@ -804,8 +804,8 @@ export type UserUncheckedUpdateWithoutRequestsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
   teams?: Prisma.TeamUncheckedUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUncheckedUpdateOneWithoutUserNestedInput;
@@ -816,11 +816,11 @@ export type UserCreateWithoutTeam_matesInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamCreateNestedManyWithoutCreatorInput;
   user_vector?: Prisma.UserVectorCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutTeam_matesInput = {
@@ -829,11 +829,11 @@ export type UserUncheckedCreateWithoutTeam_matesInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutCreatorInput;
   user_vector?: Prisma.UserVectorUncheckedCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutTeam_matesInput = {
@@ -869,11 +869,11 @@ export type UserUpdateWithoutTeam_matesInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUpdateManyWithoutCreatorNestedInput;
   user_vector?: Prisma.UserVectorUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutTeam_matesInput = {
@@ -882,11 +882,11 @@ export type UserUncheckedUpdateWithoutTeam_matesInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUncheckedUpdateManyWithoutCreatorNestedInput;
   user_vector?: Prisma.UserVectorUncheckedUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutTeamsInput = {
@@ -894,11 +894,11 @@ export type UserCreateWithoutTeamsInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
   team_mates?: Prisma.TeamMateCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutTeamsInput = {
@@ -907,11 +907,11 @@ export type UserUncheckedCreateWithoutTeamsInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
   team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutUserInput;
   user_vector?: Prisma.UserVectorUncheckedCreateNestedOneWithoutUserInput;
-  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutTeamsInput = {
@@ -947,11 +947,11 @@ export type UserUpdateWithoutTeamsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
   team_mates?: Prisma.TeamMateUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutTeamsInput = {
@@ -960,11 +960,11 @@ export type UserUncheckedUpdateWithoutTeamsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
   team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutUserNestedInput;
   user_vector?: Prisma.UserVectorUncheckedUpdateOneWithoutUserNestedInput;
-  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 export type UserCreateWithoutUser_vectorInput = {
@@ -972,11 +972,11 @@ export type UserCreateWithoutUser_vectorInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateCreateNestedManyWithoutUserInput;
-  requests?: Prisma.RequestCreateNestedManyWithoutUserInput;
 };
 
 export type UserUncheckedCreateWithoutUser_vectorInput = {
@@ -985,11 +985,11 @@ export type UserUncheckedCreateWithoutUser_vectorInput = {
   name?: string | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
   corporate?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput;
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
+  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
   teams?: Prisma.TeamUncheckedCreateNestedManyWithoutCreatorInput;
   team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutUserInput;
-  requests?: Prisma.RequestUncheckedCreateNestedManyWithoutUserInput;
 };
 
 export type UserCreateOrConnectWithoutUser_vectorInput = {
@@ -1025,11 +1025,11 @@ export type UserUpdateWithoutUser_vectorInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUpdateManyWithoutUserNestedInput;
-  requests?: Prisma.RequestUpdateManyWithoutUserNestedInput;
 };
 
 export type UserUncheckedUpdateWithoutUser_vectorInput = {
@@ -1038,11 +1038,11 @@ export type UserUncheckedUpdateWithoutUser_vectorInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
   corporate?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput;
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
+  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
   teams?: Prisma.TeamUncheckedUpdateManyWithoutCreatorNestedInput;
   team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutUserNestedInput;
-  requests?: Prisma.RequestUncheckedUpdateManyWithoutUserNestedInput;
 };
 
 /**
@@ -1050,18 +1050,18 @@ export type UserUncheckedUpdateWithoutUser_vectorInput = {
  */
 
 export type UserCountOutputType = {
+  requests: number;
   teams: number;
   team_mates: number;
-  requests: number;
 };
 
 export type UserCountOutputTypeSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
+  requests?: boolean | UserCountOutputTypeCountRequestsArgs;
   teams?: boolean | UserCountOutputTypeCountTeamsArgs;
   team_mates?: boolean | UserCountOutputTypeCountTeam_matesArgs;
-  requests?: boolean | UserCountOutputTypeCountRequestsArgs;
 };
 
 /**
@@ -1075,6 +1075,16 @@ export type UserCountOutputTypeDefaultArgs<
    * Select specific fields to fetch from the UserCountOutputType
    */
   select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null;
+};
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountRequestsArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  where?: Prisma.RequestWhereInput;
 };
 
 /**
@@ -1097,16 +1107,6 @@ export type UserCountOutputTypeCountTeam_matesArgs<
   where?: Prisma.TeamMateWhereInput;
 };
 
-/**
- * UserCountOutputType without action
- */
-export type UserCountOutputTypeCountRequestsArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  where?: Prisma.RequestWhereInput;
-};
-
 export type UserSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
@@ -1117,12 +1117,12 @@ export type UserSelect<
     name?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    profile?: boolean | Prisma.User$profileArgs<ExtArgs>;
     corporate?: boolean | Prisma.User$corporateArgs<ExtArgs>;
+    profile?: boolean | Prisma.User$profileArgs<ExtArgs>;
+    requests?: boolean | Prisma.User$requestsArgs<ExtArgs>;
     teams?: boolean | Prisma.User$teamsArgs<ExtArgs>;
     team_mates?: boolean | Prisma.User$team_matesArgs<ExtArgs>;
     user_vector?: boolean | Prisma.User$user_vectorArgs<ExtArgs>;
-    requests?: boolean | Prisma.User$requestsArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['user']
@@ -1175,12 +1175,12 @@ export type UserInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  profile?: boolean | Prisma.User$profileArgs<ExtArgs>;
   corporate?: boolean | Prisma.User$corporateArgs<ExtArgs>;
+  profile?: boolean | Prisma.User$profileArgs<ExtArgs>;
+  requests?: boolean | Prisma.User$requestsArgs<ExtArgs>;
   teams?: boolean | Prisma.User$teamsArgs<ExtArgs>;
   team_mates?: boolean | Prisma.User$team_matesArgs<ExtArgs>;
   user_vector?: boolean | Prisma.User$user_vectorArgs<ExtArgs>;
-  requests?: boolean | Prisma.User$requestsArgs<ExtArgs>;
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type UserIncludeCreateManyAndReturn<
@@ -1198,12 +1198,12 @@ export type $UserPayload<
 > = {
   name: 'User';
   objects: {
-    profile: Prisma.$ProfilePayload<ExtArgs> | null;
     corporate: Prisma.$CompanyPayload<ExtArgs> | null;
+    profile: Prisma.$ProfilePayload<ExtArgs> | null;
+    requests: Prisma.$RequestPayload<ExtArgs>[];
     teams: Prisma.$TeamPayload<ExtArgs>[];
     team_mates: Prisma.$TeamMatePayload<ExtArgs>[];
     user_vector: Prisma.$UserVectorPayload<ExtArgs> | null;
-    requests: Prisma.$RequestPayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -1762,6 +1762,19 @@ export interface Prisma__UserClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
+  corporate<T extends Prisma.User$corporateArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.User$corporateArgs<ExtArgs>>
+  ): Prisma.Prisma__CompanyClient<
+    runtime.Types.Result.GetResult<
+      Prisma.$CompanyPayload<ExtArgs>,
+      T,
+      'findUniqueOrThrow',
+      GlobalOmitOptions
+    > | null,
+    null,
+    ExtArgs,
+    GlobalOmitOptions
+  >;
   profile<T extends Prisma.User$profileArgs<ExtArgs> = {}>(
     args?: Prisma.Subset<T, Prisma.User$profileArgs<ExtArgs>>
   ): Prisma.Prisma__ProfileClient<
@@ -1775,18 +1788,16 @@ export interface Prisma__UserClient<
     ExtArgs,
     GlobalOmitOptions
   >;
-  corporate<T extends Prisma.User$corporateArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.User$corporateArgs<ExtArgs>>
-  ): Prisma.Prisma__CompanyClient<
-    runtime.Types.Result.GetResult<
-      Prisma.$CompanyPayload<ExtArgs>,
-      T,
-      'findUniqueOrThrow',
-      GlobalOmitOptions
-    > | null,
-    null,
-    ExtArgs,
-    GlobalOmitOptions
+  requests<T extends Prisma.User$requestsArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.User$requestsArgs<ExtArgs>>
+  ): Prisma.PrismaPromise<
+    | runtime.Types.Result.GetResult<
+        Prisma.$RequestPayload<ExtArgs>,
+        T,
+        'findMany',
+        GlobalOmitOptions
+      >
+    | Null
   >;
   teams<T extends Prisma.User$teamsArgs<ExtArgs> = {}>(
     args?: Prisma.Subset<T, Prisma.User$teamsArgs<ExtArgs>>
@@ -1822,17 +1833,6 @@ export interface Prisma__UserClient<
     null,
     ExtArgs,
     GlobalOmitOptions
-  >;
-  requests<T extends Prisma.User$requestsArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.User$requestsArgs<ExtArgs>>
-  ): Prisma.PrismaPromise<
-    | runtime.Types.Result.GetResult<
-        Prisma.$RequestPayload<ExtArgs>,
-        T,
-        'findMany',
-        GlobalOmitOptions
-      >
-    | Null
   >;
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2322,6 +2322,28 @@ export type UserDeleteManyArgs<
 };
 
 /**
+ * User.corporate
+ */
+export type User$corporateArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  /**
+   * Select specific fields to fetch from the Company
+   */
+  select?: Prisma.CompanySelect<ExtArgs> | null;
+  /**
+   * Omit specific fields from the Company
+   */
+  omit?: Prisma.CompanyOmit<ExtArgs> | null;
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CompanyInclude<ExtArgs> | null;
+  where?: Prisma.CompanyWhereInput;
+};
+
+/**
  * User.profile
  */
 export type User$profileArgs<
@@ -2344,25 +2366,32 @@ export type User$profileArgs<
 };
 
 /**
- * User.corporate
+ * User.requests
  */
-export type User$corporateArgs<
+export type User$requestsArgs<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
   /**
-   * Select specific fields to fetch from the Company
+   * Select specific fields to fetch from the Request
    */
-  select?: Prisma.CompanySelect<ExtArgs> | null;
+  select?: Prisma.RequestSelect<ExtArgs> | null;
   /**
-   * Omit specific fields from the Company
+   * Omit specific fields from the Request
    */
-  omit?: Prisma.CompanyOmit<ExtArgs> | null;
+  omit?: Prisma.RequestOmit<ExtArgs> | null;
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.CompanyInclude<ExtArgs> | null;
-  where?: Prisma.CompanyWhereInput;
+  include?: Prisma.RequestInclude<ExtArgs> | null;
+  where?: Prisma.RequestWhereInput;
+  orderBy?:
+    | Prisma.RequestOrderByWithRelationInput
+    | Prisma.RequestOrderByWithRelationInput[];
+  cursor?: Prisma.RequestWhereUniqueInput;
+  take?: number;
+  skip?: number;
+  distinct?: Prisma.RequestScalarFieldEnum | Prisma.RequestScalarFieldEnum[];
 };
 
 /**
@@ -2443,35 +2472,6 @@ export type User$user_vectorArgs<
    */
   include?: Prisma.UserVectorInclude<ExtArgs> | null;
   where?: Prisma.UserVectorWhereInput;
-};
-
-/**
- * User.requests
- */
-export type User$requestsArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  /**
-   * Select specific fields to fetch from the Request
-   */
-  select?: Prisma.RequestSelect<ExtArgs> | null;
-  /**
-   * Omit specific fields from the Request
-   */
-  omit?: Prisma.RequestOmit<ExtArgs> | null;
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.RequestInclude<ExtArgs> | null;
-  where?: Prisma.RequestWhereInput;
-  orderBy?:
-    | Prisma.RequestOrderByWithRelationInput
-    | Prisma.RequestOrderByWithRelationInput[];
-  cursor?: Prisma.RequestWhereUniqueInput;
-  take?: number;
-  skip?: number;
-  distinct?: Prisma.RequestScalarFieldEnum | Prisma.RequestScalarFieldEnum[];
 };
 
 /**

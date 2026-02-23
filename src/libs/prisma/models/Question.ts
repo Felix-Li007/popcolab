@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -240,9 +240,9 @@ export type QuestionWhereInput = {
   created_at?: Prisma.DateTimeFilter<'Question'> | Date | string;
   updated_at?: Prisma.DateTimeFilter<'Question'> | Date | string;
   order_index?: Prisma.IntNullableFilter<'Question'> | number | null;
-  options?: Prisma.QuestionOptionListRelationFilter;
-  dimensions?: Prisma.QuestionDimensionListRelationFilter;
   answers?: Prisma.AnswerListRelationFilter;
+  dimensions?: Prisma.QuestionDimensionListRelationFilter;
+  options?: Prisma.QuestionOptionListRelationFilter;
 };
 
 export type QuestionOrderByWithRelationInput = {
@@ -253,9 +253,9 @@ export type QuestionOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder;
   updated_at?: Prisma.SortOrder;
   order_index?: Prisma.SortOrderInput | Prisma.SortOrder;
-  options?: Prisma.QuestionOptionOrderByRelationAggregateInput;
-  dimensions?: Prisma.QuestionDimensionOrderByRelationAggregateInput;
   answers?: Prisma.AnswerOrderByRelationAggregateInput;
+  dimensions?: Prisma.QuestionDimensionOrderByRelationAggregateInput;
+  options?: Prisma.QuestionOptionOrderByRelationAggregateInput;
 };
 
 export type QuestionWhereUniqueInput = Prisma.AtLeast<
@@ -270,9 +270,9 @@ export type QuestionWhereUniqueInput = Prisma.AtLeast<
     created_at?: Prisma.DateTimeFilter<'Question'> | Date | string;
     updated_at?: Prisma.DateTimeFilter<'Question'> | Date | string;
     order_index?: Prisma.IntNullableFilter<'Question'> | number | null;
-    options?: Prisma.QuestionOptionListRelationFilter;
-    dimensions?: Prisma.QuestionDimensionListRelationFilter;
     answers?: Prisma.AnswerListRelationFilter;
+    dimensions?: Prisma.QuestionDimensionListRelationFilter;
+    options?: Prisma.QuestionOptionListRelationFilter;
   },
   'id'
 >;
@@ -319,9 +319,9 @@ export type QuestionCreateInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  options?: Prisma.QuestionOptionCreateNestedManyWithoutQuestionInput;
-  dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutQuestionInput;
   answers?: Prisma.AnswerCreateNestedManyWithoutQuestionInput;
+  dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutQuestionInput;
+  options?: Prisma.QuestionOptionCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionUncheckedCreateInput = {
@@ -332,9 +332,9 @@ export type QuestionUncheckedCreateInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  options?: Prisma.QuestionOptionUncheckedCreateNestedManyWithoutQuestionInput;
-  dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput;
   answers?: Prisma.AnswerUncheckedCreateNestedManyWithoutQuestionInput;
+  dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput;
+  options?: Prisma.QuestionOptionUncheckedCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionUpdateInput = {
@@ -344,9 +344,9 @@ export type QuestionUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  options?: Prisma.QuestionOptionUpdateManyWithoutQuestionNestedInput;
-  dimensions?: Prisma.QuestionDimensionUpdateManyWithoutQuestionNestedInput;
   answers?: Prisma.AnswerUpdateManyWithoutQuestionNestedInput;
+  dimensions?: Prisma.QuestionDimensionUpdateManyWithoutQuestionNestedInput;
+  options?: Prisma.QuestionOptionUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionUncheckedUpdateInput = {
@@ -357,9 +357,9 @@ export type QuestionUncheckedUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  options?: Prisma.QuestionOptionUncheckedUpdateManyWithoutQuestionNestedInput;
-  dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput;
   answers?: Prisma.AnswerUncheckedUpdateManyWithoutQuestionNestedInput;
+  dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput;
+  options?: Prisma.QuestionOptionUncheckedUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionCreateManyInput = {
@@ -389,11 +389,6 @@ export type QuestionUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-};
-
-export type QuestionScalarRelationFilter = {
-  is?: Prisma.QuestionWhereInput;
-  isNot?: Prisma.QuestionWhereInput;
 };
 
 export type QuestionCountOrderByAggregateInput = {
@@ -434,6 +429,35 @@ export type QuestionMinOrderByAggregateInput = {
 export type QuestionSumOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   order_index?: Prisma.SortOrder;
+};
+
+export type QuestionScalarRelationFilter = {
+  is?: Prisma.QuestionWhereInput;
+  isNot?: Prisma.QuestionWhereInput;
+};
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string;
+};
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string;
+};
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null;
+  increment?: number;
+  decrement?: number;
+  multiply?: number;
+  divide?: number;
+};
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number;
+  increment?: number;
+  decrement?: number;
+  multiply?: number;
+  divide?: number;
 };
 
 export type QuestionCreateNestedOneWithoutAnswersInput = {
@@ -521,8 +545,8 @@ export type QuestionCreateWithoutAnswersInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  options?: Prisma.QuestionOptionCreateNestedManyWithoutQuestionInput;
   dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutQuestionInput;
+  options?: Prisma.QuestionOptionCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionUncheckedCreateWithoutAnswersInput = {
@@ -533,8 +557,8 @@ export type QuestionUncheckedCreateWithoutAnswersInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  options?: Prisma.QuestionOptionUncheckedCreateNestedManyWithoutQuestionInput;
   dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput;
+  options?: Prisma.QuestionOptionUncheckedCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionCreateOrConnectWithoutAnswersInput = {
@@ -572,8 +596,8 @@ export type QuestionUpdateWithoutAnswersInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  options?: Prisma.QuestionOptionUpdateManyWithoutQuestionNestedInput;
   dimensions?: Prisma.QuestionDimensionUpdateManyWithoutQuestionNestedInput;
+  options?: Prisma.QuestionOptionUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionUncheckedUpdateWithoutAnswersInput = {
@@ -584,8 +608,8 @@ export type QuestionUncheckedUpdateWithoutAnswersInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  options?: Prisma.QuestionOptionUncheckedUpdateManyWithoutQuestionNestedInput;
   dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput;
+  options?: Prisma.QuestionOptionUncheckedUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionCreateWithoutDimensionsInput = {
@@ -595,8 +619,8 @@ export type QuestionCreateWithoutDimensionsInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  options?: Prisma.QuestionOptionCreateNestedManyWithoutQuestionInput;
   answers?: Prisma.AnswerCreateNestedManyWithoutQuestionInput;
+  options?: Prisma.QuestionOptionCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionUncheckedCreateWithoutDimensionsInput = {
@@ -607,8 +631,8 @@ export type QuestionUncheckedCreateWithoutDimensionsInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  options?: Prisma.QuestionOptionUncheckedCreateNestedManyWithoutQuestionInput;
   answers?: Prisma.AnswerUncheckedCreateNestedManyWithoutQuestionInput;
+  options?: Prisma.QuestionOptionUncheckedCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionCreateOrConnectWithoutDimensionsInput = {
@@ -646,8 +670,8 @@ export type QuestionUpdateWithoutDimensionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  options?: Prisma.QuestionOptionUpdateManyWithoutQuestionNestedInput;
   answers?: Prisma.AnswerUpdateManyWithoutQuestionNestedInput;
+  options?: Prisma.QuestionOptionUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionUncheckedUpdateWithoutDimensionsInput = {
@@ -658,8 +682,8 @@ export type QuestionUncheckedUpdateWithoutDimensionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  options?: Prisma.QuestionOptionUncheckedUpdateManyWithoutQuestionNestedInput;
   answers?: Prisma.AnswerUncheckedUpdateManyWithoutQuestionNestedInput;
+  options?: Prisma.QuestionOptionUncheckedUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionCreateWithoutOptionsInput = {
@@ -669,8 +693,8 @@ export type QuestionCreateWithoutOptionsInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutQuestionInput;
   answers?: Prisma.AnswerCreateNestedManyWithoutQuestionInput;
+  dimensions?: Prisma.QuestionDimensionCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionUncheckedCreateWithoutOptionsInput = {
@@ -681,8 +705,8 @@ export type QuestionUncheckedCreateWithoutOptionsInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   order_index?: number | null;
-  dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput;
   answers?: Prisma.AnswerUncheckedCreateNestedManyWithoutQuestionInput;
+  dimensions?: Prisma.QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput;
 };
 
 export type QuestionCreateOrConnectWithoutOptionsInput = {
@@ -720,8 +744,8 @@ export type QuestionUpdateWithoutOptionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  dimensions?: Prisma.QuestionDimensionUpdateManyWithoutQuestionNestedInput;
   answers?: Prisma.AnswerUpdateManyWithoutQuestionNestedInput;
+  dimensions?: Prisma.QuestionDimensionUpdateManyWithoutQuestionNestedInput;
 };
 
 export type QuestionUncheckedUpdateWithoutOptionsInput = {
@@ -732,8 +756,8 @@ export type QuestionUncheckedUpdateWithoutOptionsInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   order_index?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
-  dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput;
   answers?: Prisma.AnswerUncheckedUpdateManyWithoutQuestionNestedInput;
+  dimensions?: Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput;
 };
 
 /**
@@ -741,18 +765,18 @@ export type QuestionUncheckedUpdateWithoutOptionsInput = {
  */
 
 export type QuestionCountOutputType = {
-  options: number;
-  dimensions: number;
   answers: number;
+  dimensions: number;
+  options: number;
 };
 
 export type QuestionCountOutputTypeSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  options?: boolean | QuestionCountOutputTypeCountOptionsArgs;
-  dimensions?: boolean | QuestionCountOutputTypeCountDimensionsArgs;
   answers?: boolean | QuestionCountOutputTypeCountAnswersArgs;
+  dimensions?: boolean | QuestionCountOutputTypeCountDimensionsArgs;
+  options?: boolean | QuestionCountOutputTypeCountOptionsArgs;
 };
 
 /**
@@ -771,11 +795,11 @@ export type QuestionCountOutputTypeDefaultArgs<
 /**
  * QuestionCountOutputType without action
  */
-export type QuestionCountOutputTypeCountOptionsArgs<
+export type QuestionCountOutputTypeCountAnswersArgs<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  where?: Prisma.QuestionOptionWhereInput;
+  where?: Prisma.AnswerWhereInput;
 };
 
 /**
@@ -791,11 +815,11 @@ export type QuestionCountOutputTypeCountDimensionsArgs<
 /**
  * QuestionCountOutputType without action
  */
-export type QuestionCountOutputTypeCountAnswersArgs<
+export type QuestionCountOutputTypeCountOptionsArgs<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  where?: Prisma.AnswerWhereInput;
+  where?: Prisma.QuestionOptionWhereInput;
 };
 
 export type QuestionSelect<
@@ -810,9 +834,9 @@ export type QuestionSelect<
     created_at?: boolean;
     updated_at?: boolean;
     order_index?: boolean;
-    options?: boolean | Prisma.Question$optionsArgs<ExtArgs>;
-    dimensions?: boolean | Prisma.Question$dimensionsArgs<ExtArgs>;
     answers?: boolean | Prisma.Question$answersArgs<ExtArgs>;
+    dimensions?: boolean | Prisma.Question$dimensionsArgs<ExtArgs>;
+    options?: boolean | Prisma.Question$optionsArgs<ExtArgs>;
     _count?: boolean | Prisma.QuestionCountOutputTypeDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['question']
@@ -877,9 +901,9 @@ export type QuestionInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  options?: boolean | Prisma.Question$optionsArgs<ExtArgs>;
-  dimensions?: boolean | Prisma.Question$dimensionsArgs<ExtArgs>;
   answers?: boolean | Prisma.Question$answersArgs<ExtArgs>;
+  dimensions?: boolean | Prisma.Question$dimensionsArgs<ExtArgs>;
+  options?: boolean | Prisma.Question$optionsArgs<ExtArgs>;
   _count?: boolean | Prisma.QuestionCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type QuestionIncludeCreateManyAndReturn<
@@ -897,9 +921,9 @@ export type $QuestionPayload<
 > = {
   name: 'Question';
   objects: {
-    options: Prisma.$QuestionOptionPayload<ExtArgs>[];
-    dimensions: Prisma.$QuestionDimensionPayload<ExtArgs>[];
     answers: Prisma.$AnswerPayload<ExtArgs>[];
+    dimensions: Prisma.$QuestionDimensionPayload<ExtArgs>[];
+    options: Prisma.$QuestionOptionPayload<ExtArgs>[];
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -1460,11 +1484,11 @@ export interface Prisma__QuestionClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
-  options<T extends Prisma.Question$optionsArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.Question$optionsArgs<ExtArgs>>
+  answers<T extends Prisma.Question$answersArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.Question$answersArgs<ExtArgs>>
   ): Prisma.PrismaPromise<
     | runtime.Types.Result.GetResult<
-        Prisma.$QuestionOptionPayload<ExtArgs>,
+        Prisma.$AnswerPayload<ExtArgs>,
         T,
         'findMany',
         GlobalOmitOptions
@@ -1482,11 +1506,11 @@ export interface Prisma__QuestionClient<
       >
     | Null
   >;
-  answers<T extends Prisma.Question$answersArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.Question$answersArgs<ExtArgs>>
+  options<T extends Prisma.Question$optionsArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.Question$optionsArgs<ExtArgs>>
   ): Prisma.PrismaPromise<
     | runtime.Types.Result.GetResult<
-        Prisma.$AnswerPayload<ExtArgs>,
+        Prisma.$QuestionOptionPayload<ExtArgs>,
         T,
         'findMany',
         GlobalOmitOptions
@@ -1995,34 +2019,32 @@ export type QuestionDeleteManyArgs<
 };
 
 /**
- * Question.options
+ * Question.answers
  */
-export type Question$optionsArgs<
+export type Question$answersArgs<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
   /**
-   * Select specific fields to fetch from the QuestionOption
+   * Select specific fields to fetch from the Answer
    */
-  select?: Prisma.QuestionOptionSelect<ExtArgs> | null;
+  select?: Prisma.AnswerSelect<ExtArgs> | null;
   /**
-   * Omit specific fields from the QuestionOption
+   * Omit specific fields from the Answer
    */
-  omit?: Prisma.QuestionOptionOmit<ExtArgs> | null;
+  omit?: Prisma.AnswerOmit<ExtArgs> | null;
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.QuestionOptionInclude<ExtArgs> | null;
-  where?: Prisma.QuestionOptionWhereInput;
+  include?: Prisma.AnswerInclude<ExtArgs> | null;
+  where?: Prisma.AnswerWhereInput;
   orderBy?:
-    | Prisma.QuestionOptionOrderByWithRelationInput
-    | Prisma.QuestionOptionOrderByWithRelationInput[];
-  cursor?: Prisma.QuestionOptionWhereUniqueInput;
+    | Prisma.AnswerOrderByWithRelationInput
+    | Prisma.AnswerOrderByWithRelationInput[];
+  cursor?: Prisma.AnswerWhereUniqueInput;
   take?: number;
   skip?: number;
-  distinct?:
-    | Prisma.QuestionOptionScalarFieldEnum
-    | Prisma.QuestionOptionScalarFieldEnum[];
+  distinct?: Prisma.AnswerScalarFieldEnum | Prisma.AnswerScalarFieldEnum[];
 };
 
 /**
@@ -2057,32 +2079,34 @@ export type Question$dimensionsArgs<
 };
 
 /**
- * Question.answers
+ * Question.options
  */
-export type Question$answersArgs<
+export type Question$optionsArgs<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
   /**
-   * Select specific fields to fetch from the Answer
+   * Select specific fields to fetch from the QuestionOption
    */
-  select?: Prisma.AnswerSelect<ExtArgs> | null;
+  select?: Prisma.QuestionOptionSelect<ExtArgs> | null;
   /**
-   * Omit specific fields from the Answer
+   * Omit specific fields from the QuestionOption
    */
-  omit?: Prisma.AnswerOmit<ExtArgs> | null;
+  omit?: Prisma.QuestionOptionOmit<ExtArgs> | null;
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.AnswerInclude<ExtArgs> | null;
-  where?: Prisma.AnswerWhereInput;
+  include?: Prisma.QuestionOptionInclude<ExtArgs> | null;
+  where?: Prisma.QuestionOptionWhereInput;
   orderBy?:
-    | Prisma.AnswerOrderByWithRelationInput
-    | Prisma.AnswerOrderByWithRelationInput[];
-  cursor?: Prisma.AnswerWhereUniqueInput;
+    | Prisma.QuestionOptionOrderByWithRelationInput
+    | Prisma.QuestionOptionOrderByWithRelationInput[];
+  cursor?: Prisma.QuestionOptionWhereUniqueInput;
   take?: number;
   skip?: number;
-  distinct?: Prisma.AnswerScalarFieldEnum | Prisma.AnswerScalarFieldEnum[];
+  distinct?:
+    | Prisma.QuestionOptionScalarFieldEnum
+    | Prisma.QuestionOptionScalarFieldEnum[];
 };
 
 /**

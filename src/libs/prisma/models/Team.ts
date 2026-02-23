@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -232,8 +232,8 @@ export type TeamWhereInput = {
   created_by?: Prisma.IntFilter<'Team'> | number;
   team_code?: Prisma.StringFilter<'Team'> | string;
   creator?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
-  team_mates?: Prisma.TeamMateListRelationFilter;
   team_aggregates?: Prisma.TeamAggregateListRelationFilter;
+  team_mates?: Prisma.TeamMateListRelationFilter;
   team_vector?: Prisma.XOR<
     Prisma.TeamVectorNullableScalarRelationFilter,
     Prisma.TeamVectorWhereInput
@@ -248,8 +248,8 @@ export type TeamOrderByWithRelationInput = {
   created_by?: Prisma.SortOrder;
   team_code?: Prisma.SortOrder;
   creator?: Prisma.UserOrderByWithRelationInput;
-  team_mates?: Prisma.TeamMateOrderByRelationAggregateInput;
   team_aggregates?: Prisma.TeamAggregateOrderByRelationAggregateInput;
+  team_mates?: Prisma.TeamMateOrderByRelationAggregateInput;
   team_vector?: Prisma.TeamVectorOrderByWithRelationInput;
 };
 
@@ -268,8 +268,8 @@ export type TeamWhereUniqueInput = Prisma.AtLeast<
       Prisma.UserScalarRelationFilter,
       Prisma.UserWhereInput
     >;
-    team_mates?: Prisma.TeamMateListRelationFilter;
     team_aggregates?: Prisma.TeamAggregateListRelationFilter;
+    team_mates?: Prisma.TeamMateListRelationFilter;
     team_vector?: Prisma.XOR<
       Prisma.TeamVectorNullableScalarRelationFilter,
       Prisma.TeamVectorWhereInput
@@ -314,8 +314,8 @@ export type TeamCreateInput = {
   updated_at?: Date | string;
   team_code: string;
   creator: Prisma.UserCreateNestedOneWithoutTeamsInput;
-  team_mates?: Prisma.TeamMateCreateNestedManyWithoutTeamInput;
   team_aggregates?: Prisma.TeamAggregateCreateNestedManyWithoutTeamInput;
+  team_mates?: Prisma.TeamMateCreateNestedManyWithoutTeamInput;
   team_vector?: Prisma.TeamVectorCreateNestedOneWithoutTeamInput;
 };
 
@@ -326,8 +326,8 @@ export type TeamUncheckedCreateInput = {
   updated_at?: Date | string;
   created_by: number;
   team_code: string;
-  team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutTeamInput;
   team_aggregates?: Prisma.TeamAggregateUncheckedCreateNestedManyWithoutTeamInput;
+  team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutTeamInput;
   team_vector?: Prisma.TeamVectorUncheckedCreateNestedOneWithoutTeamInput;
 };
 
@@ -337,8 +337,8 @@ export type TeamUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   team_code?: Prisma.StringFieldUpdateOperationsInput | string;
   creator?: Prisma.UserUpdateOneRequiredWithoutTeamsNestedInput;
-  team_mates?: Prisma.TeamMateUpdateManyWithoutTeamNestedInput;
   team_aggregates?: Prisma.TeamAggregateUpdateManyWithoutTeamNestedInput;
+  team_mates?: Prisma.TeamMateUpdateManyWithoutTeamNestedInput;
   team_vector?: Prisma.TeamVectorUpdateOneWithoutTeamNestedInput;
 };
 
@@ -349,8 +349,8 @@ export type TeamUncheckedUpdateInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   created_by?: Prisma.IntFieldUpdateOperationsInput | number;
   team_code?: Prisma.StringFieldUpdateOperationsInput | string;
-  team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutTeamNestedInput;
   team_aggregates?: Prisma.TeamAggregateUncheckedUpdateManyWithoutTeamNestedInput;
+  team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutTeamNestedInput;
   team_vector?: Prisma.TeamVectorUncheckedUpdateOneWithoutTeamNestedInput;
 };
 
@@ -741,8 +741,8 @@ export type TeamCreateWithoutTeam_vectorInput = {
   updated_at?: Date | string;
   team_code: string;
   creator: Prisma.UserCreateNestedOneWithoutTeamsInput;
-  team_mates?: Prisma.TeamMateCreateNestedManyWithoutTeamInput;
   team_aggregates?: Prisma.TeamAggregateCreateNestedManyWithoutTeamInput;
+  team_mates?: Prisma.TeamMateCreateNestedManyWithoutTeamInput;
 };
 
 export type TeamUncheckedCreateWithoutTeam_vectorInput = {
@@ -752,8 +752,8 @@ export type TeamUncheckedCreateWithoutTeam_vectorInput = {
   updated_at?: Date | string;
   created_by: number;
   team_code: string;
-  team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutTeamInput;
   team_aggregates?: Prisma.TeamAggregateUncheckedCreateNestedManyWithoutTeamInput;
+  team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutTeamInput;
 };
 
 export type TeamCreateOrConnectWithoutTeam_vectorInput = {
@@ -790,8 +790,8 @@ export type TeamUpdateWithoutTeam_vectorInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   team_code?: Prisma.StringFieldUpdateOperationsInput | string;
   creator?: Prisma.UserUpdateOneRequiredWithoutTeamsNestedInput;
-  team_mates?: Prisma.TeamMateUpdateManyWithoutTeamNestedInput;
   team_aggregates?: Prisma.TeamAggregateUpdateManyWithoutTeamNestedInput;
+  team_mates?: Prisma.TeamMateUpdateManyWithoutTeamNestedInput;
 };
 
 export type TeamUncheckedUpdateWithoutTeam_vectorInput = {
@@ -801,8 +801,8 @@ export type TeamUncheckedUpdateWithoutTeam_vectorInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   created_by?: Prisma.IntFieldUpdateOperationsInput | number;
   team_code?: Prisma.StringFieldUpdateOperationsInput | string;
-  team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutTeamNestedInput;
   team_aggregates?: Prisma.TeamAggregateUncheckedUpdateManyWithoutTeamNestedInput;
+  team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutTeamNestedInput;
 };
 
 export type TeamCreateWithoutCreatorInput = {
@@ -810,8 +810,8 @@ export type TeamCreateWithoutCreatorInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   team_code: string;
-  team_mates?: Prisma.TeamMateCreateNestedManyWithoutTeamInput;
   team_aggregates?: Prisma.TeamAggregateCreateNestedManyWithoutTeamInput;
+  team_mates?: Prisma.TeamMateCreateNestedManyWithoutTeamInput;
   team_vector?: Prisma.TeamVectorCreateNestedOneWithoutTeamInput;
 };
 
@@ -821,8 +821,8 @@ export type TeamUncheckedCreateWithoutCreatorInput = {
   created_at?: Date | string;
   updated_at?: Date | string;
   team_code: string;
-  team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutTeamInput;
   team_aggregates?: Prisma.TeamAggregateUncheckedCreateNestedManyWithoutTeamInput;
+  team_mates?: Prisma.TeamMateUncheckedCreateNestedManyWithoutTeamInput;
   team_vector?: Prisma.TeamVectorUncheckedCreateNestedOneWithoutTeamInput;
 };
 
@@ -892,8 +892,8 @@ export type TeamUpdateWithoutCreatorInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   team_code?: Prisma.StringFieldUpdateOperationsInput | string;
-  team_mates?: Prisma.TeamMateUpdateManyWithoutTeamNestedInput;
   team_aggregates?: Prisma.TeamAggregateUpdateManyWithoutTeamNestedInput;
+  team_mates?: Prisma.TeamMateUpdateManyWithoutTeamNestedInput;
   team_vector?: Prisma.TeamVectorUpdateOneWithoutTeamNestedInput;
 };
 
@@ -903,8 +903,8 @@ export type TeamUncheckedUpdateWithoutCreatorInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   team_code?: Prisma.StringFieldUpdateOperationsInput | string;
-  team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutTeamNestedInput;
   team_aggregates?: Prisma.TeamAggregateUncheckedUpdateManyWithoutTeamNestedInput;
+  team_mates?: Prisma.TeamMateUncheckedUpdateManyWithoutTeamNestedInput;
   team_vector?: Prisma.TeamVectorUncheckedUpdateOneWithoutTeamNestedInput;
 };
 
@@ -921,16 +921,16 @@ export type TeamUncheckedUpdateManyWithoutCreatorInput = {
  */
 
 export type TeamCountOutputType = {
-  team_mates: number;
   team_aggregates: number;
+  team_mates: number;
 };
 
 export type TeamCountOutputTypeSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  team_mates?: boolean | TeamCountOutputTypeCountTeam_matesArgs;
   team_aggregates?: boolean | TeamCountOutputTypeCountTeam_aggregatesArgs;
+  team_mates?: boolean | TeamCountOutputTypeCountTeam_matesArgs;
 };
 
 /**
@@ -949,21 +949,21 @@ export type TeamCountOutputTypeDefaultArgs<
 /**
  * TeamCountOutputType without action
  */
-export type TeamCountOutputTypeCountTeam_matesArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  where?: Prisma.TeamMateWhereInput;
-};
-
-/**
- * TeamCountOutputType without action
- */
 export type TeamCountOutputTypeCountTeam_aggregatesArgs<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
   where?: Prisma.TeamAggregateWhereInput;
+};
+
+/**
+ * TeamCountOutputType without action
+ */
+export type TeamCountOutputTypeCountTeam_matesArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  where?: Prisma.TeamMateWhereInput;
 };
 
 export type TeamSelect<
@@ -978,8 +978,8 @@ export type TeamSelect<
     created_by?: boolean;
     team_code?: boolean;
     creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    team_mates?: boolean | Prisma.Team$team_matesArgs<ExtArgs>;
     team_aggregates?: boolean | Prisma.Team$team_aggregatesArgs<ExtArgs>;
+    team_mates?: boolean | Prisma.Team$team_matesArgs<ExtArgs>;
     team_vector?: boolean | Prisma.Team$team_vectorArgs<ExtArgs>;
     _count?: boolean | Prisma.TeamCountOutputTypeDefaultArgs<ExtArgs>;
   },
@@ -1039,8 +1039,8 @@ export type TeamInclude<
     runtime.Types.Extensions.DefaultArgs,
 > = {
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-  team_mates?: boolean | Prisma.Team$team_matesArgs<ExtArgs>;
   team_aggregates?: boolean | Prisma.Team$team_aggregatesArgs<ExtArgs>;
+  team_mates?: boolean | Prisma.Team$team_matesArgs<ExtArgs>;
   team_vector?: boolean | Prisma.Team$team_vectorArgs<ExtArgs>;
   _count?: boolean | Prisma.TeamCountOutputTypeDefaultArgs<ExtArgs>;
 };
@@ -1064,8 +1064,8 @@ export type $TeamPayload<
   name: 'Team';
   objects: {
     creator: Prisma.$UserPayload<ExtArgs>;
-    team_mates: Prisma.$TeamMatePayload<ExtArgs>[];
     team_aggregates: Prisma.$TeamAggregatePayload<ExtArgs>[];
+    team_mates: Prisma.$TeamMatePayload<ExtArgs>[];
     team_vector: Prisma.$TeamVectorPayload<ExtArgs> | null;
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
@@ -1640,22 +1640,22 @@ export interface Prisma__TeamClient<
     ExtArgs,
     GlobalOmitOptions
   >;
-  team_mates<T extends Prisma.Team$team_matesArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.Team$team_matesArgs<ExtArgs>>
+  team_aggregates<T extends Prisma.Team$team_aggregatesArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.Team$team_aggregatesArgs<ExtArgs>>
   ): Prisma.PrismaPromise<
     | runtime.Types.Result.GetResult<
-        Prisma.$TeamMatePayload<ExtArgs>,
+        Prisma.$TeamAggregatePayload<ExtArgs>,
         T,
         'findMany',
         GlobalOmitOptions
       >
     | Null
   >;
-  team_aggregates<T extends Prisma.Team$team_aggregatesArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.Team$team_aggregatesArgs<ExtArgs>>
+  team_mates<T extends Prisma.Team$team_matesArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.Team$team_matesArgs<ExtArgs>>
   ): Prisma.PrismaPromise<
     | runtime.Types.Result.GetResult<
-        Prisma.$TeamAggregatePayload<ExtArgs>,
+        Prisma.$TeamMatePayload<ExtArgs>,
         T,
         'findMany',
         GlobalOmitOptions
@@ -2172,35 +2172,6 @@ export type TeamDeleteManyArgs<
 };
 
 /**
- * Team.team_mates
- */
-export type Team$team_matesArgs<
-  ExtArgs extends runtime.Types.Extensions.InternalArgs =
-    runtime.Types.Extensions.DefaultArgs,
-> = {
-  /**
-   * Select specific fields to fetch from the TeamMate
-   */
-  select?: Prisma.TeamMateSelect<ExtArgs> | null;
-  /**
-   * Omit specific fields from the TeamMate
-   */
-  omit?: Prisma.TeamMateOmit<ExtArgs> | null;
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.TeamMateInclude<ExtArgs> | null;
-  where?: Prisma.TeamMateWhereInput;
-  orderBy?:
-    | Prisma.TeamMateOrderByWithRelationInput
-    | Prisma.TeamMateOrderByWithRelationInput[];
-  cursor?: Prisma.TeamMateWhereUniqueInput;
-  take?: number;
-  skip?: number;
-  distinct?: Prisma.TeamMateScalarFieldEnum | Prisma.TeamMateScalarFieldEnum[];
-};
-
-/**
  * Team.team_aggregates
  */
 export type Team$team_aggregatesArgs<
@@ -2229,6 +2200,35 @@ export type Team$team_aggregatesArgs<
   distinct?:
     | Prisma.TeamAggregateScalarFieldEnum
     | Prisma.TeamAggregateScalarFieldEnum[];
+};
+
+/**
+ * Team.team_mates
+ */
+export type Team$team_matesArgs<
+  ExtArgs extends runtime.Types.Extensions.InternalArgs =
+    runtime.Types.Extensions.DefaultArgs,
+> = {
+  /**
+   * Select specific fields to fetch from the TeamMate
+   */
+  select?: Prisma.TeamMateSelect<ExtArgs> | null;
+  /**
+   * Omit specific fields from the TeamMate
+   */
+  omit?: Prisma.TeamMateOmit<ExtArgs> | null;
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TeamMateInclude<ExtArgs> | null;
+  where?: Prisma.TeamMateWhereInput;
+  orderBy?:
+    | Prisma.TeamMateOrderByWithRelationInput
+    | Prisma.TeamMateOrderByWithRelationInput[];
+  cursor?: Prisma.TeamMateWhereUniqueInput;
+  take?: number;
+  skip?: number;
+  distinct?: Prisma.TeamMateScalarFieldEnum | Prisma.TeamMateScalarFieldEnum[];
 };
 
 /**

@@ -3,8 +3,8 @@ name: Publish Docker Image
 on:
   workflow_run:
     workflows:
-      - "Jest Unit Tests"
-      - "Playwright E2E Tests"
+      - 'Jest Unit Tests'
+      - 'Playwright E2E Tests'
     types:
       - completed
 

@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -447,6 +447,16 @@ export type QuestionOptionUncheckedUpdateManyInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
+export type QuestionOptionListRelationFilter = {
+  every?: Prisma.QuestionOptionWhereInput;
+  some?: Prisma.QuestionOptionWhereInput;
+  none?: Prisma.QuestionOptionWhereInput;
+};
+
+export type QuestionOptionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder;
+};
+
 export type QuestionOptionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   question_id?: Prisma.SortOrder;
@@ -487,16 +497,6 @@ export type QuestionOptionSumOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   question_id?: Prisma.SortOrder;
   option_score?: Prisma.SortOrder;
-};
-
-export type QuestionOptionListRelationFilter = {
-  every?: Prisma.QuestionOptionWhereInput;
-  some?: Prisma.QuestionOptionWhereInput;
-  none?: Prisma.QuestionOptionWhereInput;
-};
-
-export type QuestionOptionOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder;
 };
 
 export type QuestionOptionCreateNestedManyWithoutQuestionInput = {

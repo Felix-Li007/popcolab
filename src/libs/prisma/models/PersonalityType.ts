@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -43,13 +43,13 @@ export type PersonalityTypeMinAggregateOutputType = {
   personality_key: string | null;
   personality_name: string | null;
   personality_desc: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+  accent_color: string | null;
   emoji: string | null;
   stars: number | null;
   status: string | null;
-  accent_color: string | null;
   score_threshold: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
 };
 
 export type PersonalityTypeMaxAggregateOutputType = {
@@ -57,13 +57,13 @@ export type PersonalityTypeMaxAggregateOutputType = {
   personality_key: string | null;
   personality_name: string | null;
   personality_desc: string | null;
+  created_at: Date | null;
+  updated_at: Date | null;
+  accent_color: string | null;
   emoji: string | null;
   stars: number | null;
   status: string | null;
-  accent_color: string | null;
   score_threshold: number | null;
-  created_at: Date | null;
-  updated_at: Date | null;
 };
 
 export type PersonalityTypeCountAggregateOutputType = {
@@ -71,13 +71,13 @@ export type PersonalityTypeCountAggregateOutputType = {
   personality_key: number;
   personality_name: number;
   personality_desc: number;
+  created_at: number;
+  updated_at: number;
+  accent_color: number;
   emoji: number;
   stars: number;
   status: number;
-  accent_color: number;
   score_threshold: number;
-  created_at: number;
-  updated_at: number;
   _all: number;
 };
 
@@ -98,13 +98,13 @@ export type PersonalityTypeMinAggregateInputType = {
   personality_key?: true;
   personality_name?: true;
   personality_desc?: true;
+  created_at?: true;
+  updated_at?: true;
+  accent_color?: true;
   emoji?: true;
   stars?: true;
   status?: true;
-  accent_color?: true;
   score_threshold?: true;
-  created_at?: true;
-  updated_at?: true;
 };
 
 export type PersonalityTypeMaxAggregateInputType = {
@@ -112,13 +112,13 @@ export type PersonalityTypeMaxAggregateInputType = {
   personality_key?: true;
   personality_name?: true;
   personality_desc?: true;
+  created_at?: true;
+  updated_at?: true;
+  accent_color?: true;
   emoji?: true;
   stars?: true;
   status?: true;
-  accent_color?: true;
   score_threshold?: true;
-  created_at?: true;
-  updated_at?: true;
 };
 
 export type PersonalityTypeCountAggregateInputType = {
@@ -126,13 +126,13 @@ export type PersonalityTypeCountAggregateInputType = {
   personality_key?: true;
   personality_name?: true;
   personality_desc?: true;
+  created_at?: true;
+  updated_at?: true;
+  accent_color?: true;
   emoji?: true;
   stars?: true;
   status?: true;
-  accent_color?: true;
   score_threshold?: true;
-  created_at?: true;
-  updated_at?: true;
   _all?: true;
 };
 
@@ -238,13 +238,13 @@ export type PersonalityTypeGroupByOutputType = {
   personality_key: string;
   personality_name: string;
   personality_desc: string | null;
+  created_at: Date;
+  updated_at: Date;
+  accent_color: string | null;
   emoji: string | null;
   stars: number;
   status: string;
-  accent_color: string | null;
   score_threshold: number;
-  created_at: Date;
-  updated_at: Date;
   _count: PersonalityTypeCountAggregateOutputType | null;
   _avg: PersonalityTypeAvgAggregateOutputType | null;
   _sum: PersonalityTypeSumAggregateOutputType | null;
@@ -277,13 +277,13 @@ export type PersonalityTypeWhereInput = {
     | Prisma.StringNullableFilter<'PersonalityType'>
     | string
     | null;
+  created_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
+  updated_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
+  accent_color?: Prisma.StringNullableFilter<'PersonalityType'> | string | null;
   emoji?: Prisma.StringNullableFilter<'PersonalityType'> | string | null;
   stars?: Prisma.IntFilter<'PersonalityType'> | number;
   status?: Prisma.StringFilter<'PersonalityType'> | string;
-  accent_color?: Prisma.StringNullableFilter<'PersonalityType'> | string | null;
   score_threshold?: Prisma.FloatFilter<'PersonalityType'> | number;
-  created_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
-  updated_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
 };
 
 export type PersonalityTypeOrderByWithRelationInput = {
@@ -291,13 +291,13 @@ export type PersonalityTypeOrderByWithRelationInput = {
   personality_key?: Prisma.SortOrder;
   personality_name?: Prisma.SortOrder;
   personality_desc?: Prisma.SortOrderInput | Prisma.SortOrder;
+  created_at?: Prisma.SortOrder;
+  updated_at?: Prisma.SortOrder;
+  accent_color?: Prisma.SortOrderInput | Prisma.SortOrder;
   emoji?: Prisma.SortOrderInput | Prisma.SortOrder;
   stars?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  accent_color?: Prisma.SortOrderInput | Prisma.SortOrder;
   score_threshold?: Prisma.SortOrder;
-  created_at?: Prisma.SortOrder;
-  updated_at?: Prisma.SortOrder;
 };
 
 export type PersonalityTypeWhereUniqueInput = Prisma.AtLeast<
@@ -312,16 +312,16 @@ export type PersonalityTypeWhereUniqueInput = Prisma.AtLeast<
       | Prisma.StringNullableFilter<'PersonalityType'>
       | string
       | null;
-    emoji?: Prisma.StringNullableFilter<'PersonalityType'> | string | null;
-    stars?: Prisma.IntFilter<'PersonalityType'> | number;
-    status?: Prisma.StringFilter<'PersonalityType'> | string;
+    created_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
+    updated_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
     accent_color?:
       | Prisma.StringNullableFilter<'PersonalityType'>
       | string
       | null;
+    emoji?: Prisma.StringNullableFilter<'PersonalityType'> | string | null;
+    stars?: Prisma.IntFilter<'PersonalityType'> | number;
+    status?: Prisma.StringFilter<'PersonalityType'> | string;
     score_threshold?: Prisma.FloatFilter<'PersonalityType'> | number;
-    created_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
-    updated_at?: Prisma.DateTimeFilter<'PersonalityType'> | Date | string;
   },
   'id' | 'personality_key'
 >;
@@ -331,13 +331,13 @@ export type PersonalityTypeOrderByWithAggregationInput = {
   personality_key?: Prisma.SortOrder;
   personality_name?: Prisma.SortOrder;
   personality_desc?: Prisma.SortOrderInput | Prisma.SortOrder;
+  created_at?: Prisma.SortOrder;
+  updated_at?: Prisma.SortOrder;
+  accent_color?: Prisma.SortOrderInput | Prisma.SortOrder;
   emoji?: Prisma.SortOrderInput | Prisma.SortOrder;
   stars?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  accent_color?: Prisma.SortOrderInput | Prisma.SortOrder;
   score_threshold?: Prisma.SortOrder;
-  created_at?: Prisma.SortOrder;
-  updated_at?: Prisma.SortOrder;
   _count?: Prisma.PersonalityTypeCountOrderByAggregateInput;
   _avg?: Prisma.PersonalityTypeAvgOrderByAggregateInput;
   _max?: Prisma.PersonalityTypeMaxOrderByAggregateInput;
@@ -364,19 +364,6 @@ export type PersonalityTypeScalarWhereWithAggregatesInput = {
     | Prisma.StringNullableWithAggregatesFilter<'PersonalityType'>
     | string
     | null;
-  emoji?:
-    | Prisma.StringNullableWithAggregatesFilter<'PersonalityType'>
-    | string
-    | null;
-  stars?: Prisma.IntWithAggregatesFilter<'PersonalityType'> | number;
-  status?: Prisma.StringWithAggregatesFilter<'PersonalityType'> | string;
-  accent_color?:
-    | Prisma.StringNullableWithAggregatesFilter<'PersonalityType'>
-    | string
-    | null;
-  score_threshold?:
-    | Prisma.FloatWithAggregatesFilter<'PersonalityType'>
-    | number;
   created_at?:
     | Prisma.DateTimeWithAggregatesFilter<'PersonalityType'>
     | Date
@@ -385,19 +372,32 @@ export type PersonalityTypeScalarWhereWithAggregatesInput = {
     | Prisma.DateTimeWithAggregatesFilter<'PersonalityType'>
     | Date
     | string;
+  accent_color?:
+    | Prisma.StringNullableWithAggregatesFilter<'PersonalityType'>
+    | string
+    | null;
+  emoji?:
+    | Prisma.StringNullableWithAggregatesFilter<'PersonalityType'>
+    | string
+    | null;
+  stars?: Prisma.IntWithAggregatesFilter<'PersonalityType'> | number;
+  status?: Prisma.StringWithAggregatesFilter<'PersonalityType'> | string;
+  score_threshold?:
+    | Prisma.FloatWithAggregatesFilter<'PersonalityType'>
+    | number;
 };
 
 export type PersonalityTypeCreateInput = {
   personality_key: string;
   personality_name: string;
   personality_desc?: string | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  accent_color?: string | null;
   emoji?: string | null;
   stars?: number;
   status?: string;
-  accent_color?: string | null;
   score_threshold?: number;
-  created_at?: Date | string;
-  updated_at?: Date | string;
 };
 
 export type PersonalityTypeUncheckedCreateInput = {
@@ -405,13 +405,13 @@ export type PersonalityTypeUncheckedCreateInput = {
   personality_key: string;
   personality_name: string;
   personality_desc?: string | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  accent_color?: string | null;
   emoji?: string | null;
   stars?: number;
   status?: string;
-  accent_color?: string | null;
   score_threshold?: number;
-  created_at?: Date | string;
-  updated_at?: Date | string;
 };
 
 export type PersonalityTypeUpdateInput = {
@@ -421,16 +421,16 @@ export type PersonalityTypeUpdateInput = {
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
-  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  stars?: Prisma.IntFieldUpdateOperationsInput | number;
-  status?: Prisma.StringFieldUpdateOperationsInput | string;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   accent_color?:
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  stars?: Prisma.IntFieldUpdateOperationsInput | number;
+  status?: Prisma.StringFieldUpdateOperationsInput | string;
   score_threshold?: Prisma.FloatFieldUpdateOperationsInput | number;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
 export type PersonalityTypeUncheckedUpdateInput = {
@@ -441,16 +441,16 @@ export type PersonalityTypeUncheckedUpdateInput = {
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
-  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  stars?: Prisma.IntFieldUpdateOperationsInput | number;
-  status?: Prisma.StringFieldUpdateOperationsInput | string;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   accent_color?:
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  stars?: Prisma.IntFieldUpdateOperationsInput | number;
+  status?: Prisma.StringFieldUpdateOperationsInput | string;
   score_threshold?: Prisma.FloatFieldUpdateOperationsInput | number;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
 export type PersonalityTypeCreateManyInput = {
@@ -458,13 +458,13 @@ export type PersonalityTypeCreateManyInput = {
   personality_key: string;
   personality_name: string;
   personality_desc?: string | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  accent_color?: string | null;
   emoji?: string | null;
   stars?: number;
   status?: string;
-  accent_color?: string | null;
   score_threshold?: number;
-  created_at?: Date | string;
-  updated_at?: Date | string;
 };
 
 export type PersonalityTypeUpdateManyMutationInput = {
@@ -474,16 +474,16 @@ export type PersonalityTypeUpdateManyMutationInput = {
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
-  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  stars?: Prisma.IntFieldUpdateOperationsInput | number;
-  status?: Prisma.StringFieldUpdateOperationsInput | string;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   accent_color?:
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  stars?: Prisma.IntFieldUpdateOperationsInput | number;
+  status?: Prisma.StringFieldUpdateOperationsInput | string;
   score_threshold?: Prisma.FloatFieldUpdateOperationsInput | number;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
 export type PersonalityTypeUncheckedUpdateManyInput = {
@@ -494,16 +494,16 @@ export type PersonalityTypeUncheckedUpdateManyInput = {
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
-  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-  stars?: Prisma.IntFieldUpdateOperationsInput | number;
-  status?: Prisma.StringFieldUpdateOperationsInput | string;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   accent_color?:
     | Prisma.NullableStringFieldUpdateOperationsInput
     | string
     | null;
+  emoji?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  stars?: Prisma.IntFieldUpdateOperationsInput | number;
+  status?: Prisma.StringFieldUpdateOperationsInput | string;
   score_threshold?: Prisma.FloatFieldUpdateOperationsInput | number;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
 export type PersonalityTypeCountOrderByAggregateInput = {
@@ -511,13 +511,13 @@ export type PersonalityTypeCountOrderByAggregateInput = {
   personality_key?: Prisma.SortOrder;
   personality_name?: Prisma.SortOrder;
   personality_desc?: Prisma.SortOrder;
+  created_at?: Prisma.SortOrder;
+  updated_at?: Prisma.SortOrder;
+  accent_color?: Prisma.SortOrder;
   emoji?: Prisma.SortOrder;
   stars?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  accent_color?: Prisma.SortOrder;
   score_threshold?: Prisma.SortOrder;
-  created_at?: Prisma.SortOrder;
-  updated_at?: Prisma.SortOrder;
 };
 
 export type PersonalityTypeAvgOrderByAggregateInput = {
@@ -531,13 +531,13 @@ export type PersonalityTypeMaxOrderByAggregateInput = {
   personality_key?: Prisma.SortOrder;
   personality_name?: Prisma.SortOrder;
   personality_desc?: Prisma.SortOrder;
+  created_at?: Prisma.SortOrder;
+  updated_at?: Prisma.SortOrder;
+  accent_color?: Prisma.SortOrder;
   emoji?: Prisma.SortOrder;
   stars?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  accent_color?: Prisma.SortOrder;
   score_threshold?: Prisma.SortOrder;
-  created_at?: Prisma.SortOrder;
-  updated_at?: Prisma.SortOrder;
 };
 
 export type PersonalityTypeMinOrderByAggregateInput = {
@@ -545,13 +545,13 @@ export type PersonalityTypeMinOrderByAggregateInput = {
   personality_key?: Prisma.SortOrder;
   personality_name?: Prisma.SortOrder;
   personality_desc?: Prisma.SortOrder;
+  created_at?: Prisma.SortOrder;
+  updated_at?: Prisma.SortOrder;
+  accent_color?: Prisma.SortOrder;
   emoji?: Prisma.SortOrder;
   stars?: Prisma.SortOrder;
   status?: Prisma.SortOrder;
-  accent_color?: Prisma.SortOrder;
   score_threshold?: Prisma.SortOrder;
-  created_at?: Prisma.SortOrder;
-  updated_at?: Prisma.SortOrder;
 };
 
 export type PersonalityTypeSumOrderByAggregateInput = {
@@ -577,13 +577,13 @@ export type PersonalityTypeSelect<
     personality_key?: boolean;
     personality_name?: boolean;
     personality_desc?: boolean;
+    created_at?: boolean;
+    updated_at?: boolean;
+    accent_color?: boolean;
     emoji?: boolean;
     stars?: boolean;
     status?: boolean;
-    accent_color?: boolean;
     score_threshold?: boolean;
-    created_at?: boolean;
-    updated_at?: boolean;
   },
   ExtArgs['result']['personalityType']
 >;
@@ -597,13 +597,13 @@ export type PersonalityTypeSelectCreateManyAndReturn<
     personality_key?: boolean;
     personality_name?: boolean;
     personality_desc?: boolean;
+    created_at?: boolean;
+    updated_at?: boolean;
+    accent_color?: boolean;
     emoji?: boolean;
     stars?: boolean;
     status?: boolean;
-    accent_color?: boolean;
     score_threshold?: boolean;
-    created_at?: boolean;
-    updated_at?: boolean;
   },
   ExtArgs['result']['personalityType']
 >;
@@ -617,13 +617,13 @@ export type PersonalityTypeSelectUpdateManyAndReturn<
     personality_key?: boolean;
     personality_name?: boolean;
     personality_desc?: boolean;
+    created_at?: boolean;
+    updated_at?: boolean;
+    accent_color?: boolean;
     emoji?: boolean;
     stars?: boolean;
     status?: boolean;
-    accent_color?: boolean;
     score_threshold?: boolean;
-    created_at?: boolean;
-    updated_at?: boolean;
   },
   ExtArgs['result']['personalityType']
 >;
@@ -633,13 +633,13 @@ export type PersonalityTypeSelectScalar = {
   personality_key?: boolean;
   personality_name?: boolean;
   personality_desc?: boolean;
+  created_at?: boolean;
+  updated_at?: boolean;
+  accent_color?: boolean;
   emoji?: boolean;
   stars?: boolean;
   status?: boolean;
-  accent_color?: boolean;
   score_threshold?: boolean;
-  created_at?: boolean;
-  updated_at?: boolean;
 };
 
 export type PersonalityTypeOmit<
@@ -650,13 +650,13 @@ export type PersonalityTypeOmit<
   | 'personality_key'
   | 'personality_name'
   | 'personality_desc'
+  | 'created_at'
+  | 'updated_at'
+  | 'accent_color'
   | 'emoji'
   | 'stars'
   | 'status'
-  | 'accent_color'
-  | 'score_threshold'
-  | 'created_at'
-  | 'updated_at',
+  | 'score_threshold',
   ExtArgs['result']['personalityType']
 >;
 
@@ -672,13 +672,13 @@ export type $PersonalityTypePayload<
       personality_key: string;
       personality_name: string;
       personality_desc: string | null;
+      created_at: Date;
+      updated_at: Date;
+      accent_color: string | null;
       emoji: string | null;
       stars: number;
       status: string;
-      accent_color: string | null;
       score_threshold: number;
-      created_at: Date;
-      updated_at: Date;
     },
     ExtArgs['result']['personalityType']
   >;
@@ -1287,13 +1287,13 @@ export interface PersonalityTypeFieldRefs {
   readonly personality_key: Prisma.FieldRef<'PersonalityType', 'String'>;
   readonly personality_name: Prisma.FieldRef<'PersonalityType', 'String'>;
   readonly personality_desc: Prisma.FieldRef<'PersonalityType', 'String'>;
+  readonly created_at: Prisma.FieldRef<'PersonalityType', 'DateTime'>;
+  readonly updated_at: Prisma.FieldRef<'PersonalityType', 'DateTime'>;
+  readonly accent_color: Prisma.FieldRef<'PersonalityType', 'String'>;
   readonly emoji: Prisma.FieldRef<'PersonalityType', 'String'>;
   readonly stars: Prisma.FieldRef<'PersonalityType', 'Int'>;
   readonly status: Prisma.FieldRef<'PersonalityType', 'String'>;
-  readonly accent_color: Prisma.FieldRef<'PersonalityType', 'String'>;
   readonly score_threshold: Prisma.FieldRef<'PersonalityType', 'Float'>;
-  readonly created_at: Prisma.FieldRef<'PersonalityType', 'DateTime'>;
-  readonly updated_at: Prisma.FieldRef<'PersonalityType', 'DateTime'>;
 }
 
 // Custom InputTypes
