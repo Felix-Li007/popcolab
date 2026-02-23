@@ -1,6 +1,9 @@
 'use server';
 
-import { computeTestResult } from '@/services/response-service';
+import {
+  computeTestResult,
+  computeAllPersonalityMatches,
+} from '@/services/response-service';
 import type { UserAnswer, TestSubmitResult } from '@/types/response-type';
 
 export async function submitTestAction(
@@ -12,10 +15,13 @@ export async function submitTestAction(
 
   try {
     const result = await computeTestResult(answers);
+    const allMatches = await computeAllPersonalityMatches(result.totalScore);
+    const matches = allMatches.map(m => `${m.key}:${m.matchPercent}`).join('|');
     return {
       success: true,
       personalityKey: result.personalityKey,
       totalScore: result.totalScore,
+      matches,
     };
   } catch {
     return {

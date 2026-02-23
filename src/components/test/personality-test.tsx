@@ -49,7 +49,7 @@ export default function PersonalityTest({ questions }: Props) {
       const result = await submitTestAction(answersArray);
       if (result.success) {
         router.push(
-          `/test/result?type=${result.personalityKey}&score=${result.totalScore}`
+          `/test/result?matches=${encodeURIComponent(result.matches ?? '')}`
         );
       } else {
         setError(result.error ?? 'Something went wrong. Please try again.');
