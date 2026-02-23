@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -258,13 +258,13 @@ export type QuestionDimensionWhereInput = {
     | null;
   created_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
   updated_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
-  question?: Prisma.XOR<
-    Prisma.QuestionScalarRelationFilter,
-    Prisma.QuestionWhereInput
-  >;
   dimension?: Prisma.XOR<
     Prisma.DimensionIndexScalarRelationFilter,
     Prisma.DimensionIndexWhereInput
+  >;
+  question?: Prisma.XOR<
+    Prisma.QuestionScalarRelationFilter,
+    Prisma.QuestionWhereInput
   >;
 };
 
@@ -275,8 +275,8 @@ export type QuestionDimensionOrderByWithRelationInput = {
   weight_rate?: Prisma.SortOrderInput | Prisma.SortOrder;
   created_at?: Prisma.SortOrder;
   updated_at?: Prisma.SortOrder;
-  question?: Prisma.QuestionOrderByWithRelationInput;
   dimension?: Prisma.DimensionIndexOrderByWithRelationInput;
+  question?: Prisma.QuestionOrderByWithRelationInput;
 };
 
 export type QuestionDimensionWhereUniqueInput = Prisma.AtLeast<
@@ -300,13 +300,13 @@ export type QuestionDimensionWhereUniqueInput = Prisma.AtLeast<
       | null;
     created_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
     updated_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
-    question?: Prisma.XOR<
-      Prisma.QuestionScalarRelationFilter,
-      Prisma.QuestionWhereInput
-    >;
     dimension?: Prisma.XOR<
       Prisma.DimensionIndexScalarRelationFilter,
       Prisma.DimensionIndexWhereInput
+    >;
+    question?: Prisma.XOR<
+      Prisma.QuestionScalarRelationFilter,
+      Prisma.QuestionWhereInput
     >;
   },
   'id'
@@ -363,8 +363,8 @@ export type QuestionDimensionCreateInput = {
     | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  question: Prisma.QuestionCreateNestedOneWithoutDimensionsInput;
   dimension: Prisma.DimensionIndexCreateNestedOneWithoutQuestion_dimensionsInput;
+  question: Prisma.QuestionCreateNestedOneWithoutDimensionsInput;
 };
 
 export type QuestionDimensionUncheckedCreateInput = {
@@ -391,8 +391,8 @@ export type QuestionDimensionUpdateInput = {
     | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  question?: Prisma.QuestionUpdateOneRequiredWithoutDimensionsNestedInput;
   dimension?: Prisma.DimensionIndexUpdateOneRequiredWithoutQuestion_dimensionsNestedInput;
+  question?: Prisma.QuestionUpdateOneRequiredWithoutDimensionsNestedInput;
 };
 
 export type QuestionDimensionUncheckedUpdateInput = {
@@ -500,6 +500,116 @@ export type QuestionDimensionSumOrderByAggregateInput = {
   question_id?: Prisma.SortOrder;
   dimension_id?: Prisma.SortOrder;
   weight_rate?: Prisma.SortOrder;
+};
+
+export type QuestionDimensionCreateNestedManyWithoutQuestionInput = {
+  create?:
+    | Prisma.XOR<
+        Prisma.QuestionDimensionCreateWithoutQuestionInput,
+        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
+      >
+    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
+    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
+  connectOrCreate?:
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
+  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
+  connect?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+};
+
+export type QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput = {
+  create?:
+    | Prisma.XOR<
+        Prisma.QuestionDimensionCreateWithoutQuestionInput,
+        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
+      >
+    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
+    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
+  connectOrCreate?:
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
+  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
+  connect?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+};
+
+export type QuestionDimensionUpdateManyWithoutQuestionNestedInput = {
+  create?:
+    | Prisma.XOR<
+        Prisma.QuestionDimensionCreateWithoutQuestionInput,
+        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
+      >
+    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
+    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
+  connectOrCreate?:
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
+  upsert?:
+    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput
+    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput[];
+  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
+  set?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  disconnect?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  delete?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  connect?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  update?:
+    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput
+    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput[];
+  updateMany?:
+    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput
+    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput[];
+  deleteMany?:
+    | Prisma.QuestionDimensionScalarWhereInput
+    | Prisma.QuestionDimensionScalarWhereInput[];
+};
+
+export type QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput = {
+  create?:
+    | Prisma.XOR<
+        Prisma.QuestionDimensionCreateWithoutQuestionInput,
+        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
+      >
+    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
+    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
+  connectOrCreate?:
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
+    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
+  upsert?:
+    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput
+    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput[];
+  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
+  set?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  disconnect?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  delete?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  connect?:
+    | Prisma.QuestionDimensionWhereUniqueInput
+    | Prisma.QuestionDimensionWhereUniqueInput[];
+  update?:
+    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput
+    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput[];
+  updateMany?:
+    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput
+    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput[];
+  deleteMany?:
+    | Prisma.QuestionDimensionScalarWhereInput
+    | Prisma.QuestionDimensionScalarWhereInput[];
 };
 
 export type QuestionDimensionCreateNestedManyWithoutDimensionInput = {
@@ -620,114 +730,94 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 };
 
-export type QuestionDimensionCreateNestedManyWithoutQuestionInput = {
-  create?:
-    | Prisma.XOR<
-        Prisma.QuestionDimensionCreateWithoutQuestionInput,
-        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
-      >
-    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
-    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
-  connectOrCreate?:
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
-  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
-  connect?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
+export type QuestionDimensionCreateWithoutQuestionInput = {
+  weight_rate?:
+    | runtime.Decimal
+    | runtime.DecimalJsLike
+    | number
+    | string
+    | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+  dimension: Prisma.DimensionIndexCreateNestedOneWithoutQuestion_dimensionsInput;
 };
 
-export type QuestionDimensionUncheckedCreateNestedManyWithoutQuestionInput = {
-  create?:
-    | Prisma.XOR<
-        Prisma.QuestionDimensionCreateWithoutQuestionInput,
-        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
-      >
-    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
-    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
-  connectOrCreate?:
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
-  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
-  connect?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
+export type QuestionDimensionUncheckedCreateWithoutQuestionInput = {
+  id?: number;
+  dimension_id: number;
+  weight_rate?:
+    | runtime.Decimal
+    | runtime.DecimalJsLike
+    | number
+    | string
+    | null;
+  created_at?: Date | string;
+  updated_at?: Date | string;
 };
 
-export type QuestionDimensionUpdateManyWithoutQuestionNestedInput = {
-  create?:
-    | Prisma.XOR<
-        Prisma.QuestionDimensionCreateWithoutQuestionInput,
-        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
-      >
-    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
-    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
-  connectOrCreate?:
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
-  upsert?:
-    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput
-    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput[];
-  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
-  set?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  disconnect?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  delete?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  connect?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  update?:
-    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput
-    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput[];
-  updateMany?:
-    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput
-    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput[];
-  deleteMany?:
+export type QuestionDimensionCreateOrConnectWithoutQuestionInput = {
+  where: Prisma.QuestionDimensionWhereUniqueInput;
+  create: Prisma.XOR<
+    Prisma.QuestionDimensionCreateWithoutQuestionInput,
+    Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
+  >;
+};
+
+export type QuestionDimensionCreateManyQuestionInputEnvelope = {
+  data:
+    | Prisma.QuestionDimensionCreateManyQuestionInput
+    | Prisma.QuestionDimensionCreateManyQuestionInput[];
+  skipDuplicates?: boolean;
+};
+
+export type QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput = {
+  where: Prisma.QuestionDimensionWhereUniqueInput;
+  update: Prisma.XOR<
+    Prisma.QuestionDimensionUpdateWithoutQuestionInput,
+    Prisma.QuestionDimensionUncheckedUpdateWithoutQuestionInput
+  >;
+  create: Prisma.XOR<
+    Prisma.QuestionDimensionCreateWithoutQuestionInput,
+    Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
+  >;
+};
+
+export type QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput = {
+  where: Prisma.QuestionDimensionWhereUniqueInput;
+  data: Prisma.XOR<
+    Prisma.QuestionDimensionUpdateWithoutQuestionInput,
+    Prisma.QuestionDimensionUncheckedUpdateWithoutQuestionInput
+  >;
+};
+
+export type QuestionDimensionUpdateManyWithWhereWithoutQuestionInput = {
+  where: Prisma.QuestionDimensionScalarWhereInput;
+  data: Prisma.XOR<
+    Prisma.QuestionDimensionUpdateManyMutationInput,
+    Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionInput
+  >;
+};
+
+export type QuestionDimensionScalarWhereInput = {
+  AND?:
     | Prisma.QuestionDimensionScalarWhereInput
     | Prisma.QuestionDimensionScalarWhereInput[];
-};
-
-export type QuestionDimensionUncheckedUpdateManyWithoutQuestionNestedInput = {
-  create?:
-    | Prisma.XOR<
-        Prisma.QuestionDimensionCreateWithoutQuestionInput,
-        Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
-      >
-    | Prisma.QuestionDimensionCreateWithoutQuestionInput[]
-    | Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput[];
-  connectOrCreate?:
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput
-    | Prisma.QuestionDimensionCreateOrConnectWithoutQuestionInput[];
-  upsert?:
-    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput
-    | Prisma.QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput[];
-  createMany?: Prisma.QuestionDimensionCreateManyQuestionInputEnvelope;
-  set?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  disconnect?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  delete?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  connect?:
-    | Prisma.QuestionDimensionWhereUniqueInput
-    | Prisma.QuestionDimensionWhereUniqueInput[];
-  update?:
-    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput
-    | Prisma.QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput[];
-  updateMany?:
-    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput
-    | Prisma.QuestionDimensionUpdateManyWithWhereWithoutQuestionInput[];
-  deleteMany?:
+  OR?: Prisma.QuestionDimensionScalarWhereInput[];
+  NOT?:
     | Prisma.QuestionDimensionScalarWhereInput
     | Prisma.QuestionDimensionScalarWhereInput[];
+  id?: Prisma.IntFilter<'QuestionDimension'> | number;
+  question_id?: Prisma.IntFilter<'QuestionDimension'> | number;
+  dimension_id?: Prisma.IntFilter<'QuestionDimension'> | number;
+  weight_rate?:
+    | Prisma.DecimalNullableFilter<'QuestionDimension'>
+    | runtime.Decimal
+    | runtime.DecimalJsLike
+    | number
+    | string
+    | null;
+  created_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
+  updated_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
 };
 
 export type QuestionDimensionCreateWithoutDimensionInput = {
@@ -798,41 +888,7 @@ export type QuestionDimensionUpdateManyWithWhereWithoutDimensionInput = {
   >;
 };
 
-export type QuestionDimensionScalarWhereInput = {
-  AND?:
-    | Prisma.QuestionDimensionScalarWhereInput
-    | Prisma.QuestionDimensionScalarWhereInput[];
-  OR?: Prisma.QuestionDimensionScalarWhereInput[];
-  NOT?:
-    | Prisma.QuestionDimensionScalarWhereInput
-    | Prisma.QuestionDimensionScalarWhereInput[];
-  id?: Prisma.IntFilter<'QuestionDimension'> | number;
-  question_id?: Prisma.IntFilter<'QuestionDimension'> | number;
-  dimension_id?: Prisma.IntFilter<'QuestionDimension'> | number;
-  weight_rate?:
-    | Prisma.DecimalNullableFilter<'QuestionDimension'>
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  created_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
-  updated_at?: Prisma.DateTimeFilter<'QuestionDimension'> | Date | string;
-};
-
-export type QuestionDimensionCreateWithoutQuestionInput = {
-  weight_rate?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  created_at?: Date | string;
-  updated_at?: Date | string;
-  dimension: Prisma.DimensionIndexCreateNestedOneWithoutQuestion_dimensionsInput;
-};
-
-export type QuestionDimensionUncheckedCreateWithoutQuestionInput = {
+export type QuestionDimensionCreateManyQuestionInput = {
   id?: number;
   dimension_id: number;
   weight_rate?:
@@ -845,47 +901,45 @@ export type QuestionDimensionUncheckedCreateWithoutQuestionInput = {
   updated_at?: Date | string;
 };
 
-export type QuestionDimensionCreateOrConnectWithoutQuestionInput = {
-  where: Prisma.QuestionDimensionWhereUniqueInput;
-  create: Prisma.XOR<
-    Prisma.QuestionDimensionCreateWithoutQuestionInput,
-    Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
-  >;
+export type QuestionDimensionUpdateWithoutQuestionInput = {
+  weight_rate?:
+    | Prisma.NullableDecimalFieldUpdateOperationsInput
+    | runtime.Decimal
+    | runtime.DecimalJsLike
+    | number
+    | string
+    | null;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  dimension?: Prisma.DimensionIndexUpdateOneRequiredWithoutQuestion_dimensionsNestedInput;
 };
 
-export type QuestionDimensionCreateManyQuestionInputEnvelope = {
-  data:
-    | Prisma.QuestionDimensionCreateManyQuestionInput
-    | Prisma.QuestionDimensionCreateManyQuestionInput[];
-  skipDuplicates?: boolean;
+export type QuestionDimensionUncheckedUpdateWithoutQuestionInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number;
+  dimension_id?: Prisma.IntFieldUpdateOperationsInput | number;
+  weight_rate?:
+    | Prisma.NullableDecimalFieldUpdateOperationsInput
+    | runtime.Decimal
+    | runtime.DecimalJsLike
+    | number
+    | string
+    | null;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
-export type QuestionDimensionUpsertWithWhereUniqueWithoutQuestionInput = {
-  where: Prisma.QuestionDimensionWhereUniqueInput;
-  update: Prisma.XOR<
-    Prisma.QuestionDimensionUpdateWithoutQuestionInput,
-    Prisma.QuestionDimensionUncheckedUpdateWithoutQuestionInput
-  >;
-  create: Prisma.XOR<
-    Prisma.QuestionDimensionCreateWithoutQuestionInput,
-    Prisma.QuestionDimensionUncheckedCreateWithoutQuestionInput
-  >;
-};
-
-export type QuestionDimensionUpdateWithWhereUniqueWithoutQuestionInput = {
-  where: Prisma.QuestionDimensionWhereUniqueInput;
-  data: Prisma.XOR<
-    Prisma.QuestionDimensionUpdateWithoutQuestionInput,
-    Prisma.QuestionDimensionUncheckedUpdateWithoutQuestionInput
-  >;
-};
-
-export type QuestionDimensionUpdateManyWithWhereWithoutQuestionInput = {
-  where: Prisma.QuestionDimensionScalarWhereInput;
-  data: Prisma.XOR<
-    Prisma.QuestionDimensionUpdateManyMutationInput,
-    Prisma.QuestionDimensionUncheckedUpdateManyWithoutQuestionInput
-  >;
+export type QuestionDimensionUncheckedUpdateManyWithoutQuestionInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number;
+  dimension_id?: Prisma.IntFieldUpdateOperationsInput | number;
+  weight_rate?:
+    | Prisma.NullableDecimalFieldUpdateOperationsInput
+    | runtime.Decimal
+    | runtime.DecimalJsLike
+    | number
+    | string
+    | null;
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
 export type QuestionDimensionCreateManyDimensionInput = {
@@ -942,60 +996,6 @@ export type QuestionDimensionUncheckedUpdateManyWithoutDimensionInput = {
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 
-export type QuestionDimensionCreateManyQuestionInput = {
-  id?: number;
-  dimension_id: number;
-  weight_rate?:
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  created_at?: Date | string;
-  updated_at?: Date | string;
-};
-
-export type QuestionDimensionUpdateWithoutQuestionInput = {
-  weight_rate?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  dimension?: Prisma.DimensionIndexUpdateOneRequiredWithoutQuestion_dimensionsNestedInput;
-};
-
-export type QuestionDimensionUncheckedUpdateWithoutQuestionInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number;
-  dimension_id?: Prisma.IntFieldUpdateOperationsInput | number;
-  weight_rate?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-};
-
-export type QuestionDimensionUncheckedUpdateManyWithoutQuestionInput = {
-  id?: Prisma.IntFieldUpdateOperationsInput | number;
-  dimension_id?: Prisma.IntFieldUpdateOperationsInput | number;
-  weight_rate?:
-    | Prisma.NullableDecimalFieldUpdateOperationsInput
-    | runtime.Decimal
-    | runtime.DecimalJsLike
-    | number
-    | string
-    | null;
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-};
-
 export type QuestionDimensionSelect<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
@@ -1007,8 +1007,8 @@ export type QuestionDimensionSelect<
     weight_rate?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
     dimension?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+    question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['questionDimension']
 >;
@@ -1024,8 +1024,8 @@ export type QuestionDimensionSelectCreateManyAndReturn<
     weight_rate?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
     dimension?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+    question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['questionDimension']
 >;
@@ -1041,8 +1041,8 @@ export type QuestionDimensionSelectUpdateManyAndReturn<
     weight_rate?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
     dimension?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+    question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['questionDimension']
 >;
@@ -1072,22 +1072,22 @@ export type QuestionDimensionInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
   dimension?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+  question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
 };
 export type QuestionDimensionIncludeCreateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
   dimension?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+  question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
 };
 export type QuestionDimensionIncludeUpdateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
   dimension?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+  question?: boolean | Prisma.QuestionDefaultArgs<ExtArgs>;
 };
 
 export type $QuestionDimensionPayload<
@@ -1096,8 +1096,8 @@ export type $QuestionDimensionPayload<
 > = {
   name: 'QuestionDimension';
   objects: {
-    question: Prisma.$QuestionPayload<ExtArgs>;
     dimension: Prisma.$DimensionIndexPayload<ExtArgs>;
+    question: Prisma.$QuestionPayload<ExtArgs>;
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -1679,11 +1679,11 @@ export interface Prisma__QuestionDimensionClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
-  question<T extends Prisma.QuestionDefaultArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.QuestionDefaultArgs<ExtArgs>>
-  ): Prisma.Prisma__QuestionClient<
+  dimension<T extends Prisma.DimensionIndexDefaultArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.DimensionIndexDefaultArgs<ExtArgs>>
+  ): Prisma.Prisma__DimensionIndexClient<
     | runtime.Types.Result.GetResult<
-        Prisma.$QuestionPayload<ExtArgs>,
+        Prisma.$DimensionIndexPayload<ExtArgs>,
         T,
         'findUniqueOrThrow',
         GlobalOmitOptions
@@ -1693,11 +1693,11 @@ export interface Prisma__QuestionDimensionClient<
     ExtArgs,
     GlobalOmitOptions
   >;
-  dimension<T extends Prisma.DimensionIndexDefaultArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.DimensionIndexDefaultArgs<ExtArgs>>
-  ): Prisma.Prisma__DimensionIndexClient<
+  question<T extends Prisma.QuestionDefaultArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.QuestionDefaultArgs<ExtArgs>>
+  ): Prisma.Prisma__QuestionClient<
     | runtime.Types.Result.GetResult<
-        Prisma.$DimensionIndexPayload<ExtArgs>,
+        Prisma.$QuestionPayload<ExtArgs>,
         T,
         'findUniqueOrThrow',
         GlobalOmitOptions

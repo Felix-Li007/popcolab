@@ -1,18 +1,15 @@
-// PersonalityType Model
-// This model represents different personality types available in the system
-
 model PersonalityType {
   id               Int      @id @default(autoincrement())
   personality_key  String   @unique @db.VarChar(50)
   personality_name String   @db.VarChar(50)
   personality_desc String?  @db.VarChar(255)
+  created_at       DateTime @default(now()) @db.Timestamp(6)
+  updated_at       DateTime @updatedAt @db.Timestamp(6)
+  accent_color     String?  @db.VarChar(20)
   emoji            String?  @db.VarChar(10)
   stars            Int      @default(3)
   status           String   @default("active") @db.VarChar(20)
-  accent_color     String?  @db.VarChar(20)
   score_threshold  Float    @default(0)
-  created_at       DateTime @default(now()) @db.Timestamp()
-  updated_at       DateTime @updatedAt @db.Timestamp()
 
   @@map("personality_type")
 }

@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -278,13 +278,13 @@ export type ProposalWhereInput = {
   rationale_desc?: Prisma.StringFilter<'Proposal'> | string;
   created_at?: Prisma.DateTimeFilter<'Proposal'> | Date | string;
   updated_at?: Prisma.DateTimeFilter<'Proposal'> | Date | string;
-  request?: Prisma.XOR<
-    Prisma.RequestScalarRelationFilter,
-    Prisma.RequestWhereInput
-  >;
   experience?: Prisma.XOR<
     Prisma.ExperienceScalarRelationFilter,
     Prisma.ExperienceWhereInput
+  >;
+  request?: Prisma.XOR<
+    Prisma.RequestScalarRelationFilter,
+    Prisma.RequestWhereInput
   >;
 };
 
@@ -298,8 +298,8 @@ export type ProposalOrderByWithRelationInput = {
   rationale_desc?: Prisma.SortOrder;
   created_at?: Prisma.SortOrder;
   updated_at?: Prisma.SortOrder;
-  request?: Prisma.RequestOrderByWithRelationInput;
   experience?: Prisma.ExperienceOrderByWithRelationInput;
+  request?: Prisma.RequestOrderByWithRelationInput;
 };
 
 export type ProposalWhereUniqueInput = Prisma.AtLeast<
@@ -326,13 +326,13 @@ export type ProposalWhereUniqueInput = Prisma.AtLeast<
     rationale_desc?: Prisma.StringFilter<'Proposal'> | string;
     created_at?: Prisma.DateTimeFilter<'Proposal'> | Date | string;
     updated_at?: Prisma.DateTimeFilter<'Proposal'> | Date | string;
-    request?: Prisma.XOR<
-      Prisma.RequestScalarRelationFilter,
-      Prisma.RequestWhereInput
-    >;
     experience?: Prisma.XOR<
       Prisma.ExperienceScalarRelationFilter,
       Prisma.ExperienceWhereInput
+    >;
+    request?: Prisma.XOR<
+      Prisma.RequestScalarRelationFilter,
+      Prisma.RequestWhereInput
     >;
   },
   'id'
@@ -391,8 +391,8 @@ export type ProposalCreateInput = {
   rationale_desc: string;
   created_at?: Date | string;
   updated_at?: Date | string;
-  request: Prisma.RequestCreateNestedOneWithoutProposalsInput;
   experience: Prisma.ExperienceCreateNestedOneWithoutProposalsInput;
+  request: Prisma.RequestCreateNestedOneWithoutProposalsInput;
 };
 
 export type ProposalUncheckedCreateInput = {
@@ -424,8 +424,8 @@ export type ProposalUpdateInput = {
   rationale_desc?: Prisma.StringFieldUpdateOperationsInput | string;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  request?: Prisma.RequestUpdateOneRequiredWithoutProposalsNestedInput;
   experience?: Prisma.ExperienceUpdateOneRequiredWithoutProposalsNestedInput;
+  request?: Prisma.RequestUpdateOneRequiredWithoutProposalsNestedInput;
 };
 
 export type ProposalUncheckedUpdateInput = {
@@ -1066,8 +1066,8 @@ export type ProposalSelect<
     rationale_desc?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
     experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
+    request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['proposal']
 >;
@@ -1086,8 +1086,8 @@ export type ProposalSelectCreateManyAndReturn<
     rationale_desc?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
     experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
+    request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['proposal']
 >;
@@ -1106,8 +1106,8 @@ export type ProposalSelectUpdateManyAndReturn<
     rationale_desc?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
     experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
+    request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['proposal']
 >;
@@ -1143,22 +1143,22 @@ export type ProposalInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
   experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
+  request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
 };
 export type ProposalIncludeCreateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
   experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
+  request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
 };
 export type ProposalIncludeUpdateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
   experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
+  request?: boolean | Prisma.RequestDefaultArgs<ExtArgs>;
 };
 
 export type $ProposalPayload<
@@ -1167,8 +1167,8 @@ export type $ProposalPayload<
 > = {
   name: 'Proposal';
   objects: {
-    request: Prisma.$RequestPayload<ExtArgs>;
     experience: Prisma.$ExperiencePayload<ExtArgs>;
+    request: Prisma.$RequestPayload<ExtArgs>;
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -1731,11 +1731,11 @@ export interface Prisma__ProposalClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
-  request<T extends Prisma.RequestDefaultArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.RequestDefaultArgs<ExtArgs>>
-  ): Prisma.Prisma__RequestClient<
+  experience<T extends Prisma.ExperienceDefaultArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.ExperienceDefaultArgs<ExtArgs>>
+  ): Prisma.Prisma__ExperienceClient<
     | runtime.Types.Result.GetResult<
-        Prisma.$RequestPayload<ExtArgs>,
+        Prisma.$ExperiencePayload<ExtArgs>,
         T,
         'findUniqueOrThrow',
         GlobalOmitOptions
@@ -1745,11 +1745,11 @@ export interface Prisma__ProposalClient<
     ExtArgs,
     GlobalOmitOptions
   >;
-  experience<T extends Prisma.ExperienceDefaultArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.ExperienceDefaultArgs<ExtArgs>>
-  ): Prisma.Prisma__ExperienceClient<
+  request<T extends Prisma.RequestDefaultArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.RequestDefaultArgs<ExtArgs>>
+  ): Prisma.Prisma__RequestClient<
     | runtime.Types.Result.GetResult<
-        Prisma.$ExperiencePayload<ExtArgs>,
+        Prisma.$RequestPayload<ExtArgs>,
         T,
         'findUniqueOrThrow',
         GlobalOmitOptions

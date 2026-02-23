@@ -1,13 +1,10 @@
-// DimensionCategory Model
-// This model represents categories for dimension indexes
-
 model DimensionCategory {
-    id            Int              @id @default(autoincrement())
-    category_name String           @db.VarChar(50)
-    category_desc String?          @db.VarChar(255)
-    created_at    DateTime         @default(now()) @db.Timestamp()
-    updated_at    DateTime         @updatedAt @db.Timestamp()
-    indexes       DimensionIndex[]
+  id            Int              @id @default(autoincrement())
+  category_name String           @db.VarChar(50)
+  category_desc String?          @db.VarChar(255)
+  created_at    DateTime         @default(now()) @db.Timestamp(6)
+  updated_at    DateTime         @updatedAt @db.Timestamp(6)
+  indexes       DimensionIndex[]
 
-    @@map("dimension_category")
+  @@map("dimension_category")
 }

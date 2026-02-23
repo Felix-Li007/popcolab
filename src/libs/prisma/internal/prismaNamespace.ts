@@ -14,7 +14,7 @@
  * model files in the `model` directory!
  */
 
-import * as runtime from '@prisma/client/runtime/client';
+import * as runtime from '@prisma/client/runtime/library';
 import type * as Prisma from '../models';
 import { type PrismaClient } from './class';
 
@@ -68,6 +68,14 @@ export type Decimal = runtime.Decimal;
 export type DecimalJsLike = runtime.DecimalJsLike;
 
 /**
+ * Metrics
+ */
+export type Metrics = runtime.Metrics;
+export type Metric<T> = runtime.Metric<T>;
+export type MetricHistogram = runtime.MetricHistogram;
+export type MetricHistogramBucket = runtime.MetricHistogramBucket;
+
+/**
  * Extensions
  */
 export type Extension = runtime.Types.Extensions.UserArgs;
@@ -93,12 +101,12 @@ export type PrismaVersion = {
 };
 
 /**
- * Prisma Client JS version: 7.3.0
- * Query Engine version: 9d6ad21cbbceab97458517b147a6a09ff43aa735
+ * Prisma Client JS version: 6.19.2
+ * Query Engine version: c2990dca591cba766e3b7ef5d9e8a84796e47ab7
  */
 export const prismaVersion: PrismaVersion = {
-  client: '7.3.0',
-  engine: '9d6ad21cbbceab97458517b147a6a09ff43aa735',
+  client: '6.19.2',
+  engine: 'c2990dca591cba766e3b7ef5d9e8a84796e47ab7',
 };
 
 /**
@@ -114,36 +122,34 @@ export type InputJsonArray = runtime.InputJsonArray;
 export type InputJsonValue = runtime.InputJsonValue;
 
 export const NullTypes = {
-  DbNull: runtime.NullTypes.DbNull as new (
+  DbNull: runtime.objectEnumValues.classes.DbNull as new (
     secret: never
-  ) => typeof runtime.DbNull,
-  JsonNull: runtime.NullTypes.JsonNull as new (
+  ) => typeof runtime.objectEnumValues.instances.DbNull,
+  JsonNull: runtime.objectEnumValues.classes.JsonNull as new (
     secret: never
-  ) => typeof runtime.JsonNull,
-  AnyNull: runtime.NullTypes.AnyNull as new (
+  ) => typeof runtime.objectEnumValues.instances.JsonNull,
+  AnyNull: runtime.objectEnumValues.classes.AnyNull as new (
     secret: never
-  ) => typeof runtime.AnyNull,
+  ) => typeof runtime.objectEnumValues.instances.AnyNull,
 };
 /**
  * Helper for filtering JSON entries that have `null` on the database (empty on the db)
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const DbNull = runtime.DbNull;
-
+export const DbNull = runtime.objectEnumValues.instances.DbNull;
 /**
  * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const JsonNull = runtime.JsonNull;
-
+export const JsonNull = runtime.objectEnumValues.instances.JsonNull;
 /**
  * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
  *
  * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
  */
-export const AnyNull = runtime.AnyNull;
+export const AnyNull = runtime.objectEnumValues.instances.AnyNull;
 
 type SelectAndInclude = {
   select: any;
@@ -412,6 +418,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never
   : FieldRef<Model, FieldType>;
 
 export const ModelName = {
+  Question: 'Question',
   Answer: 'Answer',
   Company: 'Company',
   DimensionCategory: 'DimensionCategory',
@@ -424,7 +431,6 @@ export const ModelName = {
   Provider: 'Provider',
   QuestionDimension: 'QuestionDimension',
   QuestionOption: 'QuestionOption',
-  Question: 'Question',
   RequestPreference: 'RequestPreference',
   Request: 'Request',
   ResponseScore: 'ResponseScore',
@@ -457,6 +463,7 @@ export type TypeMap<
   };
   meta: {
     modelProps:
+      | 'question'
       | 'answer'
       | 'company'
       | 'dimensionCategory'
@@ -469,7 +476,6 @@ export type TypeMap<
       | 'provider'
       | 'questionDimension'
       | 'questionOption'
-      | 'question'
       | 'requestPreference'
       | 'request'
       | 'responseScore'
@@ -483,6 +489,82 @@ export type TypeMap<
     txIsolationLevel: TransactionIsolationLevel;
   };
   model: {
+    Question: {
+      payload: Prisma.$QuestionPayload<ExtArgs>;
+      fields: Prisma.QuestionFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.QuestionFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.QuestionFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        findFirst: {
+          args: Prisma.QuestionFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.QuestionFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        findMany: {
+          args: Prisma.QuestionFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
+        };
+        create: {
+          args: Prisma.QuestionCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        createMany: {
+          args: Prisma.QuestionCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.QuestionCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
+        };
+        delete: {
+          args: Prisma.QuestionDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        update: {
+          args: Prisma.QuestionUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        deleteMany: {
+          args: Prisma.QuestionDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.QuestionUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.QuestionUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
+        };
+        upsert: {
+          args: Prisma.QuestionUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        aggregate: {
+          args: Prisma.QuestionAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQuestion>;
+        };
+        groupBy: {
+          args: Prisma.QuestionGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.QuestionGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.QuestionCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.QuestionCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
     Answer: {
       payload: Prisma.$AnswerPayload<ExtArgs>;
       fields: Prisma.AnswerFieldRefs;
@@ -1395,82 +1477,6 @@ export type TypeMap<
         };
       };
     };
-    Question: {
-      payload: Prisma.$QuestionPayload<ExtArgs>;
-      fields: Prisma.QuestionFieldRefs;
-      operations: {
-        findUnique: {
-          args: Prisma.QuestionFindUniqueArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
-        };
-        findUniqueOrThrow: {
-          args: Prisma.QuestionFindUniqueOrThrowArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        findFirst: {
-          args: Prisma.QuestionFindFirstArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
-        };
-        findFirstOrThrow: {
-          args: Prisma.QuestionFindFirstOrThrowArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        findMany: {
-          args: Prisma.QuestionFindManyArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
-        };
-        create: {
-          args: Prisma.QuestionCreateArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        createMany: {
-          args: Prisma.QuestionCreateManyArgs<ExtArgs>;
-          result: BatchPayload;
-        };
-        createManyAndReturn: {
-          args: Prisma.QuestionCreateManyAndReturnArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
-        };
-        delete: {
-          args: Prisma.QuestionDeleteArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        update: {
-          args: Prisma.QuestionUpdateArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        deleteMany: {
-          args: Prisma.QuestionDeleteManyArgs<ExtArgs>;
-          result: BatchPayload;
-        };
-        updateMany: {
-          args: Prisma.QuestionUpdateManyArgs<ExtArgs>;
-          result: BatchPayload;
-        };
-        updateManyAndReturn: {
-          args: Prisma.QuestionUpdateManyAndReturnArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
-        };
-        upsert: {
-          args: Prisma.QuestionUpsertArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        aggregate: {
-          args: Prisma.QuestionAggregateArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.AggregateQuestion>;
-        };
-        groupBy: {
-          args: Prisma.QuestionGroupByArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.QuestionGroupByOutputType>[];
-        };
-        count: {
-          args: Prisma.QuestionCountArgs<ExtArgs>;
-          result:
-            | runtime.Types.Utils.Optional<Prisma.QuestionCountAggregateOutputType>
-            | number;
-        };
-      };
-    };
     RequestPreference: {
       payload: Prisma.$RequestPreferencePayload<ExtArgs>;
       fields: Prisma.RequestPreferenceFieldRefs;
@@ -2270,6 +2276,19 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel =
   (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel];
 
+export const QuestionScalarFieldEnum = {
+  id: 'id',
+  question_type: 'question_type',
+  question_text: 'question_text',
+  question_desc: 'question_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  order_index: 'order_index',
+} as const;
+
+export type QuestionScalarFieldEnum =
+  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
+
 export const AnswerScalarFieldEnum = {
   id: 'id',
   question_id: 'question_id',
@@ -2359,13 +2378,13 @@ export const PersonalityTypeScalarFieldEnum = {
   personality_key: 'personality_key',
   personality_name: 'personality_name',
   personality_desc: 'personality_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  accent_color: 'accent_color',
   emoji: 'emoji',
   stars: 'stars',
   status: 'status',
-  accent_color: 'accent_color',
   score_threshold: 'score_threshold',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
 } as const;
 
 export type PersonalityTypeScalarFieldEnum =
@@ -2437,19 +2456,6 @@ export const QuestionOptionScalarFieldEnum = {
 
 export type QuestionOptionScalarFieldEnum =
   (typeof QuestionOptionScalarFieldEnum)[keyof typeof QuestionOptionScalarFieldEnum];
-
-export const QuestionScalarFieldEnum = {
-  id: 'id',
-  question_type: 'question_type',
-  question_text: 'question_text',
-  question_desc: 'question_desc',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  order_index: 'order_index',
-} as const;
-
-export type QuestionScalarFieldEnum =
-  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
 
 export const RequestPreferenceScalarFieldEnum = {
   id: 'id',
@@ -2580,19 +2586,19 @@ export const SortOrder = {
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last',
-} as const;
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
-
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive',
 } as const;
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode];
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last',
+} as const;
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
 
 /**
  * Field references
@@ -2615,22 +2621,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<
 >;
 
 /**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  'DateTime'
->;
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  'DateTime[]'
->;
-
-/**
  * Reference to a field of type 'String'
  */
 export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<
@@ -2644,6 +2634,22 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<
   $PrismaModel,
   'String[]'
+>;
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  'DateTime'
+>;
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  'DateTime[]'
 >;
 
 /**
@@ -2693,6 +2699,13 @@ export type BatchPayload = {
   count: number;
 };
 
+export type Datasource = {
+  url?: string;
+};
+export type Datasources = {
+  db?: Datasource;
+};
+
 export const defineExtension = runtime.Extensions
   .defineExtension as unknown as runtime.Types.Extensions.ExtendsHook<
   'define',
@@ -2701,22 +2714,15 @@ export const defineExtension = runtime.Extensions
 >;
 export type DefaultPrismaClient = PrismaClient;
 export type ErrorFormat = 'pretty' | 'colorless' | 'minimal';
-export type PrismaClientOptions = (
-  | {
-      /**
-       * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-pg`.
-       */
-      adapter: runtime.SqlDriverAdapterFactory;
-      accelerateUrl?: never;
-    }
-  | {
-      /**
-       * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
-       */
-      accelerateUrl: string;
-      adapter?: never;
-    }
-) & {
+export interface PrismaClientOptions {
+  /**
+   * Overwrites the datasource url from your schema.prisma file
+   */
+  datasources?: Datasources;
+  /**
+   * Overwrites the datasource url from your schema.prisma file
+   */
+  datasourceUrl?: string;
   /**
    * @default "colorless"
    */
@@ -2743,7 +2749,7 @@ export type PrismaClientOptions = (
    *  { emit: 'stdout', level: 'error' }
    *
    * ```
-   * Read more in our [docs](https://pris.ly/d/logging).
+   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/logging#the-log-option).
    */
   log?: (LogLevel | LogDefinition)[];
   /**
@@ -2756,6 +2762,10 @@ export type PrismaClientOptions = (
     timeout?: number;
     isolationLevel?: TransactionIsolationLevel;
   };
+  /**
+   * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+   */
+  adapter?: runtime.SqlDriverAdapterFactory | null;
   /**
    * Global configuration for omitting model fields by default.
    *
@@ -2771,24 +2781,9 @@ export type PrismaClientOptions = (
    * ```
    */
   omit?: GlobalOmitConfig;
-  /**
-   * SQL commenter plugins that add metadata to SQL queries as comments.
-   * Comments follow the sqlcommenter format: https://google.github.io/sqlcommenter/
-   *
-   * @example
-   * ```
-   * const prisma = new PrismaClient({
-   *   adapter,
-   *   comments: [
-   *     traceContext(),
-   *     queryInsights(),
-   *   ],
-   * })
-   * ```
-   */
-  comments?: runtime.SqlCommenterPlugin[];
-};
+}
 export type GlobalOmitConfig = {
+  question?: Prisma.QuestionOmit;
   answer?: Prisma.AnswerOmit;
   company?: Prisma.CompanyOmit;
   dimensionCategory?: Prisma.DimensionCategoryOmit;
@@ -2801,7 +2796,6 @@ export type GlobalOmitConfig = {
   provider?: Prisma.ProviderOmit;
   questionDimension?: Prisma.QuestionDimensionOmit;
   questionOption?: Prisma.QuestionOptionOmit;
-  question?: Prisma.QuestionOmit;
   requestPreference?: Prisma.RequestPreferenceOmit;
   request?: Prisma.RequestOmit;
   responseScore?: Prisma.ResponseScoreOmit;

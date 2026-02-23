@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -398,6 +398,16 @@ export type AnswerUncheckedUpdateManyInput = {
   numeric_value?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 };
 
+export type AnswerListRelationFilter = {
+  every?: Prisma.AnswerWhereInput;
+  some?: Prisma.AnswerWhereInput;
+  none?: Prisma.AnswerWhereInput;
+};
+
+export type AnswerOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder;
+};
+
 export type AnswerCountOrderByAggregateInput = {
   id?: Prisma.SortOrder;
   question_id?: Prisma.SortOrder;
@@ -442,36 +452,6 @@ export type AnswerSumOrderByAggregateInput = {
   response_id?: Prisma.SortOrder;
   raw_value?: Prisma.SortOrder;
   numeric_value?: Prisma.SortOrder;
-};
-
-export type AnswerListRelationFilter = {
-  every?: Prisma.AnswerWhereInput;
-  some?: Prisma.AnswerWhereInput;
-  none?: Prisma.AnswerWhereInput;
-};
-
-export type AnswerOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder;
-};
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string;
-};
-
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null;
-  increment?: number;
-  decrement?: number;
-  multiply?: number;
-  divide?: number;
-};
-
-export type IntFieldUpdateOperationsInput = {
-  set?: number;
-  increment?: number;
-  decrement?: number;
-  multiply?: number;
-  divide?: number;
 };
 
 export type AnswerCreateNestedManyWithoutQuestionInput = {

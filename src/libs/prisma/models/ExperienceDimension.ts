@@ -7,7 +7,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from '@prisma/client/runtime/client';
+import type * as runtime from '@prisma/client/runtime/library';
 import type * as $Enums from '../enums';
 import type * as Prisma from '../internal/prismaNamespace';
 
@@ -255,13 +255,13 @@ export type ExperienceDimensionWhereInput = {
     | null;
   created_at?: Prisma.DateTimeFilter<'ExperienceDimension'> | Date | string;
   updated_at?: Prisma.DateTimeFilter<'ExperienceDimension'> | Date | string;
-  experience?: Prisma.XOR<
-    Prisma.ExperienceScalarRelationFilter,
-    Prisma.ExperienceWhereInput
-  >;
   dimension_index?: Prisma.XOR<
     Prisma.DimensionIndexScalarRelationFilter,
     Prisma.DimensionIndexWhereInput
+  >;
+  experience?: Prisma.XOR<
+    Prisma.ExperienceScalarRelationFilter,
+    Prisma.ExperienceWhereInput
   >;
 };
 
@@ -272,8 +272,8 @@ export type ExperienceDimensionOrderByWithRelationInput = {
   original_score?: Prisma.SortOrderInput | Prisma.SortOrder;
   created_at?: Prisma.SortOrder;
   updated_at?: Prisma.SortOrder;
-  experience?: Prisma.ExperienceOrderByWithRelationInput;
   dimension_index?: Prisma.DimensionIndexOrderByWithRelationInput;
+  experience?: Prisma.ExperienceOrderByWithRelationInput;
 };
 
 export type ExperienceDimensionWhereUniqueInput = Prisma.AtLeast<
@@ -294,13 +294,13 @@ export type ExperienceDimensionWhereUniqueInput = Prisma.AtLeast<
       | null;
     created_at?: Prisma.DateTimeFilter<'ExperienceDimension'> | Date | string;
     updated_at?: Prisma.DateTimeFilter<'ExperienceDimension'> | Date | string;
-    experience?: Prisma.XOR<
-      Prisma.ExperienceScalarRelationFilter,
-      Prisma.ExperienceWhereInput
-    >;
     dimension_index?: Prisma.XOR<
       Prisma.DimensionIndexScalarRelationFilter,
       Prisma.DimensionIndexWhereInput
+    >;
+    experience?: Prisma.XOR<
+      Prisma.ExperienceScalarRelationFilter,
+      Prisma.ExperienceWhereInput
     >;
   },
   'id'
@@ -351,8 +351,8 @@ export type ExperienceDimensionCreateInput = {
   original_score?: number | null;
   created_at?: Date | string;
   updated_at?: Date | string;
-  experience: Prisma.ExperienceCreateNestedOneWithoutExperience_dimensionsInput;
   dimension_index: Prisma.DimensionIndexCreateNestedOneWithoutExperience_dimensionsInput;
+  experience: Prisma.ExperienceCreateNestedOneWithoutExperience_dimensionsInput;
 };
 
 export type ExperienceDimensionUncheckedCreateInput = {
@@ -368,8 +368,8 @@ export type ExperienceDimensionUpdateInput = {
   original_score?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-  experience?: Prisma.ExperienceUpdateOneRequiredWithoutExperience_dimensionsNestedInput;
   dimension_index?: Prisma.DimensionIndexUpdateOneRequiredWithoutExperience_dimensionsNestedInput;
+  experience?: Prisma.ExperienceUpdateOneRequiredWithoutExperience_dimensionsNestedInput;
 };
 
 export type ExperienceDimensionUncheckedUpdateInput = {
@@ -895,8 +895,8 @@ export type ExperienceDimensionSelect<
     original_score?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
     dimension_index?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+    experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['experienceDimension']
 >;
@@ -912,8 +912,8 @@ export type ExperienceDimensionSelectCreateManyAndReturn<
     original_score?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
     dimension_index?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+    experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['experienceDimension']
 >;
@@ -929,8 +929,8 @@ export type ExperienceDimensionSelectUpdateManyAndReturn<
     original_score?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
-    experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
     dimension_index?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+    experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
   },
   ExtArgs['result']['experienceDimension']
 >;
@@ -960,22 +960,22 @@ export type ExperienceDimensionInclude<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
   dimension_index?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+  experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
 };
 export type ExperienceDimensionIncludeCreateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
   dimension_index?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+  experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
 };
 export type ExperienceDimensionIncludeUpdateManyAndReturn<
   ExtArgs extends runtime.Types.Extensions.InternalArgs =
     runtime.Types.Extensions.DefaultArgs,
 > = {
-  experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
   dimension_index?: boolean | Prisma.DimensionIndexDefaultArgs<ExtArgs>;
+  experience?: boolean | Prisma.ExperienceDefaultArgs<ExtArgs>;
 };
 
 export type $ExperienceDimensionPayload<
@@ -984,8 +984,8 @@ export type $ExperienceDimensionPayload<
 > = {
   name: 'ExperienceDimension';
   objects: {
-    experience: Prisma.$ExperiencePayload<ExtArgs>;
     dimension_index: Prisma.$DimensionIndexPayload<ExtArgs>;
+    experience: Prisma.$ExperiencePayload<ExtArgs>;
   };
   scalars: runtime.Types.Extensions.GetPayloadResult<
     {
@@ -1567,11 +1567,11 @@ export interface Prisma__ExperienceDimensionClient<
   GlobalOmitOptions = {},
 > extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: 'PrismaPromise';
-  experience<T extends Prisma.ExperienceDefaultArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.ExperienceDefaultArgs<ExtArgs>>
-  ): Prisma.Prisma__ExperienceClient<
+  dimension_index<T extends Prisma.DimensionIndexDefaultArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.DimensionIndexDefaultArgs<ExtArgs>>
+  ): Prisma.Prisma__DimensionIndexClient<
     | runtime.Types.Result.GetResult<
-        Prisma.$ExperiencePayload<ExtArgs>,
+        Prisma.$DimensionIndexPayload<ExtArgs>,
         T,
         'findUniqueOrThrow',
         GlobalOmitOptions
@@ -1581,11 +1581,11 @@ export interface Prisma__ExperienceDimensionClient<
     ExtArgs,
     GlobalOmitOptions
   >;
-  dimension_index<T extends Prisma.DimensionIndexDefaultArgs<ExtArgs> = {}>(
-    args?: Prisma.Subset<T, Prisma.DimensionIndexDefaultArgs<ExtArgs>>
-  ): Prisma.Prisma__DimensionIndexClient<
+  experience<T extends Prisma.ExperienceDefaultArgs<ExtArgs> = {}>(
+    args?: Prisma.Subset<T, Prisma.ExperienceDefaultArgs<ExtArgs>>
+  ): Prisma.Prisma__ExperienceClient<
     | runtime.Types.Result.GetResult<
-        Prisma.$DimensionIndexPayload<ExtArgs>,
+        Prisma.$ExperiencePayload<ExtArgs>,
         T,
         'findUniqueOrThrow',
         GlobalOmitOptions
