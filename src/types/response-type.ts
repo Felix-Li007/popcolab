@@ -11,5 +11,6 @@ export type TestSubmitResult = {
   success: boolean;
   personalityKey?: string;
   totalScore?: number;
+  matches?: string;
   error?: string;
 };

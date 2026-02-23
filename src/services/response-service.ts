@@ -243,6 +243,37 @@ export async function getPersonalityByKey(
   return mapPersonalityRow(row);
 }
 
+// ─── All Personality Matches (for results display) ───────────────────────────
+
+export async function computeAllPersonalityMatches(
+  totalScore: number
+): Promise<{ key: string; matchPercent: number }[]> {
+  const rows = await prisma.personalityType.findMany({
+    where: { status: 'active' },
+    orderBy: { score_threshold: 'desc' },
+  });
+  if (rows.length === 0) return [];
+
+  // Qualified personalities first (highest threshold first), then unqualified
+  const sorted = [...rows].sort((a, b) => {
+    const aQ = totalScore >= a.score_threshold;
+    const bQ = totalScore >= b.score_threshold;
+    if (aQ !== bQ) return aQ ? -1 : 1;
+    return b.score_threshold - a.score_threshold;
+  });
+
+  const primaryThreshold = Math.max(1, sorted[0].score_threshold);
+  const basePercent = Math.min(
+    95,
+    Math.max(40, Math.round((totalScore / primaryThreshold) * 95))
+  );
+
+  return sorted.map((row, i) => ({
+    key: row.personality_key,
+    matchPercent: Math.max(10, Math.round(basePercent * Math.pow(0.85, i))),
+  }));
+}
+
 // ─── User Bridge (Clerk email → local user id) ────────────────────────────────
 
 export async function findOrCreateUserByEmail(
