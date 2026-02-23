@@ -18,8 +18,8 @@ type Props = {
 export default function PlayPersonalities({ matches }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const primary = matches.slice(0, 2);
-  const others = matches.slice(2);
+  const primary = matches[0];
+  const others = matches.slice(1);
 
   async function handleShare() {
     const top = matches[0];
@@ -53,48 +53,51 @@ export default function PlayPersonalities({ matches }: Props) {
       </div>
 
       {/* Personality grid */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
-        {/* Primary cards */}
-        {primary.map(({ personality, matchPercent }) => (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[3fr_2fr] md:gap-6">
+        {/* Primary card */}
+        {primary && (
           <div
-            key={personality.type}
             className={styles.primaryCard}
             style={cssVarStyle({
-              '--card-accent': personality.accentColor ?? '#0d9488',
+              '--card-accent': primary.personality.accentColor ?? '#0d9488',
             })}
           >
             {/* Colored header */}
             <div
               className={styles.cardHeader}
-              style={{ backgroundColor: personality.accentColor ?? '#0d9488' }}
+              style={{
+                backgroundColor: primary.personality.accentColor ?? '#0d9488',
+              }}
             >
               <span className={styles.badge}>PRIMARY</span>
-              <span className={styles.emoji}>{personality.emoji}</span>
+              <span className={styles.emoji}>{primary.personality.emoji}</span>
             </div>
 
             {/* White content */}
             <div className="bg-white p-5 flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="text-lg font-bold text-gray-800 leading-tight">
-                  {personality.name}
+                  {primary.personality.name}
                 </h2>
                 <div className="text-right flex-shrink-0">
                   <p
                     className="text-2xl font-extrabold leading-none"
-                    style={{ color: personality.accentColor ?? '#0d9488' }}
+                    style={{
+                      color: primary.personality.accentColor ?? '#0d9488',
+                    }}
                   >
-                    {matchPercent}%
+                    {primary.matchPercent}%
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">match</p>
                 </div>
               </div>
 
               <p className="text-sm text-gray-500 leading-relaxed">
-                {personality.description}
+                {primary.personality.description}
               </p>
             </div>
           </div>
-        ))}
+        )}
 
         {/* Other matches panel */}
         {others.length > 0 && (
