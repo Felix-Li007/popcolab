@@ -93,12 +93,12 @@ export type PrismaVersion = {
 };
 
 /**
- * Prisma Client JS version: 7.3.0
- * Query Engine version: 9d6ad21cbbceab97458517b147a6a09ff43aa735
+ * Prisma Client JS version: 7.4.0
+ * Query Engine version: ab56fe763f921d033a6c195e7ddeb3e255bdbb57
  */
 export const prismaVersion: PrismaVersion = {
-  client: '7.3.0',
-  engine: '9d6ad21cbbceab97458517b147a6a09ff43aa735',
+  client: '7.4.0',
+  engine: 'ab56fe763f921d033a6c195e7ddeb3e255bdbb57',
 };
 
 /**
@@ -412,6 +412,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never
   : FieldRef<Model, FieldType>;
 
 export const ModelName = {
+  Question: 'Question',
   Answer: 'Answer',
   Company: 'Company',
   DimensionCategory: 'DimensionCategory',
@@ -424,7 +425,6 @@ export const ModelName = {
   Provider: 'Provider',
   QuestionDimension: 'QuestionDimension',
   QuestionOption: 'QuestionOption',
-  Question: 'Question',
   RequestPreference: 'RequestPreference',
   Request: 'Request',
   ResponseScore: 'ResponseScore',
@@ -457,6 +457,7 @@ export type TypeMap<
   };
   meta: {
     modelProps:
+      | 'question'
       | 'answer'
       | 'company'
       | 'dimensionCategory'
@@ -469,7 +470,6 @@ export type TypeMap<
       | 'provider'
       | 'questionDimension'
       | 'questionOption'
-      | 'question'
       | 'requestPreference'
       | 'request'
       | 'responseScore'
@@ -483,6 +483,82 @@ export type TypeMap<
     txIsolationLevel: TransactionIsolationLevel;
   };
   model: {
+    Question: {
+      payload: Prisma.$QuestionPayload<ExtArgs>;
+      fields: Prisma.QuestionFieldRefs;
+      operations: {
+        findUnique: {
+          args: Prisma.QuestionFindUniqueArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
+        };
+        findUniqueOrThrow: {
+          args: Prisma.QuestionFindUniqueOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        findFirst: {
+          args: Prisma.QuestionFindFirstArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
+        };
+        findFirstOrThrow: {
+          args: Prisma.QuestionFindFirstOrThrowArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        findMany: {
+          args: Prisma.QuestionFindManyArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
+        };
+        create: {
+          args: Prisma.QuestionCreateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        createMany: {
+          args: Prisma.QuestionCreateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        createManyAndReturn: {
+          args: Prisma.QuestionCreateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
+        };
+        delete: {
+          args: Prisma.QuestionDeleteArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        update: {
+          args: Prisma.QuestionUpdateArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        deleteMany: {
+          args: Prisma.QuestionDeleteManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateMany: {
+          args: Prisma.QuestionUpdateManyArgs<ExtArgs>;
+          result: BatchPayload;
+        };
+        updateManyAndReturn: {
+          args: Prisma.QuestionUpdateManyAndReturnArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
+        };
+        upsert: {
+          args: Prisma.QuestionUpsertArgs<ExtArgs>;
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
+        };
+        aggregate: {
+          args: Prisma.QuestionAggregateArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.AggregateQuestion>;
+        };
+        groupBy: {
+          args: Prisma.QuestionGroupByArgs<ExtArgs>;
+          result: runtime.Types.Utils.Optional<Prisma.QuestionGroupByOutputType>[];
+        };
+        count: {
+          args: Prisma.QuestionCountArgs<ExtArgs>;
+          result:
+            | runtime.Types.Utils.Optional<Prisma.QuestionCountAggregateOutputType>
+            | number;
+        };
+      };
+    };
     Answer: {
       payload: Prisma.$AnswerPayload<ExtArgs>;
       fields: Prisma.AnswerFieldRefs;
@@ -1395,82 +1471,6 @@ export type TypeMap<
         };
       };
     };
-    Question: {
-      payload: Prisma.$QuestionPayload<ExtArgs>;
-      fields: Prisma.QuestionFieldRefs;
-      operations: {
-        findUnique: {
-          args: Prisma.QuestionFindUniqueArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
-        };
-        findUniqueOrThrow: {
-          args: Prisma.QuestionFindUniqueOrThrowArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        findFirst: {
-          args: Prisma.QuestionFindFirstArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload> | null;
-        };
-        findFirstOrThrow: {
-          args: Prisma.QuestionFindFirstOrThrowArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        findMany: {
-          args: Prisma.QuestionFindManyArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
-        };
-        create: {
-          args: Prisma.QuestionCreateArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        createMany: {
-          args: Prisma.QuestionCreateManyArgs<ExtArgs>;
-          result: BatchPayload;
-        };
-        createManyAndReturn: {
-          args: Prisma.QuestionCreateManyAndReturnArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
-        };
-        delete: {
-          args: Prisma.QuestionDeleteArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        update: {
-          args: Prisma.QuestionUpdateArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        deleteMany: {
-          args: Prisma.QuestionDeleteManyArgs<ExtArgs>;
-          result: BatchPayload;
-        };
-        updateMany: {
-          args: Prisma.QuestionUpdateManyArgs<ExtArgs>;
-          result: BatchPayload;
-        };
-        updateManyAndReturn: {
-          args: Prisma.QuestionUpdateManyAndReturnArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>[];
-        };
-        upsert: {
-          args: Prisma.QuestionUpsertArgs<ExtArgs>;
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionPayload>;
-        };
-        aggregate: {
-          args: Prisma.QuestionAggregateArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.AggregateQuestion>;
-        };
-        groupBy: {
-          args: Prisma.QuestionGroupByArgs<ExtArgs>;
-          result: runtime.Types.Utils.Optional<Prisma.QuestionGroupByOutputType>[];
-        };
-        count: {
-          args: Prisma.QuestionCountArgs<ExtArgs>;
-          result:
-            | runtime.Types.Utils.Optional<Prisma.QuestionCountAggregateOutputType>
-            | number;
-        };
-      };
-    };
     RequestPreference: {
       payload: Prisma.$RequestPreferencePayload<ExtArgs>;
       fields: Prisma.RequestPreferenceFieldRefs;
@@ -2270,6 +2270,19 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel =
   (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel];
 
+export const QuestionScalarFieldEnum = {
+  id: 'id',
+  question_type: 'question_type',
+  question_text: 'question_text',
+  question_desc: 'question_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  order_index: 'order_index',
+} as const;
+
+export type QuestionScalarFieldEnum =
+  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
+
 export const AnswerScalarFieldEnum = {
   id: 'id',
   question_id: 'question_id',
@@ -2359,13 +2372,13 @@ export const PersonalityTypeScalarFieldEnum = {
   personality_key: 'personality_key',
   personality_name: 'personality_name',
   personality_desc: 'personality_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  accent_color: 'accent_color',
   emoji: 'emoji',
   stars: 'stars',
   status: 'status',
-  accent_color: 'accent_color',
   score_threshold: 'score_threshold',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
 } as const;
 
 export type PersonalityTypeScalarFieldEnum =
@@ -2437,19 +2450,6 @@ export const QuestionOptionScalarFieldEnum = {
 
 export type QuestionOptionScalarFieldEnum =
   (typeof QuestionOptionScalarFieldEnum)[keyof typeof QuestionOptionScalarFieldEnum];
-
-export const QuestionScalarFieldEnum = {
-  id: 'id',
-  question_type: 'question_type',
-  question_text: 'question_text',
-  question_desc: 'question_desc',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  order_index: 'order_index',
-} as const;
-
-export type QuestionScalarFieldEnum =
-  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
 
 export const RequestPreferenceScalarFieldEnum = {
   id: 'id',
@@ -2580,19 +2580,19 @@ export const SortOrder = {
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last',
-} as const;
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
-
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive',
 } as const;
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode];
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last',
+} as const;
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
 
 /**
  * Field references
@@ -2615,22 +2615,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<
 >;
 
 /**
- * Reference to a field of type 'DateTime'
- */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  'DateTime'
->;
-
-/**
- * Reference to a field of type 'DateTime[]'
- */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
-  $PrismaModel,
-  'DateTime[]'
->;
-
-/**
  * Reference to a field of type 'String'
  */
 export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<
@@ -2644,6 +2628,22 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<
 export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<
   $PrismaModel,
   'String[]'
+>;
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  'DateTime'
+>;
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<
+  $PrismaModel,
+  'DateTime[]'
 >;
 
 /**
@@ -2789,6 +2789,7 @@ export type PrismaClientOptions = (
   comments?: runtime.SqlCommenterPlugin[];
 };
 export type GlobalOmitConfig = {
+  question?: Prisma.QuestionOmit;
   answer?: Prisma.AnswerOmit;
   company?: Prisma.CompanyOmit;
   dimensionCategory?: Prisma.DimensionCategoryOmit;
@@ -2801,7 +2802,6 @@ export type GlobalOmitConfig = {
   provider?: Prisma.ProviderOmit;
   questionDimension?: Prisma.QuestionDimensionOmit;
   questionOption?: Prisma.QuestionOptionOmit;
-  question?: Prisma.QuestionOmit;
   requestPreference?: Prisma.RequestPreferenceOmit;
   request?: Prisma.RequestOmit;
   responseScore?: Prisma.ResponseScoreOmit;

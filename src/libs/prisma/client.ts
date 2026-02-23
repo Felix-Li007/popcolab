@@ -28,8 +28,8 @@ export * from './enums';
  * @example
  * ```
  * const prisma = new PrismaClient()
- * // Fetch zero or more Answers
- * const answers = await prisma.answer.findMany()
+ * // Fetch zero or more Questions
+ * const questions = await prisma.question.findMany()
  * ```
  *
  * Read more in our [docs](https://pris.ly/d/client).
@@ -44,6 +44,11 @@ export type PrismaClient<
 > = $Class.PrismaClient<LogOpts, OmitOpts, ExtArgs>;
 export { Prisma };
 
+/**
+ * Model Question
+ *
+ */
+export type Question = Prisma.QuestionModel;
 /**
  * Model Answer
  *
@@ -104,11 +109,6 @@ export type QuestionDimension = Prisma.QuestionDimensionModel;
  *
  */
 export type QuestionOption = Prisma.QuestionOptionModel;
-/**
- * Model Question
- *
- */
-export type Question = Prisma.QuestionModel;
 /**
  * Model RequestPreference
  *

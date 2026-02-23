@@ -1,27 +1,20 @@
 import { redirect } from 'next/navigation';
-import { currentUser } from '@clerk/nextjs/server';
-import {
-  getTestResult,
-  findOrCreateUserByEmail,
-} from '@/services/response-service';
+import { getPersonalityByKey } from '@/services/response-service';
 import TestResult from '@/components/test/test-result';
 
-export default async function ResultPage() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) redirect('/sign-in');
+export default async function ResultPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; score?: string }>;
+}) {
+  const params = await searchParams;
+  const type = params.type;
+  const totalScore = parseInt(params.score ?? '0');
 
-  const email = clerkUser.emailAddresses[0]?.emailAddress;
-  if (!email) redirect('/test');
+  if (!type) redirect('/test');
 
-  const userId = await findOrCreateUserByEmail(
-    email,
-    clerkUser.fullName ?? undefined
-  );
-  const result = await getTestResult(userId);
-
-  if (!result) {
-    redirect('/test');
-  }
+  const personality = await getPersonalityByKey(type);
+  if (!personality) redirect('/test');
 
   return (
     <div className="flex flex-col gap-6">
@@ -32,10 +25,7 @@ export default async function ResultPage() {
         <h1 className="text-2xl font-bold text-gray-800">Your Result</h1>
       </div>
 
-      <TestResult
-        personality={result.personality}
-        totalScore={result.totalScore}
-      />
+      <TestResult personality={personality} totalScore={totalScore} />
     </div>
   );
 }

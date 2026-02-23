@@ -191,6 +191,54 @@ export async function getTestResult(userId: number): Promise<{
   return { personality: mapPersonalityRow(row), totalScore };
 }
 
+// ─── Anonymous Score Compute (no DB write) ───────────────────────────────────
+
+export async function computeTestResult(answers: UserAnswer[]): Promise<{
+  personalityKey: string;
+  totalScore: number;
+  personality: Personality | null;
+}> {
+  const scored = await Promise.all(
+    answers.map(async a => ({
+      answer: a,
+      ...(await computeNumericValue(a)),
+    }))
+  );
+
+  const questionIds = answers.map(a => a.questionId);
+  const dimMappings = await getDimensionMappings(questionIds);
+
+  const dimensionScoreMap = new Map<number, number>();
+  for (const item of scored) {
+    if (item.numericValue === null) continue;
+    const dims = dimMappings.filter(d => d.questionId === item.answer.questionId);
+    for (const dim of dims) {
+      const current = dimensionScoreMap.get(dim.dimensionId) ?? 0;
+      dimensionScoreMap.set(
+        dim.dimensionId,
+        current + item.numericValue * dim.weight
+      );
+    }
+  }
+
+  const totalScore = Math.round(
+    Array.from(dimensionScoreMap.values()).reduce((a, b) => a + b, 0)
+  );
+
+  const personality = await matchPersonality(totalScore);
+  const personalityKey = personality?.type ?? 'UNKNOWN';
+
+  return { personalityKey, totalScore, personality };
+}
+
+export async function getPersonalityByKey(key: string): Promise<Personality | null> {
+  const row = await prisma.personalityType.findFirst({
+    where: { personality_key: key, status: 'active' },
+  });
+  if (!row) return null;
+  return mapPersonalityRow(row);
+}
+
 // ─── User Bridge (Clerk email → local user id) ────────────────────────────────
 
 export async function findOrCreateUserByEmail(

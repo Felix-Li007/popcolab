@@ -17,6 +17,11 @@ export { Prisma };
 export * as $Enums from './enums';
 export * from './enums';
 /**
+ * Model Question
+ *
+ */
+export type Question = Prisma.QuestionModel;
+/**
  * Model Answer
  *
  */
@@ -76,11 +81,6 @@ export type QuestionDimension = Prisma.QuestionDimensionModel;
  *
  */
 export type QuestionOption = Prisma.QuestionOptionModel;
-/**
- * Model Question
- *
- */
-export type Question = Prisma.QuestionModel;
 /**
  * Model RequestPreference
  *

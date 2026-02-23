@@ -54,6 +54,7 @@ export const JsonNull = runtime.JsonNull;
 export const AnyNull = runtime.AnyNull;
 
 export const ModelName = {
+  Question: 'Question',
   Answer: 'Answer',
   Company: 'Company',
   DimensionCategory: 'DimensionCategory',
@@ -66,7 +67,6 @@ export const ModelName = {
   Provider: 'Provider',
   QuestionDimension: 'QuestionDimension',
   QuestionOption: 'QuestionOption',
-  Question: 'Question',
   RequestPreference: 'RequestPreference',
   Request: 'Request',
   ResponseScore: 'ResponseScore',
@@ -94,6 +94,19 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 
 export type TransactionIsolationLevel =
   (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel];
+
+export const QuestionScalarFieldEnum = {
+  id: 'id',
+  question_type: 'question_type',
+  question_text: 'question_text',
+  question_desc: 'question_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  order_index: 'order_index',
+} as const;
+
+export type QuestionScalarFieldEnum =
+  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
 
 export const AnswerScalarFieldEnum = {
   id: 'id',
@@ -184,13 +197,13 @@ export const PersonalityTypeScalarFieldEnum = {
   personality_key: 'personality_key',
   personality_name: 'personality_name',
   personality_desc: 'personality_desc',
+  created_at: 'created_at',
+  updated_at: 'updated_at',
+  accent_color: 'accent_color',
   emoji: 'emoji',
   stars: 'stars',
   status: 'status',
-  accent_color: 'accent_color',
   score_threshold: 'score_threshold',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
 } as const;
 
 export type PersonalityTypeScalarFieldEnum =
@@ -262,19 +275,6 @@ export const QuestionOptionScalarFieldEnum = {
 
 export type QuestionOptionScalarFieldEnum =
   (typeof QuestionOptionScalarFieldEnum)[keyof typeof QuestionOptionScalarFieldEnum];
-
-export const QuestionScalarFieldEnum = {
-  id: 'id',
-  question_type: 'question_type',
-  question_text: 'question_text',
-  question_desc: 'question_desc',
-  created_at: 'created_at',
-  updated_at: 'updated_at',
-  order_index: 'order_index',
-} as const;
-
-export type QuestionScalarFieldEnum =
-  (typeof QuestionScalarFieldEnum)[keyof typeof QuestionScalarFieldEnum];
 
 export const RequestPreferenceScalarFieldEnum = {
   id: 'id',
@@ -405,16 +405,16 @@ export const SortOrder = {
 
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder];
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last',
-} as const;
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];
-
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive',
 } as const;
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode];
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last',
+} as const;
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder];

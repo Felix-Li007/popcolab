@@ -414,10 +414,6 @@ export type DimensionCategoryScalarRelationFilter = {
   isNot?: Prisma.DimensionCategoryWhereInput;
 };
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string;
-};
-
 export type DimensionCategoryCreateNestedOneWithoutIndexesInput = {
   create?: Prisma.XOR<
     Prisma.DimensionCategoryCreateWithoutIndexesInput,

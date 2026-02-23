@@ -48,7 +48,9 @@ export default function PersonalityTest({ questions }: Props) {
     startTransition(async () => {
       const result = await submitTestAction(answersArray);
       if (result.success) {
-        router.push('/test/result');
+        router.push(
+          `/test/result?type=${result.personalityKey}&score=${result.totalScore}`
+        );
       } else {
         setError(result.error ?? 'Something went wrong. Please try again.');
       }

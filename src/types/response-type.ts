@@ -9,5 +9,7 @@ export type UserAnswer = {
 
 export type TestSubmitResult = {
   success: boolean;
+  personalityKey?: string;
+  totalScore?: number;
   error?: string;
 };
