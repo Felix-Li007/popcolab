@@ -1,0 +1,87 @@
+.header-container {
+  background: var(--color-teal-deep);
+  color: white;
+  width: 100%;
+}
+
+.header-wrapper {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Logo */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo img {
+  height: 32px;
+  width: auto;
+}
+
+.logo span {
+  font-size: var(--text-body);
+  font-weight: 700;
+}
+
+/* Desktop Nav */
+
+.nav-desktop {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: white;
+  font-size: var(--text-sm);
+}
+
+/* Buttons */
+
+.signin-btn,
+.signup-btn {
+  font-size: var(--text-sm);
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.signin-btn {
+  background: transparent;
+  border: 1px solid white;
+}
+
+.signup-btn {
+  background: white;
+  color: black;
+}
+
+/* Mobile Menu */
+
+.menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+}
+
+.nav-mobile {
+  display: none;
+}
+
+.nav-mobile.open {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+  background: var(--color-teal-deep);
+}

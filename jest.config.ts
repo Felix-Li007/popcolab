@@ -18,12 +18,15 @@ const customJestConfig: Config = {
   // testMatch: ["**/__tests__/**/*.test.[jt]s?(x)", "**/__tests__/**/*.spec.[jt]s?(x)"],
   reporters: [
     'default',
-    ['jest-html-reporter', {
-      pageTitle: 'Jest Test Report',
-      outputPath: 'test-reports/unit/jest-report.html',
-      includeFailureMsg: true,
-      includeConsoleLog: true,
-    }]
+    [
+      'jest-html-reporter',
+      {
+        pageTitle: 'Jest Test Report',
+        outputPath: 'test-reports/unit/jest-report.html',
+        includeFailureMsg: true,
+        includeConsoleLog: true,
+      },
+    ],
   ],
 };
 

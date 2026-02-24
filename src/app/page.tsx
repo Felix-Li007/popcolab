@@ -1,19 +1,21 @@
-'use client';
+import Header from '../components/page-Header';
+import HeroSection from '../components/landing-Hero';
+import EventsSection from '../components/landing-EventsSection';
+import CTASection from '../components/landing-CTASection';
+import Footer from '../components/page-Footer';
+import ExperiencesCarousel from '../components/landing-Experiences';
+import ImageGallerySection from '../components/landing-ImageGallerySection';
 
 export default function Home() {
-  const createUser = async () => {
-    const res = await fetch('/api/demo', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'alice@example.com', name: 'Alice' }),
-    });
-    const data = await res.json();
-    console.log(data);
-  };
-
   return (
-    <div>
-      <button onClick={createUser}>Create User</button>
-    </div>
+    <>
+      <Header />
+      <HeroSection />
+      <EventsSection />
+      <ExperiencesCarousel />
+      <ImageGallerySection />
+      <CTASection />
+      <Footer />
+    </>
   );
 }

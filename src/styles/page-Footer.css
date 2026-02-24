@@ -1,0 +1,39 @@
+.footer-container {
+  background: var(--color-teal-deep);
+  color: white;
+  padding: 2rem 1rem;
+  font-size: var(--text-sm);
+}
+
+.footer-wrapper {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.footer-title {
+  font-size: var(--text-body);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.footer-link {
+  display: block;
+  text-decoration: none;
+  color: white;
+  margin-bottom: 0.4rem;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: #ff8de6; /* subtle hover effect */
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: var(--text-xs);
+  opacity: 0.8;
+}
