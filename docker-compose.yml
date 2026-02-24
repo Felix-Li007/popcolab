@@ -4,7 +4,7 @@ services:
   popcolab-app:
     build:
       context: .
-      dockerfile: Docker/Dockerfile
+      dockerfile: docker/Dockerfile
       args:
         NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
     env_file:
@@ -21,6 +21,6 @@ services:
     ports:
       - '80:80'
     volumes:
-      - ./Docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - popcolab-app

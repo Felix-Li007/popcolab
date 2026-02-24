@@ -89,7 +89,7 @@ export async function createQuestionAction(
       options,
       dimensions,
     });
-    revalidatePath('/admin/surveys');
+    revalidatePath('/admin/questions');
     return { errors: {}, success: true };
   } catch {
     return {
@@ -140,7 +140,7 @@ export async function updateQuestionAction(
       options,
       dimensions,
     });
-    revalidatePath('/admin/surveys');
+    revalidatePath('/admin/questions');
     return { errors: {}, success: true };
   } catch {
     return {
@@ -151,5 +151,5 @@ export async function updateQuestionAction(
 
 export async function deleteQuestionAction(id: number): Promise<void> {
   await deleteQuestion(id);
-  revalidatePath('/admin/surveys');
+  revalidatePath('/admin/questions');
 }

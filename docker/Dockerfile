@@ -19,7 +19,7 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
 RUN apk add --no-cache nginx
-COPY Docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 ENV NODE_ENV=production
 

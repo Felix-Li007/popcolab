@@ -1,7 +1,7 @@
 {
   "default": {
     "paths": ["tests/bdd/features/"],
-    "require": ["tests/bdd/steps/*.js"],
+    "require": ["tests/bdd/steps/*.ts"],
     "formatOptions": {
       "snippetInterface": "async-await"
     },

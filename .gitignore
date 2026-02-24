@@ -70,3 +70,5 @@ terraform.tfstate
 
 # Playwright auth session — never commit real credentials
 session.json
+
+prisma

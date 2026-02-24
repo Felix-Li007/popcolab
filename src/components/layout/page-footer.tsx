@@ -112,10 +112,10 @@ export default function PageFooter() {
                 </a>
                 <br />
                 <a
-                  href="mailto:@pop.colab"
+                  href="mailto:xxx@pop.colab"
                   className="hover:text-white transition-colors"
                 >
-                  @pop.colab
+                  xxx@pop.colab
                 </a>
               </div>
             </div>
