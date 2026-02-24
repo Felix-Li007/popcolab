@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import '../styles/landing-Hero.css';
 
@@ -59,10 +60,10 @@ export default function HeroSection() {
 
             {/* CTA Button */}
             <div className="hero-cta">
-              <button className="hero-button">
+              <Link href="/test" className="hero-button">
                 Take the Quiz
                 <ArrowRight className="w-5 h-5" />
-              </button>
+              </Link>
             </div>
 
             {/* Features */}
