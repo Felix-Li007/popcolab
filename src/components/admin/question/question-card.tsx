@@ -24,7 +24,11 @@ export const QUESTION_TYPE_META: Record<
     icon: '☑',
     color: 'bg-purple-100 text-purple-700',
   },
-  scale: { label: 'Scale', icon: '〰', color: 'bg-orange-100 text-orange-700' },
+  scale: {
+    label: 'Scale Choice',
+    icon: '〰',
+    color: 'bg-orange-100 text-orange-700',
+  },
   text_input: {
     label: 'Text Input',
     icon: '✏️',

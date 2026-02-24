@@ -9,13 +9,12 @@ import ImageGallerySection from '@/components/landing-ImageGallerySection';
 export default function Home() {
   return (
     <>
-      <Header />
+      {/* <Header /> */}
       <HeroSection />
       <EventsSection />
       <ExperiencesCarousel />
       <ImageGallerySection />
       <CTASection />
-      <Footer />
     </>
   );
 }

@@ -23,30 +23,7 @@
   --color-coral-pink: var(--palette-coral-pink);
   --color-coral-red: var(--palette-coral-red);
   --color-coral-vibe: var(--palette-coral-vibe);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --palette-background: #0a0a0a;
-    --palette-teal-deep: #09191b;
-    --palette-yellow: #e5d139;
-  }
-}
-
-body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-poppins), sans-serif;
-  font-weight: 400;
-  font-size: 0.875rem;
-  /* 14px — base size for dashboard UI */
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* ─── Typography scale ────────────────────────────────────────────────────── */
-:root {
   /* sizes */
   --text-display: 1.5rem;
   /* 24px — hero / large headings */
@@ -67,6 +44,26 @@ body {
   --weight-normal: 400;
   --weight-semibold: 600;
   --weight-bold: 700;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --palette-background: #0a0a0a;
+    --palette-teal-deep: #09191b;
+    --palette-yellow: #e5d139;
+  }
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-poppins), sans-serif;
+  font-weight: 400;
+  font-size: 0.875rem;
+  /* 14px — base size for dashboard UI */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Ensure ALL elements use Poppins — inputs & buttons don't inherit by default */

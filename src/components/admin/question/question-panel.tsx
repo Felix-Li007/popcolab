@@ -222,7 +222,7 @@ export default function QuestionPanel({
         {/* Description */}
         <TextArea
           name="description"
-          label="Description / Hint"
+          label="Description"
           placeholder="Optional helper text for respondents…"
           defaultValue={initial?.description}
           inputSize="sm"
@@ -267,22 +267,6 @@ export default function QuestionPanel({
                     onChange={e => updateOption(i, 'label', e.target.value)}
                     placeholder="Label"
                     className="flex-1 px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
-                  />
-                  <input
-                    type="text"
-                    name="option_value"
-                    value={opt.value}
-                    onChange={e => updateOption(i, 'value', e.target.value)}
-                    placeholder="Value"
-                    className="w-20 px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
-                  />
-                  <input
-                    type="number"
-                    name="option_score"
-                    value={opt.score}
-                    onChange={e => updateOption(i, 'score', e.target.value)}
-                    placeholder="Score"
-                    className="w-16 px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
                   />
                   {options.length > 2 && (
                     <button
@@ -470,10 +454,10 @@ export default function QuestionPanel({
             <div className="space-y-3">
               {Object.entries(dimsByCategory).map(([cat, catDims]) => (
                 <div key={cat}>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                  <p className="text-caption font-bold text-gray-400 uppercase tracking-wide mb-1.5">
                     {cat}
                   </p>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     {catDims.map(dim => {
                       const isSelected = selectedIds.has(dim.id);
                       const row = dims.find(d => d.dimensionId === dim.id);

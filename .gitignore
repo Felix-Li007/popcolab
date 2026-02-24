@@ -49,10 +49,6 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 
-/generated/prisma
-
-/generated/prisma
-
 # clerk configuration (can include secrets)
 /.clerk/
 
