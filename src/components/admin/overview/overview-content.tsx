@@ -8,7 +8,7 @@ import EventsTable from '@/components/admin/event-table';
 import QuickActions from '@/components/admin/quick-actions';
 import RecentActivity from '@/components/admin/recent-activity';
 import QuizChart from '@/components/admin/quiz-chart';
-import AdminFooter from '@/components/layout/page-footer';
+import AdminFooter from '@/components/admin/page-footer';
 import PersonalityGrid from '@/components/admin/personality/personality-grid';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
@@ -120,7 +120,7 @@ export default function OverviewContent({
                               {meta.icon}
                             </span>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${meta.color}`}
+                              className={` text-badge font-bold px-2 py-0.5 rounded-full ${meta.color}`}
                             >
                               {meta.label}
                             </span>
@@ -131,11 +131,11 @@ export default function OverviewContent({
                             )}
                           </div>
                           <div className={QuestionStyles.previewCardBody}>
-                            <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
+                            <p className="font-semibold text-gray-800 line-clamp-2 leading-snug">
                               {q.text}
                             </p>
                             {q.description && (
-                              <p className="text-xs text-gray-400 line-clamp-1">
+                              <p className="text-gray-400 line-clamp-1">
                                 {q.description}
                               </p>
                             )}
@@ -168,7 +168,7 @@ export default function OverviewContent({
                               <span className="ml-auto">
                                 🕐{' '}
                                 {new Date(q.updatedAt).toLocaleDateString(
-                                  'zh-CN',
+                                  'en-CA',
                                   {
                                     month: '2-digit',
                                     day: '2-digit',

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import { ClerkProvider } from '@clerk/nextjs';
-import Header from '../components/page-Header';
+import Header from '../components/front/page-header';
 import './globals.css';
 
 const poppins = Poppins({

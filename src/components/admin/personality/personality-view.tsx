@@ -4,7 +4,6 @@ import { createPortal } from 'react-dom';
 import type { Personality } from '@/types/personality-type';
 import styles from '@/styles/personality-view-modal.module.css';
 import { Button, Badge } from '@/ui';
-import { getPersonalityStyle } from '@/constants/personality-styles';
 
 type PersonalityViewProps = {
   isOpen: boolean;
@@ -21,15 +20,13 @@ export default function PersonalityView({
 }: PersonalityViewProps) {
   if (!isOpen || typeof window === 'undefined') return null;
 
-  const style = getPersonalityStyle(personality.type);
-
   return createPortal(
     <>
       <div className={styles.backdrop} onClick={onClose} />
 
       <div className={styles.modal}>
         <div
-          className={`bg-gradient-to-r from-lavender via-white to-coral-light px-6 border-b border-pink-light/50 flex items-center justify-between rounded-t-2xl shrink-0 ${styles.header}`}
+          className={`bg-linear-to-r from-lavender via-white to-coral-light px-6 border-b border-pink-light/50 flex items-center justify-between rounded-t-2xl shrink-0 ${styles.header}`}
         >
           <div className="flex items-center gap-3">
             <span className={styles.emoji}>{personality.emoji}</span>
@@ -37,13 +34,7 @@ export default function PersonalityView({
               <h2 className="text-base font-black text-gray-800 leading-tight">
                 {personality.name}
               </h2>
-              <Badge
-                variant="personality"
-                size="sm"
-                bgColor={style.bg}
-                textColor={style.text}
-                className="mt-0.5"
-              >
+              <Badge variant="personality" size="sm" className="mt-0.5">
                 {personality.type}
               </Badge>
             </div>

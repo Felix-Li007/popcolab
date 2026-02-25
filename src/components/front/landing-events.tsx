@@ -1,4 +1,4 @@
-import '../styles/landing-EventsSection.css';
+import '@/styles/landing-EventsSection.css';
 const events = [
   {
     id: 1,

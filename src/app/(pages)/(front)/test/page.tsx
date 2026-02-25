@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { getQuestions } from '@/services/question-service';
 import type { Question } from '@/types/question-type';
-import PersonalityTest from '@/components/test/personality-test';
+import PersonalityTest from '@/components/front/test/personality-test';
 
 export default async function TestPage() {
   const questions = await getQuestions();

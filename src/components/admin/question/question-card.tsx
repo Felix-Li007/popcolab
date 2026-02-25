@@ -111,7 +111,7 @@ export default function QuestionCard({
       </div>
 
       {/* Question text */}
-      <p className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug">
+      <p className="font-semibold text-gray-800 line-clamp-2 leading-snug">
         {question.text}
       </p>
 

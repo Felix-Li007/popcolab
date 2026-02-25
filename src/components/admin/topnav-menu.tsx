@@ -3,43 +3,12 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import styles from '@/styles/top-nav.module.css';
-import { BadgeCounts, NavItem } from '@/types/navmenu-type';
-
-const tabs: NavItem[] = [
-  { label: 'Overview', countKey: 'overview', href: '/admin' },
-  {
-    label: 'Personalities',
-    countKey: 'personalities',
-    href: '/admin/personalities',
-  },
-  { label: 'Questions', countKey: 'questions', href: '/admin/questions' },
-  { label: 'Events', countKey: 'events', href: '/admin/events' },
-  { label: 'Users', countKey: 'users', href: '/admin/users' },
-  { label: 'Bookings', countKey: 'bookings', href: '/admin/bookings' },
-  { label: 'Settings', href: '/admin/settings' },
-];
-
-const topTabs: NavItem[] = [
-  { label: 'Corporate Teams ○', href: '#' },
-  { label: 'Public Group ○', href: '#' },
-  { label: 'Facilitators & Partners +', href: '#' },
-];
-
-function getBadge(item: NavItem, counts?: BadgeCounts) {
-  if (
-    item.countKey &&
-    counts &&
-    counts[item.countKey as keyof BadgeCounts] !== undefined
-  ) {
-    return counts[item.countKey as keyof BadgeCounts];
-  }
-  return item.badge;
-}
+import { getBadge } from '@/utils/menu-helper';
+import { getMenuItem, topTabs, BadgeCounts } from '@/types/menu-item';
 
 export default function TopnavMenu({
   badgeCounts,
 }: {
-  personalitiesCount?: number;
   badgeCounts?: BadgeCounts;
 }) {
   const pathname = usePathname();
@@ -47,15 +16,22 @@ export default function TopnavMenu({
   const isActive = (href: string) =>
     href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
 
-  const resolvedTabs = tabs.map(tab => ({
-    ...tab,
-    badge: getBadge(tab, badgeCounts),
+  const activeItem = getMenuItem(pathname);
+  const resolvedItems = (activeItem?.children ?? []).map(item => ({
+    ...item,
+    badge: getBadge(item, badgeCounts),
   }));
+
+  const activeHref =
+    resolvedItems
+      .map(tab => tab.href)
+      .sort((a, b) => b.length - a.length)
+      .find(href => isActive(href)) ?? '';
 
   return (
     <header className="bg-teal-deep text-white">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 h-14 border-b border-white/10 text-xs">
+      <div className="flex text-heading font-bold items-center justify-between px-4 h-14 border-b border-white/10">
         <nav className="flex items-center gap-4">
           {topTabs.map(t => (
             <a
@@ -139,26 +115,28 @@ export default function TopnavMenu({
       </div>
 
       {/* Tab bar */}
-      <div
-        className={`flex items-center gap-1 px-4 overflow-x-auto ${styles.tabBar}`}
-      >
-        {resolvedTabs.map(tab => (
-          <Link
-            key={tab.label}
-            href={tab.href}
-            className={`flex items-center gap-1.5 px-3 py-2.5 text-xs whitespace-nowrap transition-colors border-b-2 ${
-              isActive(tab.href)
-                ? 'border-gray-800 text-gray-800 font-bold'
-                : 'border-transparent text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            {tab.label}
-            {tab.badge !== undefined && (
-              <span className={styles.badge}>{tab.badge}</span>
-            )}
-          </Link>
-        ))}
-      </div>
+      {resolvedItems.length > 0 && (
+        <div
+          className={`flex items-center gap-1 px-4 overflow-x-auto ${styles.tabBar}`}
+        >
+          {resolvedItems.map(tab => (
+            <Link
+              key={tab.label}
+              href={tab.href}
+              className={`flex items-center gap-1.5 px-3 py-2.5 text-xs whitespace-nowrap transition-colors border-b-2 ${
+                activeHref === tab.href
+                  ? 'border-gray-800 text-gray-800 font-bold'
+                  : 'border-transparent text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {tab.label}
+              {tab.badge !== undefined && (
+                <span className={styles.badge}>{tab.badge}</span>
+              )}
+            </Link>
+          ))}
+        </div>
+      )}
     </header>
   );
 }

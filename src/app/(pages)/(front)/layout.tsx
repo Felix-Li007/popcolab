@@ -1,14 +1,7 @@
 import type { Metadata } from 'next';
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs';
 import '@/app/globals.css';
-import Header from '@/components/page-Header';
-import Footer from '@/components/page-Footer';
+import Header from '@/components/front/page-header';
+import Footer from '@/components/front/page-footer';
 
 export const metadata: Metadata = {
   title: 'Create Next App',

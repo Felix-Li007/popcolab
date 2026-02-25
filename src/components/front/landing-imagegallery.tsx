@@ -1,4 +1,4 @@
-import '../styles/landing-ImageGallerySection.css';
+import '@/styles/landing-ImageGallerySection.css';
 
 const galleryItems = [
   { id: 1, title: 'Creative Spaces', image: '🏢' },

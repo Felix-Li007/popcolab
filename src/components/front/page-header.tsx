@@ -10,7 +10,7 @@ import {
   SignUpButton,
   UserButton,
 } from '@clerk/nextjs';
-import '../styles/page-Header.css';
+import '@/styles/page-Header.css';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);

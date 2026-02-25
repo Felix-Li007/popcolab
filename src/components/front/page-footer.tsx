@@ -1,4 +1,4 @@
-import '../styles/page-Footer.css';
+import '@/styles/page-Footer.css';
 
 const adminLinks = [
   'Dashboard',

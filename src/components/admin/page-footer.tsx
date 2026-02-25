@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { NavItem } from '@/types/navmenu-type';
+import { MenuItem } from '@/types/menu-item';
 
-const adminLinks: NavItem[] = [
+const adminLinks: MenuItem[] = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Dimensions', href: '/admin/dimensions' },
   { label: 'Personalities', href: '/admin/personalities' },
@@ -12,7 +12,7 @@ const adminLinks: NavItem[] = [
   { label: 'Settings', href: '/admin/settings' },
 ];
 
-const supportLinks: NavItem[] = [
+const supportLinks: MenuItem[] = [
   { label: 'Help Centre', href: '#' },
   { label: 'Privacy Policy', href: '#' },
   { label: 'Terms of Use', href: '#' },

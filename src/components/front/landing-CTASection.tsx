@@ -1,4 +1,4 @@
-import '../styles/landing-CTASection.css';
+import '@/styles/landing-CTASection.css';
 
 export default function CTASection() {
   return (

@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
-import '../styles/landing-Experience.css';
+import '@/styles/landing-Experience.css';
 
 const experiences = [
   {

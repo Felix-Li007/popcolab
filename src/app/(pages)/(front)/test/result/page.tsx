@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getPersonalityByKey } from '@/services/response-service';
 import type { Personality } from '@/types/personality-type';
-import PlayPersonalities from '@/components/test/play-personalities';
+import PlayPersonalities from '@/components/front/test/play-personalities';
 
 type PersonalityMatch = {
   personality: Personality;
@@ -40,5 +40,13 @@ export default async function ResultPage({
 
   if (matches.length === 0) redirect('/test');
 
-  return <PlayPersonalities matches={matches} />;
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <main className="flex-1">
+        <div className="max-w-4xl mx-auto px-4 py-12">
+          <PlayPersonalities matches={matches} />
+        </div>
+      </main>
+    </div>
+  );
 }

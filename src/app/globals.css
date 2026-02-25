@@ -33,8 +33,8 @@
   /* 14px — section heading (h2) */
   --text-subhead: 0.8125rem;
   /* 13px — card title, strong label */
-  --text-body: 0.8125rem;
-  /* 13px — body copy, descriptions */
+  --text-body: 0.75rem;
+  /* 12px — body copy, descriptions */
   --text-caption: 0.6875rem;
   /* 11px — secondary meta, hints */
   --text-badge: 0.625rem;
@@ -54,13 +54,17 @@
   }
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-poppins), sans-serif;
-  font-weight: 400;
-  font-size: 0.875rem;
-  /* 14px — base size for dashboard UI */
+  font-weight: 600;
+  font-size: 0.75rem;
+  /* 12px — base size for dashboard UI */
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

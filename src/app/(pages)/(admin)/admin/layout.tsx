@@ -1,5 +1,5 @@
-import SidenavMenu from '@/components/layout/sidenav-menu';
-import TopnavMenu from '@/components/layout/topnav-menu';
+import SidenavMenu from '@/components/admin/sidenav-menu';
+import TopnavMenu from '@/components/admin/topnav-menu';
 import { getBadgeCounts } from '@/services/statistic-service';
 
 export default async function AdminLayout({

@@ -5,7 +5,7 @@ import PersonalityCardGrid from '@/components/admin/personality/personality-grid
 import StatsCard from '@/components/admin/stats-card';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
-import PageFooter from '@/components/layout/page-footer';
+import PageFooter from '@/components/admin/page-footer';
 import ContentHeader from '@/components/admin/content-header';
 import { Button, Badge } from '@/ui';
 import { Personality } from '@/types/personality-type';
