@@ -13,28 +13,32 @@ test.describe('Personalities page', () => {
   });
 
   test('personality cards are rendered', async ({ page }) => {
-    // PersonalityCardGrid renders individual cards — wait for at least one.
-    const card = page.locator('[class*="card"]').first();
-    await expect(card).toBeVisible();
+    const cardGrid = page.locator('[class*="cardGrid"]').first();
+    await expect(cardGrid).toBeVisible();
+    await expect(
+      cardGrid.getByRole('button', { name: /^edit$/i }).first()
+    ).toBeVisible();
   });
 
   test('filter tabs render — All, Active, Draft', async ({ page }) => {
     for (const tab of ['All', 'Active', 'Draft']) {
-      await expect(page.getByRole('button', { name: tab })).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: new RegExp(`^${tab}`, 'i') })
+      ).toBeVisible();
     }
   });
 
   test('clicking "Active" filter does not crash the page', async ({ page }) => {
-    await page.getByRole('button', { name: 'Active' }).click();
+    await page.getByRole('button', { name: /^Active/i }).click();
     // Page should remain on the personalities route without error.
     await expect(page).toHaveURL(/\/admin\/personalities/);
-    await expect(page.getByRole('button', { name: 'Active' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Active/i })).toBeVisible();
   });
 
   test('clicking "Draft" filter does not crash the page', async ({ page }) => {
-    await page.getByRole('button', { name: 'Draft' }).click();
+    await page.getByRole('button', { name: /^Draft/i }).click();
     await expect(page).toHaveURL(/\/admin\/personalities/);
-    await expect(page.getByRole('button', { name: 'Draft' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Draft/i })).toBeVisible();
   });
 
   test('"New Personality" button opens the create modal', async ({ page }) => {

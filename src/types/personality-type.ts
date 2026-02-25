@@ -4,7 +4,6 @@ export type Personality = {
   name: string;
   description: string;
   emoji: string;
-  stars: number;
   status: 'active' | 'draft';
   accentColor?: string;
   threshold: number;

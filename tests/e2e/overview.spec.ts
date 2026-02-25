@@ -13,54 +13,56 @@ test.describe('Admin Overview page', () => {
   });
 
   test('stats grid is visible', async ({ page }) => {
-    // Each stat card sits inside the stats section.
-    // We look for at least two numeric stat values rendered on the page.
-    const statsSection = page
-      .locator('[class*="stats"], [class*="stat"]')
-      .first();
-    await expect(statsSection).toBeVisible();
+    await expect(
+      page.getByText('Quiz Completions', { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText('Bookings / Month', { exact: true })
+    ).toBeVisible();
   });
 
   test('Personalities preview section renders cards', async ({ page }) => {
     const section = page
       .getByRole('heading', { name: /personalit/i })
-      .locator('..');
+      .locator('xpath=ancestor::section[1]');
 
     await expect(section).toBeVisible();
-
-    // At least one personality card should be present.
-    const cards = page.locator('[class*="personalityCard"], [class*="card"]');
-    await expect(cards.first()).toBeVisible();
+    await expect(
+      section.getByRole('button', { name: /^edit$/i }).first()
+    ).toBeVisible();
   });
 
-  test('Surveys preview section renders question cards', async ({ page }) => {
+  test('Questions preview section renders question cards', async ({ page }) => {
     const section = page
-      .getByRole('heading', { name: /survey/i })
-      .locator('..');
+      .getByRole('heading', { name: /questions/i })
+      .locator('xpath=ancestor::section[1]');
 
     await expect(section).toBeVisible();
 
-    // At least one survey preview card.
-    const cards = page.locator('[class*="previewCard"]');
-    await expect(cards.first()).toBeVisible();
+    await expect(
+      section.locator('a[href^="/admin/questions?id="]').first()
+    ).toBeVisible();
   });
 
-  test('"View all" link in Surveys section navigates to /admin/surveys', async ({
+  test('"View all" link in Questions section navigates to /admin/questions', async ({
     page,
   }) => {
-    const link = page.getByRole('link', { name: /view all/i }).last(); // last "View all" should be Surveys section
+    const questionsSection = page
+      .getByRole('heading', { name: /questions/i })
+      .locator('xpath=ancestor::section[1]');
+    const link = questionsSection.getByRole('link', { name: /view all/i });
 
     await link.click();
-    await expect(page).toHaveURL(/\/admin\/surveys/);
+    await expect(page).toHaveURL(/\/admin\/questions(?:\?.*)?$/);
   });
 
-  test('clicking a survey preview card navigates with ?id= param', async ({
+  test('clicking a question preview card navigates with ?id= param', async ({
     page,
   }) => {
-    const card = page.locator('[class*="previewCard"]').first();
+    const card = page.locator('a[href^="/admin/questions?id="]').first();
     await expect(card).toBeVisible();
 
     await card.click();
-    await expect(page).toHaveURL(/\/admin\/surveys\?id=/);
+    await expect(page).toHaveURL(/\/admin\/questions\?id=\d+/);
   });
 });

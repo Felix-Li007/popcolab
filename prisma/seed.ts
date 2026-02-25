@@ -13,7 +13,6 @@ const personalities = [
     personality_desc:
       'Joy through humour, wit, and lightness. Brings laughter and levity to every experience.',
     emoji: '🃏',
-    stars: 4,
     status: 'active',
     accent_color: '#ff8de6',
   },
@@ -23,7 +22,6 @@ const personalities = [
     personality_desc:
       'Alive through movement, dance, and physical adventure. Learns best by doing.',
     emoji: '💃',
-    stars: 5,
     status: 'active',
     accent_color: '#86efac',
   },
@@ -33,7 +31,6 @@ const personalities = [
     personality_desc:
       'Thrives on discovering new places, ideas, and perspectives. Curiosity-driven.',
     emoji: '🧭',
-    stars: 4,
     status: 'active',
     accent_color: '#fdba74',
   },
@@ -43,7 +40,6 @@ const personalities = [
     personality_desc:
       'Fueled by challenge, rivalry, and the rush of competition. Loves to win.',
     emoji: '🏆',
-    stars: 3,
     status: 'active',
     accent_color: '#f5dd42',
   },
@@ -53,7 +49,6 @@ const personalities = [
     personality_desc:
       'Finds joy in gathering, cataloguing, and mastering a domain of interest.',
     emoji: '🏅',
-    stars: 4,
     status: 'active',
     accent_color: '#93c5fd',
   },
@@ -63,7 +58,6 @@ const personalities = [
     personality_desc:
       'Expresses through making — art, music, building, crafting imaginative worlds.',
     emoji: '🎨',
-    stars: 5,
     status: 'active',
     accent_color: '#e9d5ff',
   },
@@ -73,7 +67,6 @@ const personalities = [
     personality_desc:
       'Loves to organize, lead, and design the experience for others to enjoy.',
     emoji: '🎬',
-    stars: 3,
     status: 'draft',
     accent_color: '#ff8de6',
   },
@@ -83,7 +76,6 @@ const personalities = [
     personality_desc:
       'Captivates through narrative, roleplay, and imaginative world-building.',
     emoji: '📖',
-    stars: 4,
     status: 'draft',
     accent_color: '#fdba74',
   },

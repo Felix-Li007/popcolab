@@ -24,7 +24,6 @@ export default function PersonalityGrid({
           name={p.name}
           description={p.description}
           emoji={p.emoji}
-          stars={p.stars}
           threshold={p.threshold}
           accentColor={p.accentColor}
           onEdit={() => onEdit(p.id!)}

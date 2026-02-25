@@ -11,7 +11,6 @@ type CreatePersonalityInput = {
   name: string;
   description: string;
   emoji: string;
-  stars: number;
   status: string;
   accentColor: string;
   threshold: number;
@@ -32,7 +31,6 @@ export function mapPersonalityRow(row: PersonalityRow): Personality {
     name: row.personality_name,
     description: row.personality_desc ?? '',
     emoji: row.emoji ?? '',
-    stars: row.stars,
     status: row.status as 'active' | 'draft',
     accentColor: row.accent_color ?? undefined,
     threshold: row.score_threshold,
@@ -113,7 +111,6 @@ export async function createPersonality(
       personality_name: input.name,
       personality_desc: input.description,
       emoji: input.emoji,
-      stars: input.stars,
       status: input.status,
       accent_color: input.accentColor,
       score_threshold: input.threshold,
@@ -131,7 +128,6 @@ export async function updatePersonality(
       personality_name: input.name,
       personality_desc: input.description,
       emoji: input.emoji,
-      stars: input.stars,
       status: input.status,
       accent_color: input.accentColor,
       score_threshold: input.threshold,

@@ -23,7 +23,6 @@ export async function createPersonalityAction(
   const type = formData.get('type')?.toString().trim().toUpperCase() ?? '';
   const description = formData.get('description')?.toString().trim() ?? '';
   const emoji = formData.get('emoji')?.toString() ?? '';
-  const stars = parseInt(formData.get('stars')?.toString() ?? '3', 10);
   const status = formData.get('status')?.toString() ?? 'active';
   const accentColor = formData.get('accentColor')?.toString() ?? '';
   const threshold = parseFloat(formData.get('threshold')?.toString() ?? '0');
@@ -42,7 +41,6 @@ export async function createPersonalityAction(
       name,
       description,
       emoji,
-      stars,
       status,
       accentColor,
       threshold,
@@ -67,7 +65,6 @@ export async function updatePersonalityAction(
   const name = formData.get('name')?.toString().trim() ?? '';
   const description = formData.get('description')?.toString().trim() ?? '';
   const emoji = formData.get('emoji')?.toString() ?? '';
-  const stars = parseInt(formData.get('stars')?.toString() ?? '3', 10);
   const status = formData.get('status')?.toString() ?? 'active';
   const accentColor = formData.get('accentColor')?.toString() ?? '';
   const threshold = parseFloat(formData.get('threshold')?.toString() ?? '0');
@@ -80,7 +77,6 @@ export async function updatePersonalityAction(
       name,
       description,
       emoji,
-      stars,
       status,
       accentColor,
       threshold,
