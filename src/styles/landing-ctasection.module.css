@@ -1,0 +1,165 @@
+@reference "../app/globals.css";
+
+.section {
+  position: relative;
+  overflow: hidden;
+  padding: 5rem 1rem;
+  background: linear-gradient(
+    to bottom right,
+    var(--color-teal-deep),
+    var(--color-teal-medium)
+  );
+}
+
+.pinkCircle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 24rem;
+  height: 24rem;
+  margin-top: -12rem;
+  margin-right: -12rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-pink-light) 20%, transparent);
+}
+
+.lightCircle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 20rem;
+  height: 20rem;
+  margin-left: -10rem;
+  margin-bottom: -10rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-pink-light) 12%, transparent);
+}
+
+.container {
+  position: relative;
+  z-index: 10;
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.heading {
+  margin: 0;
+  color: white;
+  font-size: 2.25rem;
+  line-height: 1.15;
+  font-weight: var(--weight-bold);
+}
+
+.subheading {
+  margin: 0 auto;
+  max-width: 48rem;
+  color: color-mix(in srgb, white 90%, transparent);
+  font-size: 1.25rem;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  width: 100%;
+  border-radius: 0.5rem;
+  padding: 0.9rem 2rem;
+  font-size: 1rem;
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryButton {
+  border: none;
+  background: var(--color-magenta);
+  color: white;
+  box-shadow: 0 10px 25px color-mix(in srgb, black 20%, transparent);
+}
+
+.primaryButton:hover {
+  transform: scale(1.03);
+  background: color-mix(in srgb, var(--color-magenta) 88%, black);
+}
+
+.secondaryButton {
+  border: 2px solid white;
+  background: color-mix(in srgb, white 20%, transparent);
+  color: white;
+}
+
+.secondaryButton:hover {
+  background: color-mix(in srgb, white 30%, transparent);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid color-mix(in srgb, white 20%, transparent);
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statValue {
+  color: white;
+  font-size: 1.875rem;
+  font-weight: var(--weight-bold);
+}
+
+.statLabel {
+  color: color-mix(in srgb, white 80%, transparent);
+  font-size: var(--text-body);
+}
+
+@media (min-width: 640px) {
+  .actions {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: auto;
+  }
+
+  .stats {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: 8rem 1rem;
+  }
+
+  .heading {
+    font-size: 3rem;
+  }
+
+  .subheading {
+    font-size: 1.5rem;
+  }
+}

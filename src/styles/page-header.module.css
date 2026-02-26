@@ -1,10 +1,12 @@
-.header-container {
+@reference "../app/globals.css";
+
+.headerContainer {
   background: var(--color-teal-deep);
   color: white;
   width: 100%;
 }
 
-.header-wrapper {
+.headerWrapper {
   max-width: 1200px;
   margin: auto;
   padding: 0.75rem 1rem;
@@ -12,8 +14,6 @@
   align-items: center;
   justify-content: space-between;
 }
-
-/* Logo */
 
 .logo {
   display: flex;
@@ -28,60 +28,85 @@
 
 .logo span {
   font-size: var(--text-body);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
 }
 
-/* Desktop Nav */
-
-.nav-desktop {
+.navDesktop {
   display: flex;
   gap: 1.5rem;
 }
 
-.nav-link {
+.navLink {
   text-decoration: none;
   color: white;
-  font-size: var(--text-sm);
+  font-size: var(--text-body);
 }
 
-/* Buttons */
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-.signin-btn,
-.signup-btn {
-  font-size: var(--text-sm);
+.signinBtn,
+.signupBtn {
+  font-size: var(--text-body);
   padding: 0.4rem 0.9rem;
   border-radius: 6px;
   border: none;
   cursor: pointer;
 }
 
-.signin-btn {
+.signinBtn {
   background: transparent;
   border: 1px solid white;
 }
 
-.signup-btn {
+.signupBtn {
   background: white;
   color: black;
 }
 
-/* Mobile Menu */
-
-.menu-btn {
+.menuBtn {
   display: none;
   background: none;
   border: none;
   color: white;
 }
 
-.nav-mobile {
+.navMobile {
   display: none;
 }
 
-.nav-mobile.open {
+.open {
   display: flex;
   flex-direction: column;
   padding: 1rem;
   gap: 1rem;
   background: var(--color-teal-deep);
+}
+
+.mobileAuthBlock {
+  padding-top: 1rem;
+  border-top: 1px solid color-mix(in srgb, white 20%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .navDesktop,
+  .authButtons {
+    display: none;
+  }
+
+  .menuBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }

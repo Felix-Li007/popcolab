@@ -1,4 +1,4 @@
-import '@/styles/landing-EventsSection.css';
+import styles from '@/styles/landing-events.module.css';
 const events = [
   {
     id: 1,
@@ -28,39 +28,41 @@ const events = [
 
 export default function EventsSection() {
   return (
-    <section className="events-section">
-      <div className="events-container">
+    <section className={styles['events-section']}>
+      <div className={styles['events-container']}>
         {/* Section Header */}
-        <div className="events-header">
-          <h2 className="events-title">Want to see more?</h2>
-          <a href="#" className="events-link">
+        <div className={styles['events-header']}>
+          <h2 className={styles['events-title']}>Want to see more?</h2>
+          <a href="#" className={styles['events-link']}>
             Find more Events →
           </a>
         </div>
 
         {/* Events Grid */}
-        <div className="events-grid">
+        <div className={styles['events-grid']}>
           {events.map(event => (
             <div
               key={event.id}
-              className="event-card"
+              className={styles['event-card']}
               style={{ backgroundColor: event.bgColor }}
             >
               {/* Event Number */}
-              <div className="event-number">{event.number}</div>
+              <div className={styles['event-number']}>{event.number}</div>
 
               {/* Image Area */}
-              <div className="event-image">{event.image}</div>
+              <div className={styles['event-image']}>{event.image}</div>
 
               {/* Content */}
-              <div className="event-content">
-                <h3 className="event-title">{event.title}</h3>
-                <p className="event-description">{event.description}</p>
+              <div className={styles['event-content']}>
+                <h3 className={styles['event-title']}>{event.title}</h3>
+                <p className={styles['event-description']}>
+                  {event.description}
+                </p>
               </div>
 
               {/* Learn More Link */}
-              <div className="event-link-wrapper">
-                <a href="#" className="event-link">
+              <div className={styles['event-link-wrapper']}>
+                <a href="#" className={styles['event-link']}>
                   Learn More →
                 </a>
               </div>

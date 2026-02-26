@@ -20,7 +20,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:bdd": "cucumber-js --require-module ts-node/register --require tests/bdd/steps/*.ts tests/bdd/features/*.feature",
     "prepare": "husky",
-    "seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",

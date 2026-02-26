@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -10,47 +11,49 @@ import {
   SignUpButton,
   UserButton,
 } from '@clerk/nextjs';
-import '@/styles/page-Header.css';
+import styles from '@/styles/page-header.module.css';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="header-container">
-      <div className="header-wrapper">
-        <Link href="/" className="logo">
-          <img
-            src="/logo/logo-icon.png" // path from public folder
-            alt="PopColab Logo"
-            className="logo-img"
+    <header className={styles.headerContainer}>
+      <div className={styles.headerWrapper}>
+        <Link href="/" className={styles.logo}>
+          <Image
+            src="/logo/logo-icon.png"
+            alt="Pop CoLab"
+            width={32}
+            height={32}
+            className="rounded-full"
           />
           <span>PopColab</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="nav-desktop">
-          <Link href="/" className="nav-link">
+        <nav className={styles.navDesktop}>
+          <Link href="/" className={styles.navLink}>
             Home
           </Link>
-          <Link href="/" className="nav-link">
+          <Link href="/" className={styles.navLink}>
             About
           </Link>
-          <Link href="/" className="nav-link">
+          <Link href="/" className={styles.navLink}>
             Services
           </Link>
-          <Link href="/" className="nav-link">
+          <Link href="/" className={styles.navLink}>
             Contact
           </Link>
         </nav>
 
         {/* Auth Buttons */}
-        <div className="auth-buttons">
+        <div className={styles.authButtons}>
           <SignedOut>
             <SignInButton>
-              <button className="signin-btn">Sign In</button>
+              <button className={styles.signinBtn}>Sign In</button>
             </SignInButton>
             <SignUpButton>
-              <button className="signup-btn">Sign Up</button>
+              <button className={styles.signupBtn}>Sign Up</button>
             </SignUpButton>
           </SignedOut>
           <SignedIn>
@@ -60,7 +63,7 @@ export default function Header() {
 
         {/* Mobile Menu Toggle */}
         <button
-          className="menu-btn"
+          className={styles.menuBtn}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
         >
@@ -73,35 +76,27 @@ export default function Header() {
       </div>
 
       {/* Mobile Navigation */}
-      <nav className={`nav-mobile ${isOpen ? 'open' : ''}`}>
-        <Link href="/" className="nav-link">
+      <nav className={`${styles.navMobile} ${isOpen ? styles.open : ''}`}>
+        <Link href="/" className={styles.navLink}>
           Home
         </Link>
-        <Link href="/" className="nav-link">
+        <Link href="/" className={styles.navLink}>
           About
         </Link>
-        <Link href="/" className="nav-link">
+        <Link href="/" className={styles.navLink}>
           Services
         </Link>
-        <Link href="/" className="nav-link">
+        <Link href="/" className={styles.navLink}>
           Contact
         </Link>
 
-        <div
-          style={{
-            paddingTop: '1rem',
-            borderTop: '1px solid rgba(255,255,255,0.2)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-          }}
-        >
+        <div className={styles.mobileAuthBlock}>
           <SignedOut>
             <SignInButton>
-              <button className="signin-btn">Sign In</button>
+              <button className={styles.signinBtn}>Sign In</button>
             </SignInButton>
             <SignUpButton>
-              <button className="signup-btn" style={{ width: '100%' }}>
+              <button className={`${styles.signupBtn} ${styles.fullWidth}`}>
                 Sign Up
               </button>
             </SignUpButton>

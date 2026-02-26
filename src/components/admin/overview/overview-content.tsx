@@ -8,7 +8,6 @@ import EventsTable from '@/components/admin/event-table';
 import QuickActions from '@/components/admin/quick-actions';
 import RecentActivity from '@/components/admin/recent-activity';
 import QuizChart from '@/components/admin/quiz-chart';
-import AdminFooter from '@/components/admin/page-footer';
 import PersonalityGrid from '@/components/admin/personality/personality-grid';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
@@ -54,7 +53,7 @@ export default function OverviewContent({
 
   return (
     <>
-      <div className="flex flex-col min-h-full">
+      <div className="flex flex-col">
         <div className="flex flex-1 gap-0">
           <div className="flex-1 min-w-0 p-4 space-y-5">
             <DashboardHeader onNewPersonality={openCreate} />
@@ -196,8 +195,6 @@ export default function OverviewContent({
             <QuizChart />
           </aside>
         </div>
-
-        <AdminFooter />
       </div>
 
       <PersonalityForm

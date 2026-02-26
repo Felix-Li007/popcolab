@@ -17,7 +17,8 @@
   z-index: 9999;
   width: min(28rem, calc(100vw - 2rem));
   max-height: 92vh;
-  background-color: #ffffff;
+  /* background-color: #ffffff; */
+  @apply bg-background;
   border-radius: 1rem;
   border: 1px solid #f3e8ff;
   box-shadow: 0 20px 60px -10px rgba(0, 0, 0, 0.25);

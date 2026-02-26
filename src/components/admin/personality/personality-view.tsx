@@ -2,7 +2,7 @@
 
 import { createPortal } from 'react-dom';
 import type { Personality } from '@/types/personality-type';
-import styles from '@/styles/personality-view-modal.module.css';
+import styles from '@/styles/personality-view.module.css';
 import { Button, Badge } from '@/ui';
 
 type PersonalityViewProps = {
@@ -84,7 +84,7 @@ export default function PersonalityView({
         </div>
 
         <div
-          className={`px-6 border-t border-gray-100 bg-white flex items-center gap-3 shrink-0 ${styles.footer}`}
+          className={`px-6 border-t border-gray-100flex items-center gap-3 shrink-0 ${styles.footer}`}
         >
           <Button
             onClick={onClose}

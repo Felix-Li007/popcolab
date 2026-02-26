@@ -3,6 +3,7 @@ model DimensionIndex {
   index_key             String?               @db.VarChar(50)
   category_id           Int
   index_name            String                @db.VarChar(50)
+  index_notes           String?
   data_type             String                @db.VarChar(20)
   hard_filter           Boolean
   scale_min             Int?
@@ -10,6 +11,7 @@ model DimensionIndex {
   created_at            DateTime              @default(now()) @db.Timestamp(6)
   updated_at            DateTime              @updatedAt @db.Timestamp(6)
   category              DimensionCategory     @relation(fields: [category_id], references: [id])
+  dimension_options     DimensionOption[]
   experience_dimensions ExperienceDimension[]
   question_dimensions   QuestionDimension[]
   request_preferences   RequestPreference[]

@@ -1,11 +1,13 @@
-.footer-container {
+@reference "../app/globals.css";
+
+.footerContainer {
   background: var(--color-teal-deep);
   color: white;
   padding: 2rem 1rem;
-  font-size: var(--text-sm);
+  font-size: var(--text-body);
 }
 
-.footer-wrapper {
+.footerWrapper {
   max-width: 1200px;
   margin: auto;
   display: grid;
@@ -13,13 +15,13 @@
   gap: 2rem;
 }
 
-.footer-title {
-  font-size: var(--text-body);
-  font-weight: 700;
+.footerTitle {
+  font-size: var(--text-subhead);
+  font-weight: var(--weight-bold);
   margin-bottom: 0.75rem;
 }
 
-.footer-link {
+.footerLink {
   display: block;
   text-decoration: none;
   color: white;
@@ -27,13 +29,20 @@
   transition: color 0.2s;
 }
 
-.footer-link:hover {
-  color: #ff8de6; /* subtle hover effect */
+.footerLink:hover {
+  color: var(--color-pink-light);
 }
 
-.footer-bottom {
+.footerBottom {
   text-align: center;
   margin-top: 2rem;
-  font-size: var(--text-xs);
+  font-size: var(--text-caption);
   opacity: 0.8;
+}
+
+.footerBottomLinks {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
 }

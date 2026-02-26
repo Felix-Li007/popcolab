@@ -5,7 +5,6 @@ import PersonalityCardGrid from '@/components/admin/personality/personality-grid
 import StatsCard from '@/components/admin/stats-card';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
-import PageFooter from '@/components/admin/page-footer';
 import ContentHeader from '@/components/admin/content-header';
 import { Button, Badge } from '@/ui';
 import { Personality } from '@/types/personality-type';
@@ -55,7 +54,7 @@ export default function PersonalityContent({ initialData }: Props) {
 
   return (
     <>
-      <div className="flex flex-col min-h-full">
+      <div className="flex flex-col">
         <div className="flex-1 p-4 flex flex-col gap-5 min-h-0">
           <ContentHeader
             emoji="🎭"
@@ -160,8 +159,6 @@ export default function PersonalityContent({ initialData }: Props) {
             ))}
           </div>
         </div>
-
-        <PageFooter />
       </div>
 
       <PersonalityForm

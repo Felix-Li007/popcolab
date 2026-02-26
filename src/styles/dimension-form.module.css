@@ -1,0 +1,30 @@
+@reference "../app/globals.css";
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: color-mix(in srgb, var(--color-foreground) 45%, transparent);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.wideCard {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  width: min(48rem, calc(100vw - 2rem));
+  max-height: 90vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  /* background-color: var(--color-background); */
+  @apply bg-background;
+  border-radius: 1.5rem;
+  box-shadow: 0 24px 64px -8px color-mix(in srgb, black 18%, transparent);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}

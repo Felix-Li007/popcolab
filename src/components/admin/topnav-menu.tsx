@@ -2,14 +2,19 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import styles from '@/styles/top-nav.module.css';
+import Image from 'next/image';
+import styles from '@/styles/topnav-menu.module.css';
 import { getBadge } from '@/utils/menu-helper';
 import { getMenuItem, topTabs, BadgeCounts } from '@/types/menu-item';
 
 export default function TopnavMenu({
   badgeCounts,
+  isSidebarOpen = false,
+  onToggleSidebar,
 }: {
   badgeCounts?: BadgeCounts;
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
 }) {
   const pathname = usePathname();
 
@@ -29,27 +34,71 @@ export default function TopnavMenu({
       .find(href => isActive(href)) ?? '';
 
   return (
-    <header className="bg-teal-deep text-white">
+    <header className="bg-teal-deep  text-white">
       {/* Top bar */}
-      <div className="flex text-heading font-bold items-center justify-between px-4 h-14 border-b border-white/10">
-        <nav className="flex items-center gap-4">
-          {topTabs.map(t => (
-            <a
-              key={t.label}
-              href={t.href}
-              className="text-white/70 hover:text-white transition-colors"
+      <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-14 border-b border-white/10 gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isSidebarOpen}
+            className="sm:hidden w-9 h-9 rounded-md border border-white/20 hover:bg-white/10 flex items-center justify-center shrink-0 transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              {t.label}
-            </a>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
+              {isSidebarOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
+          </button>
+          <Link
+            href="/admin"
+            aria-label="Go to dashboard"
+            className="sm:hidden w-8 h-8 rounded-full overflow-hidden shrink-0"
+          >
+            <Image
+              src="/logo/logo-icon.png"
+              alt="Pop CoLab"
+              width={32}
+              height={32}
+            />
+          </Link>
+          <nav className="hidden md:flex items-center gap-4">
+            {topTabs.map(t => (
+              <a
+                key={t.label}
+                href={t.href}
+                className="text-white/70 hover:text-white transition-colors whitespace-nowrap"
+              >
+                {t.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Search */}
-          <div className="relative">
+          <div className="relative hidden sm:block">
             <input
               type="text"
               placeholder="Search..."
-              className="bg-white/10 text-white placeholder-white/50 text-xs px-3 py-1.5 rounded-full w-36 focus:outline-none focus:ring-1 focus:ring-white/30"
+              className="bg-white/10 text-white placeholder-white/50 text-xs px-3 py-1.5 rounded-full w-32 md:w-36 focus:outline-none focus:ring-1 focus:ring-white/30"
             />
             <svg
               className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/50"
@@ -80,7 +129,7 @@ export default function TopnavMenu({
             </svg>
           </button>
           {/* Divider */}
-          <div className="w-px h-6 bg-white/20 mx-1" />
+          <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
           {/* User avatar */}
           <button className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-lg hover:bg-white/10 transition-colors group">
             <div className="relative shrink-0">

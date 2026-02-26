@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import PageFooter from '@/components/admin/page-footer';
 import QuestionPanel from '@/components/admin/question/question-panel';
 import type { Question, DimensionIndex } from '@/types/question-type';
 import {
@@ -11,6 +10,7 @@ import {
   deleteQuestionAction,
 } from '@/actions/question-actions';
 import { Button, Badge } from '@/ui';
+import PaginationBar from '@/components/shared/pagination-bar';
 import StatsCard from '@/components/admin/stats-card';
 import PageHeader from '@/components/admin/content-header';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
@@ -112,7 +112,7 @@ export default function QuestionContent({
 
   return (
     <>
-      <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex flex-col">
         <div className="p-4 pb-0 shrink-0">
           <PageHeader
             emoji="📋"
@@ -315,51 +315,11 @@ export default function QuestionContent({
               )}
             </div>
 
-            {totalPages > 1 && (
-              <div className="px-3 py-2 border-t border-gray-100 flex items-center justify-between shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  title="Previous page"
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                <span className="text-[10px] font-semibold text-gray-500">
-                  {page} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  title="Next page"
-                  className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                >
-                  <svg
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-4 h-4"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            )}
+            <PaginationBar
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
 
           <div
@@ -392,8 +352,6 @@ export default function QuestionContent({
             )}
           </div>
         </div>
-
-        <PageFooter />
       </div>
     </>
   );

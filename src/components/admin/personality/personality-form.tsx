@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useActionState } from 'react';
 import { createPortal } from 'react-dom';
-import styles from '@/styles/personality-form-modal.module.css';
+import styles from '@/styles/personality-form.module.css';
 import { Button, Input, TextArea } from '@/ui';
 import type { PersonalityFormState } from '@/types/personality-type';
 

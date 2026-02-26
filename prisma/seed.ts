@@ -492,6 +492,54 @@ const dimensionIndexes = [
   },
 ];
 
+type DimensionOptionSeed = {
+  index_key: string;
+  allowed_values: string[];
+};
+
+const dimensionOptions: DimensionOptionSeed[] = [
+  {
+    index_key: 'HUMOR',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'KINESIS',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'CREATIVITY',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'STRATEGY',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'LEADERSHIP',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'COLLABORATION',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'SPOTLIGHT',
+    allowed_values: ['1', '2', '3', '4', '5'],
+  },
+  {
+    index_key: 'COMPETITION',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'EXPLORATION',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+  {
+    index_key: 'MASTERY',
+    allowed_values: ['low', 'medium', 'high'],
+  },
+];
+
 // question_dimension mappings: question order_index → [{ indexKey, weight }]
 type DimMapping = { indexKey: string; weight: number };
 const questionDimensionMappings: Record<number, DimMapping[]> = {
@@ -592,6 +640,7 @@ async function main() {
   }
 
   // ── Dimension Categories ───────────────────────────────────────────────────
+  await prisma.dimensionOption.deleteMany({});
   await prisma.dimensionIndex.deleteMany({});
   await prisma.dimensionCategory.deleteMany({});
   console.log('🗑️  Cleared existing dimensions');
@@ -620,6 +669,26 @@ async function main() {
     });
     indexKeyMap.set(idx.index_key, created.id);
     console.log(`  ✅ [${idx.category}] ${idx.index_name} (${idx.index_key})`);
+  }
+
+  // ── Dimension Options ──────────────────────────────────────────────────────
+  for (const opt of dimensionOptions) {
+    const dimensionId = indexKeyMap.get(opt.index_key);
+    if (!dimensionId) {
+      console.warn(`⚠️  No dimension with key ${opt.index_key} for options`);
+      continue;
+    }
+
+    await prisma.dimensionOption.createMany({
+      data: opt.allowed_values.map(value => ({
+        dimension_id: dimensionId,
+        allowed_value: value,
+      })),
+    });
+
+    console.log(
+      `  ✅ [${opt.index_key}] ${opt.allowed_values.length} option value(s)`
+    );
   }
 
   // ── Question ↔ Dimension Mappings ─────────────────────────────────────────

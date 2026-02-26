@@ -61,7 +61,7 @@ yarn.lock
 terraform.tfstate.d
 terraform.tfstate.backup
 terraform.tfstate
-.terraform.lock.hcl
+.terraform.lock.hcls
 
 .vscode
 
@@ -69,3 +69,4 @@ terraform.tfstate
 session.json
 
 prisma
+!/prisma/

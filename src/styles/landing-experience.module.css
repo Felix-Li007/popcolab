@@ -85,6 +85,12 @@
   min-width: 0; /* prevents text overflow in flex container */
 }
 
+.carousel-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .carousel-title {
   font-size: 24px;
   font-weight: bold;
@@ -138,7 +144,7 @@
   transition: background 0.3s;
 }
 
-.pagination-dot.active {
+.active {
   background: #19464d;
 }
 

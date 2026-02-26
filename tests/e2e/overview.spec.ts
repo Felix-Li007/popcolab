@@ -52,8 +52,11 @@ test.describe('Admin Overview page', () => {
       .locator('xpath=ancestor::section[1]');
     const link = questionsSection.getByRole('link', { name: /view all/i });
 
-    await link.click();
-    await expect(page).toHaveURL(/\/admin\/questions(?:\?.*)?$/);
+    await expect(link).toHaveAttribute('href', '/admin/questions');
+    await Promise.all([
+      page.waitForURL(/\/admin\/questions(?:\?.*)?$/),
+      link.click(),
+    ]);
   });
 
   test('clicking a question preview card navigates with ?id= param', async ({

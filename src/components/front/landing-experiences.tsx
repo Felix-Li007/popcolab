@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import Image from 'next/image';
-import '@/styles/landing-Experience.css';
+import styles from '@/styles/landing-experience.module.css';
 
 const experiences = [
   {
@@ -47,49 +47,53 @@ export default function ExperiencesCarousel() {
   const current = experiences[currentIndex];
 
   return (
-    <section className="experiences-carousel">
-      <div className="carousel-container">
-        <p className="carousel-label">Most Played Experiences</p>
+    <section className={styles['experiences-carousel']}>
+      <div className={styles['carousel-container']}>
+        <p className={styles['carousel-label']}>Most Played Experiences</p>
 
-        <div className="carousel-content">
+        <div className={styles['carousel-content']}>
           {/* Left Arrow */}
           <button
             onClick={goToPrevious}
-            className="carousel-arrow"
+            className={styles['carousel-arrow']}
             aria-label="Previous experience"
           >
             <ChevronLeft />
           </button>
 
           {/* Carousel Inner */}
-          <div className="carousel-inner">
-            <div className="carousel-image">
+          <div className={styles['carousel-inner']}>
+            <div className={styles['carousel-image']}>
               <Image
                 src={current.image}
                 alt={current.title}
                 width={320} // set explicit width
                 height={220} // set explicit height
-                className="carousel-img"
+                className={styles['carousel-img']}
                 style={{ objectFit: 'cover' }}
               />
             </div>
 
-            <div className="carousel-text">
-              <div className="carousel-heading">
-                <h2 className="carousel-title">{current.title}</h2>
-                <p className="carousel-subtitle">{current.subtitle}</p>
+            <div className={styles['carousel-text']}>
+              <div className={styles['carousel-heading']}>
+                <h2 className={styles['carousel-title']}>{current.title}</h2>
+                <p className={styles['carousel-subtitle']}>
+                  {current.subtitle}
+                </p>
               </div>
 
-              <p className="carousel-description">{current.description}</p>
+              <p className={styles['carousel-description']}>
+                {current.description}
+              </p>
 
-              <button className="carousel-button">Learn More</button>
+              <button className={styles['carousel-button']}>Learn More</button>
             </div>
           </div>
 
           {/* Right Arrow */}
           <button
             onClick={goToNext}
-            className="carousel-arrow"
+            className={styles['carousel-arrow']}
             aria-label="Next experience"
           >
             <ChevronRight />
@@ -97,14 +101,12 @@ export default function ExperiencesCarousel() {
         </div>
 
         {/* Pagination Dots */}
-        <div className="carousel-pagination">
+        <div className={styles['carousel-pagination']}>
           {experiences.map((_, idx) => (
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`pagination-dot ${
-                idx === currentIndex ? 'active' : ''
-              }`}
+              className={`${styles['pagination-dot']} ${idx === currentIndex ? styles.active : ''}`}
             />
           ))}
         </div>

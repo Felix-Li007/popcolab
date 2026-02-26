@@ -1,0 +1,26 @@
+@reference "../app/globals.css";
+
+.listPanel {
+  flex: 1;
+  min-width: 0;
+}
+
+.editPanel {
+  flex: 2;
+  min-width: 0;
+}
+
+.listItem {
+  transition:
+    box-shadow 0.25s ease,
+    background 0.2s ease;
+  position: relative;
+  z-index: 0;
+}
+
+.listItem:hover {
+  box-shadow:
+    0 0 0 1.5px color-mix(in srgb, var(--color-magenta) 12%, transparent),
+    0 0 18px 4px color-mix(in srgb, var(--color-magenta) 8%, transparent);
+  z-index: 1;
+}

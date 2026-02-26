@@ -97,6 +97,10 @@ export const menuSection: MenuGroup[] = [
             href: '/admin/dimensions',
             countKey: 'dimensions',
           },
+          {
+            label: 'Categories',
+            href: '/admin/dimensions/categories',
+          },
         ],
       },
     ],

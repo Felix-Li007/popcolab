@@ -1,4 +1,4 @@
-import '@/styles/landing-ImageGallerySection.css';
+import styles from '@/styles/landing-gallery.module.css';
 
 const galleryItems = [
   { id: 1, title: 'Creative Spaces', image: '🏢' },
@@ -11,36 +11,40 @@ const galleryItems = [
 
 export default function ImageGallerySection() {
   return (
-    <section className="image-gallery-section">
-      <div className="image-gallery-container">
+    <section className={styles['image-gallery-section']}>
+      <div className={styles['image-gallery-container']}>
         {/* Section Header */}
-        <div className="gallery-header">
-          <h2 className="gallery-title">Gallery</h2>
-          <p className="gallery-subtitle">
+        <div className={styles['gallery-header']}>
+          <h2 className={styles['gallery-title']}>Gallery</h2>
+          <p className={styles['gallery-subtitle']}>
             Explore our amazing experiences and see what Pop CoLab is all about
           </p>
         </div>
 
         {/* Gallery Grid */}
-        <div className="gallery-items-grid">
+        <div className={styles['gallery-items-grid']}>
           {galleryItems.map(item => (
-            <div key={item.id} className="gallery-item">
+            <div key={item.id} className={styles['gallery-item']}>
               {/* Background with gradient */}
-              <div className="gallery-item-background">
-                <span className="gallery-item-emoji">{item.image}</span>
+              <div className={styles['gallery-item-background']}>
+                <span className={styles['gallery-item-emoji']}>
+                  {item.image}
+                </span>
               </div>
 
               {/* Overlay with title */}
-              <div className="gallery-item-overlay">
-                <h3 className="gallery-item-title">{item.title}</h3>
+              <div className={styles['gallery-item-overlay']}>
+                <h3 className={styles['gallery-item-title']}>{item.title}</h3>
               </div>
             </div>
           ))}
         </div>
 
         {/* View More Button */}
-        <div className="gallery-button-wrapper">
-          <button className="gallery-view-more-btn">View More Gallery</button>
+        <div className={styles['gallery-button-wrapper']}>
+          <button className={styles['gallery-view-more-btn']}>
+            View More Gallery
+          </button>
         </div>
       </div>
     </section>

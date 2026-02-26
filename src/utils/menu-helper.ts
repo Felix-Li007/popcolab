@@ -1,5 +1,6 @@
-import type { BadgeCounts, NavItem } from '@/types/navmenu-type';
-export const getBadge = (item: NavItem, counts?: BadgeCounts) => {
+import type { BadgeCounts, MenuItem } from '@/types/menu-item';
+
+export const getBadge = (item: MenuItem, counts?: BadgeCounts) => {
   if (
     item.countKey &&
     counts &&

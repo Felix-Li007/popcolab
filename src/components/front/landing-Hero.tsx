@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import '@/styles/landing-Hero.css';
+import styles from '@/styles/landing-hero.module.css';
 
 const personalities = [
   {
@@ -35,77 +35,85 @@ const personalities = [
 
 export default function HeroSection() {
   return (
-    <section className="hero-section">
-      <div className="hero-container">
-        <div className="hero-grid">
+    <section className={styles['hero-section']}>
+      <div className={styles['hero-container']}>
+        <div className={styles['hero-grid']}>
           {/* Left Column */}
-          <div className="hero-content">
+          <div className={styles['hero-content']}>
             {/* Badge */}
-            <div className="hero-badge">
+            <div className={styles['hero-badge']}>
               <span>Free Assessment</span>
             </div>
 
             {/* Main Heading */}
-            <div className="hero-heading">
-              <h1 className="hero-title">
+            <div className={styles['hero-heading']}>
+              <h1 className={styles['hero-title']}>
                 Discover Your
                 <br />
                 Play Personality
               </h1>
-              <p className="hero-description">
+              <p className={styles['hero-description']}>
                 Find out how you play best. Take our 2-minute assessment and
                 discover your unique play style — no sign up required.
               </p>
             </div>
 
             {/* CTA Button */}
-            <div className="hero-cta">
-              <Link href="/test" className="hero-button">
+            <div className={styles['hero-cta']}>
+              <Link href="/test" className={styles['hero-button']}>
                 Take the Quiz
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>
 
             {/* Features */}
-            <div className="hero-features">
-              <div className="hero-feature">
-                <span className="hero-feature-dot">●</span>
-                <span className="hero-feature-text">No account needed</span>
+            <div className={styles['hero-features']}>
+              <div className={styles['hero-feature']}>
+                <span className={styles['hero-feature-dot']}>●</span>
+                <span className={styles['hero-feature-text']}>
+                  No account needed
+                </span>
               </div>
-              <div className="hero-feature">
-                <span className="hero-feature-dot">●</span>
-                <span className="hero-feature-text">Only 2 minutes</span>
+              <div className={styles['hero-feature']}>
+                <span className={styles['hero-feature-dot']}>●</span>
+                <span className={styles['hero-feature-text']}>
+                  Only 2 minutes
+                </span>
               </div>
-              <div className="hero-feature">
-                <span className="hero-feature-dot">●</span>
-                <span className="hero-feature-text">Instant results</span>
+              <div className={styles['hero-feature']}>
+                <span className={styles['hero-feature-dot']}>●</span>
+                <span className={styles['hero-feature-text']}>
+                  Instant results
+                </span>
               </div>
             </div>
           </div>
 
           {/* Right Column - Personality Grid */}
-          <div className="hero-grid-right">
+          <div className={styles['hero-grid-right']}>
             {/* Center circle with question mark */}
-            <div className="hero-center-circle">
+            <div className={styles['hero-center-circle']}>
               <span>?</span>
             </div>
 
             {/* Personality Cards arranged in grid */}
-            <div className="hero-cards-grid">
+            <div className={styles['hero-cards-grid']}>
               {/* Creator */}
               <div
-                className="hero-card"
+                className={styles['hero-card']}
                 style={{ backgroundColor: personalities[0].color }}
               >
-                <span className="hero-card-icon">{personalities[0].icon}</span>
+                <span className={styles['hero-card-icon']}>
+                  {personalities[0].icon}
+                </span>
                 <h3
-                  className="hero-card-name"
+                  className={styles['hero-card-name']}
                   style={{ color: personalities[0].textColor }}
                 >
                   {personalities[0].name}
                 </h3>
                 <p
-                  className="hero-card-subtitle"
+                  className={styles['hero-card-subtitle']}
                   style={{ color: personalities[0].textColor }}
                 >
                   Unique Strengths
@@ -114,18 +122,20 @@ export default function HeroSection() {
 
               {/* Inspirer */}
               <div
-                className="hero-card"
+                className={styles['hero-card']}
                 style={{ backgroundColor: personalities[1].color }}
               >
-                <span className="hero-card-icon">{personalities[1].icon}</span>
+                <span className={styles['hero-card-icon']}>
+                  {personalities[1].icon}
+                </span>
                 <h3
-                  className="hero-card-name"
+                  className={styles['hero-card-name']}
                   style={{ color: personalities[1].textColor }}
                 >
                   {personalities[1].name}
                 </h3>
                 <p
-                  className="hero-card-subtitle"
+                  className={styles['hero-card-subtitle']}
                   style={{ color: personalities[1].textColor }}
                 >
                   Unique Strengths
@@ -134,18 +144,20 @@ export default function HeroSection() {
 
               {/* Companion */}
               <div
-                className="hero-card"
+                className={styles['hero-card']}
                 style={{ backgroundColor: personalities[2].color }}
               >
-                <span className="hero-card-icon">{personalities[2].icon}</span>
+                <span className={styles['hero-card-icon']}>
+                  {personalities[2].icon}
+                </span>
                 <h3
-                  className="hero-card-name"
+                  className={styles['hero-card-name']}
                   style={{ color: personalities[2].textColor }}
                 >
                   {personalities[2].name}
                 </h3>
                 <p
-                  className="hero-card-subtitle"
+                  className={styles['hero-card-subtitle']}
                   style={{ color: personalities[2].textColor }}
                 >
                   Unique Strengths
@@ -154,18 +166,20 @@ export default function HeroSection() {
 
               {/* Connector */}
               <div
-                className="hero-card"
+                className={styles['hero-card']}
                 style={{ backgroundColor: personalities[3].color }}
               >
-                <span className="hero-card-icon">{personalities[3].icon}</span>
+                <span className={styles['hero-card-icon']}>
+                  {personalities[3].icon}
+                </span>
                 <h3
-                  className="hero-card-name"
+                  className={styles['hero-card-name']}
                   style={{ color: personalities[3].textColor }}
                 >
                   {personalities[3].name}
                 </h3>
                 <p
-                  className="hero-card-subtitle"
+                  className={styles['hero-card-subtitle']}
                   style={{ color: personalities[3].textColor }}
                 >
                   Unique Strengths
