@@ -15,7 +15,7 @@
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 9999;
-  width: min(28rem, calc(100vw - 2rem));
+  width: min(39rem, calc(100vw - 2rem));
   max-height: 92vh;
   background-color: var(--color-background);
   border-radius: 1rem;

@@ -44,7 +44,9 @@ export default function Sidebar({
             className="rounded-full"
           />
           <div>
-            <div className="text-sm font-bold leading-tight">Pop CoLab</div>
+            <div className="text-heading font-bold leading-tight">
+              Pop CoLab
+            </div>
             <div className="text-[10px] text-white/60 leading-tight">
               Rediscover the Power of Play
             </div>

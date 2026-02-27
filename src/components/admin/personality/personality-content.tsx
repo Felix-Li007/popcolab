@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PersonalityCardGrid from '@/components/admin/personality/personality-grid';
+import PersonalityCard from '@/components/admin/personality/personality-card';
 import StatsCard from '@/components/admin/stats-card';
 import PersonalityForm from '@/components/admin/personality/personality-form';
 import PersonalityView from '@/components/admin/personality/personality-view';
-import ContentHeader from '@/components/admin/content-header';
 import { Button, Badge } from '@/ui';
 import { Personality } from '@/types/personality-type';
 import { usePersonality } from '@/hooks/usePersonality';
-import cardStyles from '@/styles/personality-card.module.css';
+import contentStyles from '@/styles/personality-content.module.css';
 
 const filterTabs = ['All', 'Active', 'Draft'] as const;
 type FilterTab = (typeof filterTabs)[number];
@@ -54,29 +53,9 @@ export default function PersonalityContent({ initialData }: Props) {
 
   return (
     <>
-      <div className="flex flex-col">
-        <div className="flex-1 p-4 flex flex-col gap-5 min-h-0">
-          <ContentHeader
-            emoji="🎭"
-            title={
-              <>
-                Play <span className="text-magenta">Personalities</span>
-              </>
-            }
-            subtitle={`${counts.All} types · ${counts.Active} active · last updated 2 hours ago`}
-            actions={
-              <Button
-                onClick={openCreate}
-                variant="primary"
-                size="md"
-                icon={<span>+</span>}
-              >
-                New Personality
-              </Button>
-            }
-          />
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className={contentStyles.root}>
+        <div className={contentStyles.content}>
+          <div className={contentStyles.statsGrid}>
             <StatsCard
               bgColor="bg-pink-light"
               glowColor="rgba(255, 187, 240, 0.5)"
@@ -113,50 +92,70 @@ export default function PersonalityContent({ initialData }: Props) {
             />
           </div>
 
-          <div className="flex items-center gap-1 border-b border-gray-100 pb-1">
-            {filterTabs.map(tab => (
-              <Button
-                key={tab}
-                onClick={() => setFilter(tab)}
-                variant="tab"
-                size="sm"
-                isActive={filter === tab}
-              >
-                {tab}
-                <Badge
-                  variant="default"
-                  size="xs"
-                  bgColor={filter === tab ? 'bg-white/20' : 'bg-gray-100'}
-                  textColor={filter === tab ? 'text-white' : 'text-gray-500'}
-                >
-                  {counts[tab]}
-                </Badge>
-              </Button>
-            ))}
-          </div>
-
-          <div
-            className={`flex-1 min-h-0 overflow-y-auto ${cardStyles.cardGrid}`}
-          >
-            {filtered.map(p => (
-              <div key={p.id} className="relative h-full">
-                {p.status === 'draft' && (
-                  <Badge
-                    variant="default"
-                    size="xs"
-                    className="absolute top-2 right-2 z-10"
+          <div className={contentStyles.listPanel}>
+            <div className={contentStyles.filterBar}>
+              <div className={contentStyles.filterTabs}>
+                {filterTabs.map(tab => (
+                  <Button
+                    key={tab}
+                    onClick={() => setFilter(tab)}
+                    variant="tab"
+                    size="sm"
+                    isActive={filter === tab}
                   >
-                    DRAFT
-                  </Badge>
-                )}
-                <PersonalityCardGrid
-                  personalities={[p]}
-                  onEdit={openEdit}
-                  onView={openView}
-                  onDelete={handleDelete}
-                />
+                    {tab}
+                    <Badge
+                      variant="default"
+                      size="xs"
+                      bgColor={filter === tab ? 'bg-white/20' : 'bg-gray-100'}
+                      textColor={
+                        filter === tab ? 'text-white' : 'text-gray-500'
+                      }
+                    >
+                      {counts[tab]}
+                    </Badge>
+                  </Button>
+                ))}
               </div>
-            ))}
+              <Button
+                onClick={openCreate}
+                variant="primary"
+                size="sm"
+                icon={<span>+</span>}
+                className="shrink-0"
+              >
+                New
+              </Button>
+            </div>
+
+            <div className={contentStyles.listArea}>
+              <div className={contentStyles.personalityGrid}>
+                {filtered.map(p => (
+                  <div key={p.id} className="relative h-full">
+                    {p.status === 'draft' && (
+                      <Badge
+                        variant="default"
+                        size="xs"
+                        className="absolute top-2 right-2 z-10"
+                      >
+                        DRAFT
+                      </Badge>
+                    )}
+                    <PersonalityCard
+                      type={p.type}
+                      name={p.name}
+                      description={p.description}
+                      emoji={p.emoji}
+                      threshold={p.threshold}
+                      accentColor={p.accentColor}
+                      onEdit={() => openEdit(p.id!)}
+                      onView={() => openView(p.id!)}
+                      onDelete={() => handleDelete(p.id!, p.name)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>

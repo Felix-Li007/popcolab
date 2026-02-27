@@ -1,0 +1,47 @@
+@reference "../app/globals.css";
+
+.form {
+  @apply flex flex-col h-full;
+}
+
+.header {
+  @apply flex items-center justify-between px-6 py-3 border-b border-pink-light/50 shrink-0;
+  background: linear-gradient(
+    to right,
+    var(--color-lavender),
+    white,
+    var(--color-coral-light)
+  );
+}
+
+.headerTitle {
+  @apply flex items-center gap-2;
+}
+
+.body {
+  @apply flex-1 overflow-y-auto px-6 py-5 space-y-4;
+}
+
+.formError {
+  @apply bg-red-50 border border-red-200 text-red-700 text-body px-4 py-2 rounded-xl;
+}
+
+.usageBox {
+  @apply rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5;
+}
+
+.usageLabel {
+  @apply text-badge font-bold text-foreground/45 uppercase tracking-wide;
+}
+
+.usageValue {
+  @apply text-heading font-semibold text-foreground/80 mt-0.5;
+}
+
+.usageHint {
+  @apply text-caption text-amber-600 mt-1;
+}
+
+.footer {
+  @apply px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-white shrink-0;
+}

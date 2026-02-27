@@ -1,26 +1,34 @@
 @reference "../app/globals.css";
 
+.root {
+  @apply flex flex-col;
+  min-height: calc(100dvh - 6rem);
+}
+
+.statsSection {
+  @apply px-4 pt-3 shrink-0;
+}
+
+.statsGrid {
+  @apply grid grid-cols-2 lg:grid-cols-4 gap-3;
+}
+
+.listSection {
+  @apply flex flex-1 min-h-0 px-4 py-3 gap-4;
+}
+
 .listPanel {
-  flex: 1;
-  min-width: 0;
+  @apply w-full flex-1 min-h-0 border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden;
 }
 
-.editPanel {
-  flex: 2;
-  min-width: 0;
+.listBody {
+  @apply flex-1 min-h-0 overflow-y-auto;
 }
 
-.listItem {
-  transition:
-    box-shadow 0.25s ease,
-    background 0.2s ease;
-  position: relative;
-  z-index: 0;
+.cardsWrap {
+  @apply p-3;
 }
 
-.listItem:hover {
-  box-shadow:
-    0 0 0 1.5px color-mix(in srgb, var(--color-magenta) 12%, transparent),
-    0 0 18px 4px color-mix(in srgb, var(--color-magenta) 8%, transparent);
-  z-index: 1;
+.cardsGrid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:auto-rows-[256px] content-start;
 }

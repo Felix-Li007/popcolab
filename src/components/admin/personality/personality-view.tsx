@@ -84,7 +84,7 @@ export default function PersonalityView({
         </div>
 
         <div
-          className={`px-6 border-t border-gray-100flex items-center gap-3 shrink-0 ${styles.footer}`}
+          className={`px-6 border-t border-gray-100 flex items-center gap-3 shrink-0 ${styles.footer}`}
         >
           <Button
             onClick={onClose}

@@ -10,7 +10,7 @@ import DimensionCard from '@/components/admin/dimension/dimension-card';
 import DimensionForm from '@/components/admin/dimension/dimension-form';
 import DimensionView from '@/components/admin/dimension/dimension-view';
 import DimensionStatsBar from '@/components/admin/dimension/dimension-stats-bar';
-import DimensionCategoryFilterBar from '@/components/admin/dimension/dimension-category-filter-bar';
+import DimensionCategoryFilterBar from '@/components/admin/dimension/category-filter';
 import type {
   Dimension,
   DimensionCategory,
@@ -238,7 +238,7 @@ export default function DimensionContent({
                     size="sm"
                     icon={<span>+</span>}
                   >
-                    Add
+                    New
                   </Button>
                   <Button
                     onClick={handleBulkDelete}

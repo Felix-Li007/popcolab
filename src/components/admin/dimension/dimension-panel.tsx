@@ -217,18 +217,18 @@ export default function DimensionPanel({
           <label className="text-body font-bold text-foreground/75">
             ALLOW VALUE
           </label>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
+          <div className="mt-2 grid grid-cols-2 gap-2">
             {options.map((option, index) => (
               <div
                 key={index}
-                className="inline-flex items-stretch rounded-xl border border-gray-200 bg-gray-100 overflow-hidden focus-within:ring-2 focus-within:ring-magenta/30"
+                className="flex w-full min-w-0 items-stretch rounded-xl border border-gray-200 bg-gray-100 overflow-hidden focus-within:ring-2 focus-within:ring-magenta/30"
               >
                 <input
                   type="text"
                   value={option}
                   onChange={e => updateOption(index, e.target.value)}
                   placeholder="Allowed value"
-                  className="w-32 sm:w-36 md:w-40 px-3 py-2 text-body bg-transparent outline-none"
+                  className="min-w-0 flex-1 px-3 py-2 text-body bg-transparent outline-none"
                 />
                 <input type="hidden" name="optionValue" value={option} />
                 {options.length > 1 && (
@@ -244,6 +244,8 @@ export default function DimensionPanel({
                 )}
               </div>
             ))}
+          </div>
+          <div className="mt-2">
             <Button
               type="button"
               variant="ghost"
