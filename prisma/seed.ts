@@ -639,8 +639,8 @@ type MockUserSeed = {
 
 type MockTeamSeed = {
   team_name: string;
-  team_code: string;
   team_notes?: string;
+  team_owner_email: string;
   created_by_email: string;
   members: string[];
 };
@@ -679,7 +679,7 @@ function deriveUserName(seedUser: MockUserSeed): string {
   return 'user';
 }
 
-const mockUsers: MockUserSeed[] = [
+const baseMockUsers: MockUserSeed[] = [
   {
     email: 'ava.hughes@northstar.io',
     status: 'active',
@@ -1002,53 +1002,161 @@ const mockUsers: MockUserSeed[] = [
   },
 ];
 
-const mockTeams: MockTeamSeed[] = [
-  {
-    team_name: 'Trailblazers',
-    team_code: 'TRAIL-01',
-    team_notes: 'Cross-functional pilots',
-    created_by_email: 'ava.hughes@northstar.io',
-    members: [
-      'logan.chen@northstar.io',
-      'mia.garcia@lumen.co',
-      'sophia.reed@helix.ai',
-    ],
-  },
-  {
-    team_name: 'Insight Ops',
-    team_code: 'INSIGHT-02',
-    team_notes: 'Metrics and planning circle',
-    created_by_email: 'logan.chen@northstar.io',
-    members: [
-      'ava.hughes@northstar.io',
-      'ethan.park@lumen.co',
-      'noah.wright@helix.ai',
-      'emma.davis@orbit.one',
-    ],
-  },
-  {
-    team_name: 'Creative Sprint',
-    team_code: 'CREATE-03',
-    team_notes: 'Rapid concept testing squad',
-    created_by_email: 'mia.garcia@lumen.co',
-    members: [
-      'olivia.kim@verve.studio',
-      'liam.brown@verve.studio',
-      'harper.nguyen@aurora.dev',
-    ],
-  },
-  {
-    team_name: 'Wellness Guild',
-    team_code: 'WELL-04',
-    team_notes: 'Low-stress social activities',
-    created_by_email: 'sophia.reed@helix.ai',
-    members: [
-      'ava.hughes@northstar.io',
-      'olivia.kim@verve.studio',
-      'jack.wilson@example.com',
-    ],
-  },
+const TOTAL_USER_COUNT = 200;
+if (baseMockUsers.length > TOTAL_USER_COUNT) {
+  throw new Error(
+    `Base mock users (${baseMockUsers.length}) exceed TOTAL_USER_COUNT (${TOTAL_USER_COUNT}).`
+  );
+}
+const generatedUserCount = TOTAL_USER_COUNT - baseMockUsers.length;
+
+const generatedMockUsers: MockUserSeed[] = Array.from(
+  { length: generatedUserCount },
+  (_, index) => {
+    const userNo = String(index + 1).padStart(3, '0');
+    return {
+      email: `seed.user${userNo}@popcolab.dev`,
+      status: index % 9 === 0 ? 'inactive' : 'active',
+      profile: {
+        first_name: `Seed${userNo}`,
+        last_name: `User${userNo}`,
+        phone_number: null,
+        preferred_contact: 'email',
+        consent_given: index % 9 === 0 ? 0 : 1,
+        privacy_notes: null,
+      },
+      company: {
+        corporate_name: 'Pop CoLab Seed',
+        department_name: 'Sandbox',
+        role_title: 'Seed Member',
+        work_mode: 'remote',
+      },
+    };
+  }
+);
+
+const mockUsers: MockUserSeed[] = [...baseMockUsers, ...generatedMockUsers];
+
+const TEAM_COUNT = 20;
+if (TOTAL_USER_COUNT % TEAM_COUNT !== 0) {
+  throw new Error(
+    `TOTAL_USER_COUNT (${TOTAL_USER_COUNT}) must be divisible by TEAM_COUNT (${TEAM_COUNT}).`
+  );
+}
+const USERS_PER_TEAM = TOTAL_USER_COUNT / TEAM_COUNT;
+const teamNamePrefixes = [
+  'North',
+  'Bright',
+  'Prime',
+  'Delta',
+  'Summit',
+  'Nova',
+  'Atlas',
+  'Echo',
+  'Pulse',
+  'Orbit',
 ];
+const teamNameSuffixes = [
+  'Crew',
+  'Squad',
+  'Guild',
+  'Circle',
+  'Unit',
+  'Hub',
+  'Lab',
+  'Core',
+  'Ops',
+  'Collective',
+];
+const mockUserEmails = mockUsers.map(user => user.email);
+if (mockUserEmails.length !== TOTAL_USER_COUNT) {
+  throw new Error(
+    `Expected ${TOTAL_USER_COUNT} users, but got ${mockUserEmails.length} in mockUsers.`
+  );
+}
+
+const generatedTeams: MockTeamSeed[] = Array.from(
+  { length: TEAM_COUNT },
+  (_, index) => {
+    const teamNumber = String(index + 1).padStart(3, '0');
+    const prefix = teamNamePrefixes[index % teamNamePrefixes.length];
+    const suffix =
+      teamNameSuffixes[
+        Math.floor(index / teamNamePrefixes.length) % teamNameSuffixes.length
+      ];
+    const start = index * USERS_PER_TEAM;
+    const teamUsers = mockUserEmails.slice(start, start + USERS_PER_TEAM);
+    if (teamUsers.length < USERS_PER_TEAM) {
+      throw new Error(
+        `Unable to assign ${USERS_PER_TEAM} users to team index ${index + 1}.`
+      );
+    }
+    const ownerEmail = teamUsers[0];
+    const creatorEmail = teamUsers[1];
+
+    return {
+      team_name: `T${teamNumber} ${prefix} ${suffix}`,
+      team_notes: `Seeded team ${teamNumber} for admin team browsing and management scenarios.`,
+      team_owner_email: ownerEmail,
+      created_by_email: creatorEmail,
+      members: teamUsers.slice(2),
+    };
+  }
+);
+
+const FOCUS_USER_EMAIL = 'seed.user187@popcolab.dev';
+const FOCUS_USER_TEAM_COUNT = 5;
+if (FOCUS_USER_TEAM_COUNT > TEAM_COUNT) {
+  throw new Error(
+    `FOCUS_USER_TEAM_COUNT (${FOCUS_USER_TEAM_COUNT}) cannot exceed TEAM_COUNT (${TEAM_COUNT}).`
+  );
+}
+if (!mockUserEmails.includes(FOCUS_USER_EMAIL)) {
+  throw new Error(`Required focus user not found: ${FOCUS_USER_EMAIL}`);
+}
+
+const currentFocusUserOwnedCount = generatedTeams.filter(
+  team => team.team_owner_email === FOCUS_USER_EMAIL
+).length;
+
+if (currentFocusUserOwnedCount < FOCUS_USER_TEAM_COUNT) {
+  let remaining = FOCUS_USER_TEAM_COUNT - currentFocusUserOwnedCount;
+  for (const team of generatedTeams) {
+    if (remaining === 0) break;
+    if (team.team_owner_email === FOCUS_USER_EMAIL) continue;
+
+    const previousOwner = team.team_owner_email;
+    team.team_owner_email = FOCUS_USER_EMAIL;
+
+    const focusMemberIndex = team.members.indexOf(FOCUS_USER_EMAIL);
+    if (focusMemberIndex >= 0) {
+      team.members[focusMemberIndex] = previousOwner;
+    }
+
+    if (team.created_by_email === FOCUS_USER_EMAIL) {
+      const replacementCreator = team.members.find(
+        email => email !== FOCUS_USER_EMAIL
+      );
+      if (!replacementCreator) {
+        throw new Error(`Unable to set created_by for team ${team.team_name}.`);
+      }
+      team.created_by_email = replacementCreator;
+    }
+
+    remaining -= 1;
+  }
+}
+
+const finalFocusUserOwnedCount = generatedTeams.filter(
+  team => team.team_owner_email === FOCUS_USER_EMAIL
+).length;
+if (finalFocusUserOwnedCount !== FOCUS_USER_TEAM_COUNT) {
+  throw new Error(
+    `Expected ${FOCUS_USER_EMAIL} to own ${FOCUS_USER_TEAM_COUNT} teams, but found ${finalFocusUserOwnedCount}.`
+  );
+}
+
+const mockTeams: MockTeamSeed[] = generatedTeams;
 
 // ─── Main Seed Function ───────────────────────────────────────────────────────
 
@@ -1092,6 +1200,8 @@ async function main() {
   }
 
   // ── Dimension Categories ───────────────────────────────────────────────────
+  await prisma.requestPreference.deleteMany({});
+  await prisma.teamAggregate.deleteMany({});
   await prisma.dimensionOption.deleteMany({});
   await prisma.dimensionIndex.deleteMany({});
   await prisma.dimensionCategory.deleteMany({});
@@ -1278,7 +1388,14 @@ async function main() {
   }
 
   for (const teamSeed of mockTeams) {
+    const ownerId = userIdByEmail.get(teamSeed.team_owner_email);
     const creatorId = userIdByEmail.get(teamSeed.created_by_email);
+    if (!ownerId) {
+      console.warn(
+        `⚠️  No user ${teamSeed.team_owner_email} found as owner for team ${teamSeed.team_name}`
+      );
+      continue;
+    }
     if (!creatorId) {
       console.warn(
         `⚠️  No user ${teamSeed.created_by_email} found for team ${teamSeed.team_name}`
@@ -1289,14 +1406,18 @@ async function main() {
     const createdTeam = await prisma.team.create({
       data: {
         team_name: teamSeed.team_name,
-        team_code: teamSeed.team_code,
         team_notes: teamSeed.team_notes ?? null,
+        team_owner: ownerId,
         created_by: creatorId,
       },
     });
 
     const memberEmails = Array.from(
-      new Set([teamSeed.created_by_email, ...teamSeed.members])
+      new Set([
+        teamSeed.team_owner_email,
+        teamSeed.created_by_email,
+        ...teamSeed.members,
+      ])
     );
 
     for (const memberEmail of memberEmails) {

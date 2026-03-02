@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
+import SearchPanel from '@/components/admin/common/search-panel';
 import UserClient from '@/components/admin/user/user-client';
 import PaginationBar from '@/components/shared/pagination-bar';
 import { USER_STATUS_OPTIONS } from '@/constants/user-status';
@@ -78,46 +79,29 @@ export default function UserContent({ pageData, query }: Props) {
     <div className={styles.root}>
       <div className={styles.content}>
         <div className={styles.panel}>
-          <div className={styles.toolbar}>
-            <div className={styles.toolbarTop}>
-              <span className={styles.toolbarTitle}>
-                Users ({pageData.totalItems})
-              </span>
-            </div>
-
-            <form
-              action="/admin/users"
-              method="GET"
-              className={styles.searchForm}
-            >
-              <input
-                type="search"
-                name="q"
-                defaultValue={query.search}
-                placeholder="Search by email, name, company, team..."
-                className={styles.searchInput}
-                data-testid="user-search"
-              />
-              {query.status !== 'all' && (
-                <input type="hidden" name="status" value={query.status} />
-              )}
-              <button type="submit" className={styles.searchButton}>
-                Search
-              </button>
-              {query.search.trim().length > 0 && (
-                <Link
-                  href={buildUsersHref({
+          <SearchPanel
+            mode="submit"
+            title={`Users (${pageData.totalItems})`}
+            formAction="/admin/users"
+            method="GET"
+            defaultSearchValue={query.search}
+            searchPlaceholder="Search by email, name, company, team..."
+            searchTestId="user-search"
+            hiddenFields={
+              query.status !== 'all'
+                ? [{ name: 'status', value: query.status }]
+                : undefined
+            }
+            clearHref={
+              query.search.trim().length > 0
+                ? buildUsersHref({
                     search: '',
                     status: query.status,
                     page: 1,
-                  })}
-                  className={styles.clearLink}
-                >
-                  Clear
-                </Link>
-              )}
-            </form>
-          </div>
+                  })
+                : undefined
+            }
+          />
 
           <div className={styles.tabs}>
             {statusTabs.map(tab => {

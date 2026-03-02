@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/ui';
 import StatsCard from '@/components/admin/stats-card';
-import AdminListHeader from '@/components/admin/common/admin-list-header';
+import SearchPanel from '@/components/admin/common/search-panel';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
@@ -265,7 +265,7 @@ export default function CategoryContent({ initialData }: Props) {
 
         <div className={styles.listSection}>
           <div className={styles.listPanel}>
-            <AdminListHeader
+            <SearchPanel
               title={`Categories (${filtered.length})`}
               searchValue={search}
               onSearchChange={setSearch}

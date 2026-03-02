@@ -8,7 +8,8 @@ model User {
   corporate   Company?
   profile     Profile?
   requests    Request[]
-  teams       Team[]
+  owned_teams Team[]      @relation("TeamOwner")
+  created_teams Team[]    @relation("TeamCreator")
   team_mates  TeamMate[]
   user_vector UserVector?
 

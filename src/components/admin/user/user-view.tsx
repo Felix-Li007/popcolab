@@ -133,7 +133,7 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
           <p className={styles.sectionTitle}>Teams({user.teamCount})</p>
           <div className={styles.sectionCard}>
             {user.teamNames.length === 0 ? (
-              <p className={styles.emptyText}>No teams joined.</p>
+              <p className={styles.emptyText}>No teams owned.</p>
             ) : (
               <div className={styles.teamChips}>
                 {user.teamNames.map(teamName => (

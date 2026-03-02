@@ -120,7 +120,7 @@ export const menuSection: MenuGroup[] = [
           },
           {
             label: 'Teams',
-            href: '/admin/teams',
+            href: '/admin/users/teams',
             countKey: 'teams',
           },
         ],

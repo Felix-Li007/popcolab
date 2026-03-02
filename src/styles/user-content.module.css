@@ -13,53 +13,6 @@
   @apply w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden;
 }
 
-.toolbar {
-  @apply border-b border-gray-100 px-4 py-3 shrink-0 space-y-3;
-}
-
-.toolbarTop {
-  @apply flex items-center justify-between;
-}
-
-.toolbarTitle {
-  @apply text-xs font-bold text-gray-700;
-}
-
-.searchForm {
-  @apply flex items-center gap-2;
-}
-
-.searchInput {
-  @apply h-8 flex-1 rounded-lg bg-gray-100 px-3 text-xs text-gray-700 outline-none;
-  transition:
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.searchInput:focus {
-  @apply bg-white;
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--color-magenta) 26%, transparent);
-}
-
-.searchButton {
-  @apply h-8 rounded-full px-3 text-xs font-semibold text-white;
-  background: var(--color-teal-deep);
-  transition: opacity 0.15s ease;
-}
-
-.searchButton:hover {
-  opacity: 0.9;
-}
-
-.clearLink {
-  @apply text-xs font-semibold text-gray-500;
-}
-
-.clearLink:hover {
-  color: var(--color-magenta);
-}
-
 .tabs {
   @apply border-b border-gray-100 px-4 py-2 flex flex-wrap items-center gap-2 shrink-0;
 }

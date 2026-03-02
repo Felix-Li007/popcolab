@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { USER_STATUS_BADGE } from '@/constants/user-status';
 import type { AdminUserListItem } from '@/types/user-type';
 import { Badge } from '@/ui';
@@ -84,6 +85,12 @@ function getStatusBadge(status: AdminUserListItem['status']) {
   return USER_STATUS_BADGE[status];
 }
 
+function buildTeamsHref(ownerEmail: string): string {
+  const searchParams = new URLSearchParams();
+  searchParams.set('q', ownerEmail);
+  return `/admin/users/teams?${searchParams.toString()}`;
+}
+
 export default function UserCard({ user, onViewDetails, onEdit }: Props) {
   const status = getStatusBadge(user.status);
   const avatarText = user.userName.slice(0, 1).toUpperCase() || '?';
@@ -119,7 +126,13 @@ export default function UserCard({ user, onViewDetails, onEdit }: Props) {
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <p className={styles.statLabel}>Teams</p>
-          <p className={styles.statValue}>{user.teamCount}</p>
+          <Link
+            href={buildTeamsHref(user.email)}
+            className={styles.statLink}
+            data-testid="user-card-teams-link"
+          >
+            {user.teamCount}
+          </Link>
         </div>
         <div className={styles.statCard}>
           <p className={styles.statLabel}>Requests</p>

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/ui';
-import AdminListHeader from '@/components/admin/common/admin-list-header';
+import SearchPanel from '@/components/admin/common/search-panel';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
@@ -233,7 +233,7 @@ export default function DimensionContent({
 
         <div className="flex flex-1 min-h-0 px-4 py-3 gap-4">
           <div className="w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden">
-            <AdminListHeader
+            <SearchPanel
               title={`Dimensions (${filtered.length})`}
               searchValue={search}
               onSearchChange={setSearch}

@@ -1,12 +1,13 @@
 model Team {
   id              Int             @id @default(autoincrement())
   team_name       String          @db.VarChar(50)
+  team_notes      String?         @db.VarChar(200)
+  team_owner      Int
+  created_by      Int
   created_at      DateTime        @default(now()) @db.Timestamp(6)
   updated_at      DateTime        @updatedAt @db.Timestamp(6)
-  created_by      Int
-  team_code       String          @db.VarChar(20)
-  team_notes      String?         @db.VarChar(255)
-  creator         User            @relation(fields: [created_by], references: [id])
+  owner           User            @relation("TeamOwner", fields: [team_owner], references: [id])
+  creator         User            @relation("TeamCreator", fields: [created_by], references: [id])
   team_aggregates TeamAggregate[]
   team_mates      TeamMate[]
   team_vector     TeamVector?
