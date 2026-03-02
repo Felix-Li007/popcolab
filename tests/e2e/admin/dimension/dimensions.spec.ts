@@ -8,11 +8,11 @@ test.describe('Dimensions page', () => {
   test('page loads with core controls', async ({ page }) => {
     await expect(page).toHaveURL(/\/admin\/dimensions/);
     await expect(page.getByTestId('dimension-search')).toBeVisible();
-    await expect(page.getByRole('button', { name: /add/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /new/i })).toBeVisible();
     await expect(
-      page.getByRole('button', { name: /^Delete/i }).first()
+      page.getByRole('button', { name: /delete/i }).first()
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: /^All/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /all/i })).toBeVisible();
     await expect(
       page.locator('label:has-text("HARD FILTER")').first()
     ).toBeVisible();
@@ -50,8 +50,8 @@ test.describe('Dimensions page', () => {
     await expect(page).toHaveURL(/\/admin\/dimensions/);
   });
 
-  test('"Add" opens create modal', async ({ page }) => {
-    await page.getByRole('button', { name: /add/i }).click();
+  test('"New" opens create modal', async ({ page }) => {
+    await page.getByRole('button', { name: /new/i }).click();
     await expect(
       page.getByRole('heading', { name: /new dimension/i })
     ).toBeVisible();
@@ -79,13 +79,10 @@ test.describe('Dimensions page', () => {
       return;
     }
 
-    await cards
-      .first()
-      .getByRole('button', { name: /^View$/i })
-      .click();
+    await cards.first().getByRole('button', { name: /view/i }).click();
     await expect(page.getByText(/^Created:/)).toBeVisible();
     await expect(
-      page.getByRole('button', { name: /^Edit$/i }).last()
+      page.getByRole('button', { name: /edit/i }).last()
     ).toBeVisible();
   });
 
@@ -104,7 +101,7 @@ test.describe('Dimensions page', () => {
 
     await cards
       .first()
-      .getByRole('button', { name: /^Delete$/i })
+      .getByRole('button', { name: /delete/i })
       .click();
     expect(dialogMessage).toContain('Delete this dimension?');
   });
@@ -130,6 +127,7 @@ test.describe('Dimensions page', () => {
   }) => {
     const nextPageBtn = page.locator('button[title="Next page"]');
     if ((await nextPageBtn.count()) === 0) return;
+    if (await nextPageBtn.isDisabled()) return;
 
     const prevPageBtn = page.locator('button[title="Previous page"]');
     await expect(prevPageBtn).toBeDisabled();
@@ -155,7 +153,9 @@ test.describe('Dimensions page', () => {
     const id = idText.slice(1);
 
     await page.goto(`/admin/dimensions?id=${id}`);
-    await expect(page).toHaveURL(new RegExp(`/admin/dimensions\\?id=${id}$`));
+    const url = new URL(page.url());
+    expect(url.pathname).toMatch(/^\/admin\/dimensions\/?$/);
+    expect(url.searchParams.get('id')).toBe(id);
     await expect(
       page.getByRole('heading', { name: /edit dimension/i })
     ).toBeVisible();

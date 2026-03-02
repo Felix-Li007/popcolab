@@ -5,6 +5,7 @@ model Team {
   updated_at      DateTime        @updatedAt @db.Timestamp(6)
   created_by      Int
   team_code       String          @db.VarChar(20)
+  team_notes      String?         @db.VarChar(255)
   creator         User            @relation(fields: [created_by], references: [id])
   team_aggregates TeamAggregate[]
   team_mates      TeamMate[]

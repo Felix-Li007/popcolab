@@ -41,6 +41,13 @@ export default function PageFooter() {
               <br />
               Building trust one experience at a time.
             </p>
+            <Image
+              src="/images/doodle.png"
+              alt="Pop CoLab illustration"
+              width={148}
+              height={148}
+              className="mt-4 rounded-xl object-cover"
+            />
           </div>
 
           {/* Admin links */}

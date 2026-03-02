@@ -35,7 +35,7 @@ type Props = {
 
 type CategoryFilter = 'all' | number;
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 5;
 
 export default function DimensionContent({
   initialData,
@@ -49,8 +49,8 @@ export default function DimensionContent({
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [hardOnly, setHardOnly] = useState(false);
-  const initialId = Number(searchParams.get('id')) || null;
-  const [selectedId, setSelectedId] = useState<number | null>(initialId);
+  const idParam = searchParams.get('id');
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [viewId, setViewId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -59,6 +59,15 @@ export default function DimensionContent({
   useEffect(() => {
     setDimensions(initialData);
   }, [initialData]);
+
+  useEffect(() => {
+    if (!idParam || !/^\d+$/.test(idParam)) {
+      setSelectedId(null);
+      return;
+    }
+    setSelectedId(Number(idParam));
+    setIsCreating(false);
+  }, [idParam]);
 
   useEffect(() => {
     setPage(1);

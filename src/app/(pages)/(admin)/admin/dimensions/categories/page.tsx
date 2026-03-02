@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import CategoryContent from '@/components/admin/dimension/category-content';
 import {
   getDimensionCategories,
@@ -23,5 +24,9 @@ export default async function DimensionCategoriesPage() {
     usageCount: usageMap.get(category.id) ?? 0,
   }));
 
-  return <CategoryContent initialData={data} />;
+  return (
+    <Suspense fallback={null}>
+      <CategoryContent initialData={data} />
+    </Suspense>
+  );
 }

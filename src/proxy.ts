@@ -1,19 +1,19 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-import { NextResponse } from 'next/server';
+// import { NextResponse } from 'next/server';
 
 // TODO: This is demo middleware for testing purposes, not intended for production use.
 // Define protected routes using glob patterns, regular expressions, or a function
-const publicRoutes = createRouteMatcher([
-  '/public/:path*',
-  '/about',
-  '/sign-in/:path*',
-  '/sign-up/:path*',
-]);
+// const publicRoutes = createRouteMatcher([
+//   '/public/:path*',
+//   '/about',
+//   '/sign-in/:path*',
+//   '/sign-up/:path*',
+// ]);
 const protectedRoutes = createRouteMatcher([
   '/protected/:path*',
   '/user-profile',
 ]);
-const adminRoutes = createRouteMatcher(['/admin/:path*']);
+// const adminRoutes = createRouteMatcher(['/admin/:path*']);
 
 // Middleware to protect routes
 export default clerkMiddleware(async (auth, req) => {

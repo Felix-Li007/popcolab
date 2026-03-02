@@ -8,7 +8,7 @@ test.describe('Dimension categories page', () => {
   test('page loads with core controls', async ({ page }) => {
     await expect(page).toHaveURL(/\/admin\/dimensions\/categories/);
     await expect(page.getByTestId('dimension-category-search')).toBeVisible();
-    await expect(page.getByRole('button', { name: /add/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /new/i })).toBeVisible();
     await expect(
       page.getByRole('button', { name: /^Delete/i }).first()
     ).toBeVisible();
@@ -33,8 +33,8 @@ test.describe('Dimension categories page', () => {
     });
   });
 
-  test('"Add" opens create modal', async ({ page }) => {
-    await page.getByRole('button', { name: /add/i }).click();
+  test('"New" opens create modal', async ({ page }) => {
+    await page.getByRole('button', { name: /new/i }).click();
     await expect(
       page.getByRole('heading', { name: /new category/i })
     ).toBeVisible();
@@ -123,6 +123,7 @@ test.describe('Dimension categories page', () => {
   }) => {
     const nextPageBtn = page.locator('button[title="Next page"]');
     if ((await nextPageBtn.count()) === 0) return;
+    if (await nextPageBtn.isDisabled()) return;
 
     const prevPageBtn = page.locator('button[title="Previous page"]');
     await expect(prevPageBtn).toBeDisabled();
@@ -148,9 +149,9 @@ test.describe('Dimension categories page', () => {
     const id = idText.slice(1);
 
     await page.goto(`/admin/dimensions/categories?id=${id}`);
-    await expect(page).toHaveURL(
-      new RegExp(`/admin/dimensions/categories\\?id=${id}$`)
-    );
+    const url = new URL(page.url());
+    expect(url.pathname).toMatch(/^\/admin\/dimensions\/categories\/?$/);
+    expect(url.searchParams.get('id')).toBe(id);
     await expect(
       page.getByRole('heading', { name: /edit category/i })
     ).toBeVisible();

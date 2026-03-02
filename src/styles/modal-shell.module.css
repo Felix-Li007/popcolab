@@ -1,0 +1,55 @@
+@reference "../app/globals.css";
+
+.root {
+  @apply fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto;
+}
+
+.backdrop {
+  @apply absolute inset-0;
+  background: rgb(0 0 0 / 45%);
+}
+
+.panel {
+  @apply relative w-full max-w-2xl rounded-2xl border border-gray-200 bg-white shadow-2xl;
+  max-height: calc(100dvh - 2rem);
+  overflow: hidden;
+}
+
+.header {
+  @apply flex items-center justify-between border-b border-gray-100 px-5 py-4;
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--color-teal-accent) 34%, white 66%) 0%,
+    color-mix(in srgb, var(--color-lavender) 30%, white 70%) 52%,
+    color-mix(in srgb, var(--color-magenta) 26%, white 74%) 100%
+  );
+}
+
+.headerIdentity {
+  @apply min-w-0;
+}
+
+.titleRow {
+  @apply flex items-center gap-2 min-w-0;
+}
+
+.title {
+  @apply text-sm font-bold text-gray-800;
+}
+
+.subtitle {
+  @apply text-xs text-gray-500 mt-0.5;
+}
+
+.closeButton {
+  @apply h-8 w-8 rounded-full text-gray-500;
+  transition: background-color 0.15s ease;
+}
+
+.closeButton:hover {
+  @apply bg-gray-100;
+}
+
+.body {
+  @apply max-h-[70vh] overflow-y-auto px-5 py-4;
+}

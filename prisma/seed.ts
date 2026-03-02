@@ -598,6 +598,458 @@ const questionDimensionMappings: Record<number, DimMapping[]> = {
   ],
 };
 
+type MockRequestPreferenceSeed = {
+  index_key: string;
+  desired_score: number;
+  weight_rate: number;
+};
+
+type MockRequestSeed = {
+  objective_category?: number | null;
+  budget_min?: number | null;
+  budget_max?: number | null;
+  delivery_method?: number | null;
+  duration_max?: number | null;
+  preferences?: MockRequestPreferenceSeed[];
+};
+
+type MockProfileSeed = {
+  first_name?: string | null;
+  last_name?: string | null;
+  phone_number?: string | null;
+  preferred_contact?: string | null;
+  consent_given: number;
+  privacy_notes?: string | null;
+};
+
+type MockCompanySeed = {
+  corporate_name?: string | null;
+  department_name?: string | null;
+  role_title?: string | null;
+  work_mode?: string | null;
+};
+
+type MockUserSeed = {
+  email: string;
+  status: 'active' | 'inactive';
+  profile?: MockProfileSeed;
+  company?: MockCompanySeed;
+  requests?: MockRequestSeed[];
+};
+
+type MockTeamSeed = {
+  team_name: string;
+  team_code: string;
+  team_notes?: string;
+  created_by_email: string;
+  members: string[];
+};
+
+const USER_NAME_MAX_LENGTH = 50;
+
+function normalizeUserName(value: string): string {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '_')
+    .replace(/^[_\-.]+|[_\-.]+$/g, '')
+    .replace(/[_\-.]{2,}/g, '_');
+
+  return normalized.slice(0, USER_NAME_MAX_LENGTH);
+}
+
+function deriveUserName(seedUser: MockUserSeed): string {
+  const first = seedUser.profile?.first_name?.trim();
+  const last = seedUser.profile?.last_name?.trim();
+
+  if (first && last) {
+    const joined = normalizeUserName(`${first}.${last}`);
+    if (joined) return joined;
+  }
+
+  if (first) {
+    const fromFirst = normalizeUserName(first);
+    if (fromFirst) return fromFirst;
+  }
+
+  const localPart = seedUser.email.split('@')[0] ?? '';
+  const fromEmail = normalizeUserName(localPart);
+  if (fromEmail) return fromEmail;
+
+  return 'user';
+}
+
+const mockUsers: MockUserSeed[] = [
+  {
+    email: 'ava.hughes@northstar.io',
+    status: 'active',
+    profile: {
+      first_name: 'Ava',
+      last_name: 'Hughes',
+      phone_number: '+1-415-555-1001',
+      preferred_contact: 'email',
+      consent_given: 1,
+      privacy_notes: 'Weekly updates preferred.',
+    },
+    company: {
+      corporate_name: 'Northstar Labs',
+      department_name: 'Product',
+      role_title: 'Product Manager',
+      work_mode: 'hybrid',
+    },
+    requests: [
+      {
+        objective_category: 1,
+        budget_min: 3000,
+        budget_max: 6000,
+        delivery_method: 1,
+        duration_max: 180,
+        preferences: [
+          { index_key: 'COLLABORATION', desired_score: 80, weight_rate: 35 },
+          { index_key: 'CREATIVITY', desired_score: 75, weight_rate: 30 },
+          { index_key: 'LEADERSHIP', desired_score: 70, weight_rate: 20 },
+        ],
+      },
+      {
+        objective_category: 2,
+        budget_min: 2000,
+        budget_max: 4500,
+        delivery_method: 2,
+        duration_max: 120,
+        preferences: [
+          { index_key: 'HUMOR', desired_score: 85, weight_rate: 40 },
+          { index_key: 'SPOTLIGHT', desired_score: 65, weight_rate: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'logan.chen@northstar.io',
+    status: 'active',
+    profile: {
+      first_name: 'Logan',
+      last_name: 'Chen',
+      phone_number: '+1-415-555-1002',
+      preferred_contact: 'phone',
+      consent_given: 1,
+      privacy_notes: 'Phone for urgent coordination.',
+    },
+    company: {
+      corporate_name: 'Northstar Labs',
+      department_name: 'Operations',
+      role_title: 'Ops Lead',
+      work_mode: 'onsite',
+    },
+    requests: [
+      {
+        objective_category: 3,
+        budget_min: 5000,
+        budget_max: 9000,
+        delivery_method: 1,
+        duration_max: 240,
+        preferences: [
+          { index_key: 'STRATEGY', desired_score: 90, weight_rate: 45 },
+          { index_key: 'COMPETITION', desired_score: 78, weight_rate: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'mia.garcia@lumen.co',
+    status: 'active',
+    profile: {
+      first_name: 'Mia',
+      last_name: 'Garcia',
+      phone_number: '+1-650-555-1003',
+      preferred_contact: 'email',
+      consent_given: 1,
+      privacy_notes: 'Creative workshops enthusiast.',
+    },
+    company: {
+      corporate_name: 'Lumen Co',
+      department_name: 'Design',
+      role_title: 'Design Director',
+      work_mode: 'hybrid',
+    },
+    requests: [
+      {
+        objective_category: 1,
+        budget_min: 2500,
+        budget_max: 5000,
+        delivery_method: 2,
+        duration_max: 150,
+        preferences: [
+          { index_key: 'CREATIVITY', desired_score: 92, weight_rate: 50 },
+          { index_key: 'EXPLORATION', desired_score: 76, weight_rate: 20 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'ethan.park@lumen.co',
+    status: 'inactive',
+    profile: {
+      first_name: 'Ethan',
+      last_name: 'Park',
+      phone_number: '+1-650-555-1004',
+      preferred_contact: 'email',
+      consent_given: 0,
+      privacy_notes: 'Paused account during leave.',
+    },
+    company: {
+      corporate_name: 'Lumen Co',
+      department_name: 'Engineering',
+      role_title: 'Frontend Engineer',
+      work_mode: 'remote',
+    },
+  },
+  {
+    email: 'sophia.reed@helix.ai',
+    status: 'active',
+    profile: {
+      first_name: 'Sophia',
+      last_name: 'Reed',
+      phone_number: '+1-206-555-1005',
+      preferred_contact: 'email',
+      consent_given: 1,
+      privacy_notes: 'Interested in active sessions.',
+    },
+    company: {
+      corporate_name: 'Helix AI',
+      department_name: 'People Ops',
+      role_title: 'HRBP',
+      work_mode: 'hybrid',
+    },
+    requests: [
+      {
+        objective_category: 4,
+        budget_min: 1500,
+        budget_max: 3500,
+        delivery_method: 1,
+        duration_max: 90,
+        preferences: [
+          { index_key: 'KINESIS', desired_score: 82, weight_rate: 35 },
+          { index_key: 'COLLABORATION', desired_score: 88, weight_rate: 30 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'noah.wright@helix.ai',
+    status: 'inactive',
+    profile: {
+      first_name: 'Noah',
+      last_name: 'Wright',
+      phone_number: '+1-206-555-1006',
+      preferred_contact: 'phone',
+      consent_given: 0,
+      privacy_notes: 'Reactivate next quarter.',
+    },
+    company: {
+      corporate_name: 'Helix AI',
+      department_name: 'Security',
+      role_title: 'Security Analyst',
+      work_mode: 'onsite',
+    },
+    requests: [
+      {
+        objective_category: 2,
+        budget_min: 1800,
+        budget_max: 4200,
+        delivery_method: 2,
+        duration_max: 110,
+        preferences: [
+          { index_key: 'MASTERY', desired_score: 84, weight_rate: 35 },
+          { index_key: 'STRATEGY', desired_score: 79, weight_rate: 25 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'olivia.kim@verve.studio',
+    status: 'active',
+    profile: {
+      first_name: 'Olivia',
+      last_name: 'Kim',
+      phone_number: '+1-408-555-1007',
+      preferred_contact: 'email',
+      consent_given: 1,
+      privacy_notes: null,
+    },
+    company: {
+      corporate_name: 'Verve Studio',
+      department_name: 'Marketing',
+      role_title: 'Brand Strategist',
+      work_mode: 'remote',
+    },
+  },
+  {
+    email: 'liam.brown@verve.studio',
+    status: 'active',
+    profile: {
+      first_name: 'Liam',
+      last_name: 'Brown',
+      phone_number: '+1-408-555-1008',
+      preferred_contact: 'phone',
+      consent_given: 1,
+      privacy_notes: 'Prefers evening sessions.',
+    },
+    company: {
+      corporate_name: 'Verve Studio',
+      department_name: 'Growth',
+      role_title: 'Growth Manager',
+      work_mode: 'hybrid',
+    },
+    requests: [
+      {
+        objective_category: 3,
+        budget_min: 2200,
+        budget_max: 5400,
+        delivery_method: 1,
+        duration_max: 140,
+        preferences: [
+          { index_key: 'COMPETITION', desired_score: 86, weight_rate: 35 },
+          { index_key: 'HUMOR', desired_score: 74, weight_rate: 20 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'emma.davis@orbit.one',
+    status: 'active',
+    profile: {
+      first_name: 'Emma',
+      last_name: 'Davis',
+      phone_number: '+1-312-555-1009',
+      preferred_contact: 'email',
+      consent_given: 1,
+      privacy_notes: 'Looking for mixed-format events.',
+    },
+    company: {
+      corporate_name: 'Orbit One',
+      department_name: 'Finance',
+      role_title: 'Finance Manager',
+      work_mode: 'onsite',
+    },
+    requests: [
+      {
+        objective_category: 1,
+        budget_min: 3200,
+        budget_max: 7000,
+        delivery_method: 1,
+        duration_max: 200,
+        preferences: [
+          { index_key: 'LEADERSHIP', desired_score: 81, weight_rate: 30 },
+          { index_key: 'COLLABORATION', desired_score: 89, weight_rate: 35 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'mason.lee@orbit.one',
+    status: 'inactive',
+    profile: {
+      first_name: 'Mason',
+      last_name: 'Lee',
+      phone_number: '+1-312-555-1010',
+      preferred_contact: 'email',
+      consent_given: 0,
+      privacy_notes: 'No outreach while inactive.',
+    },
+    company: {
+      corporate_name: 'Orbit One',
+      department_name: 'Data',
+      role_title: 'Data Analyst',
+      work_mode: 'remote',
+    },
+  },
+  {
+    email: 'harper.nguyen@aurora.dev',
+    status: 'active',
+    profile: {
+      first_name: 'Harper',
+      last_name: 'Nguyen',
+      phone_number: '+1-971-555-1011',
+      preferred_contact: 'email',
+      consent_given: 1,
+      privacy_notes: 'Prefers low-noise activities.',
+    },
+    requests: [
+      {
+        objective_category: 4,
+        budget_min: 1200,
+        budget_max: 2600,
+        delivery_method: 2,
+        duration_max: 80,
+        preferences: [
+          { index_key: 'EXPLORATION', desired_score: 83, weight_rate: 32 },
+          { index_key: 'CREATIVITY', desired_score: 80, weight_rate: 28 },
+        ],
+      },
+    ],
+  },
+  {
+    email: 'jack.wilson@example.com',
+    status: 'active',
+    profile: {
+      first_name: 'Jack',
+      last_name: 'Wilson',
+      phone_number: '+1-503-555-1012',
+      preferred_contact: 'phone',
+      consent_given: 1,
+      privacy_notes: null,
+    },
+  },
+];
+
+const mockTeams: MockTeamSeed[] = [
+  {
+    team_name: 'Trailblazers',
+    team_code: 'TRAIL-01',
+    team_notes: 'Cross-functional pilots',
+    created_by_email: 'ava.hughes@northstar.io',
+    members: [
+      'logan.chen@northstar.io',
+      'mia.garcia@lumen.co',
+      'sophia.reed@helix.ai',
+    ],
+  },
+  {
+    team_name: 'Insight Ops',
+    team_code: 'INSIGHT-02',
+    team_notes: 'Metrics and planning circle',
+    created_by_email: 'logan.chen@northstar.io',
+    members: [
+      'ava.hughes@northstar.io',
+      'ethan.park@lumen.co',
+      'noah.wright@helix.ai',
+      'emma.davis@orbit.one',
+    ],
+  },
+  {
+    team_name: 'Creative Sprint',
+    team_code: 'CREATE-03',
+    team_notes: 'Rapid concept testing squad',
+    created_by_email: 'mia.garcia@lumen.co',
+    members: [
+      'olivia.kim@verve.studio',
+      'liam.brown@verve.studio',
+      'harper.nguyen@aurora.dev',
+    ],
+  },
+  {
+    team_name: 'Wellness Guild',
+    team_code: 'WELL-04',
+    team_notes: 'Low-stress social activities',
+    created_by_email: 'sophia.reed@helix.ai',
+    members: [
+      'ava.hughes@northstar.io',
+      'olivia.kim@verve.studio',
+      'jack.wilson@example.com',
+    ],
+  },
+];
+
 // ─── Main Seed Function ───────────────────────────────────────────────────────
 
 async function main() {
@@ -717,6 +1169,157 @@ async function main() {
     }
     console.log(`✅ Wired ${mappings.length} dimension(s) → Q#${orderIndex}`);
   }
+
+  // ── Users and Related Tables ───────────────────────────────────────────────
+  const userStatusColumnRows = await prisma.$queryRaw<{ exists: boolean }[]>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = current_schema()
+        AND table_name = 'user'
+        AND column_name = 'status'
+    ) AS "exists"
+  `;
+  const hasUserStatusColumn = Boolean(userStatusColumnRows[0]?.exists);
+
+  await prisma.userVector.deleteMany({});
+  await prisma.requestPreference.deleteMany({});
+  await prisma.proposal.deleteMany({});
+  await prisma.request.deleteMany({});
+  await prisma.teamAggregate.deleteMany({});
+  await prisma.teamVector.deleteMany({});
+  await prisma.teamMate.deleteMany({});
+  await prisma.team.deleteMany({});
+  await prisma.company.deleteMany({});
+  await prisma.profile.deleteMany({});
+  await prisma.user.deleteMany({});
+  console.log('🗑️  Cleared existing users and related data');
+
+  const userIdByEmail = new Map<string, number>();
+
+  for (const seedUser of mockUsers) {
+    const userName = deriveUserName(seedUser);
+    const createdUser = await prisma.user.create({
+      data: {
+        email: seedUser.email,
+        user_name: userName,
+      },
+    });
+
+    userIdByEmail.set(seedUser.email, createdUser.id);
+
+    if (hasUserStatusColumn) {
+      await prisma.$executeRaw`
+        UPDATE "user"
+        SET
+          "status" = ${seedUser.status},
+          "updated_at" = NOW()
+        WHERE "id" = ${createdUser.id}
+      `;
+    }
+
+    if (seedUser.profile) {
+      await prisma.profile.create({
+        data: {
+          user_id: createdUser.id,
+          consent_given: seedUser.profile.consent_given,
+          first_name: seedUser.profile.first_name ?? null,
+          last_name: seedUser.profile.last_name ?? null,
+          phone_number: seedUser.profile.phone_number ?? null,
+          preferred_contact: seedUser.profile.preferred_contact ?? null,
+          privacy_notes: seedUser.profile.privacy_notes ?? null,
+        },
+      });
+    }
+
+    if (seedUser.company) {
+      await prisma.company.create({
+        data: {
+          user_id: createdUser.id,
+          corporate_name: seedUser.company.corporate_name ?? null,
+          department_name: seedUser.company.department_name ?? null,
+          role_title: seedUser.company.role_title ?? null,
+          work_mode: seedUser.company.work_mode ?? null,
+        },
+      });
+    }
+
+    for (const requestSeed of seedUser.requests ?? []) {
+      const createdRequest = await prisma.request.create({
+        data: {
+          user_id: createdUser.id,
+          objective_category: requestSeed.objective_category ?? null,
+          budget_min: requestSeed.budget_min ?? null,
+          budget_max: requestSeed.budget_max ?? null,
+          delivery_method: requestSeed.delivery_method ?? null,
+          duration_max: requestSeed.duration_max ?? null,
+        },
+      });
+
+      for (const preferenceSeed of requestSeed.preferences ?? []) {
+        const dimensionId = indexKeyMap.get(preferenceSeed.index_key);
+        if (!dimensionId) {
+          console.warn(
+            `⚠️  No dimension with key ${preferenceSeed.index_key} for request preference`
+          );
+          continue;
+        }
+
+        await prisma.requestPreference.create({
+          data: {
+            request_id: createdRequest.id,
+            dimension_id: dimensionId,
+            desired_score: preferenceSeed.desired_score,
+            weight_rate: preferenceSeed.weight_rate,
+          },
+        });
+      }
+    }
+  }
+
+  for (const teamSeed of mockTeams) {
+    const creatorId = userIdByEmail.get(teamSeed.created_by_email);
+    if (!creatorId) {
+      console.warn(
+        `⚠️  No user ${teamSeed.created_by_email} found for team ${teamSeed.team_name}`
+      );
+      continue;
+    }
+
+    const createdTeam = await prisma.team.create({
+      data: {
+        team_name: teamSeed.team_name,
+        team_code: teamSeed.team_code,
+        team_notes: teamSeed.team_notes ?? null,
+        created_by: creatorId,
+      },
+    });
+
+    const memberEmails = Array.from(
+      new Set([teamSeed.created_by_email, ...teamSeed.members])
+    );
+
+    for (const memberEmail of memberEmails) {
+      const userId = userIdByEmail.get(memberEmail);
+      if (!userId) {
+        console.warn(
+          `⚠️  No user ${memberEmail} found for team member in ${teamSeed.team_name}`
+        );
+        continue;
+      }
+
+      await prisma.teamMate.create({
+        data: {
+          team_id: createdTeam.id,
+          user_id: userId,
+        },
+      });
+    }
+  }
+
+  console.log(
+    `✅ Created ${mockUsers.length} users, ${mockTeams.length} teams, and related records`
+  );
 
   console.log('🎉 Seed completed!');
 }

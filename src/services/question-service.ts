@@ -39,7 +39,7 @@ export function mapQuestionRow(
     options: {
       id: number;
       option_label: string;
-      option_value: string;
+      option_value: string | null;
       option_score: unknown;
     }[];
     dimensions: {
@@ -63,7 +63,7 @@ export function mapQuestionRow(
     options: q.options.map(o => ({
       id: o.id,
       label: o.option_label,
-      value: o.option_value,
+      value: o.option_value ?? '',
       score: o.option_score !== null ? Number(o.option_score) : null,
     })),
     dimensions: q.dimensions.map(d => ({

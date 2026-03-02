@@ -67,7 +67,8 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const isIconOnly = icon && !children;
     const isTab = variant === 'tab';
 
-    const baseStyles = 'inline-flex items-center justify-center transition-all';
+    const baseStyles =
+      'inline-flex items-center justify-center whitespace-nowrap transition-all';
     const roundedStyle = isIconOnly ? 'rounded-full' : 'rounded-full';
     const disabledStyle = disabled
       ? 'opacity-50 cursor-not-allowed pointer-events-none'

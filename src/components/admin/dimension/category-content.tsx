@@ -32,12 +32,12 @@ export default function CategoryContent({ initialData }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
-  const initialId = Number(searchParams.get('id')) || null;
+  const idParam = searchParams.get('id');
 
   const [categories, setCategories] =
     useState<CategoryWithUsage[]>(initialData);
   const [search, setSearch] = useState('');
-  const [selectedId, setSelectedId] = useState<number | null>(initialId);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [isCreating, setIsCreating] = useState(false);
   const [page, setPage] = useState(1);
@@ -45,6 +45,15 @@ export default function CategoryContent({ initialData }: Props) {
   useEffect(() => {
     setCategories(initialData);
   }, [initialData]);
+
+  useEffect(() => {
+    if (!idParam || !/^\d+$/.test(idParam)) {
+      setSelectedId(null);
+      return;
+    }
+    setSelectedId(Number(idParam));
+    setIsCreating(false);
+  }, [idParam]);
 
   useEffect(() => {
     setPage(1);

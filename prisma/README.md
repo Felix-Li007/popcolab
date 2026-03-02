@@ -94,7 +94,7 @@ import { prisma } from '@/libs/prisma/client';
 
 async function main() {
   const newUser = await prisma.user.create({
-    data: { email: 'alice@example.com', name: 'Alice' },
+    data: { email: 'alice@example.com', user_name: 'alice' },
   });
 
   const users = await prisma.user.findMany();

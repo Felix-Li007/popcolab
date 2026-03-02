@@ -44,14 +44,22 @@ export default function QuestionContent({
   const [questions, setQuestions] = useState<Question[]>(initialData);
   const [filter, setFilter] = useState<TypeFilter>('All');
   const [search, setSearch] = useState('');
-  const initialId = Number(searchParams.get('id')) || null;
-  const [selectedId, setSelectedId] = useState<number | null>(initialId);
+  const idParam = searchParams.get('id');
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setQuestions(initialData);
   }, [initialData]);
+
+  useEffect(() => {
+    if (!idParam || !/^\d+$/.test(idParam)) {
+      setSelectedId(null);
+      return;
+    }
+    setSelectedId(Number(idParam));
+  }, [idParam]);
 
   // Reset page when filter or search changes
   useEffect(() => {

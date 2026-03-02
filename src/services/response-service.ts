@@ -3,6 +3,19 @@ import type { UserAnswer } from '@/types/response-type';
 import type { Personality } from '@/types/personality-type';
 import { mapPersonalityRow } from '@/services/personality-service';
 
+const USER_NAME_MAX_LENGTH = 50;
+
+function deriveUserNameFromEmail(email: string): string {
+  const localPart = (email.split('@')[0] ?? '').trim().toLowerCase();
+  const normalized = localPart
+    .replace(/[^a-z0-9._-]+/g, '_')
+    .replace(/^[_\-.]+|[_\-.]+$/g, '')
+    .replace(/[_\-.]{2,}/g, '_')
+    .slice(0, USER_NAME_MAX_LENGTH);
+
+  return normalized || 'user';
+}
+
 // ─── Scoring Helpers ──────────────────────────────────────────────────────────
 
 async function computeNumericValue(
@@ -276,15 +289,14 @@ export async function computeAllPersonalityMatches(
 
 // ─── User Bridge (Clerk email → local user id) ────────────────────────────────
 
-export async function findOrCreateUserByEmail(
-  email: string,
-  name?: string
-): Promise<number> {
+export async function findOrCreateUserByEmail(email: string): Promise<number> {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) return existing.id;
 
+  const userName = deriveUserNameFromEmail(email);
   const created = await prisma.user.create({
-    data: { email, name: name ?? null },
+    data: { email, user_name: userName },
   });
+
   return created.id;
 }

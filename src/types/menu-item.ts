@@ -112,7 +112,18 @@ export const menuSection: MenuGroup[] = [
         label: 'Users',
         href: '/admin/users',
         countKey: 'users',
-        children: [{ label: 'Users', href: '/admin/users', countKey: 'users' }],
+        children: [
+          {
+            label: 'Users',
+            href: '/admin/users',
+            countKey: 'users',
+          },
+          {
+            label: 'Teams',
+            href: '/admin/teams',
+            countKey: 'teams',
+          },
+        ],
       },
       {
         label: 'Facilitators',
@@ -125,12 +136,6 @@ export const menuSection: MenuGroup[] = [
             countKey: 'facilitators',
           },
         ],
-      },
-      {
-        label: 'Teams',
-        href: '/admin/teams',
-        countKey: 'teams',
-        children: [{ label: 'Teams', href: '/admin/teams', countKey: 'teams' }],
       },
       {
         label: 'Events',

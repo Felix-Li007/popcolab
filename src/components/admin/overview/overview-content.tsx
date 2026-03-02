@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import DashboardHeader from '@/components/admin/dashboard-header';
 import StatsGrid from '@/components/admin/stats-grid';
 import EventsTable from '@/components/admin/event-table';
 import QuickActions from '@/components/admin/quick-actions';
@@ -24,6 +23,18 @@ type OverviewContentProps = {
   initialQuestions?: Question[];
 };
 
+function formatUpdatedAt(value: Date | string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const hour = String(date.getUTCHours()).padStart(2, '0');
+  const minute = String(date.getUTCMinutes()).padStart(2, '0');
+
+  return `${month}/${day} ${hour}:${minute} UTC`;
+}
+
 export default function OverviewContent({
   initialPersonalities,
   personalitiesCount,
@@ -36,7 +47,6 @@ export default function OverviewContent({
   const {
     formModal,
     viewModal,
-    openCreate,
     openEdit,
     openView,
     closeForm,
@@ -56,7 +66,6 @@ export default function OverviewContent({
       <div className="flex flex-col">
         <div className="flex flex-1 gap-0">
           <div className="flex-1 min-w-0 p-4 space-y-5">
-            <DashboardHeader onNewPersonality={openCreate} />
             <StatsGrid
               personalitiesCount={personalitiesCount}
               personalitiesActiveCount={personalitiesActiveCount}
@@ -165,16 +174,7 @@ export default function OverviewContent({
                             )}
                             {q.updatedAt && (
                               <span className="ml-auto">
-                                🕐{' '}
-                                {new Date(q.updatedAt).toLocaleDateString(
-                                  'en-CA',
-                                  {
-                                    month: '2-digit',
-                                    day: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  }
-                                )}
+                                🕐 {formatUpdatedAt(q.updatedAt)}
                               </span>
                             )}
                           </div>

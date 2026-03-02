@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import {
   getDimensionCategories,
   getDimensions,
@@ -14,10 +15,12 @@ export default async function DimensionsPage() {
   ]);
 
   return (
-    <DimensionContent
-      initialData={dimensions as Dimension[]}
-      categories={categories as DimensionCategory[]}
-      summary={summary}
-    />
+    <Suspense fallback={null}>
+      <DimensionContent
+        initialData={dimensions as Dimension[]}
+        categories={categories as DimensionCategory[]}
+        summary={summary}
+      />
+    </Suspense>
   );
 }
