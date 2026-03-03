@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       );
     }
 
-    await prisma.contactMessage.create({
+    await prisma.contact.create({
       data: {
         name: data.name,
         email: data.email,
