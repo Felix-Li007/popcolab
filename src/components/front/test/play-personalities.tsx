@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useState } from 'react';
 import type { Personality } from '@/types/personality-type';
 import { cssVarStyle } from '@/utils/css-helper';
-import styles from '@/styles/play-personalities.module.css';
+import styles from '@/styles/play-personality.module.css';
+import cardStyles from '@/styles/personality-card.module.css';
+import ctaStyles from '@/styles/landing-ctasection.module.css';
 
 type PersonalityMatch = {
   personality: Personality;
@@ -14,6 +16,45 @@ type PersonalityMatch = {
 type Props = {
   matches: PersonalityMatch[];
 };
+
+const BENEFITS = [
+  {
+    icon: '🎯',
+    title: 'Curated Experiences',
+    desc: 'Get matched with play experiences built for your personality type.',
+  },
+  {
+    icon: '👥',
+    title: 'Team Dynamics',
+    desc: 'See how your style blends with your team to unlock better collaboration.',
+  },
+  {
+    icon: '📊',
+    title: 'Saved Profile',
+    desc: 'Keep your results and track how your play style evolves over time.',
+  },
+];
+
+const EXPERIENCE_TEASERS = [
+  {
+    emoji: '🎨',
+    title: 'Creative Sprint Workshop',
+    tag: 'For Creators',
+    color: '#c026d3',
+  },
+  {
+    emoji: '🧩',
+    title: 'Strategic Play Session',
+    tag: 'For Strategists',
+    color: '#0891b2',
+  },
+  {
+    emoji: '🎭',
+    title: 'Improv & Connection',
+    tag: 'For Performers',
+    color: '#ea580c',
+  },
+];
 
 export default function PlayPersonalities({ matches }: Props) {
   const [copied, setCopied] = useState(false);
@@ -153,27 +194,124 @@ export default function PlayPersonalities({ matches }: Props) {
         {copied ? 'Link copied!' : 'Share my results'}
       </button>
 
-      {/* Auth CTAs */}
-      <div className="rounded-xl bg-white border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-        <p className="text-sm font-semibold text-gray-700">
-          Want to save your result?
-        </p>
-        <p className="text-xs text-gray-400">
-          Create a free account to keep your personality profile and get matched
-          with experiences.
-        </p>
+      {/* Benefit tiles */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {BENEFITS.map(({ icon, title, desc }) => (
+          <div
+            key={title}
+            className="rounded-xl bg-white border border-gray-100 shadow-sm p-4 flex flex-col gap-2"
+          >
+            <span className="text-2xl">{icon}</span>
+            <p className="text-sm font-bold text-gray-800">{title}</p>
+            <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Experience teasers */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="text-base font-bold text-gray-800">
+            Experiences made for you
+          </h2>
+          <p className="text-xs text-gray-400">
+            Sign up to unlock curated activities that match your play
+            personality.
+          </p>
+        </div>
+        <div className={cardStyles.cardGrid}>
+          {EXPERIENCE_TEASERS.map(({ emoji, title, tag, color }) => (
+            <div
+              key={title}
+              className={`${cardStyles.card} group`}
+              style={cssVarStyle({ '--glow-color': `${color}40` })}
+            >
+              <div className={cardStyles.orb} />
+              {/* Lock overlay — fades in on hover */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200 z-10"
+                style={{ background: 'rgba(9,25,27,0.55)' }}
+              >
+                <span className={styles.experienceLockBadge}>
+                  🔒 Sign up to unlock
+                </span>
+              </div>
+              {/* Card content */}
+              <div className="relative z-[1] flex flex-col gap-2 p-4 h-full">
+                <span
+                  className="text-xs font-bold tracking-wide rounded-full px-2.5 py-0.5 w-fit"
+                  style={{ background: `${color}20`, color }}
+                >
+                  {tag}
+                </span>
+                <span className="text-3xl leading-none mt-auto">{emoji}</span>
+                <p className="text-sm font-semibold text-gray-800 leading-tight">
+                  {title}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Team banner */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4"
+        style={{
+          background:
+            'linear-gradient(to bottom right, var(--color-teal-deep), var(--color-teal-medium))',
+        }}
+      >
+        <div className={ctaStyles.pinkCircle} />
+        <div className={ctaStyles.lightCircle} />
+        <div className="relative z-10 flex flex-col gap-3">
+          {/* Emoji chips — one per top match */}
+          <div className="flex gap-2 flex-wrap">
+            {matches.slice(0, 4).map(({ personality }) => (
+              <div key={personality.type} className={styles.teamEmojiChip}>
+                {personality.emoji}
+              </div>
+            ))}
+            <div className={styles.teamEmojiChip}>➕</div>
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white leading-tight">
+              Build your dream team
+            </h2>
+            <p
+              className="text-sm mt-1"
+              style={{ color: 'rgba(255,255,255,0.8)' }}
+            >
+              Map every team member&apos;s play personality and unlock curated
+              group experiences together.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Improved CTA */}
+      <div className="flex flex-col gap-4 items-center text-center">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-bold text-gray-800">
+            Ready to unlock everything?
+          </h2>
+          <p className="text-sm text-gray-500 max-w-xs mx-auto">
+            Create a free account to save your profile, unlock experiences, and
+            explore your team dynamics.
+          </p>
+        </div>
         <Link
           href="/sign-up"
-          className="w-full px-4 py-2.5 rounded-lg bg-teal-deep text-white text-sm font-semibold text-center hover:opacity-90 transition-all"
+          className={`${ctaStyles.primaryButton} block w-full text-center`}
         >
-          Create free account
+          Create free account — it&apos;s free
         </Link>
-        <Link
-          href="/sign-in"
-          className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 text-center hover:bg-gray-100 transition-all"
-        >
-          Sign in to existing account
-        </Link>
+        <p className="text-xs text-gray-400">
+          Already have an account?{' '}
+          <Link href="/sign-in" className="underline hover:opacity-75">
+            Sign in
+          </Link>
+        </p>
       </div>
 
       <Link
