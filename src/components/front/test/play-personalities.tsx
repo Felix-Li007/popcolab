@@ -79,7 +79,7 @@ export default function PlayPersonalities({ matches }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8" data-testid="results-page">
       {/* Header */}
       <div className="flex flex-col gap-1">
         <p className="text-xs text-gray-400 uppercase tracking-widest">
@@ -99,6 +99,7 @@ export default function PlayPersonalities({ matches }: Props) {
         {primary && (
           <div
             className={styles.primaryCard}
+            data-testid="results-primary-card"
             style={cssVarStyle({
               '--card-accent': primary.personality.accentColor ?? '#0d9488',
             })}
@@ -142,7 +143,7 @@ export default function PlayPersonalities({ matches }: Props) {
 
         {/* Other matches panel */}
         {others.length > 0 && (
-          <div className={styles.otherCard}>
+          <div className={styles.otherCard} data-testid="results-other-matches">
             <div className="mb-4">
               <h3 className="text-sm font-bold text-gray-800">Other Matches</h3>
               <p className="text-xs text-gray-400 mt-0.5">
@@ -195,11 +196,15 @@ export default function PlayPersonalities({ matches }: Props) {
       </button>
 
       {/* Benefit tiles */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div
+        className="grid grid-cols-1 gap-3 sm:grid-cols-3"
+        data-testid="results-benefit-tiles"
+      >
         {BENEFITS.map(({ icon, title, desc }) => (
           <div
             key={title}
             className="rounded-xl bg-white border border-gray-100 shadow-sm p-4 flex flex-col gap-2"
+            data-testid="results-benefit-tile"
           >
             <span className="text-2xl">{icon}</span>
             <p className="text-sm font-bold text-gray-800">{title}</p>
@@ -209,7 +214,10 @@ export default function PlayPersonalities({ matches }: Props) {
       </div>
 
       {/* Experience teasers */}
-      <div className="flex flex-col gap-3">
+      <div
+        className="flex flex-col gap-3"
+        data-testid="results-experience-teasers"
+      >
         <div className="flex flex-col gap-0.5">
           <h2 className="text-base font-bold text-gray-800">
             Experiences made for you
@@ -224,6 +232,7 @@ export default function PlayPersonalities({ matches }: Props) {
             <div
               key={title}
               className={`${cardStyles.card} group`}
+              data-testid="results-experience-card"
               style={cssVarStyle({ '--glow-color': `${color}40` })}
             >
               <div className={cardStyles.orb} />
@@ -257,6 +266,7 @@ export default function PlayPersonalities({ matches }: Props) {
       {/* Team banner */}
       <div
         className="relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4"
+        data-testid="results-team-banner"
         style={{
           background:
             'linear-gradient(to bottom right, var(--color-teal-deep), var(--color-teal-medium))',
@@ -290,7 +300,10 @@ export default function PlayPersonalities({ matches }: Props) {
       </div>
 
       {/* Improved CTA */}
-      <div className="flex flex-col gap-4 items-center text-center">
+      <div
+        className="flex flex-col gap-4 items-center text-center"
+        data-testid="results-cta"
+      >
         <div className="flex flex-col gap-1">
           <h2 className="text-xl font-bold text-gray-800">
             Ready to unlock everything?
