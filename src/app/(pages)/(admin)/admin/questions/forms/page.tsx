@@ -6,10 +6,8 @@ import {
   getIntakeForms,
   getIntakeQuestionOptions,
 } from '@/services/intake-service';
-import { requireAdminPageAccess } from '@/services/admin-auth-service';
 
 export default async function IntakeFormsPage() {
-  await requireAdminPageAccess();
   const [intakeForms, availableQuestions, availableDimensions] =
     await Promise.all([
       getIntakeForms(),

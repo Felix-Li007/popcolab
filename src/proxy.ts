@@ -1,30 +1,36 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
-// import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { readClaimRole } from '@/utils/clerk-helper';
 
-// TODO: This is demo middleware for testing purposes, not intended for production use.
-// Define protected routes using glob patterns, regular expressions, or a function
-// const publicRoutes = createRouteMatcher([
-//   '/public/:path*',
-//   '/about',
-//   '/sign-in/:path*',
-//   '/sign-up/:path*',
-// ]);
+const FORCE_REDIRECT_URL = '/dashboard';
+
 const protectedRoutes = createRouteMatcher([
-  '/protected/:path*',
-  '/user-profile',
+  '/admin/:path*',
+  '/dashboard/:path*',
+  '/profile/:path*',
 ]);
-// const adminRoutes = createRouteMatcher(['/admin/:path*']);
+const adminRoutes = createRouteMatcher(['/admin/:path*']);
 
-// Middleware to protect routes
 export default clerkMiddleware(async (auth, req) => {
-  if (protectedRoutes(req)) {
-    // Protect the route by ensuring the user is authenticated
-    await auth.protect();
+  const isProtectedRoute = protectedRoutes(req);
+  const isAdminRoute = adminRoutes(req);
+  const isForceRedirectRoute = req.nextUrl.pathname === FORCE_REDIRECT_URL;
+  if (!isProtectedRoute) {
+    return;
   }
-  // if (adminRoutes(req) && (await auth()).sessionClaims?.role !== 'admin') {
-  //   const targetUrl = new URL('/', req.url);
-  //   return NextResponse.redirect(targetUrl); // Redirect non-admin users to the home page
-  // }
+  const authState = await auth();
+  const userRole = readClaimRole(authState.sessionClaims);
+  const isAdmin = userRole === 'admin';
+  await auth.protect();
+
+  if (isForceRedirectRoute && authState.userId) {
+    const targetUrl = isAdmin ? '/admin' : '/';
+    return NextResponse.redirect(new URL(targetUrl, req.url));
+  }
+  if (isAdminRoute && !isAdmin) {
+    const targetUrl = new URL('/', req.url);
+    return NextResponse.redirect(targetUrl);
+  }
 });
 
 export const config = {

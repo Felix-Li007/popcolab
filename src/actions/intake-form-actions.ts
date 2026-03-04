@@ -5,7 +5,7 @@ import type {
   IntakeFormFormState,
   IntakeFormStatus,
 } from '@/types/intake-form-type';
-import { requireAdminActionAccess } from '@/services/admin-auth-service';
+import { requireAdminActionAccess } from '@/services/clerk-service';
 import {
   createIntakeForm,
   updateIntakeForm,
