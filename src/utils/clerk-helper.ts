@@ -1,4 +1,6 @@
-export function readMetaRole(record: Record<string, unknown>): string | null {
+export const readMetaRole = (
+  record: Record<string, unknown>
+): string | null => {
   const directRole = record.role;
   if (typeof directRole === 'string' && directRole.trim().length > 0) {
     return directRole;
@@ -18,9 +20,9 @@ export function readMetaRole(record: Record<string, unknown>): string | null {
     }
   }
   return null;
-}
+};
 
-function normalizeRole(role: string | null): string | null {
+export const normalizeRole = (role: string | null): string | null => {
   if (!role) return null;
 
   const normalized = role.trim().toLowerCase();
@@ -29,9 +31,9 @@ function normalizeRole(role: string | null): string | null {
   }
 
   return normalized;
-}
+};
 
-export function readClaimRole(sessionClaims: unknown): string | null {
+export const readClaimRole = (sessionClaims: unknown): string | null => {
   if (!sessionClaims || typeof sessionClaims !== 'object') return null;
 
   const claims = sessionClaims as Record<string, unknown>;
@@ -56,5 +58,5 @@ export function readClaimRole(sessionClaims: unknown): string | null {
     }
   }
 
-  return normalizeRole(readMetaRole(claims));
-}
+  return readMetaRole(claims);
+};

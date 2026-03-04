@@ -1,6 +1,6 @@
 import Header from '@/components/front/page-header';
-import Footer from '@/components/front/page-footer';
 import type { Metadata } from 'next';
+import PageFooter from '@/components/shared/page-footer';
 
 export const metadata: Metadata = {
   title: 'PopColab Front',
@@ -15,8 +15,9 @@ export default function FrontLayout({
   return (
     <>
       <Header />
+
       {children}
-      <Footer />
+      <PageFooter />
     </>
   );
 }

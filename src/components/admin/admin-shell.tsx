@@ -3,15 +3,19 @@
 import { useEffect, useState } from 'react';
 import SidenavMenu from '@/components/admin/sidenav-menu';
 import TopnavMenu from '@/components/admin/topnav-menu';
-import PageFooter from '@/components/admin/page-footer';
+import PageFooter from '@/components/shared/page-footer';
 import type { BadgeCounts } from '@/types/menu-item';
 
 export default function AdminShell({
   children,
   badgeCounts,
+  userDisplayName,
+  userRoleLabel,
 }: {
   children: React.ReactNode;
   badgeCounts?: BadgeCounts;
+  userDisplayName?: string;
+  userRoleLabel?: string;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -39,7 +43,7 @@ export default function AdminShell({
   }, []);
 
   return (
-    <div className="flex min-h-screenbg-background">
+    <div className="flex min-h-screen bg-background">
       <SidenavMenu badgeCounts={badgeCounts} className="hidden sm:flex" />
 
       <div
@@ -65,6 +69,8 @@ export default function AdminShell({
           badgeCounts={badgeCounts}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          userDisplayName={userDisplayName}
+          userRoleLabel={userRoleLabel}
         />
         <main className="flex-1 overflow-auto">
           {children}

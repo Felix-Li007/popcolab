@@ -1,16 +1,22 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth, useUser } from '@clerk/nextjs';
 import { MenuItem } from '@/types/menu-item';
+import {
+  normalizeRole,
+  readClaimRole,
+  readMetaRole,
+} from '@/utils/clerk-helper';
 
 const adminLinks: MenuItem[] = [
-  { label: 'Dashboard', href: '/admin' },
   { label: 'Dimensions', href: '/admin/dimensions' },
   { label: 'Personalities', href: '/admin/personalities' },
   { label: 'Questions', href: '/admin/questions' },
-  { label: 'Intake Forms', href: '/admin/questions/forms' },
+  { label: 'Users', href: '/admin/users' },
   { label: 'Events', href: '/admin/events' },
   { label: 'Bookings', href: '/admin/bookings' },
-  { label: 'Settings', href: '/admin/settings' },
 ];
 
 const supportLinks: MenuItem[] = [
@@ -21,13 +27,27 @@ const supportLinks: MenuItem[] = [
 ];
 
 export default function PageFooter() {
+  const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
+  const { isLoaded: isUserLoaded, user } = useUser();
+
+  const claimRole = normalizeRole(readClaimRole(sessionClaims));
+  const metadataRole = normalizeRole(
+    readMetaRole(
+      (user?.publicMetadata as Record<string, unknown> | undefined) ??
+        (user?.unsafeMetadata as Record<string, unknown> | undefined) ??
+        {}
+    )
+  );
+  const role = claimRole ?? metadataRole;
+  const isAdmin = isAuthLoaded && isUserLoaded && role === 'admin';
+
   return (
     <footer className="bg-teal-deep text-white mt-auto">
       <div className="max-w-7xl mx-auto px-6 py-10">
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
+            <Link href="/" className="flex items-center gap-2 mb-3">
               <Image
                 src="/logo/logo-icon.png"
                 alt="Pop CoLab"
@@ -36,7 +56,7 @@ export default function PageFooter() {
                 className="rounded-full"
               />
               <span className="font-bold text-sm">Pop CoLab</span>
-            </div>
+            </Link>
             <p className="text-white/60 text-xs leading-relaxed">
               Rediscover the Power of Play.
               <br />
@@ -51,24 +71,26 @@ export default function PageFooter() {
             />
           </div>
 
-          {/* Admin links */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-3">
-              Admin
-            </h4>
-            <ul className="space-y-1.5">
-              {adminLinks.map(link => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-xs text-white/70 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Admin links: visible only for signed-in admin users */}
+          {isAdmin ? (
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-white/40 mb-3">
+                Admin
+              </h4>
+              <ul className="space-y-1.5">
+                {adminLinks.map(link => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-xs text-white/70 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
 
           {/* Support links */}
           <div>

@@ -1,13 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { readClaimRole } from '@/utils/clerk-helper';
+import { normalizeRole, readClaimRole } from '@/utils/clerk-helper';
 
 const FORCE_REDIRECT_URL = '/dashboard';
 
 const protectedRoutes = createRouteMatcher([
   '/admin/:path*',
   '/dashboard/:path*',
-  '/profile/:path*',
 ]);
 const adminRoutes = createRouteMatcher(['/admin/:path*']);
 
@@ -19,7 +18,7 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
   const authState = await auth();
-  const userRole = readClaimRole(authState.sessionClaims);
+  const userRole = normalizeRole(readClaimRole(authState.sessionClaims));
   const isAdmin = userRole === 'admin';
   await auth.protect();
 

@@ -35,7 +35,7 @@ export default function Sidebar({
     >
       {/* Logo */}
       <div className="px-4 h-14 flex items-center border-b border-white/10">
-        <div className="flex items-center gap-2">
+        <Link href="/" onClick={onNavigate} className="flex items-center gap-2">
           <Image
             src="/logo/logo-icon.png"
             alt="Pop CoLab"
@@ -51,7 +51,7 @@ export default function Sidebar({
               Rediscover the Power of Play
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Nav */}

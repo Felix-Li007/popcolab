@@ -17,31 +17,7 @@ export default function SignInPage() {
         </div>
 
         {/* Clerk form — themed to brand */}
-        <SignIn
-          appearance={{
-            variables: {
-              colorPrimary: '#f52e81',
-              colorBackground: '#ffffff',
-              colorText: '#111827',
-              colorTextSecondary: '#6b7280',
-              colorInputBackground: '#f9fafb',
-              colorInputText: '#111827',
-              fontFamily: 'Poppins, sans-serif',
-              borderRadius: '0.75rem',
-            },
-            elements: {
-              card: 'shadow-xl border-0 rounded-2xl',
-              headerTitle: 'hidden',
-              headerSubtitle: 'hidden',
-              socialButtonsBlockButton:
-                'border border-gray-200 hover:bg-gray-50',
-              formButtonPrimary:
-                'bg-[#f52e81] hover:bg-[#d4246d] text-white font-semibold',
-              footerActionLink:
-                'text-[#f52e81] hover:text-[#d4246d] font-semibold',
-            },
-          }}
-        />
+        <SignIn />
 
         {/* Fallback cross-link */}
         <p className="text-sm text-white/70">

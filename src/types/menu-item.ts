@@ -175,26 +175,6 @@ export const menuSection: MenuGroup[] = [
       },
     ],
   },
-  {
-    title: 'SYSTEM',
-    items: [
-      {
-        label: 'Settings',
-        href: '/admin/settings',
-        children: [{ label: 'Settings', href: '/admin/settings' }],
-      },
-      {
-        label: 'Permissions',
-        href: '/admin/permissions',
-        children: [{ label: 'Permissions', href: '/admin/permissions' }],
-      },
-      {
-        label: 'Log Out',
-        href: '/sign-out',
-        children: [],
-      },
-    ],
-  },
 ];
 
 const sectionItems = [...menuSection.flatMap(section => section.items)].sort(
@@ -209,7 +189,8 @@ export const getMenuItem = (pathname: string) =>
   );
 
 export const topTabs: MenuItem[] = [
-  { label: 'Corporate Teams ○', href: '#' },
-  { label: 'Public Group ○', href: '#' },
-  { label: 'Facilitators & Partners +', href: '#' },
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about' },
+  { label: 'Services', href: '/services' },
+  { label: 'Contact', href: '/contact' },
 ];

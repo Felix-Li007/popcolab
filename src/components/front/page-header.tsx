@@ -4,14 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from '@clerk/nextjs';
+import { SignedIn, SignedOut, SignInButton, SignUpButton } from '@clerk/nextjs';
 import styles from '@/styles/page-header.module.css';
+import UserAvatar from '@/components/shared/user-avatar';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,9 +51,7 @@ export default function Header() {
               <button className={styles.signupBtn}>Sign Up</button>
             </SignUpButton>
           </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          <UserAvatar />
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -101,9 +94,7 @@ export default function Header() {
               </button>
             </SignUpButton>
           </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
+          <UserAvatar />
         </div>
       </nav>
     </header>
