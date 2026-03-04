@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useActionState } from 'react';
+import { useEffect, useState, useActionState, useMemo } from 'react';
 import { Button, Input, TextArea } from '@/ui';
 import type {
   Question,
@@ -86,18 +86,36 @@ export default function QuestionPanel({
       ? Number(initial?.options?.[1]?.label ?? 250)
       : 250
   );
-
-  // Group available dimensions by category
-  const dimsByCategory = availableDimensions.reduce<
-    Record<string, DimensionIndex[]>
-  >((acc, d) => {
-    const key = d.categoryName;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(d);
-    return acc;
-  }, {});
+  const [dimensionSearch, setDimensionSearch] = useState('');
+  const [dimensionCategoryFilter, setDimensionCategoryFilter] =
+    useState<string>('all');
 
   const selectedIds = new Set(dims.map(d => d.dimensionId));
+  const dimensionCategories = useMemo(() => {
+    return Array.from(
+      new Set(availableDimensions.map(dimension => dimension.categoryName))
+    );
+  }, [availableDimensions]);
+  const normalizedDimensionSearch = dimensionSearch.trim().toLowerCase();
+  const filteredDimensions = useMemo(() => {
+    return availableDimensions.filter(dimension => {
+      const matchCategory =
+        dimensionCategoryFilter === 'all' ||
+        dimension.categoryName === dimensionCategoryFilter;
+      if (!matchCategory) return false;
+
+      if (!normalizedDimensionSearch) return true;
+      return [
+        dimension.indexName,
+        dimension.indexKey ?? '',
+        dimension.categoryName,
+        String(dimension.id),
+      ]
+        .join(' ')
+        .toLowerCase()
+        .includes(normalizedDimensionSearch);
+    });
+  }, [availableDimensions, dimensionCategoryFilter, normalizedDimensionSearch]);
 
   useEffect(() => {
     if (state.success) onSuccess();
@@ -169,7 +187,7 @@ export default function QuestionPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+      <div className="flex-1 min-h-0 px-6 py-5 flex flex-col gap-5 overflow-hidden">
         {/* Global error */}
         {state.errors._form && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-2 rounded-xl">
@@ -227,16 +245,6 @@ export default function QuestionPanel({
           defaultValue={initial?.description}
           inputSize="sm"
           rows={2}
-        />
-
-        {/* Order index */}
-        <Input
-          name="order_index"
-          label="Order Index"
-          type="number"
-          placeholder="e.g. 1"
-          defaultValue={initial?.orderIndex ?? ''}
-          inputSize="sm"
         />
 
         {/* Options – only for choice types */}
@@ -430,14 +438,48 @@ export default function QuestionPanel({
         )}
 
         {/* Dimensions */}
-        <div>
+        <div className="flex flex-col flex-1 min-h-0">
           <div className="flex items-center justify-between mb-2">
             <label className="block text-xs font-bold text-gray-600 mb-2">
-              DEIMENSIONS <span className="text-magenta">*</span>
+              DIMENSIONS <span className="text-magenta">*</span>
             </label>
             <span className="text-[10px] text-gray-400">
               {dims.length} selected
             </span>
+          </div>
+          <input
+            type="text"
+            value={dimensionSearch}
+            onChange={e => setDimensionSearch(e.target.value)}
+            placeholder="Search dimensions..."
+            className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 mb-2"
+          />
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            <button
+              type="button"
+              onClick={() => setDimensionCategoryFilter('all')}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
+                dimensionCategoryFilter === 'all'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              All
+            </button>
+            {dimensionCategories.map(categoryName => (
+              <button
+                key={categoryName}
+                type="button"
+                onClick={() => setDimensionCategoryFilter(categoryName)}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
+                  dimensionCategoryFilter === categoryName
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {categoryName}
+              </button>
+            ))}
           </div>
 
           {state.errors.dimensions && (
@@ -450,87 +492,80 @@ export default function QuestionPanel({
             <p className="text-xs text-gray-400 italic">
               No dimensions available.
             </p>
+          ) : filteredDimensions.length === 0 ? (
+            <p className="text-xs text-gray-400 italic">
+              No dimensions match your search.
+            </p>
           ) : (
-            <div className="space-y-3">
-              {Object.entries(dimsByCategory).map(([cat, catDims]) => (
-                <div key={cat}>
-                  <p className="text-caption font-bold text-gray-400 uppercase tracking-wide mb-1.5">
-                    {cat}
-                  </p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {catDims.map(dim => {
-                      const isSelected = selectedIds.has(dim.id);
-                      const row = dims.find(d => d.dimensionId === dim.id);
-                      return (
-                        <div
-                          key={dim.id}
-                          className={`flex items-center gap-2 rounded-xl border px-3 py-2 transition-colors ${
-                            isSelected
-                              ? 'bg-teal-50 border-teal-300'
-                              : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+            <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+              {filteredDimensions.map(dim => {
+                const isSelected = selectedIds.has(dim.id);
+                const row = dims.find(d => d.dimensionId === dim.id);
+                return (
+                  <div
+                    key={dim.id}
+                    className={`flex items-center gap-2 px-3 py-2.5 transition-colors ${
+                      isSelected ? 'bg-teal-50' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleDimension(dim.id)}
+                      className="flex-1 min-w-0 flex items-center gap-2 text-left"
+                    >
+                      <span
+                        className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected
+                            ? 'bg-teal-500 border-teal-500 text-white'
+                            : 'border-gray-300 bg-white'
+                        }`}
+                      >
+                        {isSelected ? (
+                          <svg
+                            viewBox="0 0 12 12"
+                            fill="currentColor"
+                            className="w-2.5 h-2.5"
+                          >
+                            <path
+                              d="M10 3L5 8.5 2 5.5"
+                              stroke="white"
+                              strokeWidth="2"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        ) : null}
+                      </span>
+                      <div className="min-w-0">
+                        <p
+                          className={`text-xs font-semibold truncate ${
+                            isSelected ? 'text-teal-800' : 'text-gray-700'
                           }`}
                         >
-                          <button
-                            type="button"
-                            onClick={() => toggleDimension(dim.id)}
-                            className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-                              isSelected
-                                ? 'bg-teal-500 border-teal-500 text-white'
-                                : 'border-gray-300 bg-white'
-                            }`}
-                          >
-                            {isSelected && (
-                              <svg
-                                viewBox="0 0 12 12"
-                                fill="currentColor"
-                                className="w-2.5 h-2.5"
-                              >
-                                <path
-                                  d="M10 3L5 8.5 2 5.5"
-                                  stroke="white"
-                                  strokeWidth="2"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            )}
-                          </button>
+                          {dim.indexName}
+                        </p>
+                        <p className="text-[10px] text-gray-400 truncate">
+                          {dim.categoryName}
+                          {dim.indexKey ? ` · ${dim.indexKey}` : ''}
+                        </p>
+                      </div>
+                    </button>
 
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className={`text-xs font-semibold truncate ${
-                                isSelected ? 'text-teal-800' : 'text-gray-700'
-                              }`}
-                            >
-                              {dim.indexName}
-                            </p>
-                            {dim.indexKey && (
-                              <p className="text-[10px] font-mono text-gray-400">
-                                {dim.indexKey}
-                              </p>
-                            )}
-                          </div>
-
-                          {isSelected && (
-                            <input
-                              type="number"
-                              placeholder="Wt."
-                              value={row?.weight ?? ''}
-                              onChange={e =>
-                                updateDimWeight(dim.id, e.target.value)
-                              }
-                              className="w-14 px-2 py-1 text-xs bg-white border border-teal-200 rounded-lg outline-none focus:ring-2 focus:ring-teal-300 font-semibold placeholder:font-normal placeholder-gray-400 text-right shrink-0"
-                              min="0"
-                              step="0.01"
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
+                    {isSelected ? (
+                      <input
+                        type="number"
+                        placeholder="Wt."
+                        value={row?.weight ?? ''}
+                        onChange={e => updateDimWeight(dim.id, e.target.value)}
+                        className="w-14 px-2 py-1 text-xs bg-white border border-teal-200 rounded-lg outline-none focus:ring-2 focus:ring-teal-300 font-semibold placeholder:font-normal placeholder-gray-400 text-right shrink-0"
+                        min="0"
+                        step="0.01"
+                      />
+                    ) : null}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 

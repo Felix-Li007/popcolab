@@ -28,6 +28,9 @@ This directory contains individual model definitions for documentation and refer
 - **Request.prisma** - Request model definition (user requests for experiences)
 - **Proposal.prisma** - Proposal model definition (proposals matching requests with experiences)
 - **RequestPreference.prisma** - RequestPreference model definition (user preferences for dimensions in a request)
+- **IntakeForm.prisma** - IntakeForm model definition (admin-managed intake forms used to collect user information)
+- **FormQuestion.prisma** - FormQuestion model definition (join table linking intake forms with questions)
+- **FormDimension.prisma** - FormDimension model definition (join table linking intake forms with dimensions)
 
 ## Usage
 

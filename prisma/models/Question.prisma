@@ -8,6 +8,7 @@ model Question {
   order_index   Int?
   answers       Answer[]
   dimensions    QuestionDimension[]
+  form_questions FormQuestion[]
   options       QuestionOption[]
 
   @@map("question")

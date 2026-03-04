@@ -10,6 +10,7 @@ model User {
   requests    Request[]
   owned_teams Team[]      @relation("TeamOwner")
   created_teams Team[]    @relation("TeamCreator")
+  created_intake_forms IntakeForm[] @relation("IntakeFormCreator")
   team_mates  TeamMate[]
   user_vector UserVector?
 

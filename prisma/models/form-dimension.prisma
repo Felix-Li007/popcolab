@@ -1,0 +1,14 @@
+model FormDimension {
+  id           Int            @id @default(autoincrement())
+  form_id      Int
+  dimension_id Int
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at   DateTime       @updatedAt @db.Timestamp(6)
+  form         IntakeForm     @relation(fields: [form_id], references: [id], onDelete: Cascade)
+  dimension    DimensionIndex @relation(fields: [dimension_id], references: [id], onDelete: Cascade)
+
+  @@unique([form_id, dimension_id], map: "form_dimension_form_id_dimension_id_key")
+  @@index([form_id], map: "form_dimension_form_id_idx")
+  @@index([dimension_id], map: "form_dimension_dimension_id_idx")
+  @@map("form_dimension")
+}

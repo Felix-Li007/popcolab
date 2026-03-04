@@ -1,7 +1,6 @@
 import TeamContent from '@/components/admin/user/team-content';
+import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import { getAdminTeamsPage } from '@/services/team-service';
-
-const PAGE_SIZE = 6;
 
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 
@@ -29,7 +28,7 @@ export default async function TeamsPage({ searchParams }: Props) {
   const pageData = await getAdminTeamsPage({
     search,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
 
   return <TeamContent pageData={pageData} />;

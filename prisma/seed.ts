@@ -394,6 +394,140 @@ const questions = [
     order_index: 12,
     options: [],
   },
+  {
+    question_type: 'text_input',
+    question_text: 'What kind of check-in question helps your team open up?',
+    question_desc: 'Short answer.',
+    order_index: 13,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text: 'Describe a moment when your team collaborated really well.',
+    question_desc: 'One concrete example.',
+    order_index: 14,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text:
+      'When a project stalls, what is your first action to regain momentum?',
+    question_desc: 'Keep it to 1-2 sentences.',
+    order_index: 15,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text: 'What kind of feedback style helps you improve fastest?',
+    question_desc: 'Direct, supportive, structured, or other.',
+    order_index: 16,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text: 'How do you prefer decisions to be made in group settings?',
+    question_desc: 'Consensus, lead-decides, vote, etc.',
+    order_index: 17,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text:
+      'What helps you stay engaged during long workshops or meetings?',
+    question_desc: 'Describe tactics that work for you.',
+    order_index: 18,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text:
+      'If you could redesign one team ritual, what would you change first?',
+    question_desc: 'Share one practical change.',
+    order_index: 19,
+    options: [],
+  },
+  {
+    question_type: 'text_input',
+    question_text:
+      'What outcome would make this intake process feel successful to you?',
+    question_desc: 'Briefly define success.',
+    order_index: 20,
+    options: [],
+  },
+];
+
+// ─── Intake Form Seed Data ──────────────────────────────────────────────────
+
+type IntakeFormSeed = {
+  form_name: string;
+  form_desc: string | null;
+  form_status: 0 | 1;
+  form_type: string;
+  created_by_email: string;
+  question_order_indexes: number[];
+  dimension_index_keys: string[];
+};
+
+const intakeForms: IntakeFormSeed[] = [
+  {
+    form_name: 'Corporate Onboarding Intake',
+    form_desc: 'Baseline form for new team members joining a corporate cohort.',
+    form_status: 1,
+    form_type: 'onboarding',
+    created_by_email: 'ava.hughes@northstar.io',
+    question_order_indexes: [
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+    ],
+    dimension_index_keys: ['COLLABORATION', 'LEADERSHIP', 'CREATIVITY'],
+  },
+  {
+    form_name: 'Facilitator Discovery Form',
+    form_desc: 'Used by facilitators to identify participant play tendencies.',
+    form_status: 1,
+    form_type: 'discovery',
+    created_by_email: 'sophia.reed@helix.ai',
+    question_order_indexes: [3, 4, 6, 9, 12],
+    dimension_index_keys: ['HUMOR', 'SPOTLIGHT', 'EXPLORATION'],
+  },
+  {
+    form_name: 'Workshop Pilot Draft',
+    form_desc: 'Draft intake for pilot workshop validation.',
+    form_status: 0,
+    form_type: 'pilot',
+    created_by_email: 'liam.brown@verve.studio',
+    question_order_indexes: [2, 7, 10],
+    dimension_index_keys: ['COMPETITION', 'STRATEGY'],
+  },
+  {
+    form_name: 'Leadership Deep Dive Intake',
+    form_desc:
+      'Focused intake for leadership behaviours, delegation, and alignment.',
+    form_status: 1,
+    form_type: 'leadership',
+    created_by_email: 'ava.hughes@northstar.io',
+    question_order_indexes: [1, 5, 8, 13, 14, 17],
+    dimension_index_keys: ['LEADERSHIP', 'COLLABORATION', 'SPOTLIGHT'],
+  },
+  {
+    form_name: 'Remote Team Fit Scan',
+    form_desc:
+      'Screens distributed teams for communication rhythm and facilitation fit.',
+    form_status: 1,
+    form_type: 'remote',
+    created_by_email: 'sophia.reed@helix.ai',
+    question_order_indexes: [2, 6, 9, 15, 16, 18],
+    dimension_index_keys: ['COLLABORATION', 'EXPLORATION', 'MASTERY'],
+  },
+  {
+    form_name: 'Culture Sprint Intake',
+    form_desc:
+      'Short-form intake for high-tempo workshops and culture sprint sessions.',
+    form_status: 0,
+    form_type: 'sprint',
+    created_by_email: 'liam.brown@verve.studio',
+    question_order_indexes: [3, 4, 7, 10, 19, 20],
+    dimension_index_keys: ['HUMOR', 'COMPETITION', 'CREATIVITY', 'STRATEGY'],
+  },
 ];
 
 // ─── Dimension Seed Data ──────────────────────────────────────────────────────
@@ -595,6 +729,38 @@ const questionDimensionMappings: Record<number, DimMapping[]> = {
   10: [
     { indexKey: 'CREATIVITY', weight: 10 },
     { indexKey: 'EXPLORATION', weight: 8 },
+  ],
+  13: [
+    { indexKey: 'COLLABORATION', weight: 8 },
+    { indexKey: 'LEADERSHIP', weight: 7 },
+  ],
+  14: [
+    { indexKey: 'COLLABORATION', weight: 9 },
+    { indexKey: 'CREATIVITY', weight: 8 },
+  ],
+  15: [
+    { indexKey: 'MASTERY', weight: 9 },
+    { indexKey: 'COMPETITION', weight: 8 },
+  ],
+  16: [
+    { indexKey: 'SPOTLIGHT', weight: 8 },
+    { indexKey: 'HUMOR', weight: 7 },
+  ],
+  17: [
+    { indexKey: 'LEADERSHIP', weight: 9 },
+    { indexKey: 'STRATEGY', weight: 8 },
+  ],
+  18: [
+    { indexKey: 'KINESIS', weight: 7 },
+    { indexKey: 'COLLABORATION', weight: 8 },
+  ],
+  19: [
+    { indexKey: 'HUMOR', weight: 8 },
+    { indexKey: 'EXPLORATION', weight: 8 },
+  ],
+  20: [
+    { indexKey: 'CREATIVITY', weight: 8 },
+    { indexKey: 'MASTERY', weight: 7 },
   ],
 };
 
@@ -1163,6 +1329,36 @@ const mockTeams: MockTeamSeed[] = generatedTeams;
 async function main() {
   console.log('🌱 Starting seed...');
 
+  const intakeFormTableRows = await prisma.$queryRaw<{ exists: boolean }[]>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.tables
+      WHERE table_schema = current_schema()
+        AND table_name = 'intake_form'
+    ) AS "exists"
+  `;
+  const hasIntakeFormTable = Boolean(intakeFormTableRows[0]?.exists);
+
+  const formQuestionTableRows = await prisma.$queryRaw<{ exists: boolean }[]>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.tables
+      WHERE table_schema = current_schema()
+        AND table_name = 'form_question'
+    ) AS "exists"
+  `;
+  const hasFormQuestionTable = Boolean(formQuestionTableRows[0]?.exists);
+
+  const formDimensionTableRows = await prisma.$queryRaw<{ exists: boolean }[]>`
+    SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.tables
+      WHERE table_schema = current_schema()
+        AND table_name = 'form_dimension'
+    ) AS "exists"
+  `;
+  const hasFormDimensionTable = Boolean(formDimensionTableRows[0]?.exists);
+
   // ── Personalities ──────────────────────────────────────────────────────────
   await prisma.personalityType.deleteMany({});
   console.log('🗑️  Cleared existing personality types');
@@ -1174,6 +1370,18 @@ async function main() {
 
   // ── Questions ──────────────────────────────────────────────────────────────
   // Delete in dependency order to avoid FK violations
+  if (hasFormQuestionTable) {
+    await prisma.$executeRaw`DELETE FROM "form_question"`;
+    console.log('🗑️  Cleared existing form_question mappings');
+  }
+  if (hasFormDimensionTable) {
+    await prisma.$executeRaw`DELETE FROM "form_dimension"`;
+    console.log('🗑️  Cleared existing form_dimension mappings');
+  }
+  if (hasIntakeFormTable) {
+    await prisma.$executeRaw`DELETE FROM "intake_form"`;
+    console.log('🗑️  Cleared existing intake forms');
+  }
   await prisma.answer.deleteMany({});
   await prisma.questionDimension.deleteMany({});
   await prisma.questionOption.deleteMany({});
@@ -1436,6 +1644,93 @@ async function main() {
         },
       });
     }
+  }
+
+  // ── Intake Forms and Form-Question/Form-Dimension Mappings ───────────────
+  if (hasIntakeFormTable && hasFormQuestionTable && hasFormDimensionTable) {
+    for (const formSeed of intakeForms) {
+      const createdById = userIdByEmail.get(formSeed.created_by_email);
+      if (!createdById) {
+        console.warn(
+          `⚠️  No user ${formSeed.created_by_email} found for intake form ${formSeed.form_name}`
+        );
+        continue;
+      }
+      const insertedRows = await prisma.$queryRaw<{ id: number }[]>`
+        INSERT INTO "intake_form" (
+          "form_name",
+          "form_desc",
+          "form_status",
+          "form_type",
+          "created_by",
+          "created_at",
+          "updated_at"
+        )
+        VALUES (
+          ${formSeed.form_name},
+          ${formSeed.form_desc},
+          ${formSeed.form_status},
+          ${formSeed.form_type},
+          ${createdById},
+          NOW(),
+          NOW()
+        )
+        RETURNING "id"
+      `;
+
+      const formId = insertedRows[0]?.id;
+      if (!formId) {
+        console.warn(`⚠️  Failed to create intake form: ${formSeed.form_name}`);
+        continue;
+      }
+
+      const questionIds = Array.from(
+        new Set(
+          formSeed.question_order_indexes
+            .map(order => questionByOrder.get(order)?.id)
+            .filter((id): id is number => typeof id === 'number')
+        )
+      );
+      const dimensionIds = Array.from(
+        new Set(
+          formSeed.dimension_index_keys
+            .map(indexKey => indexKeyMap.get(indexKey))
+            .filter((id): id is number => typeof id === 'number')
+        )
+      );
+
+      for (const questionId of questionIds) {
+        await prisma.$executeRaw`
+          INSERT INTO "form_question" (
+            "form_id",
+            "question_id",
+            "created_at",
+            "updated_at"
+          )
+          VALUES (${formId}, ${questionId}, NOW(), NOW())
+        `;
+      }
+
+      for (const dimensionId of dimensionIds) {
+        await prisma.$executeRaw`
+          INSERT INTO "form_dimension" (
+            "form_id",
+            "dimension_id",
+            "created_at",
+            "updated_at"
+          )
+          VALUES (${formId}, ${dimensionId}, NOW(), NOW())
+        `;
+      }
+
+      console.log(
+        `✅ Created intake form: ${formSeed.form_name} (${questionIds.length} question link(s), ${dimensionIds.length} dimension link(s))`
+      );
+    }
+  } else {
+    console.warn(
+      '⚠️  Skipping intake_form seeds because intake_form/form_question/form_dimension table does not exist yet.'
+    );
   }
 
   console.log(

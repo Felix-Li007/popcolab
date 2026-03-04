@@ -7,6 +7,7 @@ const adminLinks: MenuItem[] = [
   { label: 'Dimensions', href: '/admin/dimensions' },
   { label: 'Personalities', href: '/admin/personalities' },
   { label: 'Questions', href: '/admin/questions' },
+  { label: 'Intake Forms', href: '/admin/questions/forms' },
   { label: 'Events', href: '/admin/events' },
   { label: 'Bookings', href: '/admin/bookings' },
   { label: 'Settings', href: '/admin/settings' },

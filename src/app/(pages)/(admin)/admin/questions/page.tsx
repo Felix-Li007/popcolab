@@ -16,7 +16,6 @@ export default async function SurveysPage() {
     <Suspense>
       <QuestionContent
         initialData={questions as Question[]}
-        questionsCount={questions.length}
         availableDimensions={availableDimensions as DimensionIndex[]}
       />
     </Suspense>

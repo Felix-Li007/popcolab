@@ -11,6 +11,7 @@ import DimensionForm from '@/components/admin/dimension/dimension-form';
 import DimensionView from '@/components/admin/dimension/dimension-view';
 import DimensionStatsBar from '@/components/admin/dimension/dimension-stats-bar';
 import DimensionCategoryFilterBar from '@/components/admin/dimension/category-filter';
+import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import type {
   Dimension,
   DimensionCategory,
@@ -34,8 +35,6 @@ type Props = {
 };
 
 type CategoryFilter = 'all' | number;
-
-const PAGE_SIZE = 5;
 
 export default function DimensionContent({
   initialData,
@@ -107,8 +106,14 @@ export default function DimensionContent({
     return matchCategory && matchHardOnly && haystack.includes(q);
   });
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filtered.length / DEFAULT_PAGE_SIZE)
+  );
+  const paginated = filtered.slice(
+    (page - 1) * DEFAULT_PAGE_SIZE,
+    page * DEFAULT_PAGE_SIZE
+  );
 
   const selectedDimension = dimensions.find(d => d.id === selectedId) ?? null;
   const viewedDimension = dimensions.find(d => d.id === viewId) ?? null;

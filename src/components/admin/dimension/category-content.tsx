@@ -9,6 +9,7 @@ import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
 import DimensionCategoryForm from '@/components/admin/dimension/category-form';
+import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import type {
   DimensionCategory,
   DimensionCategoryFormState,
@@ -25,8 +26,6 @@ type CategoryWithUsage = DimensionCategory & { usageCount: number };
 type Props = {
   initialData: CategoryWithUsage[];
 };
-
-const PAGE_SIZE = 10;
 
 export default function CategoryContent({ initialData }: Props) {
   const router = useRouter();
@@ -82,8 +81,14 @@ export default function CategoryContent({ initialData }: Props) {
     );
   }, [categories, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filtered.length / DEFAULT_PAGE_SIZE)
+  );
+  const paginated = filtered.slice(
+    (page - 1) * DEFAULT_PAGE_SIZE,
+    page * DEFAULT_PAGE_SIZE
+  );
 
   const selectedCategory =
     categories.find(category => category.id === selectedId) ?? null;

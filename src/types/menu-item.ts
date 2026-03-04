@@ -12,6 +12,7 @@ export type CountKey =
   | 'overview'
   | 'personalities'
   | 'questions'
+  | 'forms'
   | 'events'
   | 'users'
   | 'bookings'
@@ -71,6 +72,11 @@ export const menuSection: MenuGroup[] = [
             label: 'Questions',
             href: '/admin/questions',
             countKey: 'questions',
+          },
+          {
+            label: 'Forms',
+            href: '/admin/questions/forms',
+            countKey: 'forms',
           },
         ],
       },

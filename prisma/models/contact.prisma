@@ -7,4 +7,6 @@ model Contact {
   subject   String
   message   String
   createdAt DateTime @default(now())
+
+  @@map("contact")
 }

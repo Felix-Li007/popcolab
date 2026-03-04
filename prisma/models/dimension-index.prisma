@@ -13,6 +13,7 @@ model DimensionIndex {
   category              DimensionCategory     @relation(fields: [category_id], references: [id])
   dimension_options     DimensionOption[]
   experience_dimensions ExperienceDimension[]
+  form_dimensions       FormDimension[]
   question_dimensions   QuestionDimension[]
   request_preferences   RequestPreference[]
 

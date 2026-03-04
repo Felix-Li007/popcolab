@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useMemo, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuestionPanel from '@/components/admin/question/question-panel';
 import type { Question, DimensionIndex } from '@/types/question-type';
@@ -11,18 +11,14 @@ import {
 } from '@/actions/question-actions';
 import { Button, Badge } from '@/ui';
 import PaginationBar from '@/components/shared/pagination-bar';
-import StatsCard from '@/components/admin/stats-card';
-import PageHeader from '@/components/admin/content-header';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
+import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import styles from '@/styles/question-content.module.css';
 
 type Props = {
   initialData: Question[];
-  questionsCount?: number;
   availableDimensions: DimensionIndex[];
 };
-
-const PAGE_SIZE = 10;
 
 const TYPE_FILTERS = [
   'All',
@@ -35,7 +31,6 @@ type TypeFilter = (typeof TYPE_FILTERS)[number];
 
 export default function QuestionContent({
   initialData,
-  questionsCount,
   availableDimensions,
 }: Props) {
   const router = useRouter();
@@ -66,14 +61,24 @@ export default function QuestionContent({
     setPage(1);
   }, [filter, search]);
 
-  const filtered = questions.filter(q => {
-    const matchType = filter === 'All' || q.type === filter;
-    const matchSearch =
-      !search ||
-      q.text.toLowerCase().includes(search.toLowerCase()) ||
-      (q.description ?? '').toLowerCase().includes(search.toLowerCase());
-    return matchType && matchSearch;
-  });
+  const filtered = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    return [...questions]
+      .sort((a, b) => {
+        const aUpdated = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+        const bUpdated = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+        if (aUpdated !== bUpdated) return bUpdated - aUpdated;
+        return (b.id ?? 0) - (a.id ?? 0);
+      })
+      .filter(q => {
+        const matchType = filter === 'All' || q.type === filter;
+        const matchSearch =
+          !normalizedSearch ||
+          q.text.toLowerCase().includes(normalizedSearch) ||
+          (q.description ?? '').toLowerCase().includes(normalizedSearch);
+        return matchType && matchSearch;
+      });
+  }, [questions, filter, search]);
 
   const counts: Record<TypeFilter, number> = {
     All: questions.length,
@@ -83,8 +88,14 @@ export default function QuestionContent({
     text_input: questions.filter(q => q.type === 'text_input').length,
   };
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filtered.length / DEFAULT_PAGE_SIZE)
+  );
+  const paginated = filtered.slice(
+    (page - 1) * DEFAULT_PAGE_SIZE,
+    page * DEFAULT_PAGE_SIZE
+  );
 
   const selectedQuestion = questions.find(q => q.id === selectedId);
   const showPanel = isCreating || selectedId !== null;
@@ -121,69 +132,6 @@ export default function QuestionContent({
   return (
     <>
       <div className="flex flex-col">
-        <div className="p-4 pb-0 shrink-0">
-          <PageHeader
-            emoji="📋"
-            title={
-              <>
-                <span className="text-magenta">Questions</span>
-              </>
-            }
-            subtitle={`${questionsCount ?? questions.length} questions · ${counts.single_choice} single · ${counts.multi_choice} multi · ${counts.scale} scale · ${counts.text_input} text`}
-          />
-        </div>
-
-        <div className="px-4 pt-3 shrink-0">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <StatsCard
-              bgColor="bg-pink-light"
-              glowColor="rgba(255, 187, 240, 0.5)"
-              icon={
-                <span className="text-lg">
-                  {QUESTION_TYPE_META.single_choice.icon}
-                </span>
-              }
-              value={counts.single_choice}
-              label="Single Choice"
-              trendLabel="questions"
-            />
-            <StatsCard
-              bgColor="bg-lavender"
-              glowColor="rgba(196, 181, 253, 0.45)"
-              icon={
-                <span className="text-lg">
-                  {QUESTION_TYPE_META.multi_choice.icon}
-                </span>
-              }
-              value={counts.multi_choice}
-              label="Multi Choice"
-              trendLabel="questions"
-            />
-            <StatsCard
-              bgColor="bg-green-100"
-              glowColor="rgba(134, 239, 172, 0.5)"
-              icon={
-                <span className="text-lg">{QUESTION_TYPE_META.scale.icon}</span>
-              }
-              value={counts.scale}
-              label="Scale"
-              trendLabel="questions"
-            />
-            <StatsCard
-              bgColor="bg-brand-yellow/40"
-              glowColor="rgba(245, 221, 66, 0.45)"
-              icon={
-                <span className="text-lg">
-                  {QUESTION_TYPE_META.text_input.icon}
-                </span>
-              }
-              value={counts.text_input}
-              label="Text Input"
-              trendLabel="questions"
-            />
-          </div>
-        </div>
-
         <div className="flex flex-1 min-h-0 px-4 py-3 gap-4">
           <div
             className={`${styles.listPanel} border border-gray-200 flex flex-col bg-white z-10 shadow-[2px_0_12px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden`}
@@ -275,7 +223,7 @@ export default function QuestionContent({
                   {paginated.map((q, idx) => {
                     const meta = QUESTION_TYPE_META[q.type];
                     const isSelected = q.id === selectedId && !isCreating;
-                    const globalIdx = (page - 1) * PAGE_SIZE + idx + 1;
+                    const globalIdx = (page - 1) * DEFAULT_PAGE_SIZE + idx + 1;
                     return (
                       <li key={q.id} className={styles.questionItem}>
                         <button

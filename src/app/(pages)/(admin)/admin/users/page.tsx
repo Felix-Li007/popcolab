@@ -1,9 +1,8 @@
 import UserContent from '@/components/admin/user/user-content';
+import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import { isUserStatus } from '@/constants/user-status';
 import { getUsersPage } from '@/services/user-service';
 import type { AdminUsersStatusFilter } from '@/types/user-type';
-
-const PAGE_SIZE = 10;
 
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 
@@ -39,7 +38,7 @@ export default async function UsersPage({ searchParams }: Props) {
     search,
     status,
     page,
-    pageSize: PAGE_SIZE,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
 
   return <UserContent pageData={pageData} query={{ search, status }} />;
