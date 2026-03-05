@@ -611,3 +611,103 @@ export async function updateUserEditableFields(
     }
   }
 }
+
+export async function upsertUserByClerkId(
+  clerkId: string,
+  email: string,
+  userName: string
+): Promise<void> {
+  const existing = await prisma.user.findUnique({
+    where: { clerk_id: clerkId },
+    select: { id: true },
+  });
+
+  if (existing) return;
+
+  await prisma.user.create({
+    data: {
+      clerk_id: clerkId,
+      email,
+      user_name: userName,
+      user_type: 'INDIVIDUAL',
+      status: 'active',
+      profile: {
+        create: {
+          consent_given: 1,
+        },
+      },
+    },
+  });
+}
+
+export async function updateUserEmail(
+  clerkId: string,
+  email: string
+): Promise<void> {
+  await prisma.user.updateMany({
+    where: { clerk_id: clerkId },
+    data: { email },
+  });
+}
+
+export async function updateUserProfile(
+  clerkId: string,
+  firstName: string | null | undefined,
+  lastName: string | null | undefined
+): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { clerk_id: clerkId },
+    select: { id: true },
+  });
+
+  console.log(user);
+  if (!user) return;
+
+  const normalizedFirstName = toNullableTrimmed(firstName)?.slice(
+    0,
+    FIRST_NAME_MAX_LENGTH
+  );
+  const normalizedLastName = toNullableTrimmed(lastName)?.slice(
+    0,
+    LAST_NAME_MAX_LENGTH
+  );
+
+  const existingProfile = await prisma.profile.findUnique({
+    where: { user_id: user.id },
+    select: { id: true },
+  });
+
+  if (existingProfile) {
+    await prisma.profile.update({
+      where: { user_id: user.id },
+      data: {
+        first_name: normalizedFirstName ?? null,
+        last_name: normalizedLastName ?? null,
+      },
+    });
+    return;
+  }
+
+  if (!normalizedFirstName && !normalizedLastName) {
+    return;
+  }
+
+  await prisma.profile.create({
+    data: {
+      user_id: user.id,
+      first_name: normalizedFirstName ?? null,
+      last_name: normalizedLastName ?? null,
+      consent_given: 1,
+      phone_number: null,
+      preferred_contact: null,
+      privacy_notes: null,
+    },
+  });
+}
+
+export async function deactivateUserByClerkId(clerkId: string): Promise<void> {
+  await prisma.user.updateMany({
+    where: { clerk_id: clerkId },
+    data: { status: 'inactive' },
+  });
+}

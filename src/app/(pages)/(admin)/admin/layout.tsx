@@ -1,4 +1,5 @@
 import AdminShell from '@/components/admin/admin-shell';
+import { getCompanyAction } from '@/actions/user-actions';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { getBadgeCounts } from '@/services/statistic-service';
 
@@ -7,9 +8,10 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [badgeCounts, authContext] = await Promise.all([
+  const [badgeCounts, authContext, companyInfo] = await Promise.all([
     getBadgeCounts(),
     getCurrentAuthContext(),
+    getCompanyAction(),
   ]);
   const firstName = authContext.user?.firstName?.trim() ?? '';
   const lastName = authContext.user?.lastName?.trim() ?? '';
@@ -22,6 +24,7 @@ export default async function AdminLayout({
       badgeCounts={badgeCounts}
       userDisplayName={userDisplayName}
       userRoleLabel={userRoleLabel}
+      initialCompany={companyInfo}
     >
       {children}
     </AdminShell>

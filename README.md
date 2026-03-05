@@ -43,3 +43,48 @@ docker run -d \
  -e CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
     -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
  ghcr.io/${{ github.repository_owner }}/popcolab-app:latest
+
+## Expose Local Port with Cloudflared
+
+### Install cloudflared
+
+1. macOS (Homebrew)
+   - `brew install cloudflared`
+
+2. Linux (official install script)
+   - `curl -fsSL https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/install-and-update.sh | sudo bash`
+
+3. Verify installation
+   - `cloudflared --version`
+
+4. Start the app on port `3000`
+   - `npm run dev`
+
+5. Temporary public URL (no custom domain)
+   - `cloudflared tunnel --url http://localhost:3000`
+   - The command prints a `https://*.trycloudflare.com` URL.
+
+6. Bind a custom domain to local port `3000` (named tunnel)
+   - Login once (creates `~/.cloudflared/cert.pem`):
+     - `cloudflared tunnel login`
+   - Create tunnel:
+     - `cloudflared tunnel create popcolab-dev`
+   - Route DNS (replace with your domain):
+     - `cloudflared tunnel route dns popcolab-dev dev.example.com`
+   - Create `~/.cloudflared/config.yml`:
+
+```yaml
+tunnel: popcolab-dev
+credentials-file: /Users/<YOUR_USERNAME>/.cloudflared/<TUNNEL-UUID>.json
+
+ingress:
+  - hostname: dev.example.com
+    service: http://localhost:3000
+  - service: http_status:404
+```
+
+4. Run the named tunnel
+   - `cloudflared tunnel run popcolab-dev`
+
+5. Common error
+   - If you see `Error locating origin cert` or missing `cert.pem`, run `cloudflared tunnel login` first.

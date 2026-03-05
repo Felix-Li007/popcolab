@@ -7,7 +7,6 @@ import PersonalitiesSection from '@/components/front/landing-personality';
 export default function Home() {
   return (
     <>
-      {/* <Header /> */}
       <PersonalitiesSection />
       <EventsSection />
       <ExperiencesCarousel />

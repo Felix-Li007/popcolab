@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { MenuItem } from '@/types/menu-item';
 import {
@@ -27,8 +28,13 @@ const supportLinks: MenuItem[] = [
 ];
 
 export default function PageFooter() {
+  const pathname = usePathname();
   const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
   const { isLoaded: isUserLoaded, user } = useUser();
+
+  if (pathname.startsWith('/sign-in')) {
+    return null;
+  }
 
   const claimRole = normalizeRole(readClaimRole(sessionClaims));
   const metadataRole = normalizeRole(

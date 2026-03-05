@@ -812,6 +812,7 @@ type MockTeamSeed = {
 };
 
 const USER_NAME_MAX_LENGTH = 50;
+const CLERK_ID_MAX_LENGTH = 255;
 
 function normalizeUserName(value: string): string {
   const normalized = value
@@ -843,6 +844,18 @@ function deriveUserName(seedUser: MockUserSeed): string {
   if (fromEmail) return fromEmail;
 
   return 'user';
+}
+
+function deriveClerkId(seedUser: MockUserSeed): string {
+  const normalized = seedUser.email
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, '_')
+    .replace(/^[_\-.]+|[_\-.]+$/g, '')
+    .replace(/[_\-.]{2,}/g, '_');
+
+  const fallback = normalized || normalizeUserName(seedUser.email) || 'user';
+  return `seed_${fallback}`.slice(0, CLERK_ID_MAX_LENGTH);
 }
 
 const baseMockUsers: MockUserSeed[] = [
@@ -1517,10 +1530,15 @@ async function main() {
 
   for (const seedUser of mockUsers) {
     const userName = deriveUserName(seedUser);
+    const clerkId = deriveClerkId(seedUser);
+    const userType = seedUser.company ? 'CORPORATE' : 'INDIVIDUAL';
     const createdUser = await prisma.user.create({
       data: {
+        clerk_id: clerkId,
         email: seedUser.email,
         user_name: userName,
+        user_type: userType,
+        ...(hasUserStatusColumn ? { status: seedUser.status } : {}),
       },
     });
 

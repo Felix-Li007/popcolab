@@ -5,17 +5,20 @@ import SidenavMenu from '@/components/admin/sidenav-menu';
 import TopnavMenu from '@/components/admin/topnav-menu';
 import PageFooter from '@/components/shared/page-footer';
 import type { BadgeCounts } from '@/types/menu-item';
+import type { CompanyInfo } from '@/types/company-type';
 
 export default function AdminShell({
   children,
   badgeCounts,
   userDisplayName,
   userRoleLabel,
+  initialCompany,
 }: {
   children: React.ReactNode;
   badgeCounts?: BadgeCounts;
   userDisplayName?: string;
   userRoleLabel?: string;
+  initialCompany?: CompanyInfo | null;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -71,6 +74,7 @@ export default function AdminShell({
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
           userDisplayName={userDisplayName}
           userRoleLabel={userRoleLabel}
+          initialCompany={initialCompany}
         />
         <main className="flex-1 overflow-auto">
           {children}

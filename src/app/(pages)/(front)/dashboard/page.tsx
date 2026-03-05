@@ -1,6 +1,6 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { upsertUserByClerkId } from '@/services/user-sync-service';
+import { upsertUserByClerkId } from '@/services/user-service';
 
 export default async function Dashboard() {
   const { userId } = await auth();

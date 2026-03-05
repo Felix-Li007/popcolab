@@ -7,6 +7,7 @@ import styles from '@/styles/topnav-menu.module.css';
 import { getBadge } from '@/utils/menu-helper';
 import { getMenuItem, topTabs, BadgeCounts } from '@/types/menu-item';
 import UserAvatar from '@/components/shared/user-avatar';
+import type { CompanyInfo } from '@/types/company-type';
 
 export default function TopnavMenu({
   badgeCounts,
@@ -14,12 +15,14 @@ export default function TopnavMenu({
   onToggleSidebar,
   userDisplayName,
   userRoleLabel,
+  initialCompany,
 }: {
   badgeCounts?: BadgeCounts;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
   userDisplayName?: string;
   userRoleLabel?: string;
+  initialCompany?: CompanyInfo | null;
 }) {
   const pathname = usePathname();
 
@@ -136,7 +139,11 @@ export default function TopnavMenu({
           {/* Divider */}
           <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
           {/* User avatar */}
-          <UserAvatar displayName={userDisplayName} roleLabel={userRoleLabel} />
+          <UserAvatar
+            displayName={userDisplayName}
+            roleLabel={userRoleLabel}
+            initialCompany={initialCompany}
+          />
         </div>
       </div>
 

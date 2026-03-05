@@ -23,7 +23,7 @@ export default clerkMiddleware(async (auth, req) => {
   await auth.protect();
 
   if (isForceRedirectRoute && authState.userId) {
-    const targetUrl = isAdmin ? '/admin' : '/';
+    const targetUrl = isAdmin ? '/admin' : '/dashboar';
     return NextResponse.redirect(new URL(targetUrl, req.url));
   }
   if (isAdminRoute && !isAdmin) {
