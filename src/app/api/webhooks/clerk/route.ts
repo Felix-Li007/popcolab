@@ -2,7 +2,7 @@ import { verifyWebhook } from '@clerk/nextjs/webhooks';
 import type { WebhookEvent } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  updateUserEmail,
+  updateUserEmailByClerkId,
   updateUserProfile,
   deactivateUserByClerkId,
 } from '@/services/user-service';
@@ -20,11 +20,10 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  console.log('Received Clerk webhook event:', event);
+
   try {
     switch (event.type) {
       case 'user.updated': {
-        console.log('Received user.updated event:', event.data);
         const {
           id,
           email_addresses,
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
           e => e.id === primary_email_address_id
         );
         if (primary?.email_address) {
-          await updateUserEmail(id, primary.email_address);
+          await updateUserEmailByClerkId(id, primary.email_address);
         }
         await updateUserProfile(id, first_name, last_name);
         break;

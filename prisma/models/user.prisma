@@ -1,17 +1,17 @@
 model User {
-  id                   Int          @id @default(autoincrement())
-  clerk_id             String       @unique @db.VarChar(255)
-  email                String       @unique @db.VarChar(50)
-  user_name            String       @db.VarChar(50)
-  user_type            String       @default("INDIVIDUAL") @db.VarChar(20)
-  status               String       @default("active") @db.VarChar(20)
-  created_at           DateTime     @default(now()) @db.Timestamp(6)
-  updated_at           DateTime     @updatedAt @db.Timestamp(6)
-  corporate            Company?
-  profile              Profile?
-  requests             Request[]
-  owned_teams          Team[]       @relation("TeamOwner")
-  created_teams        Team[]       @relation("TeamCreator")
+  id          Int         @id @default(autoincrement())
+  clerk_id    String     @unique @db.VarChar(255)
+  email       String      @unique @db.VarChar(50)
+  user_name   String      @db.VarChar(50)
+  user_type   String      @default("INDIVIDUAL") @db.VarChar(20)
+  status      String      @default("active") @db.VarChar(20)
+  created_at  DateTime    @default(now()) @db.Timestamp(6)
+  updated_at  DateTime    @updatedAt @db.Timestamp(6)
+  corporate   Company?
+  profile     Profile?
+  requests    Request[]
+  owned_teams Team[]      @relation("TeamOwner")
+  created_teams Team[]    @relation("TeamCreator")
   created_intake_forms IntakeForm[] @relation("IntakeFormCreator")
   team_mates           TeamMate[]
   user_vector          UserVector?

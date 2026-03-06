@@ -1,5 +1,6 @@
 import 'server-only';
 import { Prisma } from '@/libs/prisma/client';
+import { clerkClient } from '@clerk/nextjs/server';
 import { prisma } from '@/libs/prisma-client';
 import {
   USER_STATUS,
@@ -622,25 +623,32 @@ export async function upsertUserByClerkId(
     select: { id: true },
   });
 
-  if (existing) return;
-
-  await prisma.user.create({
-    data: {
-      clerk_id: clerkId,
-      email,
-      user_name: userName,
-      user_type: 'INDIVIDUAL',
-      status: 'active',
-      profile: {
-        create: {
-          consent_given: 1,
+  if (!existing) {
+    await prisma.user.create({
+      data: {
+        clerk_id: clerkId,
+        email,
+        user_name: userName,
+        user_type: 'INDIVIDUAL',
+        status: 'active',
+        profile: {
+          create: {
+            consent_given: 1,
+          },
         },
       },
-    },
+    });
+  }
+
+  // Write user_type to Clerk public metadata so the proxy can read it
+  // from JWT session claims on subsequent requests (individual users only)
+  const client = await clerkClient();
+  await client.users.updateUserMetadata(clerkId, {
+    publicMetadata: { user_type: 'INDIVIDUAL' },
   });
 }
 
-export async function updateUserEmail(
+export async function updateUserEmailByClerkId(
   clerkId: string,
   email: string
 ): Promise<void> {
@@ -660,7 +668,6 @@ export async function updateUserProfile(
     select: { id: true },
   });
 
-  console.log(user);
   if (!user) return;
 
   const normalizedFirstName = toNullableTrimmed(firstName)?.slice(
