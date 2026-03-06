@@ -2,7 +2,11 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { normalizeRole, readClaimRole } from '@/utils/clerk-helper';
 
-const FORCE_REDIRECT_URL = '/dashboard';
+const redirectRoutes = createRouteMatcher([
+  process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL as string,
+  process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL as string,
+  process.env.NEXT_PUBLIC_CLERK_ACTION_DASHBOARD_URL as string,
+]);
 
 const protectedRoutes = createRouteMatcher([
   '/admin/:path*',
@@ -13,17 +17,16 @@ const adminRoutes = createRouteMatcher(['/admin/:path*']);
 export default clerkMiddleware(async (auth, req) => {
   const isProtectedRoute = protectedRoutes(req);
   const isAdminRoute = adminRoutes(req);
-  const isForceRedirectRoute = req.nextUrl.pathname === FORCE_REDIRECT_URL;
-  if (!isProtectedRoute) {
+  const isRedirectRoute = redirectRoutes(req);
+  if (!isProtectedRoute && !isRedirectRoute) {
     return;
   }
   const authState = await auth();
   const userRole = normalizeRole(readClaimRole(authState.sessionClaims));
   const isAdmin = userRole === 'admin';
   await auth.protect();
-
-  if (isForceRedirectRoute && authState.userId) {
-    const targetUrl = isAdmin ? '/admin' : '/dashboar';
+  if (isRedirectRoute && authState.userId) {
+    const targetUrl = isAdmin ? '/admin' : '/dashboard';
     return NextResponse.redirect(new URL(targetUrl, req.url));
   }
   if (isAdminRoute && !isAdmin) {

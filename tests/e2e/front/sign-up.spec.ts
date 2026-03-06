@@ -13,16 +13,25 @@ test.describe('Sign-up page', () => {
     await expect(page.getByText('Pop CoLab').first()).toBeVisible();
   });
 
-  test('"Join Pop CoLab" heading is visible', async ({ page }) => {
+  test('"Back to Home" button is visible', async ({ page }) => {
     await expect(
-      page.getByRole('heading', { name: /join pop colab/i })
+      page.getByRole('button', { name: /back to home/i })
+    ).toBeVisible();
+  });
+
+  test('clicking "Back to Home" navigates to home page', async ({ page }) => {
+    await page.getByRole('button', { name: /back to home/i }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test('"Create your account" heading is visible', async ({ page }) => {
+    await expect(
+      page.getByRole('heading', { name: /create your account/i })
     ).toBeVisible();
   });
 
   test('sign-up subtext is visible', async ({ page }) => {
-    await expect(
-      page.getByText(/create your account to get started/i)
-    ).toBeVisible();
+    await expect(page.getByText(/details to get started/i)).toBeVisible();
   });
 
   test('Clerk sign-up form renders with email input', async ({ page }) => {
@@ -38,7 +47,7 @@ test.describe('Sign-up page', () => {
   test('"Sign in" cross-link points to /sign-in', async ({ page }) => {
     await expect(page.getByRole('link', { name: /sign in/i })).toHaveAttribute(
       'href',
-      '/sign-in'
+      /\/sign-in$/
     );
   });
 });

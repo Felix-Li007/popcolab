@@ -30,11 +30,6 @@
   width: auto;
 }
 
-/* .logo span {
-  font-size: var(--text-body);
-  font-weight: var(--weight-bold);
-} */
-
 .navDesktop {
   display: flex;
   gap: 1.5rem;
@@ -53,21 +48,30 @@
 
 .signinBtn,
 .signupBtn {
-  font-size: var(--text-body);
   padding: 0.4rem 0.9rem;
-  border-radius: 6px;
   border: none;
   cursor: pointer;
-}
-
-.signinBtn {
-  background: transparent;
-  border: 1px solid white;
+  @apply rounded-md backdrop-blur-none text-white bg-grey-light/40 font-bold shadow-[0_0_12px] shadow-white/20;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 
 .signupBtn {
-  background: white;
-  color: black;
+  @apply bg-magenta;
+}
+
+.signinBtn:hover {
+  @apply text-teal-deep bg-white;
+  box-shadow: 0 8px 18px rgba(2, 16, 20, 0.18);
+}
+
+.signupBtn:hover {
+  @apply text-white bg-pink-medium;
+  box-shadow: 0 10px 22px rgba(161, 55, 106, 0.35);
+  transform: translateY(-1px);
 }
 
 .menuBtn {

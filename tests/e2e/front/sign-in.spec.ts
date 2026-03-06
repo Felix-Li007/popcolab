@@ -9,20 +9,25 @@ test.describe('Sign-in page', () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
-  test('Pop CoLab brand eyebrow is visible', async ({ page }) => {
-    await expect(page.getByText('Pop CoLab').first()).toBeVisible();
+  test('"Back to Home" button is visible', async ({ page }) => {
+    await expect(
+      page.getByRole('button', { name: /back to home/i })
+    ).toBeVisible();
   });
 
-  test('"Welcome back" heading is visible', async ({ page }) => {
+  test('clicking "Back to Home" navigates to home page', async ({ page }) => {
+    await page.getByRole('button', { name: /back to home/i }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test('"Sign in to Popcolab" heading is visible', async ({ page }) => {
     await expect(
-      page.getByRole('heading', { name: /welcome back/i })
+      page.getByRole('heading', { name: /sign in to popcolab/i })
     ).toBeVisible();
   });
 
   test('sign-in subtext is visible', async ({ page }) => {
-    await expect(
-      page.getByText(/sign in to your account to continue/i)
-    ).toBeVisible();
+    await expect(page.getByText(/sign in to continue/i)).toBeVisible();
   });
 
   test('Clerk sign-in form renders with email input', async ({ page }) => {
@@ -31,15 +36,13 @@ test.describe('Sign-in page', () => {
     ).toBeVisible({ timeout: 8000 });
   });
 
-  test('"Sign up free" cross-link is visible', async ({ page }) => {
-    await expect(
-      page.getByRole('link', { name: /sign up free/i })
-    ).toBeVisible();
+  test('"Sign up" cross-link is visible', async ({ page }) => {
+    await expect(page.getByRole('link', { name: /^sign up$/i })).toBeVisible();
   });
 
-  test('"Sign up free" link points to /sign-up', async ({ page }) => {
+  test('"Sign up" link points to /sign-up', async ({ page }) => {
     await expect(
-      page.getByRole('link', { name: /sign up free/i })
-    ).toHaveAttribute('href', '/sign-up');
+      page.getByRole('link', { name: /^sign up$/i })
+    ).toHaveAttribute('href', /\/sign-up$/);
   });
 });

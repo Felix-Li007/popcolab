@@ -4,11 +4,6 @@ import PageFooter from '@/components/shared/page-footer';
 import { getCompanyAction } from '@/actions/user-actions';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 
-export const metadata: Metadata = {
-  title: 'PopColab Front',
-  description: 'Front pages of PopColab app',
-};
-
 export default async function FrontLayout({
   children,
 }: {
