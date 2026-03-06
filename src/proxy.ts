@@ -27,7 +27,9 @@ export default clerkMiddleware(async (auth, req) => {
   await auth.protect();
   if (isRedirectRoute && authState.userId) {
     const targetUrl = isAdmin ? '/admin' : '/dashboard';
-    return NextResponse.redirect(new URL(targetUrl, req.url));
+    if (req.nextUrl.pathname !== targetUrl) {
+      return NextResponse.redirect(new URL(targetUrl, req.url));
+    }
   }
   if (isAdminRoute && !isAdmin) {
     const targetUrl = new URL('/', req.url);
