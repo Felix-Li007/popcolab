@@ -7,6 +7,7 @@ import {
   USER_STATUS_SET,
   isUserStatus,
 } from '@/constants/user-status';
+import { normalizeWorkMode } from '@/constants/work-mode';
 import type {
   AdminUserEditableUpdateErrors,
   AdminUserEditableUpdateInput,
@@ -22,6 +23,7 @@ type UserListRow = {
   id: number;
   email: string;
   user_name: string | null;
+  avatar_image: string | null;
   status: string | null;
   created_at: Date | string;
   updated_at: Date | string;
@@ -58,7 +60,7 @@ const PHONE_MAX_LENGTH = 20;
 const COMPANY_NAME_MAX_LENGTH = 255;
 const DEPARTMENT_MAX_LENGTH = 100;
 const ROLE_TITLE_MAX_LENGTH = 50;
-const WORK_MODE_MAX_LENGTH = 10;
+const AVATAR_IMAGE_MAX_LENGTH = 255;
 const USER_PREFERRED_CONTACT_SET = new Set(['email', 'phone']);
 
 function normalizeUserStatus(value: string | null | undefined): UserStatus {
@@ -87,6 +89,7 @@ function mapUserRow(row: UserListRow): AdminUserListItem {
     id: row.id,
     email: row.email,
     userName: row.user_name || row.email.split('@')[0] || 'user',
+    avatarImage: row.avatar_image,
     status: normalizeUserStatus(row.status),
     displayName,
     firstName: row.first_name,
@@ -99,7 +102,7 @@ function mapUserRow(row: UserListRow): AdminUserListItem {
     corporateName: row.corporate_name,
     departmentName: row.department_name,
     roleTitle: row.role_title,
-    workMode: row.work_mode,
+    workMode: normalizeWorkMode(row.work_mode),
     teamCount: toNumber(row.team_count),
     teamNames: row.team_names
       ? row.team_names
@@ -145,7 +148,7 @@ export function normalizeUserEditableUpdateInput(
     corporateName: toNullableTrimmed(input.corporateName),
     departmentName: toNullableTrimmed(input.departmentName),
     roleTitle: toNullableTrimmed(input.roleTitle),
-    workMode: toNullableTrimmed(input.workMode),
+    workMode: normalizeWorkMode(input.workMode),
   };
 }
 
@@ -200,11 +203,9 @@ export function validateUserEditableUpdateInput(
     ROLE_TITLE_MAX_LENGTH,
     `Role must be ${ROLE_TITLE_MAX_LENGTH} characters or fewer.`
   );
-  errors.workMode = validateMaxLength(
-    input.workMode,
-    WORK_MODE_MAX_LENGTH,
-    `Work mode must be ${WORK_MODE_MAX_LENGTH} characters or fewer.`
-  );
+  if (input.workMode !== null && !normalizeWorkMode(input.workMode)) {
+    errors.workMode = 'Work mode must be remote, hybrid, or onsite.';
+  }
 
   (Object.keys(errors) as Array<keyof AdminUserEditableUpdateErrors>).forEach(
     key => {
@@ -313,6 +314,7 @@ async function getUserRows(
       u.id,
       u.email,
       u.user_name,
+      u.avatar_image,
       ${statusExpr} AS status,
       u.created_at,
       u.updated_at,
@@ -348,7 +350,7 @@ async function getUserRows(
       GROUP BY request.user_id
     ) rq ON rq.user_id = u.id
     ${whereSql}
-    ORDER BY u.created_at DESC, u.id DESC
+    ORDER BY u.updated_at DESC, u.id DESC
     ${paginationSql}
   `);
 }
@@ -613,48 +615,65 @@ export async function updateUserEditableFields(
   }
 }
 
-export async function upsertUserByClerkId(
+/**
+ * Upserts a user based on their Clerk ID. If a user with the given Clerk ID already exists, the function does nothing.
+ * @param clerkId
+ * @param email
+ * @param userName
+ * @returns
+ */
+export async function upsertClerkUser(
   clerkId: string,
-  email: string,
-  userName: string
-): Promise<void> {
-  const existing = await prisma.user.findUnique({
+  email: string
+): Promise<{ userId: number }> {
+  // Try to find an existing user with the given Clerk ID
+  let user = await prisma.user.findUnique({
     where: { clerk_id: clerkId },
     select: { id: true },
   });
-
-  if (!existing) {
-    await prisma.user.create({
-      data: {
-        clerk_id: clerkId,
-        email,
-        user_name: userName,
-        user_type: 'INDIVIDUAL',
-        status: 'active',
-        profile: {
-          create: {
-            consent_given: 1,
-          },
-        },
-      },
-    });
-  }
-
-  // Write user_type to Clerk public metadata so the proxy can read it
-  // from JWT session claims on subsequent requests (individual users only)
-  const client = await clerkClient();
-  await client.users.updateUserMetadata(clerkId, {
-    publicMetadata: { user_type: 'INDIVIDUAL' },
+  if (user) return { userId: user.id };
+  // Create a new user if none exists
+  user = await prisma.user.create({
+    data: {
+      clerk_id: clerkId,
+      email,
+    },
   });
+  return { userId: user.id };
 }
 
 export async function updateUserEmailByClerkId(
   clerkId: string,
-  email: string
+  user_email: string
 ): Promise<void> {
   await prisma.user.updateMany({
     where: { clerk_id: clerkId },
-    data: { email },
+    data: { email: user_email },
+  });
+}
+
+export async function updateUserName(
+  clerkId: string,
+  user_name: string
+): Promise<void> {
+  await prisma.user.updateMany({
+    where: { clerk_id: clerkId },
+    data: { user_name },
+  });
+}
+
+export async function updateUserAvatar(
+  clerkId: string,
+  avatarImage: string | null | undefined
+): Promise<void> {
+  const normalizedAvatar = toNullableTrimmed(avatarImage)?.slice(
+    0,
+    AVATAR_IMAGE_MAX_LENGTH
+  );
+
+  await prisma.user.updateMany({
+    where: { clerk_id: clerkId },
+    data: { avatar_image: normalizedAvatar ?? null },
   });
 }
 

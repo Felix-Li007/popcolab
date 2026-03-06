@@ -3,6 +3,11 @@
 import { useState, useTransition } from 'react';
 import { updateUserAction } from '@/actions/user-actions';
 import {
+  normalizeWorkMode,
+  WORK_MODE_OPTIONS,
+  type WorkMode,
+} from '@/constants/work-mode';
+import {
   USER_STATUS_BADGE,
   USER_STATUS_OPTIONS,
 } from '@/constants/user-status';
@@ -12,6 +17,7 @@ import type {
   AdminUserListItem,
   UserStatus,
 } from '@/types/user-type';
+import UserAvatarPreview from '@/components/admin/user/avatar-preview';
 import ModalShell from '@/components/shared/modal-shell';
 import { Badge, Button } from '@/ui';
 import styles from '@/styles/user-edit.module.css';
@@ -33,6 +39,7 @@ type UserEditFormProps = {
 };
 
 type PreferredContactValue = '' | 'email' | 'phone';
+type WorkModeValue = '' | WorkMode;
 
 type EditFormState = {
   userName: string;
@@ -44,7 +51,7 @@ type EditFormState = {
   corporateName: string;
   departmentName: string;
   roleTitle: string;
-  workMode: string;
+  workMode: WorkModeValue;
 };
 
 const MAIN_INPUT_FIELDS: Array<{
@@ -114,13 +121,8 @@ function toUpdatePayload(form: EditFormState): AdminUserEditableUpdateInput {
     corporateName: toNullableTrimmed(form.corporateName),
     departmentName: toNullableTrimmed(form.departmentName),
     roleTitle: toNullableTrimmed(form.roleTitle),
-    workMode: toNullableTrimmed(form.workMode),
+    workMode: normalizeWorkMode(form.workMode),
   };
-}
-
-function getAvatarText(userName: string): string {
-  const normalized = userName.trim();
-  return normalized ? normalized.slice(0, 1).toUpperCase() : '?';
 }
 
 function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
@@ -130,8 +132,6 @@ function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
     {}
   );
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const avatarText = getAvatarText(form.userName);
 
   function handleFieldChange<K extends keyof EditFormState>(
     key: K,
@@ -192,7 +192,7 @@ function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
         <div className={`${styles.infoCard} ${styles.tile1}`}>
           <p className={styles.label}>Avatar</p>
           <div className={styles.avatarCenter}>
-            <div className={styles.avatar}>{avatarText}</div>
+            <UserAvatarPreview user={user} />
           </div>
         </div>
 
@@ -323,17 +323,41 @@ function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
                   >
                     {field.label}
                   </label>
-                  <input
-                    id={meta.inputId}
-                    value={form[field.key]}
-                    onChange={event =>
-                      handleFieldChange(field.key, event.target.value)
-                    }
-                    className={styles.input}
-                    disabled={isPending}
-                    aria-invalid={meta.hasError}
-                    aria-describedby={meta.errorId}
-                  />
+                  {field.key === 'workMode' ? (
+                    <select
+                      id={meta.inputId}
+                      value={form.workMode}
+                      onChange={event =>
+                        handleFieldChange(
+                          'workMode',
+                          event.target.value as WorkModeValue
+                        )
+                      }
+                      className={styles.select}
+                      disabled={isPending}
+                      aria-invalid={meta.hasError}
+                      aria-describedby={meta.errorId}
+                    >
+                      <option value="">Select work mode</option>
+                      {WORK_MODE_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      id={meta.inputId}
+                      value={form[field.key]}
+                      onChange={event =>
+                        handleFieldChange(field.key, event.target.value)
+                      }
+                      className={styles.input}
+                      disabled={isPending}
+                      aria-invalid={meta.hasError}
+                      aria-describedby={meta.errorId}
+                    />
+                  )}
                   {meta.error && (
                     <p id={meta.errorId} className={styles.fieldError}>
                       {meta.error}

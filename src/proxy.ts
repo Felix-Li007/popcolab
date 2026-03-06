@@ -31,7 +31,8 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(new URL(targetUrl, req.url));
     }
   }
-  if (isAdminRoute && !isAdmin) {
+
+  if ((isAdmin && !isAdminRoute) || (!isAdmin && isAdminRoute)) {
     const targetUrl = new URL('/', req.url);
     return NextResponse.redirect(targetUrl);
   }

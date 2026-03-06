@@ -24,17 +24,6 @@
   @apply flex-1 flex items-center justify-center;
 }
 
-.avatarPlaceholder {
-  @apply rounded-full flex items-center justify-center text-base font-bold shrink-0 w-full;
-  width: 48px;
-  height: 48px;
-  min-width: 48px;
-  min-height: 48px;
-  aspect-ratio: 1 / 1;
-  background: var(--color-lavender);
-  color: var(--color-teal-deep);
-}
-
 .tile1 {
   @apply flex flex-col;
   grid-row: 1 / span 2;

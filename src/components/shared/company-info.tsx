@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
+import { WORK_MODE_OPTIONS } from '@/constants/work-mode';
 import {
   saveCompanyAction,
   type SaveCompanyFormState,
@@ -100,14 +101,19 @@ export default function CompanyProfile({
               <label htmlFor="company-work-mode" className={styles.label}>
                 Work Mode
               </label>
-              <input
+              <select
                 id="company-work-mode"
                 name="workMode"
-                type="text"
                 defaultValue={resolvedValues?.workMode ?? ''}
-                placeholder="e.g. Hybrid / Remote"
                 className={styles.input}
-              />
+              >
+                <option value="">Select work mode</option>
+                {WORK_MODE_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className={styles.footer}>

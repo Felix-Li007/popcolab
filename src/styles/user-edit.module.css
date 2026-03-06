@@ -16,12 +16,6 @@
   @apply text-[10px] text-gray-400 font-semibold;
 }
 
-.avatar {
-  @apply h-12 w-12 shrink-0 rounded-full flex items-center justify-center text-sm font-bold;
-  background: var(--color-lavender);
-  color: var(--color-teal-deep);
-}
-
 .avatarCenter {
   @apply flex-1 flex items-center justify-center;
 }

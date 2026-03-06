@@ -4,6 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { prisma } from '@/libs/prisma-client';
 import {
+  isWorkMode,
+  normalizeWorkMode,
+  type WorkMode,
+} from '@/constants/work-mode';
+import {
   normalizeUserEditableUpdateInput,
   updateUserEditableFields,
   validateUserEditableUpdateInput,
@@ -27,7 +32,7 @@ export type SignedInCompanyUpdateInput = {
   corporateName: string;
   departmentName: string;
   roleTitle: string;
-  workMode: string;
+  workMode: WorkMode | '';
 };
 
 export type SaveCompanyFormState = {
@@ -41,8 +46,6 @@ export type SaveCompanyFormState = {
 const COMPANY_NAME_MAX_LENGTH = 255;
 const DEPARTMENT_MAX_LENGTH = 100;
 const ROLE_TITLE_MAX_LENGTH = 50;
-const WORK_MODE_MAX_LENGTH = 10;
-
 function revalidateAdminPaths() {
   ADMIN_PATHS.forEach(path => revalidatePath(path));
 }
@@ -120,7 +123,7 @@ export async function getCompanyAction(): Promise<SignedInCompany | null> {
     corporateName: company.corporate_name,
     departmentName: company.department_name,
     roleTitle: company.role_title,
-    workMode: company.work_mode,
+    workMode: normalizeWorkMode(company.work_mode),
   };
 }
 
@@ -148,7 +151,7 @@ export async function updateCompanyAction(
   const corporateName = toNullableTrimmed(input.corporateName);
   const departmentName = toNullableTrimmed(input.departmentName);
   const roleTitle = toNullableTrimmed(input.roleTitle);
-  const workMode = toNullableTrimmed(input.workMode);
+  const workMode = normalizeWorkMode(input.workMode);
 
   if (corporateName && corporateName.length > COMPANY_NAME_MAX_LENGTH) {
     return {
@@ -171,10 +174,10 @@ export async function updateCompanyAction(
     };
   }
 
-  if (workMode && workMode.length > WORK_MODE_MAX_LENGTH) {
+  if (input.workMode && !workMode) {
     return {
       success: false,
-      error: `Work mode must be ${WORK_MODE_MAX_LENGTH} characters or fewer.`,
+      error: 'Work mode must be remote, hybrid, or onsite.',
     };
   }
 
@@ -247,7 +250,10 @@ export async function saveCompanyAction(
   const corporateName = String(formData.get('corporateName') ?? '');
   const departmentName = String(formData.get('departmentName') ?? '');
   const roleTitle = String(formData.get('roleTitle') ?? '');
-  const workMode = String(formData.get('workMode') ?? '');
+  const rawWorkMode = String(formData.get('workMode') ?? '')
+    .trim()
+    .toLowerCase();
+  const workMode: WorkMode | '' = isWorkMode(rawWorkMode) ? rawWorkMode : '';
 
   const result = await updateCompanyAction({
     corporateName,

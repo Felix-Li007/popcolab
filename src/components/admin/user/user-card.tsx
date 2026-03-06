@@ -94,16 +94,11 @@ function buildTeamsHref(ownerEmail: string): string {
 export default function UserCard({ user, onViewDetails, onEdit }: Props) {
   const status = getStatusBadge(user.status);
   const avatarText = user.userName.slice(0, 1).toUpperCase() || '?';
-  const hasCompanyInfo =
-    hasText(user.corporateName) ||
-    hasText(user.departmentName) ||
-    hasText(user.roleTitle) ||
-    hasText(user.workMode);
+  const showAvatarImage = hasText(user.avatarImage);
+  const hasCompanyInfo = hasText(user.corporateName) || hasText(user.roleTitle);
   const companyFields = [
-    { label: 'Company', value: user.corporateName },
-    { label: 'Department', value: user.departmentName },
     { label: 'Role', value: user.roleTitle },
-    { label: 'Work Mode', value: user.workMode },
+    { label: 'Company', value: user.corporateName },
   ];
 
   return (
@@ -112,7 +107,20 @@ export default function UserCard({ user, onViewDetails, onEdit }: Props) {
 
       <div className={styles.header}>
         <div className={styles.identity}>
-          <div className={styles.avatar}>{avatarText}</div>
+          <div
+            className={styles.avatar}
+            style={
+              showAvatarImage
+                ? { backgroundImage: `url(${user.avatarImage})` }
+                : undefined
+            }
+          >
+            {showAvatarImage ? (
+              <span className={styles.avatarFallback}>{avatarText}</span>
+            ) : (
+              avatarText
+            )}
+          </div>
           <div className={styles.identityText}>
             <p className={styles.userName}>{user.userName}</p>
             <p className={styles.email}>{user.email}</p>

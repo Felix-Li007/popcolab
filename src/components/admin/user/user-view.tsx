@@ -1,7 +1,9 @@
 'use client';
 
 import { USER_STATUS_BADGE } from '@/constants/user-status';
+import { getWorkModeLabel } from '@/constants/work-mode';
 import type { AdminUserListItem } from '@/types/user-type';
+import UserAvatarPreview from '@/components/admin/user/avatar-preview';
 import ModalShell from '@/components/shared/modal-shell';
 import { Badge } from '@/ui';
 import styles from '@/styles/user-view.module.css';
@@ -24,18 +26,11 @@ function renderValue(value: string | null | undefined) {
   return value && value.trim().length > 0 ? value : '—';
 }
 
-function getAvatarText(value: string): string {
-  const normalized = value.trim();
-  if (!normalized) return '?';
-  return normalized.slice(0, 1).toUpperCase();
-}
-
 export default function UserViewModal({ user, isOpen, onClose }: Props) {
   if (!isOpen || !user) return null;
 
   const statusBadge = USER_STATUS_BADGE[user.status];
   const userName = getUserName(user);
-  const avatarText = getAvatarText(userName);
 
   return (
     <ModalShell
@@ -56,9 +51,7 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
           <div className={`${styles.infoCard} ${styles.tile1}`}>
             <p className={styles.label}>Avatar</p>
             <div className={styles.avatarCenter}>
-              <div className={styles.avatarPlaceholder} aria-hidden="true">
-                {avatarText}
-              </div>
+              <UserAvatarPreview user={user} />
             </div>
           </div>
           <div className={styles.infoCard}>
@@ -122,7 +115,7 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
               <div className={styles.corporateItem}>
                 <p className={styles.corporateLabel}>Work Mode</p>
                 <p className={styles.corporateValue}>
-                  {renderValue(user.workMode)}
+                  {renderValue(getWorkModeLabel(user.workMode))}
                 </p>
               </div>
             </div>

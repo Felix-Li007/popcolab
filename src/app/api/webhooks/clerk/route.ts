@@ -2,9 +2,12 @@ import { verifyWebhook } from '@clerk/nextjs/webhooks';
 import type { WebhookEvent } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  updateUserEmailByClerkId,
+  updateUserEmail,
+  updateUserAvatar,
   updateUserProfile,
   deactivateUserByClerkId,
+  upsertClerkUser,
+  updateUserName,
 } from '@/services/user-service';
 
 export async function POST(req: NextRequest) {
@@ -28,16 +31,24 @@ export async function POST(req: NextRequest) {
           id,
           email_addresses,
           primary_email_address_id,
+          image_url,
           first_name,
           last_name,
+          username,
         } = event.data;
         const primary = email_addresses.find(
           e => e.id === primary_email_address_id
         );
-        if (primary?.email_address) {
-          await updateUserEmailByClerkId(id, primary.email_address);
+        const user_email = primary?.email_address ?? '';
+        const user_name =
+          username || first_name || user_email.split('@')[0] || 'user';
+        const { userId } = await upsertClerkUser(id, user_email);
+        if (userId) {
+          await updateUserEmail(id, user_email);
+          await updateUserName(id, user_name);
+          await updateUserAvatar(id, image_url);
+          await updateUserProfile(id, first_name, last_name);
         }
-        await updateUserProfile(id, first_name, last_name);
         break;
       }
 

@@ -5,7 +5,7 @@ model Profile {
   last_name         String?   @db.VarChar(50)
   phone_number      String?   @db.VarChar(20)
   preferred_contact String?   @db.VarChar(20)
-  consent_given     Int       @db.SmallInt
+  consent_given     Int       @default(0) @db.SmallInt
   privacy_notes     String?   @db.VarChar(255)
   created_at        DateTime? @default(now()) @db.Timestamp(6)
   updated_at        DateTime  @updatedAt @db.Timestamp(6)

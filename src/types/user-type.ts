@@ -1,4 +1,5 @@
 import type { UserStatus } from '@/constants/user-status';
+import type { WorkMode } from '@/constants/work-mode';
 
 export type { UserStatus };
 
@@ -8,6 +9,7 @@ export type AdminUserListItem = {
   id: number;
   email: string;
   userName: string;
+  avatarImage: string | null;
   status: UserStatus;
   displayName: string;
   firstName: string | null;
@@ -19,7 +21,7 @@ export type AdminUserListItem = {
   corporateName: string | null;
   departmentName: string | null;
   roleTitle: string | null;
-  workMode: string | null;
+  workMode: WorkMode | null;
   teamCount: number;
   teamNames: string[];
   requestCount: number;
@@ -37,7 +39,7 @@ export type AdminUserEditableUpdateInput = {
   corporateName: string | null;
   departmentName: string | null;
   roleTitle: string | null;
-  workMode: string | null;
+  workMode: WorkMode | null;
 };
 
 export type AdminUserEditableUpdateErrors = Partial<
