@@ -51,6 +51,7 @@
     --palette-background: var(--color-gray-200);
     --palette-teal-deep: #09191b;
     --palette-yellow: #e5d139;
+    /* --palette-foreground: white; */
   }
 }
 

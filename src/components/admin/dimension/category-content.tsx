@@ -3,12 +3,11 @@
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/ui';
-import StatsCard from '@/components/admin/stats-card';
 import SearchPanel from '@/components/admin/common/search-panel';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
-import DimensionCategoryForm from '@/components/admin/dimension/category-form';
+import DimensionCategoryForm from '@/components/admin/dimension/category-edit';
 import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import type {
   DimensionCategory,
@@ -93,12 +92,6 @@ export default function CategoryContent({ initialData }: Props) {
   const selectedCategory =
     categories.find(category => category.id === selectedId) ?? null;
   const showFormModal = isCreating || selectedId !== null;
-
-  const totalCount = categories.length;
-  const usedCount = categories.filter(
-    category => category.usageCount > 0
-  ).length;
-  const unusedCount = totalCount - usedCount;
 
   function setSelection(id: number | null) {
     setSelectedId(id);
@@ -231,43 +224,6 @@ export default function CategoryContent({ initialData }: Props) {
   return (
     <>
       <div className={styles.root}>
-        <div className={styles.statsSection}>
-          <div className={styles.statsGrid}>
-            <StatsCard
-              bgColor="bg-pink-light"
-              glowColor="color-mix(in srgb, var(--color-pink-light) 55%, transparent)"
-              icon={<span className="text-title">🗂️</span>}
-              value={totalCount}
-              label="Categories"
-              trendLabel="total groups"
-            />
-            <StatsCard
-              bgColor="bg-green-100"
-              glowColor="color-mix(in srgb, var(--color-teal-accent) 55%, transparent)"
-              icon={<span className="text-title">🔗</span>}
-              value={usedCount}
-              label="In Use"
-              trendLabel="linked categories"
-            />
-            <StatsCard
-              bgColor="bg-lavender"
-              glowColor="color-mix(in srgb, var(--color-lavender) 50%, transparent)"
-              icon={<span className="text-title">🧪</span>}
-              value={unusedCount}
-              label="Unused"
-              trendLabel="safe to remove"
-            />
-            <StatsCard
-              bgColor="bg-brand-yellow/40"
-              glowColor="color-mix(in srgb, var(--color-brand-yellow) 50%, transparent)"
-              icon={<span className="text-title">📐</span>}
-              value={categories.reduce((sum, c) => sum + c.usageCount, 0)}
-              label="Dimensions Linked"
-              trendLabel="across categories"
-            />
-          </div>
-        </div>
-
         <div className={styles.listSection}>
           <div className={styles.listPanel}>
             <SearchPanel

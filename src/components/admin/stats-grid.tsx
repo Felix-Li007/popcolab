@@ -53,9 +53,9 @@ export default function StatsGrid({
           />
         </svg>
       ),
-      value: '2.4k',
+      value: '0',
       label: 'Quiz Completions',
-      trend: '18%',
+      trend: '0%',
       trendLabel: '',
       bgColor: 'bg-pink-light',
       glowColor: 'rgba(255, 187, 240, 0.5)',
@@ -75,9 +75,9 @@ export default function StatsGrid({
           />
         </svg>
       ),
-      value: '347',
-      label: 'Bookings / Month',
-      trend: '12%',
+      value: '0',
+      label: 'Bookings',
+      trend: '0%',
       trendLabel: '',
       bgColor: 'bg-coral-soft',
       glowColor: 'rgba(233, 117, 110, 0.35)',

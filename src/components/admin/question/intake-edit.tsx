@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
+import { FORM_TYPES } from '@/constants/intake-form';
 import { Button, Input, TextArea } from '@/ui';
 import type {
   IntakeDimensionOption,
@@ -11,14 +12,6 @@ import type {
 } from '@/types/intake-form-type';
 
 const EMPTY_STATE: IntakeFormFormState = { errors: {} };
-const DEFAULT_FORM_TYPE_OPTIONS = [
-  'onboarding',
-  'discovery',
-  'pilot',
-  'leadership',
-  'remote',
-  'sprint',
-];
 
 type FormAction = (
   prevState: IntakeFormFormState,
@@ -61,7 +54,7 @@ export default function IntakeFormPanel({
   const [questionSearch, setQuestionSearch] = useState('');
   const [dimensionSearch, setDimensionSearch] = useState('');
   const formTypeOptions = useMemo(() => {
-    const options = [...DEFAULT_FORM_TYPE_OPTIONS];
+    const options: string[] = [...FORM_TYPES];
     const current = initial?.formType?.trim();
     if (current && !options.includes(current)) options.push(current);
     return options;
@@ -192,7 +185,7 @@ export default function IntakeFormPanel({
         className="flex flex-col h-full min-h-0"
         data-testid="intake-edit-form"
       >
-        <div className="flex-1 overflow-y-auto space-y-3.5">
+        <div className="flex-1 overflow-y-auto px-3 space-y-3.5">
           {state.errors._form && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-2 rounded-xl">
               {state.errors._form}

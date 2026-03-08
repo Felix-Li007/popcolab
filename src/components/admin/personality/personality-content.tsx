@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import PersonalityCard from '@/components/admin/personality/personality-card';
 import StatsCard from '@/components/admin/stats-card';
-import PersonalityForm from '@/components/admin/personality/personality-form';
+import PersonalityForm from '@/components/admin/personality/personality-edit';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { Button, Badge } from '@/ui';
 import { Personality } from '@/types/personality-type';

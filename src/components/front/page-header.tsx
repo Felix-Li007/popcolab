@@ -23,6 +23,10 @@ export default function Header({
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = () => setIsOpen(false);
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   if (
     pathname.startsWith(process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL as string) ||
@@ -47,17 +51,30 @@ export default function Header({
 
         {/* Desktop Navigation */}
         <nav className={styles.navDesktop}>
-          <Link href="/" className={styles.navLink}>
+          <Link
+            href="/"
+            className={`${styles.navLink} ${isActive('/') ? styles.navLinkActive : ''}`}
+          >
             Home
           </Link>
-          <Link href="/about" className={styles.navLink}>
-            About
-          </Link>
-          <Link href="/services" className={styles.navLink}>
+
+          <Link
+            href="/services"
+            className={`${styles.navLink} ${isActive('/services') ? styles.navLinkActive : ''}`}
+          >
             Services
           </Link>
-          <Link href="/contact" className={styles.navLink}>
+          <Link
+            href="/contact"
+            className={`${styles.navLink} ${isActive('/contact') ? styles.navLinkActive : ''}`}
+          >
             Contact
+          </Link>
+          <Link
+            href="/about"
+            className={`${styles.navLink} ${isActive('/about') ? styles.navLinkActive : ''}`}
+          >
+            About
           </Link>
         </nav>
 
@@ -113,19 +130,34 @@ export default function Header({
           id="mobile-nav"
           className={`${styles.navMobile} ${isOpen ? styles.open : ''}`}
         >
-          <Link href="/" className={styles.navLink} onClick={closeMenu}>
+          <Link
+            href="/"
+            className={`${styles.navLink} ${isActive('/') ? styles.navLinkActive : ''}`}
+            onClick={closeMenu}
+          >
             Home
           </Link>
-          <Link href="/about" className={styles.navLink} onClick={closeMenu}>
-            About
-          </Link>
-          <Link href="/services" className={styles.navLink} onClick={closeMenu}>
+          <Link
+            href="/services"
+            className={`${styles.navLink} ${isActive('/services') ? styles.navLinkActive : ''}`}
+            onClick={closeMenu}
+          >
             Services
           </Link>
-          <Link href="/contact" className={styles.navLink} onClick={closeMenu}>
+          <Link
+            href="/contact"
+            className={`${styles.navLink} ${isActive('/contact') ? styles.navLinkActive : ''}`}
+            onClick={closeMenu}
+          >
             Contact
           </Link>
-
+          <Link
+            href="/about"
+            className={`${styles.navLink} ${isActive('/about') ? styles.navLinkActive : ''}`}
+            onClick={closeMenu}
+          >
+            About
+          </Link>
           <div className={styles.mobileAuthBlock}>
             <SignedOut>
               <SignInButton>

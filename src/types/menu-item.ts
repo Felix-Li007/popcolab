@@ -84,7 +84,6 @@ export const menuSection: MenuGroup[] = [
         label: 'Experiences',
         href: '/admin/experiences',
         countKey: 'experiences',
-        badge: '50+',
         children: [
           {
             label: 'Experiences',
@@ -147,7 +146,6 @@ export const menuSection: MenuGroup[] = [
         label: 'Events',
         href: '/admin/events',
         countKey: 'events',
-        badge: 3,
         children: [
           { label: 'Events', href: '/admin/events', countKey: 'events' },
         ],

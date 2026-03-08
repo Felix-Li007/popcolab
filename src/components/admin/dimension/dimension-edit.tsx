@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
+import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
 import type {
   Dimension,
@@ -8,33 +9,43 @@ import type {
   DimensionDataType,
   DimensionFormState,
 } from '@/types/dimension-type';
-
-const EMPTY_STATE: DimensionFormState = { errors: {} };
+import styles from '@/styles/dimension-form.module.css';
 
 type FormAction = (
   prevState: DimensionFormState,
   formData: FormData
 ) => Promise<DimensionFormState>;
 
+const EMPTY_STATE: DimensionFormState = { errors: {} };
+const DATA_TYPES: DimensionDataType[] = ['numeric', 'text'];
+
 type Props = {
+  isOpen: boolean;
+  onClose: () => void;
   action: FormAction;
   isEdit?: boolean;
   initial?: Dimension;
   categories: DimensionCategory[];
   onSuccess: () => void;
-  onCancel?: () => void;
 };
 
-const DATA_TYPES: DimensionDataType[] = ['numeric', 'text'];
+type FormBodyProps = {
+  action: FormAction;
+  isEdit: boolean;
+  initial?: Dimension;
+  categories: DimensionCategory[];
+  onSuccess: () => void;
+  onClose: () => void;
+};
 
-export default function DimensionPanel({
+function DimensionFormBody({
   action,
-  isEdit = false,
+  isEdit,
   initial,
   categories,
   onSuccess,
-  onCancel,
-}: Props) {
+  onClose,
+}: FormBodyProps) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
   const [dataType, setDataType] = useState<DimensionDataType>(
     (initial?.dataType as DimensionDataType) ?? 'numeric'
@@ -63,24 +74,8 @@ export default function DimensionPanel({
   }
 
   return (
-    <form action={formAction} className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-6 py-3 bg-linear-to-r from-lavender via-white to-coral-light border-b border-pink-light/50 shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-title leading-none">
-            {isEdit ? '✏️' : '📐'}
-          </span>
-          <h3 className="text-heading font-bold text-foreground">
-            {isEdit ? 'Edit Dimension' : 'New Dimension'}
-          </h3>
-          {isEdit && initial?.id && (
-            <span className="text-body text-foreground/45 font-mono">
-              #{initial.id}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+    <form action={formAction} className="flex h-full flex-col">
+      <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
         {state.errors._form && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-body px-4 py-2 rounded-xl">
             {state.errors._form}
@@ -264,22 +259,64 @@ export default function DimensionPanel({
         </div>
       </div>
 
-      <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 shrink-0">
-        {onCancel && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            Cancel
-          </Button>
-        )}
+      <div className="border-t border-gray-100 flex items-center justify-end gap-3 px-6 py-4 shrink-0">
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
+          onClick={onClose}
+          disabled={isPending}
+        >
+          Cancel
+        </Button>
         <Button type="submit" variant="primary" size="md" disabled={isPending}>
           {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Dimension'}
         </Button>
       </div>
     </form>
+  );
+}
+
+export default function DimensionForm({
+  isOpen,
+  onClose,
+  action,
+  isEdit = false,
+  initial,
+  categories,
+  onSuccess,
+}: Props) {
+  if (!isOpen) return null;
+
+  const formKey = `${isEdit ? (initial?.id ?? 'edit') : 'new'}-${categories.length}`;
+
+  return (
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <div className="flex items-center gap-2">
+          <span className="text-title leading-none">
+            {isEdit ? '✏️' : '📐'}
+          </span>
+          <span>{isEdit ? 'Edit Dimension' : 'New Dimension'}</span>
+        </div>
+      }
+      subtitle={isEdit && initial?.id ? `#${initial.id}` : undefined}
+      panelClassName={styles.panel}
+      bodyClassName={styles.body}
+      rootTestId="dimension-form-modal-root"
+      panelTestId="dimension-form-modal"
+    >
+      <DimensionFormBody
+        key={formKey}
+        action={action}
+        isEdit={isEdit}
+        initial={initial}
+        categories={categories}
+        onSuccess={onSuccess}
+        onClose={onClose}
+      />
+    </ModalShell>
   );
 }

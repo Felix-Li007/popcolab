@@ -1,37 +1,48 @@
 'use client';
 
 import { useActionState, useEffect } from 'react';
+import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
 import type {
   DimensionCategory,
   DimensionCategoryFormState,
 } from '@/types/dimension-type';
-import styles from '@/styles/category-panel.module.css';
-
-const EMPTY_STATE: DimensionCategoryFormState = { errors: {} };
+import styles from '@/styles/category-form.module.css';
 
 type FormAction = (
   prevState: DimensionCategoryFormState,
   formData: FormData
 ) => Promise<DimensionCategoryFormState>;
 
+const EMPTY_STATE: DimensionCategoryFormState = { errors: {} };
+
 type Props = {
+  isOpen: boolean;
+  onClose: () => void;
   action: FormAction;
   isEdit?: boolean;
   initial?: DimensionCategory;
   usageCount?: number;
   onSuccess: () => void;
-  onCancel?: () => void;
 };
 
-export default function DimensionCategoryPanel({
+type FormBodyProps = {
+  action: FormAction;
+  isEdit: boolean;
+  initial?: DimensionCategory;
+  usageCount: number;
+  onSuccess: () => void;
+  onClose: () => void;
+};
+
+function CategoryFormBody({
   action,
-  isEdit = false,
+  isEdit,
   initial,
-  usageCount = 0,
+  usageCount,
   onSuccess,
-  onCancel,
-}: Props) {
+  onClose,
+}: FormBodyProps) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
 
   useEffect(() => {
@@ -40,26 +51,11 @@ export default function DimensionCategoryPanel({
 
   return (
     <form action={formAction} className={styles.form}>
-      <div className={styles.header}>
-        <div className={styles.headerTitle}>
-          <span className="text-title leading-none">
-            {isEdit ? '✏️' : '🗂️'}
-          </span>
-          <h3 className="text-heading font-bold text-foreground">
-            {isEdit ? 'Edit Category' : 'New Category'}
-          </h3>
-          {isEdit && initial?.id && (
-            <span className="text-body text-foreground/45 font-mono">
-              #{initial.id}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className={styles.body}>
+      <div className={styles.content}>
         {state.errors._form && (
           <div className={styles.formError}>{state.errors._form}</div>
         )}
+
         <Input
           name="name"
           label="Category Name"
@@ -83,30 +79,72 @@ export default function DimensionCategoryPanel({
         <div className={styles.usageBox}>
           <p className={styles.usageLabel}>Linked Dimensions</p>
           <p className={styles.usageValue}>{usageCount}</p>
-          {usageCount > 0 && (
+          {usageCount > 0 ? (
             <p className={styles.usageHint}>
               Delete is blocked while this category is in use.
             </p>
-          )}
+          ) : null}
         </div>
       </div>
 
       <div className={styles.footer}>
-        {onCancel && (
-          <Button
-            type="button"
-            variant="secondary"
-            size="md"
-            onClick={onCancel}
-            disabled={isPending}
-          >
-            Cancel
-          </Button>
-        )}
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
+          onClick={onClose}
+          disabled={isPending}
+        >
+          Cancel
+        </Button>
         <Button type="submit" variant="primary" size="md" disabled={isPending}>
           {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Category'}
         </Button>
       </div>
     </form>
+  );
+}
+
+export default function DimensionCategoryForm({
+  isOpen,
+  onClose,
+  action,
+  isEdit = false,
+  initial,
+  usageCount = 0,
+  onSuccess,
+}: Props) {
+  if (!isOpen) return null;
+
+  const formKey = `${isEdit ? (initial?.id ?? 'edit') : 'new'}-${usageCount}`;
+
+  return (
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <div className="flex items-center gap-2">
+          <span className="text-title leading-none">
+            {isEdit ? '✏️' : '🗂️'}
+          </span>
+          <span>{isEdit ? 'Edit Category' : 'New Category'}</span>
+        </div>
+      }
+      subtitle={isEdit && initial?.id ? `#${initial.id}` : undefined}
+      panelClassName={styles.panel}
+      bodyClassName={styles.body}
+      rootTestId="category-form-modal-root"
+      panelTestId="category-form-modal"
+    >
+      <CategoryFormBody
+        key={formKey}
+        action={action}
+        isEdit={isEdit}
+        initial={initial}
+        usageCount={usageCount}
+        onSuccess={onSuccess}
+        onClose={onClose}
+      />
+    </ModalShell>
   );
 }

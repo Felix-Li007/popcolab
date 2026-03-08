@@ -7,9 +7,8 @@ import SearchPanel from '@/components/admin/common/search-panel';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
-import DimensionForm from '@/components/admin/dimension/dimension-form';
+import DimensionForm from '@/components/admin/dimension/dimension-edit';
 import DimensionView from '@/components/admin/dimension/dimension-view';
-import DimensionStatsBar from '@/components/admin/dimension/dimension-stats-bar';
 import DimensionCategoryFilterBar from '@/components/admin/dimension/category-filter';
 import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import type {
@@ -36,11 +35,7 @@ type Props = {
 
 type CategoryFilter = 'all' | number;
 
-export default function DimensionContent({
-  initialData,
-  categories,
-  summary,
-}: Props) {
+export default function DimensionContent({ initialData, categories }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
@@ -118,11 +113,6 @@ export default function DimensionContent({
   const selectedDimension = dimensions.find(d => d.id === selectedId) ?? null;
   const viewedDimension = dimensions.find(d => d.id === viewId) ?? null;
   const showFormModal = isCreating || selectedId !== null;
-
-  const totalCount = summary?.count ?? dimensions.length;
-  const hardFilterCount =
-    summary?.hardFilterCount ?? dimensions.filter(d => d.hardFilter).length;
-  const softFilterCount = Math.max(0, totalCount - hardFilterCount);
 
   function setSelection(id: number | null) {
     setSelectedId(id);
@@ -228,14 +218,6 @@ export default function DimensionContent({
   return (
     <>
       <div className="flex flex-col">
-        <div className="px-4 pt-4 shrink-0">
-          <DimensionStatsBar
-            totalCount={totalCount}
-            hardFilterCount={hardFilterCount}
-            softFilterCount={softFilterCount}
-          />
-        </div>
-
         <div className="flex flex-1 min-h-0 px-4 py-3 gap-4">
           <div className="w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden">
             <SearchPanel

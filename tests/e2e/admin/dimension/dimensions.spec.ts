@@ -52,10 +52,14 @@ test.describe('Dimensions page', () => {
 
   test('"New" opens create modal', async ({ page }) => {
     await page.getByRole('button', { name: /new/i }).click();
+    const formModal = page.getByTestId('dimension-form-modal');
+    await expect(formModal).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /new dimension/i })
     ).toBeVisible();
-    await expect(page.getByText('ALLOW VALUE')).toBeVisible();
+    await expect(formModal.getByText('ALLOW VALUE')).toBeVisible();
+    await formModal.getByRole('button', { name: /^Cancel$/i }).click();
+    await expect(page.getByTestId('dimension-form-modal')).toHaveCount(0);
   });
 
   test('clicking a card opens edit modal', async ({ page }) => {
@@ -72,7 +76,9 @@ test.describe('Dimensions page', () => {
     await expect(page.getByText(/^#\d+$/).first()).toBeVisible();
   });
 
-  test('view action opens detail modal', async ({ page }) => {
+  test('view action opens detail modal and supports close/edit actions', async ({
+    page,
+  }) => {
     const cards = page.getByTestId('dimension-card');
     if ((await cards.count()) === 0) {
       await expect(page.getByTestId('dimension-empty')).toBeVisible();
@@ -80,10 +86,17 @@ test.describe('Dimensions page', () => {
     }
 
     await cards.first().getByRole('button', { name: /view/i }).click();
-    await expect(page.getByText(/^Created:/)).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: /edit/i }).last()
-    ).toBeVisible();
+    const detailModal = page.getByTestId('dimension-view-modal');
+    await expect(detailModal).toBeVisible();
+    await expect(detailModal.getByText(/^Created:/)).toBeVisible();
+    await detailModal.getByRole('button', { name: /^Close$/i }).click();
+    await expect(page.getByTestId('dimension-view-modal')).toHaveCount(0);
+
+    await cards.first().getByRole('button', { name: /view/i }).click();
+    await expect(detailModal).toBeVisible();
+    await detailModal.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByTestId('dimension-view-modal')).toHaveCount(0);
+    await expect(page.getByTestId('dimension-form-modal')).toBeVisible();
   });
 
   test('delete action opens confirmation dialog', async ({ page }) => {

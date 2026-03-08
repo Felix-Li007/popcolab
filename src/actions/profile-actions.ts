@@ -50,11 +50,7 @@ export async function getProfileAction(): Promise<UserProfileData | null> {
 
   return {
     email: user.email,
-<<<<<<< feature/optimize-admin-dashbaord
     userName: user.user_name ?? user.email.split('@')[0] ?? 'user',
-=======
-    userName: user.user_name,
->>>>>>> main
     firstName: user.profile?.first_name ?? null,
     lastName: user.profile?.last_name ?? null,
     phoneNumber: user.profile?.phone_number ?? null,

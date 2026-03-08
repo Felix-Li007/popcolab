@@ -9,6 +9,7 @@ import {
 } from '@/actions/user-actions';
 import styles from '@/styles/company-info.module.css';
 import type { CompanyInfo } from '@/types/company-type';
+import { Button } from '@/ui';
 
 const INITIAL_SAVE_STATE: SaveCompanyFormState = {
   success: false,
@@ -118,13 +119,14 @@ export default function CompanyProfile({
           </div>
           <div className={styles.footer}>
             <p className={styles.statusText}>{saveState.message}</p>
-            <button
+            <Button
               type="submit"
               disabled={isPending}
               className={styles.saveButton}
+              size="sm"
             >
               {isPending ? 'Saving...' : 'Save'}
-            </button>
+            </Button>
           </div>
           {saveState.error ? (
             <p className={styles.errorText}>{saveState.error}</p>

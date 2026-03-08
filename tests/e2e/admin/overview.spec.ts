@@ -12,13 +12,20 @@ test.describe('Admin Overview page', () => {
     await expect(heading).toBeVisible();
   });
 
-  test('stats grid is visible', async ({ page }) => {
+  test('overview analytics sections are visible', async ({ page }) => {
     await expect(
-      page.getByText('Quiz Completions', { exact: true })
+      page.getByRole('heading', { name: 'Request status distribution' })
     ).toBeVisible();
     await expect(
-      page.getByText('Bookings / Month', { exact: true })
+      page.getByText('Total Requests', { exact: true })
     ).toBeVisible();
+    await expect(
+      page.getByRole('heading', {
+        name: 'Users and teams over the last 6 months',
+      })
+    ).toBeVisible();
+    await expect(page.getByText('Total Users', { exact: true })).toBeVisible();
+    await expect(page.getByText('Total Teams', { exact: true })).toBeVisible();
   });
 
   test('Personalities preview section renders cards', async ({ page }) => {

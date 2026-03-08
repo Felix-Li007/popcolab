@@ -45,9 +45,13 @@ test.describe('Personalities page', () => {
 
   test('"New" button opens the create modal', async ({ page }) => {
     await page.getByRole('button', { name: /new/i }).click();
+    const createModal = page.getByTestId('personality-form-modal');
+    await expect(createModal).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /new personality/i })
     ).toBeVisible();
+    await createModal.getByRole('button', { name: /^Cancel$/i }).click();
+    await expect(page.getByTestId('personality-form-modal')).toHaveCount(0);
   });
 
   test('edit button on a card opens the edit modal', async ({ page }) => {
@@ -63,12 +67,18 @@ test.describe('Personalities page', () => {
     }
 
     await editBtn.click();
+    const editModal = page.getByTestId('personality-form-modal');
+    await expect(editModal).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /edit personality/i })
     ).toBeVisible();
+    await editModal.getByRole('button', { name: /^Cancel$/i }).click();
+    await expect(page.getByTestId('personality-form-modal')).toHaveCount(0);
   });
 
-  test('view button on a card opens the view modal', async ({ page }) => {
+  test('view button opens detail modal and supports close/edit actions', async ({
+    page,
+  }) => {
     const cardGrid = page
       .locator('[class*="personalityGrid"], [class*="cardGrid"]')
       .first();
@@ -79,7 +89,15 @@ test.describe('Personalities page', () => {
     }
 
     await viewBtn.click();
-    const modal = page.locator('[class*="modal"], [class*="backdrop"]').first();
-    await expect(modal).toBeVisible();
+    const viewModal = page.getByTestId('personality-view-modal');
+    await expect(viewModal).toBeVisible();
+    await viewModal.getByRole('button', { name: /^Close$/i }).click();
+    await expect(page.getByTestId('personality-view-modal')).toHaveCount(0);
+
+    await viewBtn.click();
+    await expect(viewModal).toBeVisible();
+    await viewModal.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByTestId('personality-view-modal')).toHaveCount(0);
+    await expect(page.getByTestId('personality-form-modal')).toBeVisible();
   });
 });

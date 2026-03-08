@@ -642,7 +642,7 @@ export async function upsertClerkUser(
   return { userId: user.id };
 }
 
-export async function updateUserEmailByClerkId(
+export async function updateUserEmail(
   clerkId: string,
   user_email: string
 ): Promise<void> {

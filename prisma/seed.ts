@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { REQUEST_STATUS, type RequestStatus } from '@/constants/request-status';
 import { PrismaClient } from '@/libs/prisma/client';
 
 const connectionString = process.env.DATABASE_URL!;
@@ -771,6 +772,7 @@ type MockRequestPreferenceSeed = {
 };
 
 type MockRequestSeed = {
+  request_status?: RequestStatus;
   objective_category?: number | null;
   budget_min?: number | null;
   budget_max?: number | null;
@@ -878,6 +880,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.OPEN,
         objective_category: 1,
         budget_min: 3000,
         budget_max: 6000,
@@ -890,6 +893,7 @@ const baseMockUsers: MockUserSeed[] = [
         ],
       },
       {
+        request_status: REQUEST_STATUS.IN_REVIEW,
         objective_category: 2,
         budget_min: 2000,
         budget_max: 4500,
@@ -921,6 +925,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.MATCHED,
         objective_category: 3,
         budget_min: 5000,
         budget_max: 9000,
@@ -952,6 +957,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.CLOSED,
         objective_category: 1,
         budget_min: 2500,
         budget_max: 5000,
@@ -960,6 +966,18 @@ const baseMockUsers: MockUserSeed[] = [
         preferences: [
           { index_key: 'CREATIVITY', desired_score: 92, weight_rate: 50 },
           { index_key: 'EXPLORATION', desired_score: 76, weight_rate: 20 },
+        ],
+      },
+      {
+        request_status: REQUEST_STATUS.OPEN,
+        objective_category: 3,
+        budget_min: 4200,
+        budget_max: 7800,
+        delivery_method: 1,
+        duration_max: 180,
+        preferences: [
+          { index_key: 'CREATIVITY', desired_score: 88, weight_rate: 36 },
+          { index_key: 'COLLABORATION', desired_score: 77, weight_rate: 24 },
         ],
       },
     ],
@@ -1001,6 +1019,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.IN_REVIEW,
         objective_category: 4,
         budget_min: 1500,
         budget_max: 3500,
@@ -1032,6 +1051,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.OPEN,
         objective_category: 2,
         budget_min: 1800,
         budget_max: 4200,
@@ -1040,6 +1060,18 @@ const baseMockUsers: MockUserSeed[] = [
         preferences: [
           { index_key: 'MASTERY', desired_score: 84, weight_rate: 35 },
           { index_key: 'STRATEGY', desired_score: 79, weight_rate: 25 },
+        ],
+      },
+      {
+        request_status: REQUEST_STATUS.MATCHED,
+        objective_category: 3,
+        budget_min: 2400,
+        budget_max: 4600,
+        delivery_method: 1,
+        duration_max: 130,
+        preferences: [
+          { index_key: 'STRATEGY', desired_score: 82, weight_rate: 34 },
+          { index_key: 'MASTERY', desired_score: 75, weight_rate: 22 },
         ],
       },
     ],
@@ -1081,6 +1113,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.MATCHED,
         objective_category: 3,
         budget_min: 2200,
         budget_max: 5400,
@@ -1112,6 +1145,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.CLOSED,
         objective_category: 1,
         budget_min: 3200,
         budget_max: 7000,
@@ -1120,6 +1154,18 @@ const baseMockUsers: MockUserSeed[] = [
         preferences: [
           { index_key: 'LEADERSHIP', desired_score: 81, weight_rate: 30 },
           { index_key: 'COLLABORATION', desired_score: 89, weight_rate: 35 },
+        ],
+      },
+      {
+        request_status: REQUEST_STATUS.IN_REVIEW,
+        objective_category: 2,
+        budget_min: 2600,
+        budget_max: 5200,
+        delivery_method: 2,
+        duration_max: 160,
+        preferences: [
+          { index_key: 'LEADERSHIP', desired_score: 74, weight_rate: 22 },
+          { index_key: 'COLLABORATION', desired_score: 86, weight_rate: 30 },
         ],
       },
     ],
@@ -1155,6 +1201,7 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
+        request_status: REQUEST_STATUS.OPEN,
         objective_category: 4,
         budget_min: 1200,
         budget_max: 2600,
@@ -1163,6 +1210,18 @@ const baseMockUsers: MockUserSeed[] = [
         preferences: [
           { index_key: 'EXPLORATION', desired_score: 83, weight_rate: 32 },
           { index_key: 'CREATIVITY', desired_score: 80, weight_rate: 28 },
+        ],
+      },
+      {
+        request_status: REQUEST_STATUS.CLOSED,
+        objective_category: 1,
+        budget_min: 1800,
+        budget_max: 3200,
+        delivery_method: 2,
+        duration_max: 75,
+        preferences: [
+          { index_key: 'EXPLORATION', desired_score: 79, weight_rate: 28 },
+          { index_key: 'CREATIVITY', desired_score: 84, weight_rate: 31 },
         ],
       },
     ],
@@ -1584,6 +1643,7 @@ async function main() {
       const createdRequest = await prisma.request.create({
         data: {
           user_id: createdUser.id,
+          request_status: requestSeed.request_status ?? REQUEST_STATUS.OPEN,
           objective_category: requestSeed.objective_category ?? null,
           budget_min: requestSeed.budget_min ?? null,
           budget_max: requestSeed.budget_max ?? null,

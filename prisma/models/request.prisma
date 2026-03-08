@@ -1,6 +1,7 @@
 model Request {
   id                  Int                 @id @default(autoincrement())
   user_id             Int
+  request_status      String              @default("open") @db.VarChar(20)
   objective_category  Int?
   budget_min          Int?
   budget_max          Int?

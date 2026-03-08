@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'user.updated': {
+      case 'user.updated':
+      case 'user.created': {
         const {
           id,
           email_addresses,

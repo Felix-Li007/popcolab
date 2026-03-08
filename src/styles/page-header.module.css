@@ -10,7 +10,6 @@
 }
 
 .headerWrapper {
-  max-width: 1200px;
   margin: auto;
   padding: 0.75rem 1rem;
   display: flex;
@@ -23,6 +22,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  @apply text-heading font-bold;
 }
 
 .logo img {
@@ -33,11 +33,29 @@
 .navDesktop {
   display: flex;
   gap: 1.5rem;
+  justify-content: flex-start;
+  margin-right: auto;
+  margin-left: 2rem;
 }
 
 .navLink {
   text-decoration: none;
   color: white;
+  position: relative;
+  padding-bottom: 0.2rem;
+  transition: color 160ms ease;
+  @apply hover:text-pink-medium;
+}
+
+.navLinkActive::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.15rem;
+  height: 2px;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-magenta) 100%, transparent);
 }
 
 .authButtons {

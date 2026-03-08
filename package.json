@@ -25,6 +25,9 @@
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",
     "@clerk/ui": "^1.0.1",
+    "@nivo/bar": "^0.99.0",
+    "@nivo/line": "^0.99.0",
+    "@nivo/pie": "^0.99.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.4.2",
     "dotenv": "^17.2.4",

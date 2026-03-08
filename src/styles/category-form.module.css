@@ -1,29 +1,43 @@
 @reference "../app/globals.css";
 
-.backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 9998;
-  background: color-mix(in srgb, var(--color-foreground) 45%, transparent);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+.panel {
+  max-width: 34rem;
 }
 
-.card {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 9999;
-  width: min(34rem, calc(100vw - 2rem));
-  max-height: 90vh;
-  margin: 0;
+.body {
   padding: 0;
-  box-sizing: border-box;
-  @apply bg-background;
-  border-radius: 1.5rem;
-  box-shadow: 0 24px 64px -8px color-mix(in srgb, black 18%, transparent);
-  display: flex;
-  flex-direction: column;
+  max-height: none;
   overflow: hidden;
+}
+
+.form {
+  @apply flex h-full flex-col;
+}
+
+.content {
+  @apply flex-1 overflow-y-auto px-6 py-5 space-y-4;
+}
+
+.formError {
+  @apply rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-body text-red-700;
+}
+
+.usageBox {
+  @apply rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5;
+}
+
+.usageLabel {
+  @apply text-badge font-bold uppercase tracking-wide text-foreground/45;
+}
+
+.usageValue {
+  @apply mt-0.5 text-heading font-semibold text-foreground/80;
+}
+
+.usageHint {
+  @apply mt-1 text-caption text-amber-600;
+}
+
+.footer {
+  @apply shrink-0 border-t border-gray-100 bg-white px-6 py-4 flex items-center justify-end gap-3;
 }

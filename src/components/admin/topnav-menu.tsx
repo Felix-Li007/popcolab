@@ -93,7 +93,7 @@ export default function TopnavMenu({
               <a
                 key={t.label}
                 href={t.href}
-                className="text-white/70 hover:text-white transition-colors whitespace-nowrap"
+                className="text-white hover:text-pink-medium transition-colors whitespace-nowrap"
               >
                 {t.label}
               </a>

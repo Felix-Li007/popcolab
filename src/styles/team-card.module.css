@@ -89,12 +89,25 @@
 }
 
 .memberCountButton {
-  @apply text-[11px] font-bold;
+  @apply text-sm font-bold;
   color: var(--color-teal-deep);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--color-teal-deep) 55%,
+    transparent
+  );
 }
 
 .memberCountButton:hover {
   color: var(--color-magenta);
+  text-decoration-color: color-mix(
+    in srgb,
+    var(--color-magenta) 60%,
+    transparent
+  );
 }
 
 .memberAvatars {

@@ -190,7 +190,7 @@ export default function IntakeContent({
                 size="sm"
                 icon={<span>+</span>}
               >
-                Add
+                New
               </Button>
             }
           />

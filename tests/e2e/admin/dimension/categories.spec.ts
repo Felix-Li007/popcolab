@@ -35,10 +35,14 @@ test.describe('Dimension categories page', () => {
 
   test('"New" opens create modal', async ({ page }) => {
     await page.getByRole('button', { name: /new/i }).click();
+    const createModal = page.getByTestId('category-form-modal');
+    await expect(createModal).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /new category/i })
     ).toBeVisible();
-    await expect(page.locator('input[name="name"]')).toBeVisible();
+    await expect(createModal.locator('input[name="name"]')).toBeVisible();
+    await createModal.getByRole('button', { name: /^Cancel$/i }).click();
+    await expect(page.getByTestId('category-form-modal')).toHaveCount(0);
   });
 
   test('clicking a card opens edit modal', async ({ page }) => {
@@ -49,10 +53,14 @@ test.describe('Dimension categories page', () => {
     }
 
     await cards.first().click();
+    const editModal = page.getByTestId('category-form-modal');
+    await expect(editModal).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /edit category/i })
     ).toBeVisible();
-    await expect(page.getByText(/^#\d+$/).first()).toBeVisible();
+    await expect(editModal.getByText(/^#\d+$/)).toBeVisible();
+    await editModal.getByRole('button', { name: /^Cancel$/i }).click();
+    await expect(page.getByTestId('category-form-modal')).toHaveCount(0);
   });
 
   test('delete action opens browser dialog', async ({ page }) => {
@@ -155,12 +163,8 @@ test.describe('Dimension categories page', () => {
     await expect(
       page.getByRole('heading', { name: /edit category/i })
     ).toBeVisible();
-    const editForm = page
-      .locator('form')
-      .filter({
-        has: page.getByRole('heading', { name: /edit category/i }),
-      })
-      .first();
-    await expect(editForm.getByText(new RegExp(`^#${id}$`))).toBeVisible();
+    const editModal = page.getByTestId('category-form-modal');
+    await expect(editModal).toBeVisible();
+    await expect(editModal.getByText(new RegExp(`^#${id}$`))).toBeVisible();
   });
 });
