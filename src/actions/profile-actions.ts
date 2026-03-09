@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getCurrentAuthContext } from '@/services/clerk-service';
+import { upsertClerkUser } from '@/services/user-service';
 import { prisma } from '@/libs/prisma-client';
 
 export type UserProfileData = {
@@ -30,8 +31,16 @@ export async function getProfileAction(): Promise<UserProfileData | null> {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated || !authContext.user) return null;
 
+  const clerkUser = authContext.user;
+  const primaryEmail =
+    clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)
+      ?.emailAddress ?? '';
+
+  // Ensure a DB user row exists for brand-new sign-ups.
+  await upsertClerkUser(clerkUser.id, primaryEmail);
+
   const user = await prisma.user.findUnique({
-    where: { clerk_id: authContext.user.id },
+    where: { clerk_id: clerkUser.id },
     select: {
       email: true,
       user_name: true,
@@ -51,8 +60,8 @@ export async function getProfileAction(): Promise<UserProfileData | null> {
   return {
     email: user.email,
     userName: user.user_name ?? user.email.split('@')[0] ?? 'user',
-    firstName: user.profile?.first_name ?? null,
-    lastName: user.profile?.last_name ?? null,
+    firstName: user.profile?.first_name ?? clerkUser.firstName ?? null,
+    lastName: user.profile?.last_name ?? clerkUser.lastName ?? null,
     phoneNumber: user.profile?.phone_number ?? null,
     preferredContact: user.profile?.preferred_contact ?? null,
   };

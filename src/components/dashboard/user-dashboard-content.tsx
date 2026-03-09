@@ -1,19 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import PersonalityResultCard from '@/components/dashboard/personality-result-card';
 import MyTeamsSection from '@/components/dashboard/my-teams-section';
 import MyRequestsSection from '@/components/dashboard/my-requests-section';
 import UserQuickActions from '@/components/dashboard/user-quick-actions';
-import { savePersonalityKeyAction } from '@/actions/response-actions';
 import type { Personality } from '@/types/personality-type';
 import type {
   UserTeamSummary,
   UserRequestSummary,
 } from '@/services/user-dashboard-service';
-
-const PENDING_KEY = 'pclab_pending_key';
 
 type Props = {
   displayName: string;
@@ -30,23 +25,6 @@ export default function UserDashboardContent({
   teams,
   requests,
 }: Props) {
-  const router = useRouter();
-
-  useEffect(() => {
-    const pendingKey = localStorage.getItem(PENDING_KEY);
-    if (!pendingKey) return;
-
-    localStorage.removeItem(PENDING_KEY);
-
-    // Only save if not already saved
-    if (personality) return;
-
-    savePersonalityKeyAction(pendingKey)
-      .then(() => router.refresh())
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className="flex flex-col">
       <div className="flex flex-1 gap-0">

@@ -24,7 +24,16 @@ export default function PersonalityTest({ questions }: Props) {
   const hasAnswered = answers.has(question.id!);
 
   // multi_choice: allow proceeding with 0 selections
-  const canProceed = question.type === 'multi_choice' ? true : hasAnswered;
+  // text_input: require 1–100 words
+  const canProceed = (() => {
+    if (question.type === 'multi_choice') return true;
+    if (question.type === 'text_input') {
+      const t = answers.get(question.id!)?.textValue ?? '';
+      const wc = t.trim() === '' ? 0 : t.trim().split(/\s+/).length;
+      return wc >= 1 && wc <= 100;
+    }
+    return hasAnswered;
+  })();
 
   function handleAnswer(answer: UserAnswer) {
     setAnswers(prev => new Map(prev).set(answer.questionId, answer));

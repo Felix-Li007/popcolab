@@ -5,6 +5,7 @@ export type UserAnswer = {
   questionType: QuestionType;
   selectedOptionIds: number[]; // for single_choice / multi_choice
   scaleValue: number | null; // for scale
+  textValue?: string; // for text_input (reflection)
 };
 
 export type TestSubmitResult = {

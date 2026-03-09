@@ -86,6 +86,10 @@ export default function PlayPersonalities({
     }
   }
 
+  const experienceHref = isAuthenticated
+    ? '/dashboard/experiences'
+    : `/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`;
+
   return (
     <div className="flex flex-col gap-8" data-testid="results-page">
       {/* Header */}
@@ -273,28 +277,42 @@ export default function PlayPersonalities({
           <h2 className="text-base font-bold text-gray-800">
             Experiences made for you
           </h2>
-          <p className="text-xs text-gray-400">
-            Sign up to unlock curated activities that match your play
-            personality.
-          </p>
+          {isAuthenticated ? (
+            <p className="text-xs text-gray-400">
+              Browse curated activities that match your play personality.
+            </p>
+          ) : (
+            <p className="text-xs text-gray-400">
+              Sign up to unlock curated activities that match your play
+              personality.
+            </p>
+          )}
         </div>
         <div className={cardStyles.cardGrid}>
           {EXPERIENCE_TEASERS.map(({ emoji, title, tag, color }) => (
-            <div
+            <Link
               key={title}
+              href={experienceHref}
               className={`${cardStyles.card} group`}
               data-testid="results-experience-card"
               style={cssVarStyle({ '--glow-color': `${color}40` })}
+              onClick={
+                !isAuthenticated
+                  ? () => localStorage.setItem('pclab_pending_key', primaryKey)
+                  : undefined
+              }
             >
               <div className={cardStyles.orb} />
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200 z-10"
-                style={{ background: 'rgba(9,25,27,0.55)' }}
-              >
-                <span className={styles.experienceLockBadge}>
-                  🔒 Sign up to unlock
-                </span>
-              </div>
+              {!isAuthenticated && (
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200 z-10"
+                  style={{ background: 'rgba(9,25,27,0.55)' }}
+                >
+                  <span className={styles.experienceLockBadge}>
+                    🔒 Sign up to unlock
+                  </span>
+                </div>
+              )}
               <div className="relative z-[1] flex flex-col gap-2 p-4 h-full">
                 <span
                   className="text-xs font-bold tracking-wide rounded-full px-2.5 py-0.5 w-fit"
@@ -307,7 +325,7 @@ export default function PlayPersonalities({
                   {title}
                 </p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

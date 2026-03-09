@@ -1,4 +1,5 @@
 import DashboardShell from '@/components/dashboard/dashboard-shell';
+import PendingResultSaver from '@/components/dashboard/pending-result-saver';
 import { getCompanyAction } from '@/actions/user-actions';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 
@@ -24,6 +25,7 @@ export default async function DashboardLayout({
       userRoleLabel={userRoleLabel}
       initialCompany={companyInfo}
     >
+      <PendingResultSaver />
       {children}
     </DashboardShell>
   );

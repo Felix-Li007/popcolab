@@ -123,25 +123,40 @@ export default function QuestionStep({
   }
 
   // ── Text Input (reflection — not scored) ───────────────────────────────────
+  const text = answer?.textValue ?? '';
+  const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  const isOver = wordCount > 100;
+
   return (
     <div className="flex flex-col gap-4">
       <QuestionHeader question={question} />
       <p className="text-xs text-gray-400 italic">
         This is a reflection question and does not affect your result.
       </p>
-      <button
-        onClick={() =>
+      <textarea
+        value={text}
+        onChange={e =>
           onAnswerAction({
             questionId: qId,
             questionType: 'text_input',
             selectedOptionIds: [],
             scaleValue: null,
+            textValue: e.target.value,
           })
         }
-        className="self-start px-4 py-2 rounded-lg border-2 border-dashed border-gray-300 text-sm text-gray-500 hover:border-gray-400 transition-all"
+        placeholder="Write your reflection here…"
+        rows={5}
+        className={`w-full px-4 py-3 rounded-xl border-2 text-sm text-gray-700 resize-none transition-colors focus:outline-none ${
+          isOver
+            ? 'border-red-400 focus:border-red-400'
+            : 'border-gray-200 focus:border-teal-deep'
+        }`}
+      />
+      <p
+        className={`text-xs text-right ${isOver ? 'text-red-500' : 'text-gray-400'}`}
       >
-        Mark as read &amp; continue
-      </button>
+        {wordCount} / 100 words{isOver ? ' — please shorten your response' : ''}
+      </p>
     </div>
   );
 }
