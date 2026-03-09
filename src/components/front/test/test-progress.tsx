@@ -1,52 +1,35 @@
 'use client';
 
-import type { Question, QuestionType } from '@/types/question-type';
+import type { QuestionType } from '@/types/question-type';
 
 type Props = {
   current: number;
   total: number;
-  questions: Question[];
-};
-
-const TYPE_LABELS: Record<QuestionType, string> = {
-  single_choice: 'Choice',
-  multi_choice: 'Multi-Select',
-  scale: 'Scale',
-  text_input: 'Reflection',
+  currentType: QuestionType;
 };
 
 const MILESTONE_MESSAGES = [
   null,
-  'Great job!',
   'Halfway through!',
   'Almost there!',
   'One more to go!',
 ];
 
-const NODE_COUNT = 5;
+const NODE_LABELS: string[] = ['Choice', 'Multi-Select', 'Scale', 'Reflection'];
 
-// Pick the question at each milestone position and return its readable type label
-function getLabelForNode(nodeIndex: number, questions: Question[]): string {
-  const qIndex = Math.round(
-    (nodeIndex / (NODE_COUNT - 1)) * (questions.length - 1)
-  );
-  const q = questions[Math.min(qIndex, questions.length - 1)];
-  return q ? TYPE_LABELS[q.type] : '';
-}
+const TYPE_TO_NODE: Record<QuestionType, number> = {
+  single_choice: 0,
+  multi_choice: 1,
+  scale: 2,
+  text_input: 3,
+};
 
-export default function TestProgress({ current, total, questions }: Props) {
-  const progress = total <= 1 ? 1 : (current - 1) / (total - 1);
+const NODE_COUNT = 4;
 
-  const activeNodeIndex = Array.from({ length: NODE_COUNT }).reduce<number>(
-    (last: number, _: unknown, i: number) => {
-      const threshold = i / (NODE_COUNT - 1);
-      return progress >= threshold - 0.001 ? i : last;
-    },
-    0
-  );
-
+export default function TestProgress({ current, total, currentType }: Props) {
+  const activeNodeIndex = TYPE_TO_NODE[currentType] ?? 0;
   const currentMessage = MILESTONE_MESSAGES[activeNodeIndex];
-  const lineFill = Math.min(100, (activeNodeIndex / (NODE_COUNT - 1)) * 100);
+  const lineFill = (activeNodeIndex / (NODE_COUNT - 1)) * 100;
 
   return (
     <div className="w-full flex flex-col gap-3">
@@ -122,7 +105,7 @@ export default function TestProgress({ current, total, questions }: Props) {
                   isCurrent ? 'text-teal-deep' : 'text-gray-400'
                 }`}
               >
-                {getLabelForNode(i, questions)}
+                {NODE_LABELS[i]}
               </span>
             </div>
           );

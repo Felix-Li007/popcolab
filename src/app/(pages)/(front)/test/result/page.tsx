@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getPersonalityByKey } from '@/services/response-service';
+import { getCurrentAuthContext } from '@/services/clerk-service';
 import type { Personality } from '@/types/personality-type';
 import PlayPersonalities from '@/components/front/test/play-personalities';
 
@@ -29,22 +30,31 @@ export default async function ResultPage({
 
   if (pairs.length === 0) redirect('/test');
 
-  const matchesData = await Promise.all(
-    pairs.map(async ({ key, matchPercent }) => {
-      const personality = await getPersonalityByKey(key);
-      return personality ? { personality, matchPercent } : null;
-    })
-  );
+  const [matchesData, authContext] = await Promise.all([
+    Promise.all(
+      pairs.map(async ({ key, matchPercent }) => {
+        const personality = await getPersonalityByKey(key);
+        return personality ? { personality, matchPercent } : null;
+      })
+    ),
+    getCurrentAuthContext(),
+  ]);
 
   const matches = matchesData.filter(Boolean) as PersonalityMatch[];
 
   if (matches.length === 0) redirect('/test');
 
+  const primaryKey = matches[0]?.personality.type ?? '';
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-12">
-          <PlayPersonalities matches={matches} />
+          <PlayPersonalities
+            matches={matches}
+            isAuthenticated={authContext.isAuthenticated}
+            primaryKey={primaryKey}
+          />
         </div>
       </main>
     </div>

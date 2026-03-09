@@ -63,11 +63,7 @@ export default function UserAvatar({
                       />
                     </svg>
                   }
-                  onClick={() =>
-                    router.push(
-                      `${process.env.NEXT_PUBLIC_CLERK_ACTION_DASHBOARD_URL}`
-                    )
-                  }
+                  onClick={() => router.push('/dashboard')}
                 />
               </UserButton.MenuItems>
             </UserButton>

@@ -6,10 +6,14 @@ import type { UserAnswer } from '@/types/response-type';
 type Props = {
   question: Question;
   answer: UserAnswer | undefined;
-  onAnswer: (answer: UserAnswer) => void;
+  onAnswerAction: (answer: UserAnswer) => void;
 };
 
-export default function QuestionStep({ question, answer, onAnswer }: Props) {
+export default function QuestionStep({
+  question,
+  answer,
+  onAnswerAction,
+}: Props) {
   const qId = question.id!;
 
   // ── Scale ──────────────────────────────────────────────────────────────────
@@ -22,7 +26,7 @@ export default function QuestionStep({ question, answer, onAnswer }: Props) {
             <button
               key={n}
               onClick={() =>
-                onAnswer({
+                onAnswerAction({
                   questionId: qId,
                   questionType: 'scale',
                   selectedOptionIds: [],
@@ -58,7 +62,7 @@ export default function QuestionStep({ question, answer, onAnswer }: Props) {
             <button
               key={opt.id}
               onClick={() =>
-                onAnswer({
+                onAnswerAction({
                   questionId: qId,
                   questionType: 'single_choice',
                   selectedOptionIds: [opt.id!],
@@ -96,7 +100,7 @@ export default function QuestionStep({ question, answer, onAnswer }: Props) {
                   const next = isSelected
                     ? selectedIds.filter(id => id !== opt.id)
                     : [...selectedIds, opt.id!];
-                  onAnswer({
+                  onAnswerAction({
                     questionId: qId,
                     questionType: 'multi_choice',
                     selectedOptionIds: next,
@@ -127,7 +131,7 @@ export default function QuestionStep({ question, answer, onAnswer }: Props) {
       </p>
       <button
         onClick={() =>
-          onAnswer({
+          onAnswerAction({
             questionId: qId,
             questionType: 'text_input',
             selectedOptionIds: [],

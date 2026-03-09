@@ -72,7 +72,11 @@ async function matchPersonality(
 export async function submitResponse(
   userId: number,
   answers: UserAnswer[]
-): Promise<{ personalityKey: string; personality: Personality | null }> {
+): Promise<{
+  personalityKey: string;
+  personality: Personality | null;
+  totalScore: number;
+}> {
   // 1. Compute scores
   const scored = await Promise.all(
     answers.map(async a => ({
@@ -166,7 +170,7 @@ export async function submitResponse(
     });
   });
 
-  return { personalityKey, personality };
+  return { personalityKey, personality, totalScore: Math.round(totalScore) };
 }
 
 // ─── Result Fetch ─────────────────────────────────────────────────────────────

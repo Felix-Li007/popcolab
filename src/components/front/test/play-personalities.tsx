@@ -15,6 +15,8 @@ type PersonalityMatch = {
 
 type Props = {
   matches: PersonalityMatch[];
+  isAuthenticated: boolean;
+  primaryKey: string;
 };
 
 const BENEFITS = [
@@ -56,11 +58,17 @@ const EXPERIENCE_TEASERS = [
   },
 ];
 
-export default function PlayPersonalities({ matches }: Props) {
+export default function PlayPersonalities({
+  matches,
+  isAuthenticated,
+  primaryKey,
+}: Props) {
   const [copied, setCopied] = useState(false);
 
   const primary = matches[0];
   const others = matches.slice(1);
+
+  const saveRedirectUrl = `/test/save?key=${encodeURIComponent(primaryKey)}`;
 
   async function handleShare() {
     const top = matches[0];
@@ -104,7 +112,6 @@ export default function PlayPersonalities({ matches }: Props) {
               '--card-accent': primary.personality.accentColor ?? '#0d9488',
             })}
           >
-            {/* Colored header */}
             <div
               className={styles.cardHeader}
               style={{
@@ -115,7 +122,6 @@ export default function PlayPersonalities({ matches }: Props) {
               <span className={styles.emoji}>{primary.personality.emoji}</span>
             </div>
 
-            {/* White content */}
             <div className="bg-white p-5 flex flex-col gap-3">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="text-lg font-bold text-gray-800 leading-tight">
@@ -133,7 +139,6 @@ export default function PlayPersonalities({ matches }: Props) {
                   <p className="text-xs text-gray-400 mt-0.5">match</p>
                 </div>
               </div>
-
               <p className="text-sm text-gray-500 leading-relaxed">
                 {primary.personality.description}
               </p>
@@ -213,6 +218,52 @@ export default function PlayPersonalities({ matches }: Props) {
         ))}
       </div>
 
+      {/* Team banner — moved above curated experiences */}
+      <div
+        className="relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4"
+        data-testid="results-team-banner"
+        style={{
+          background:
+            'linear-gradient(to bottom right, var(--color-teal-deep), var(--color-teal-medium))',
+        }}
+      >
+        <div className={ctaStyles.pinkCircle} />
+        <div className={ctaStyles.lightCircle} />
+        <div className="relative z-10 flex flex-col gap-3">
+          <div className="flex gap-2 flex-wrap">
+            {matches.slice(0, 4).map(({ personality }) => (
+              <div key={personality.type} className={styles.teamEmojiChip}>
+                {personality.emoji}
+              </div>
+            ))}
+            <div className={styles.teamEmojiChip}>➕</div>
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white leading-tight">
+              Build your dream team
+            </h2>
+            <p
+              className="text-sm mt-1"
+              style={{ color: 'rgba(255,255,255,0.8)' }}
+            >
+              Map every team member&apos;s play personality and unlock curated
+              group experiences together.
+            </p>
+          </div>
+          {!isAuthenticated && (
+            <Link
+              href={`/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`}
+              className="self-start mt-1 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 px-4 py-2 text-xs font-semibold text-white transition-colors"
+              onClick={() =>
+                localStorage.setItem('pclab_pending_key', primaryKey)
+              }
+            >
+              Get started →
+            </Link>
+          )}
+        </div>
+      </div>
+
       {/* Experience teasers */}
       <div
         className="flex flex-col gap-3"
@@ -236,7 +287,6 @@ export default function PlayPersonalities({ matches }: Props) {
               style={cssVarStyle({ '--glow-color': `${color}40` })}
             >
               <div className={cardStyles.orb} />
-              {/* Lock overlay — fades in on hover */}
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200 z-10"
                 style={{ background: 'rgba(9,25,27,0.55)' }}
@@ -245,7 +295,6 @@ export default function PlayPersonalities({ matches }: Props) {
                   🔒 Sign up to unlock
                 </span>
               </div>
-              {/* Card content */}
               <div className="relative z-[1] flex flex-col gap-2 p-4 h-full">
                 <span
                   className="text-xs font-bold tracking-wide rounded-full px-2.5 py-0.5 w-fit"
@@ -263,68 +312,63 @@ export default function PlayPersonalities({ matches }: Props) {
         </div>
       </div>
 
-      {/* Team banner */}
-      <div
-        className="relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4"
-        data-testid="results-team-banner"
-        style={{
-          background:
-            'linear-gradient(to bottom right, var(--color-teal-deep), var(--color-teal-medium))',
-        }}
-      >
-        <div className={ctaStyles.pinkCircle} />
-        <div className={ctaStyles.lightCircle} />
-        <div className="relative z-10 flex flex-col gap-3">
-          {/* Emoji chips — one per top match */}
-          <div className="flex gap-2 flex-wrap">
-            {matches.slice(0, 4).map(({ personality }) => (
-              <div key={personality.type} className={styles.teamEmojiChip}>
-                {personality.emoji}
-              </div>
-            ))}
-            <div className={styles.teamEmojiChip}>➕</div>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-white leading-tight">
-              Build your dream team
-            </h2>
-            <p
-              className="text-sm mt-1"
-              style={{ color: 'rgba(255,255,255,0.8)' }}
-            >
-              Map every team member&apos;s play personality and unlock curated
-              group experiences together.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Improved CTA */}
+      {/* CTA — changes based on auth state */}
       <div
         className="flex flex-col gap-4 items-center text-center"
         data-testid="results-cta"
       >
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-gray-800">
-            Ready to unlock everything?
-          </h2>
-          <p className="text-sm text-gray-500 max-w-xs mx-auto">
-            Create a free account to save your profile, unlock experiences, and
-            explore your team dynamics.
-          </p>
-        </div>
-        <Link
-          href="/sign-up"
-          className={`${ctaStyles.primaryButton} block w-full text-center`}
-        >
-          Create free account — it&apos;s free
-        </Link>
-        <p className="text-xs text-gray-400">
-          Already have an account?{' '}
-          <Link href="/sign-in" className="underline hover:opacity-75">
-            Sign in
-          </Link>
-        </p>
+        {isAuthenticated ? (
+          <>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold text-gray-800">
+                Your result has been saved!
+              </h2>
+              <p className="text-sm text-gray-500 max-w-xs mx-auto">
+                Head to your dashboard to see your personality, teams, and
+                experience requests.
+              </p>
+            </div>
+            <Link
+              href="/dashboard"
+              className={`${ctaStyles.primaryButton} block w-full text-center`}
+            >
+              Go to my dashboard
+            </Link>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold text-gray-800">
+                Ready to unlock everything?
+              </h2>
+              <p className="text-sm text-gray-500 max-w-xs mx-auto">
+                Create a free account to save your profile, unlock experiences,
+                and explore your team dynamics.
+              </p>
+            </div>
+            <Link
+              href={`/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`}
+              className={`${ctaStyles.primaryButton} block w-full text-center`}
+              onClick={() =>
+                localStorage.setItem('pclab_pending_key', primaryKey)
+              }
+            >
+              Create free account — it&apos;s free
+            </Link>
+            <p className="text-xs text-gray-400">
+              Already have an account?{' '}
+              <Link
+                href={`/sign-in?redirect_url=${encodeURIComponent(saveRedirectUrl)}`}
+                className="underline hover:opacity-75"
+                onClick={() =>
+                  localStorage.setItem('pclab_pending_key', primaryKey)
+                }
+              >
+                Sign in
+              </Link>
+            </p>
+          </>
+        )}
       </div>
 
       <Link

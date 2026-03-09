@@ -62,13 +62,13 @@ export default function PersonalityTest({ questions }: Props) {
       <TestProgress
         current={currentIndex + 1}
         total={questions.length}
-        questions={questions}
+        currentType={question.type}
       />
 
       <QuestionStep
         question={question}
         answer={answers.get(question.id!)}
-        onAnswer={handleAnswer}
+        onAnswerAction={handleAnswer}
       />
 
       {error && (
