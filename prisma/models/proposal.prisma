@@ -1,7 +1,14 @@
+enum ProposalStatus {
+  pending
+  accepted
+  rejected
+}
+
 model Proposal {
   id                  Int        @id @default(autoincrement())
   request_id          Int
   experience_id       Int
+  proposal_status     ProposalStatus @default(pending)
   objective_alignment String     @db.VarChar(255)
   base_score          Decimal    @db.Decimal(19, 0)
   risk_adjustment     Decimal    @db.Decimal(19, 0)

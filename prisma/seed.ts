@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { REQUEST_STATUS, type RequestStatus } from '@/constants/request-status';
-import { PrismaClient } from '@/libs/prisma/client';
+import { InviteStatus, PrismaClient } from '@/libs/prisma/client';
 
 const connectionString = process.env.DATABASE_URL!;
 const adapter = new PrismaPg({ connectionString });
@@ -771,15 +771,41 @@ type MockRequestPreferenceSeed = {
   weight_rate: number;
 };
 
+type MockInvitedUserSeed = {
+  email: string;
+  invite_status?: keyof typeof InviteStatus;
+  confirm_at?: Date | string | null;
+};
+
 type MockRequestSeed = {
   request_status?: RequestStatus;
-  objective_category?: number | null;
+  objective_category?: string | number | null;
+  invite_code?: string | null;
   budget_min?: number | null;
   budget_max?: number | null;
-  delivery_method?: number | null;
+  delivery_method?: string | number | null;
   duration_max?: number | null;
+  expired_at?: Date | string | null;
+  invited_users?: MockInvitedUserSeed[];
   preferences?: MockRequestPreferenceSeed[];
 };
+
+let requestInviteCodeCounter = 0;
+
+function toRequestTextValue(value: string | number | null | undefined): string {
+  if (value === null || value === undefined) return 'unspecified';
+  return String(value).slice(0, 20);
+}
+
+function createRequestInviteCode(): string {
+  requestInviteCodeCounter += 1;
+  return requestInviteCodeCounter.toString(36).toUpperCase().padStart(6, '0');
+}
+
+function toRequestExpiry(value: Date | string | null | undefined): Date | null {
+  if (!value) return null;
+  return value instanceof Date ? value : new Date(value);
+}
 
 type MockProfileSeed = {
   first_name?: string | null;
@@ -880,12 +906,20 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
-        request_status: REQUEST_STATUS.OPEN,
-        objective_category: 1,
+        request_status: REQUEST_STATUS.OPENED,
+        objective_category: 'team_building',
         budget_min: 3000,
         budget_max: 6000,
-        delivery_method: 1,
+        delivery_method: 'in_person',
         duration_max: 180,
+        expired_at: '2026-03-18T18:00:00.000Z',
+        invited_users: [
+          { email: 'logan.chen@northstar.io', invite_status: 'accepted' },
+          {
+            email: 'mia.garcia@lumen.co',
+            invite_status: 'pending',
+          },
+        ],
         preferences: [
           { index_key: 'COLLABORATION', desired_score: 80, weight_rate: 35 },
           { index_key: 'CREATIVITY', desired_score: 75, weight_rate: 30 },
@@ -893,12 +927,25 @@ const baseMockUsers: MockUserSeed[] = [
         ],
       },
       {
-        request_status: REQUEST_STATUS.IN_REVIEW,
-        objective_category: 2,
+        request_status: REQUEST_STATUS.PENDING,
+        objective_category: 'leadership',
         budget_min: 2000,
         budget_max: 4500,
-        delivery_method: 2,
+        delivery_method: 'virtual',
         duration_max: 120,
+        expired_at: '2026-03-14T15:00:00.000Z',
+        invited_users: [
+          {
+            email: 'sophia.reed@helix.ai',
+            invite_status: 'accepted',
+            confirm_at: '2026-03-09T10:00:00.000Z',
+          },
+          {
+            email: 'liam.brown@verve.studio',
+            invite_status: 'accepted',
+            confirm_at: '2026-03-09T12:30:00.000Z',
+          },
+        ],
         preferences: [
           { index_key: 'HUMOR', desired_score: 85, weight_rate: 40 },
           { index_key: 'SPOTLIGHT', desired_score: 65, weight_rate: 25 },
@@ -926,11 +973,16 @@ const baseMockUsers: MockUserSeed[] = [
     requests: [
       {
         request_status: REQUEST_STATUS.MATCHED,
-        objective_category: 3,
+        objective_category: 'innovation',
         budget_min: 5000,
         budget_max: 9000,
-        delivery_method: 1,
+        delivery_method: 'hybrid',
         duration_max: 240,
+        expired_at: '2026-03-20T20:00:00.000Z',
+        invited_users: [
+          { email: 'ava.hughes@northstar.io', invite_status: 'accepted' },
+          { email: 'emma.davis@orbit.one', invite_status: 'accepted' },
+        ],
         preferences: [
           { index_key: 'STRATEGY', desired_score: 90, weight_rate: 45 },
           { index_key: 'COMPETITION', desired_score: 78, weight_rate: 25 },
@@ -958,23 +1010,33 @@ const baseMockUsers: MockUserSeed[] = [
     requests: [
       {
         request_status: REQUEST_STATUS.CLOSED,
-        objective_category: 1,
+        objective_category: 'team_building',
         budget_min: 2500,
         budget_max: 5000,
-        delivery_method: 2,
+        delivery_method: 'virtual',
         duration_max: 150,
+        expired_at: '2026-03-07T16:00:00.000Z',
+        invited_users: [
+          { email: 'ethan.park@lumen.co', invite_status: 'rejected' },
+          { email: 'noah.wright@helix.ai', invite_status: 'accepted' },
+        ],
         preferences: [
           { index_key: 'CREATIVITY', desired_score: 92, weight_rate: 50 },
           { index_key: 'EXPLORATION', desired_score: 76, weight_rate: 20 },
         ],
       },
       {
-        request_status: REQUEST_STATUS.OPEN,
-        objective_category: 3,
+        request_status: REQUEST_STATUS.OPENED,
+        objective_category: 'innovation',
         budget_min: 4200,
         budget_max: 7800,
-        delivery_method: 1,
+        delivery_method: 'in_person',
         duration_max: 180,
+        expired_at: '2026-03-22T19:00:00.000Z',
+        invited_users: [
+          { email: 'olivia.kim@verve.studio', invite_status: 'pending' },
+          { email: 'harper.nguyen@aurora.dev', invite_status: 'pending' },
+        ],
         preferences: [
           { index_key: 'CREATIVITY', desired_score: 88, weight_rate: 36 },
           { index_key: 'COLLABORATION', desired_score: 77, weight_rate: 24 },
@@ -1019,12 +1081,17 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
-        request_status: REQUEST_STATUS.IN_REVIEW,
-        objective_category: 4,
+        request_status: REQUEST_STATUS.PENDING,
+        objective_category: 'wellness',
         budget_min: 1500,
         budget_max: 3500,
-        delivery_method: 1,
+        delivery_method: 'in_person',
         duration_max: 90,
+        expired_at: '2026-03-13T13:00:00.000Z',
+        invited_users: [
+          { email: 'ava.hughes@northstar.io', invite_status: 'accepted' },
+          { email: 'mason.lee@orbit.one', invite_status: 'accepted' },
+        ],
         preferences: [
           { index_key: 'KINESIS', desired_score: 82, weight_rate: 35 },
           { index_key: 'COLLABORATION', desired_score: 88, weight_rate: 30 },
@@ -1051,12 +1118,17 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
-        request_status: REQUEST_STATUS.OPEN,
-        objective_category: 2,
+        request_status: REQUEST_STATUS.OPENED,
+        objective_category: 'leadership',
         budget_min: 1800,
         budget_max: 4200,
-        delivery_method: 2,
+        delivery_method: 'virtual',
         duration_max: 110,
+        expired_at: '2026-03-16T17:00:00.000Z',
+        invited_users: [
+          { email: 'sophia.reed@helix.ai', invite_status: 'pending' },
+          { email: 'jack.wilson@example.com', invite_status: 'pending' },
+        ],
         preferences: [
           { index_key: 'MASTERY', desired_score: 84, weight_rate: 35 },
           { index_key: 'STRATEGY', desired_score: 79, weight_rate: 25 },
@@ -1064,11 +1136,16 @@ const baseMockUsers: MockUserSeed[] = [
       },
       {
         request_status: REQUEST_STATUS.MATCHED,
-        objective_category: 3,
+        objective_category: 'innovation',
         budget_min: 2400,
         budget_max: 4600,
-        delivery_method: 1,
+        delivery_method: 'hybrid',
         duration_max: 130,
+        expired_at: '2026-03-11T11:00:00.000Z',
+        invited_users: [
+          { email: 'mia.garcia@lumen.co', invite_status: 'accepted' },
+          { email: 'liam.brown@verve.studio', invite_status: 'accepted' },
+        ],
         preferences: [
           { index_key: 'STRATEGY', desired_score: 82, weight_rate: 34 },
           { index_key: 'MASTERY', desired_score: 75, weight_rate: 22 },
@@ -1114,11 +1191,16 @@ const baseMockUsers: MockUserSeed[] = [
     requests: [
       {
         request_status: REQUEST_STATUS.MATCHED,
-        objective_category: 3,
+        objective_category: 'innovation',
         budget_min: 2200,
         budget_max: 5400,
-        delivery_method: 1,
+        delivery_method: 'in_person',
         duration_max: 140,
+        expired_at: '2026-03-10T18:00:00.000Z',
+        invited_users: [
+          { email: 'olivia.kim@verve.studio', invite_status: 'accepted' },
+          { email: 'emma.davis@orbit.one', invite_status: 'accepted' },
+        ],
         preferences: [
           { index_key: 'COMPETITION', desired_score: 86, weight_rate: 35 },
           { index_key: 'HUMOR', desired_score: 74, weight_rate: 20 },
@@ -1146,23 +1228,41 @@ const baseMockUsers: MockUserSeed[] = [
     requests: [
       {
         request_status: REQUEST_STATUS.CLOSED,
-        objective_category: 1,
+        objective_category: 'team_building',
         budget_min: 3200,
         budget_max: 7000,
-        delivery_method: 1,
+        delivery_method: 'in_person',
         duration_max: 200,
+        expired_at: '2026-03-06T16:30:00.000Z',
+        invited_users: [
+          { email: 'harper.nguyen@aurora.dev', invite_status: 'accepted' },
+          { email: 'jack.wilson@example.com', invite_status: 'rejected' },
+        ],
         preferences: [
           { index_key: 'LEADERSHIP', desired_score: 81, weight_rate: 30 },
           { index_key: 'COLLABORATION', desired_score: 89, weight_rate: 35 },
         ],
       },
       {
-        request_status: REQUEST_STATUS.IN_REVIEW,
-        objective_category: 2,
+        request_status: REQUEST_STATUS.PENDING,
+        objective_category: 'leadership',
         budget_min: 2600,
         budget_max: 5200,
-        delivery_method: 2,
+        delivery_method: 'virtual',
         duration_max: 160,
+        expired_at: '2026-03-15T14:00:00.000Z',
+        invited_users: [
+          {
+            email: 'ava.hughes@northstar.io',
+            invite_status: 'accepted',
+            confirm_at: '2026-03-09T09:30:00.000Z',
+          },
+          {
+            email: 'logan.chen@northstar.io',
+            invite_status: 'accepted',
+            confirm_at: '2026-03-09T11:00:00.000Z',
+          },
+        ],
         preferences: [
           { index_key: 'LEADERSHIP', desired_score: 74, weight_rate: 22 },
           { index_key: 'COLLABORATION', desired_score: 86, weight_rate: 30 },
@@ -1201,12 +1301,17 @@ const baseMockUsers: MockUserSeed[] = [
     },
     requests: [
       {
-        request_status: REQUEST_STATUS.OPEN,
-        objective_category: 4,
+        request_status: REQUEST_STATUS.OPENED,
+        objective_category: 'wellness',
         budget_min: 1200,
         budget_max: 2600,
-        delivery_method: 2,
+        delivery_method: 'virtual',
         duration_max: 80,
+        expired_at: '2026-03-19T12:00:00.000Z',
+        invited_users: [
+          { email: 'emma.davis@orbit.one', invite_status: 'pending' },
+          { email: 'mason.lee@orbit.one', invite_status: 'pending' },
+        ],
         preferences: [
           { index_key: 'EXPLORATION', desired_score: 83, weight_rate: 32 },
           { index_key: 'CREATIVITY', desired_score: 80, weight_rate: 28 },
@@ -1214,11 +1319,16 @@ const baseMockUsers: MockUserSeed[] = [
       },
       {
         request_status: REQUEST_STATUS.CLOSED,
-        objective_category: 1,
+        objective_category: 'team_building',
         budget_min: 1800,
         budget_max: 3200,
-        delivery_method: 2,
+        delivery_method: 'virtual',
         duration_max: 75,
+        expired_at: '2026-03-05T12:00:00.000Z',
+        invited_users: [
+          { email: 'sophia.reed@helix.ai', invite_status: 'accepted' },
+          { email: 'noah.wright@helix.ai', invite_status: 'rejected' },
+        ],
         preferences: [
           { index_key: 'EXPLORATION', desired_score: 79, weight_rate: 28 },
           { index_key: 'CREATIVITY', desired_score: 84, weight_rate: 31 },
@@ -1575,6 +1685,7 @@ async function main() {
   await prisma.userVector.deleteMany({});
   await prisma.requestPreference.deleteMany({});
   await prisma.proposal.deleteMany({});
+  await prisma.invitedUser.deleteMany({});
   await prisma.request.deleteMany({});
   await prisma.teamAggregate.deleteMany({});
   await prisma.teamVector.deleteMany({});
@@ -1586,6 +1697,10 @@ async function main() {
   console.log('🗑️  Cleared existing users and related data');
 
   const userIdByEmail = new Map<string, number>();
+  const pendingRequestSeeds: Array<{
+    ownerId: number;
+    requestSeed: MockRequestSeed;
+  }> = [];
 
   for (const seedUser of mockUsers) {
     const userName = deriveUserName(seedUser);
@@ -1640,36 +1755,67 @@ async function main() {
     }
 
     for (const requestSeed of seedUser.requests ?? []) {
-      const createdRequest = await prisma.request.create({
+      pendingRequestSeeds.push({
+        ownerId: createdUser.id,
+        requestSeed,
+      });
+    }
+  }
+
+  for (const { ownerId, requestSeed } of pendingRequestSeeds) {
+    const createdRequest = await prisma.request.create({
+      data: {
+        user_id: ownerId,
+        objective_category: toRequestTextValue(requestSeed.objective_category),
+        invite_code: (requestSeed.invite_code ?? createRequestInviteCode())
+          .toUpperCase()
+          .slice(0, 6),
+        request_status: requestSeed.request_status ?? REQUEST_STATUS.OPENED,
+        budget_min: requestSeed.budget_min ?? null,
+        budget_max: requestSeed.budget_max ?? null,
+        delivery_method: toRequestTextValue(requestSeed.delivery_method),
+        duration_max: requestSeed.duration_max ?? null,
+        expired_at: toRequestExpiry(requestSeed.expired_at),
+      },
+    });
+
+    for (const invitedUserSeed of requestSeed.invited_users ?? []) {
+      const invitedUserId = userIdByEmail.get(invitedUserSeed.email);
+      if (!invitedUserId) {
+        console.warn(
+          `⚠️  No user ${invitedUserSeed.email} found for invited user on request ${createdRequest.id}`
+        );
+        continue;
+      }
+
+      await prisma.invitedUser.create({
         data: {
-          user_id: createdUser.id,
-          request_status: requestSeed.request_status ?? REQUEST_STATUS.OPEN,
-          objective_category: requestSeed.objective_category ?? null,
-          budget_min: requestSeed.budget_min ?? null,
-          budget_max: requestSeed.budget_max ?? null,
-          delivery_method: requestSeed.delivery_method ?? null,
-          duration_max: requestSeed.duration_max ?? null,
+          request_id: createdRequest.id,
+          user_id: invitedUserId,
+          invite_status:
+            InviteStatus[invitedUserSeed.invite_status ?? 'pending'],
+          confirm_at: toRequestExpiry(invitedUserSeed.confirm_at),
         },
       });
+    }
 
-      for (const preferenceSeed of requestSeed.preferences ?? []) {
-        const dimensionId = indexKeyMap.get(preferenceSeed.index_key);
-        if (!dimensionId) {
-          console.warn(
-            `⚠️  No dimension with key ${preferenceSeed.index_key} for request preference`
-          );
-          continue;
-        }
-
-        await prisma.requestPreference.create({
-          data: {
-            request_id: createdRequest.id,
-            dimension_id: dimensionId,
-            desired_score: preferenceSeed.desired_score,
-            weight_rate: preferenceSeed.weight_rate,
-          },
-        });
+    for (const preferenceSeed of requestSeed.preferences ?? []) {
+      const dimensionId = indexKeyMap.get(preferenceSeed.index_key);
+      if (!dimensionId) {
+        console.warn(
+          `⚠️  No dimension with key ${preferenceSeed.index_key} for request preference`
+        );
+        continue;
       }
+
+      await prisma.requestPreference.create({
+        data: {
+          request_id: createdRequest.id,
+          dimension_id: dimensionId,
+          desired_score: preferenceSeed.desired_score,
+          weight_rate: preferenceSeed.weight_rate,
+        },
+      });
     }
   }
 

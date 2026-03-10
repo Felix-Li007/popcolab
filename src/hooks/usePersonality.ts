@@ -2,23 +2,28 @@
 
 import { useState, useTransition } from 'react';
 import type {
+  DeletePersonalityActionFn,
   Personality,
-  PersonalityFormState,
+  PersonalityActionHandlers,
+  PersonalityFormAction,
 } from '@/types/personality-type';
-import {
-  createPersonalityAction,
-  updatePersonalityAction,
-  deletePersonalityAction,
-} from '@/actions/personality-actions';
-
-type FormAction = (
-  prevState: PersonalityFormState,
-  formData: FormData
-) => Promise<PersonalityFormState>;
 
 export type ModalState = { open: boolean; id?: number };
 
-export function usePersonality(personalities: Personality[]) {
+type UsePersonalityActions = {
+  createPersonalityAction: PersonalityActionHandlers['createPersonalityAction'];
+  updatePersonalityAction: PersonalityActionHandlers['updatePersonalityAction'];
+  deletePersonalityAction: DeletePersonalityActionFn;
+};
+
+export function usePersonality(
+  personalities: Personality[],
+  {
+    createPersonalityAction,
+    updatePersonalityAction,
+    deletePersonalityAction,
+  }: UsePersonalityActions
+) {
   const [, startDeleteTransition] = useTransition();
   const [formModal, setFormModal] = useState<ModalState>({ open: false });
   const [viewModal, setViewModal] = useState<ModalState>({ open: false });
@@ -62,7 +67,7 @@ export function usePersonality(personalities: Personality[]) {
     });
   }
 
-  const formAction: FormAction =
+  const formAction: PersonalityFormAction =
     formModal.id !== undefined
       ? updatePersonalityAction.bind(null, formModal.id)
       : createPersonalityAction;

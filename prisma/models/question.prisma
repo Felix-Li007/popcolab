@@ -1,0 +1,15 @@
+model Question {
+  id             Int                 @id @default(autoincrement())
+  question_type  String              @db.VarChar(20)
+  question_text  String              @db.VarChar(255)
+  question_desc  String              @db.VarChar(255)
+  created_at     DateTime            @default(now()) @db.Timestamp(6)
+  updated_at     DateTime            @updatedAt @db.Timestamp(6)
+  order_index    Int?
+  answers        Answer[]
+  dimensions     QuestionDimension[]
+  form_questions FormQuestion[]
+  options        QuestionOption[]
+
+  @@map("question")
+}

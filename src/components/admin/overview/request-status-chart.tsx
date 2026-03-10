@@ -9,8 +9,8 @@ type Props = {
 };
 
 const STATUS_COLOR_MAP: Record<OverviewRequestStatusPoint['id'], string> = {
-  [REQUEST_STATUS.OPEN]: '#0f766e',
-  [REQUEST_STATUS.IN_REVIEW]: '#f59e0b',
+  [REQUEST_STATUS.OPENED]: '#0f766e',
+  [REQUEST_STATUS.PENDING]: '#f59e0b',
   [REQUEST_STATUS.MATCHED]: '#6366f1',
   [REQUEST_STATUS.CLOSED]: '#e9756e',
   unknown: '#9ca3af',

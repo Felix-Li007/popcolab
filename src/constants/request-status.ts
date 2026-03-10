@@ -1,6 +1,6 @@
 export const REQUEST_STATUS = {
-  OPEN: 'open',
-  IN_REVIEW: 'in_review',
+  OPENED: 'opened',
+  PENDING: 'pending',
   MATCHED: 'matched',
   CLOSED: 'closed',
 } as const;
@@ -12,8 +12,8 @@ export const REQUEST_STATUS_OPTIONS: Array<{
   value: RequestStatus;
   label: string;
 }> = [
-  { value: REQUEST_STATUS.OPEN, label: 'Open' },
-  { value: REQUEST_STATUS.IN_REVIEW, label: 'In Review' },
+  { value: REQUEST_STATUS.OPENED, label: 'Opened' },
+  { value: REQUEST_STATUS.PENDING, label: 'Pending' },
   { value: REQUEST_STATUS.MATCHED, label: 'Matched' },
   { value: REQUEST_STATUS.CLOSED, label: 'Closed' },
 ];

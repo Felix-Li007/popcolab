@@ -6,7 +6,10 @@ import StatsCard from '@/components/admin/stats-card';
 import PersonalityForm from '@/components/admin/personality/personality-edit';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { Button, Badge } from '@/ui';
-import { Personality } from '@/types/personality-type';
+import type {
+  Personality,
+  PersonalityActionHandlers,
+} from '@/types/personality-type';
 import { usePersonality } from '@/hooks/usePersonality';
 import contentStyles from '@/styles/personality-content.module.css';
 
@@ -15,9 +18,13 @@ type FilterTab = (typeof filterTabs)[number];
 
 type Props = {
   initialData: Personality[];
+  personalityActions: PersonalityActionHandlers;
 };
 
-export default function PersonalityContent({ initialData }: Props) {
+export default function PersonalityContent({
+  initialData,
+  personalityActions,
+}: Props) {
   const [personalities, setPersonalities] =
     useState<Personality[]>(initialData);
   const [filter, setFilter] = useState<FilterTab>('All');
@@ -34,7 +41,7 @@ export default function PersonalityContent({ initialData }: Props) {
     formAction,
     selectedPersonality,
     viewedPersonality,
-  } = usePersonality(personalities);
+  } = usePersonality(personalities, personalityActions);
 
   useEffect(() => {
     setPersonalities(initialData);

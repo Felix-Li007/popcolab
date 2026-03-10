@@ -1,4 +1,9 @@
 import {
+  createPersonalityAction,
+  deletePersonalityAction,
+  updatePersonalityAction,
+} from '@/actions/personality-actions';
+import {
   getDashboardPersonalities,
   getPersonalitySummary,
 } from '@/services/personality-service';
@@ -25,6 +30,11 @@ export default async function OverviewPage() {
       personalitiesActiveCount={activeCount}
       initialQuestions={questions as Question[]}
       growthMetrics={growthMetrics as OverviewGrowthMetrics}
+      personalityActions={{
+        createPersonalityAction,
+        updatePersonalityAction,
+        deletePersonalityAction,
+      }}
     />
   );
 }

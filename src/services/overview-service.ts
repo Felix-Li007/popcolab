@@ -98,10 +98,10 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
     `),
       prisma.$queryRaw<OverviewRequestStatusRow[]>(Prisma.sql`
       SELECT
-        request_status,
+        request_status::text AS request_status,
         COUNT(*)::int AS count
       FROM "request"
-      GROUP BY request_status
+      GROUP BY request_status::text
       ORDER BY COUNT(*) DESC, request_status ASC
     `),
       prisma.$queryRaw<OverviewRequestTrendRow[]>(Prisma.sql`
@@ -114,8 +114,8 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       ),
       statuses AS (
         SELECT unnest(ARRAY[
-          ${REQUEST_STATUS.OPEN}::text,
-          ${REQUEST_STATUS.IN_REVIEW}::text,
+          ${REQUEST_STATUS.OPENED}::text,
+          ${REQUEST_STATUS.PENDING}::text,
           ${REQUEST_STATUS.MATCHED}::text,
           ${REQUEST_STATUS.CLOSED}::text
         ]) AS request_status
@@ -123,7 +123,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       request_counts AS (
         SELECT
           date_trunc('month', created_at) AS month_start,
-          request_status,
+          request_status::text AS request_status,
           COUNT(*)::int AS count
         FROM "request"
         WHERE created_at >= date_trunc('month', CURRENT_DATE) - INTERVAL '5 months'
@@ -170,8 +170,8 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
     const existing = requestTrendMap.get(monthKey) ?? {
       monthKey,
       monthLabel: toMonthLabel(row.month_start),
-      [REQUEST_STATUS.OPEN]: 0,
-      [REQUEST_STATUS.IN_REVIEW]: 0,
+      [REQUEST_STATUS.OPENED]: 0,
+      [REQUEST_STATUS.PENDING]: 0,
       [REQUEST_STATUS.MATCHED]: 0,
       [REQUEST_STATUS.CLOSED]: 0,
     };

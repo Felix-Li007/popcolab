@@ -1,6 +1,8 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 
+jest.mock('server-only', () => ({}));
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation((query: string) => ({

@@ -14,7 +14,10 @@ import PersonalityForm from '@/components/admin/personality/personality-edit';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
 import type { OverviewGrowthMetrics } from '@/types/overview-type';
-import { type Personality } from '@/types/personality-type';
+import type {
+  Personality,
+  PersonalityActionHandlers,
+} from '@/types/personality-type';
 import { type Question } from '@/types/question-type';
 import { usePersonality } from '@/hooks/usePersonality';
 import QuestionStyles from '@/styles/question-content.module.css';
@@ -25,6 +28,7 @@ type OverviewContentProps = {
   personalitiesActiveCount?: number;
   initialQuestions?: Question[];
   growthMetrics: OverviewGrowthMetrics;
+  personalityActions: PersonalityActionHandlers;
 };
 
 function formatUpdatedAt(value: Date | string): string {
@@ -45,6 +49,7 @@ export default function OverviewContent({
   personalitiesActiveCount,
   initialQuestions = [],
   growthMetrics,
+  personalityActions,
 }: OverviewContentProps) {
   const [personalities, setPersonalities] =
     useState<Personality[]>(initialPersonalities);
@@ -60,7 +65,7 @@ export default function OverviewContent({
     formAction,
     selectedPersonality,
     viewedPersonality,
-  } = usePersonality(personalities);
+  } = usePersonality(personalities, personalityActions);
 
   useEffect(() => {
     setPersonalities(initialPersonalities);

@@ -10,6 +10,7 @@ model User {
   updated_at           DateTime     @updatedAt @db.Timestamp(6)
   corporate            Company?
   profile              Profile?
+  invited_users        InvitedUser[]
   requests             Request[]
   owned_teams          Team[]       @relation("TeamOwner")
   created_teams        Team[]       @relation("TeamCreator")

@@ -1,0 +1,11 @@
+model ExperienceCalendar {
+  id              Int        @id @default(autoincrement())
+  experience_id   Int
+  schedule_date   DateTime   @db.Timestamp(6)
+  calendar_status String     @db.VarChar(20)
+  created_at      DateTime   @default(now()) @db.Timestamp(6)
+  updated_at      DateTime   @updatedAt @db.Timestamp(6)
+  experience      Experience @relation(fields: [experience_id], references: [id])
+
+  @@map("experience_calendar")
+}

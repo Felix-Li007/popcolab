@@ -21,3 +21,22 @@ export type PersonalityFormState = {
   };
   success?: boolean;
 };
+
+export type PersonalityFormAction = (
+  prevState: PersonalityFormState,
+  formData: FormData
+) => Promise<PersonalityFormState>;
+
+export type UpdatePersonalityFormAction = (
+  id: number,
+  prevState: PersonalityFormState,
+  formData: FormData
+) => Promise<PersonalityFormState>;
+
+export type DeletePersonalityActionFn = (id: number) => Promise<void>;
+
+export type PersonalityActionHandlers = {
+  createPersonalityAction: PersonalityFormAction;
+  updatePersonalityAction: UpdatePersonalityFormAction;
+  deletePersonalityAction: DeletePersonalityActionFn;
+};

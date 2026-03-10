@@ -20,7 +20,9 @@
     "test:e2e:ui": "playwright test --ui",
     "test:bdd": "cucumber-js --require-module ts-node/register --require tests/bdd/steps/*.ts tests/bdd/features/*.feature",
     "prepare": "husky",
-    "prisma:seed": "tsx prisma/seed.ts"
+    "prisma:seed": "tsx prisma/seed.ts",
+    "qstash:setup": "tsx scripts/setup-qstash.ts",
+    "qstash:delete": "tsx scripts/delete-qstash.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",
@@ -30,6 +32,7 @@
     "@nivo/pie": "^0.99.0",
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.4.2",
+    "@upstash/qstash": "^2.9.0",
     "dotenv": "^17.2.4",
     "lucide-react": "^0.575.0",
     "next-themes": "^0.4.6",

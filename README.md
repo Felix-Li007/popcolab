@@ -88,3 +88,47 @@ ingress:
 
 5. Common error
    - If you see `Error locating origin cert` or missing `cert.pem`, run `cloudflared tunnel login` first.
+
+## Upstash QStash
+
+This project includes a minimal QStash integration for delayed messages and cron schedules.
+
+Required environment variables:
+
+- `QSTASH_APP_URL`
+- `QSTASH_ENDPOINT_PATH`
+- `QSTASH_TOKEN`
+- `QSTASH_CURRENT_SIGNING_KEY`
+- `QSTASH_NEXT_SIGNING_KEY`
+- `SUPABASE_QUEUE_NAME` (optional, defaults to `default_queue`)
+
+Webhook endpoint:
+
+- `POST ${QSTASH_ENDPOINT_PATH}` (for example `POST /api/qstash`)
+
+Current server-side helpers:
+
+- `publishQStashTask(payload, options)` in [src/services/qstash-service.ts](src/services/qstash-service.ts)
+- `upsertQueueSchedule(cron, batchSize)` in [src/services/qstash-service.ts](src/services/qstash-service.ts)
+- `deleteQueueSchedule(scheduleId)` in [src/services/qstash-service.ts](src/services/qstash-service.ts)
+- `handleQStashTask(payload)` in [src/services/qstash-service.ts](src/services/qstash-service.ts)
+- `scheduleRequestExpiry(requestId)` in [src/services/request-service.ts](src/services/request-service.ts)
+- `handleUserConfirmed(userId)` in [src/services/request-service.ts](src/services/request-service.ts)
+- `handleRejectedProposal(proposalId)` in [src/services/request-service.ts](src/services/request-service.ts)
+- `enqueueRequestReady(requestId, trigger, rejectedProposalId?)` in [src/services/request-service.ts](src/services/request-service.ts)
+
+The proposal orchestration flow uses PGMQ in Postgres/Supabase:
+
+- request creation schedules a delayed QStash trigger at `expired_at`
+- invite confirmations can enqueue proposal generation as soon as everyone accepts
+- proposal rejections enqueue a new proposal generation job
+- a QStash cron worker reads from the queue, generates proposals, and deletes successful jobs
+
+Setup command:
+
+- `npm run qstash:setup`
+- `npm run qstash:setup -- "*/5 * * * *" 20`
+
+Delete command:
+
+- `npm run qstash:delete -- request-queue-process`
