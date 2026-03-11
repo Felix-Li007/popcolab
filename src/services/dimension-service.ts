@@ -24,7 +24,7 @@ type UpsertDimensionInput = {
   hardFilter: boolean;
   scaleMin: number | null;
   scaleMax: number | null;
-  options: string[];
+  options: DimensionOption[];
 };
 
 type DimensionRow = Awaited<
@@ -34,14 +34,10 @@ type DimensionCategoryRow = Awaited<
   ReturnType<typeof prisma.dimensionCategory.findMany>
 >[number];
 
-function mapOptions(values: string[]): DimensionOption[] {
-  return values.map(value => ({ value }));
-}
-
 export function mapDimensionRow(
   row: DimensionRow & { category: { category_name: string } },
   indexNotes?: string | null,
-  options?: string[]
+  options?: DimensionOption[]
 ): Dimension {
   return {
     id: row.id,
@@ -55,7 +51,7 @@ export function mapDimensionRow(
     hardFilter: row.hard_filter,
     scaleMin: row.scale_min,
     scaleMax: row.scale_max,
-    options: mapOptions(options ?? []),
+    options: options ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -76,7 +72,7 @@ export function validateDimensionFields(fields: {
   dataType: string;
   scaleMin: number | null;
   scaleMax: number | null;
-  options: string[];
+  options: DimensionOption[];
 }): DimensionFormState['errors'] {
   const errors: DimensionFormState['errors'] = {};
   const normalizedType = fields.dataType as DimensionDataType;
@@ -115,8 +111,14 @@ export function validateDimensionFields(fields: {
     }
   }
 
-  if (fields.options.some(v => v.length > 100)) {
-    errors.options = 'Each option must be 100 characters or less';
+  if (fields.options.some(option => !option.label || !option.value)) {
+    errors.options = 'Each option requires both a label and a value';
+  } else if (
+    fields.options.some(
+      option => option.label.length > 50 || option.value.length > 50
+    )
+  ) {
+    errors.options = 'Option label and value must be 50 characters or less';
   }
 
   return errors;
@@ -150,32 +152,43 @@ async function getIndexNotesById(): Promise<Map<number, string | null>> {
   }
 }
 
-async function getOptionsByDimensionId(): Promise<Map<number, string[]>> {
+async function getOptionsByDimensionId(): Promise<
+  Map<number, DimensionOption[]>
+> {
   try {
     const optionRows = await prisma.$queryRaw<
-      { dimension_id: number; allowed_value: string }[]
-    >`SELECT "dimension_id", "allowed_value" FROM "dimension_option" ORDER BY "id" ASC`;
+      {
+        id: number;
+        dimension_id: number;
+        option_label: string;
+        option_value: string;
+      }[]
+    >`SELECT "id", "dimension_id", "option_label", "option_value" FROM "dimension_option" ORDER BY "id" ASC`;
 
-    const map = new Map<number, string[]>();
+    const map = new Map<number, DimensionOption[]>();
     for (const row of optionRows) {
       const values = map.get(row.dimension_id) ?? [];
-      values.push(row.allowed_value);
+      values.push({
+        id: row.id,
+        label: row.option_label,
+        value: row.option_value,
+      });
       map.set(row.dimension_id, values);
     }
     return map;
   } catch {
-    return new Map<number, string[]>();
+    return new Map<number, DimensionOption[]>();
   }
 }
 
 async function replaceDimensionOptions(
   dimensionId: number,
-  options: string[]
+  options: DimensionOption[]
 ): Promise<void> {
   try {
     await prisma.$executeRaw`DELETE FROM "dimension_option" WHERE "dimension_id" = ${dimensionId}`;
-    for (const value of options) {
-      await prisma.$executeRaw`INSERT INTO "dimension_option" ("dimension_id", "allowed_value", "created_at", "updated_at") VALUES (${dimensionId}, ${value}, NOW(), NOW())`;
+    for (const option of options) {
+      await prisma.$executeRaw`INSERT INTO "dimension_option" ("dimension_id", "option_label", "option_value", "created_at", "updated_at") VALUES (${dimensionId}, ${option.label}, ${option.value}, NOW(), NOW())`;
     }
   } catch {
     // Ignore when table/column isn't migrated yet.

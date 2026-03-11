@@ -8,7 +8,7 @@ type Props = {
 };
 
 type GrowthChartDatum = {
-  month: string;
+  period: string;
   Users: number;
   Teams: number;
 };
@@ -27,7 +27,7 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
   const seriesMap = bars.reduce<
     Map<
       'Users' | 'Teams',
-      Array<{ x: number; y: number; value: number; month: string }>
+      Array<{ x: number; y: number; value: number; period: string }>
     >
   >((acc, bar) => {
     const id = String(bar.data.id);
@@ -38,7 +38,7 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
       x: bar.x + bar.width / 2,
       y: bar.y,
       value: typeof bar.data.value === 'number' ? bar.data.value : 0,
-      month: String(bar.data.indexValue),
+      period: String(bar.data.indexValue),
     });
     acc.set(id, points);
     return acc;
@@ -71,7 +71,7 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
             />
             {points.map(point => (
               <g
-                key={`${id}-${point.month}`}
+                key={`${id}-${point.period}`}
                 transform={`translate(${point.x}, ${point.y})`}
               >
                 <circle
@@ -113,7 +113,7 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
 
 export default function PlatformGrowthChart({ data }: Props) {
   const chartData: GrowthChartDatum[] = data.map(point => ({
-    month: point.monthLabel,
+    period: point.periodLabel,
     Users: point.users,
     Teams: point.teams,
   }));
@@ -123,7 +123,7 @@ export default function PlatformGrowthChart({ data }: Props) {
       <ResponsiveBar
         data={chartData}
         keys={['Users', 'Teams']}
-        indexBy="month"
+        indexBy="period"
         margin={{ top: 22, right: 28, bottom: 50, left: 44 }}
         colors={({ id }) => BAR_COLORS[id as 'Users' | 'Teams']}
         padding={0.32}
@@ -141,7 +141,7 @@ export default function PlatformGrowthChart({ data }: Props) {
         axisBottom={{
           tickSize: 0,
           tickPadding: 12,
-          legend: 'Month',
+          legend: 'Day',
           legendOffset: 38,
           legendPosition: 'middle',
         }}

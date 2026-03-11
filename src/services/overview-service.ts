@@ -21,7 +21,7 @@ type OverviewCountRow = {
 };
 
 type OverviewGrowthRow = {
-  month_start: Date | string;
+  day_start: Date | string;
   user_count: number | string | bigint;
   team_count: number | string | bigint;
 };
@@ -54,6 +54,18 @@ function toMonthKey(value: Date | string): string {
   return new Date(value).toISOString().slice(0, 7);
 }
 
+function toDayLabel(value: Date | string): string {
+  return new Date(value).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+function toDayKey(value: Date | string): string {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
 export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics> {
   const [countRows, growthRows, requestStatusRows, requestTrendRows] =
     await Promise.all([
@@ -64,37 +76,37 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
         (SELECT COUNT(*)::int FROM "request") AS total_requests
     `),
       prisma.$queryRaw<OverviewGrowthRow[]>(Prisma.sql`
-      WITH months AS (
+      WITH days AS (
         SELECT generate_series(
-          date_trunc('month', CURRENT_DATE) - INTERVAL '5 months',
-          date_trunc('month', CURRENT_DATE),
-          INTERVAL '1 month'
-        ) AS month_start
+          CURRENT_DATE - INTERVAL '13 days',
+          CURRENT_DATE,
+          INTERVAL '1 day'
+        )::date AS day_start
       ),
       user_counts AS (
         SELECT
-          date_trunc('month', created_at) AS month_start,
+          created_at::date AS day_start,
           COUNT(*)::int AS user_count
         FROM "user"
-        WHERE created_at >= date_trunc('month', CURRENT_DATE) - INTERVAL '5 months'
+        WHERE created_at >= CURRENT_DATE - INTERVAL '13 days'
         GROUP BY 1
       ),
       team_counts AS (
         SELECT
-          date_trunc('month', created_at) AS month_start,
+          created_at::date AS day_start,
           COUNT(*)::int AS team_count
         FROM "team"
-        WHERE created_at >= date_trunc('month', CURRENT_DATE) - INTERVAL '5 months'
+        WHERE created_at >= CURRENT_DATE - INTERVAL '13 days'
         GROUP BY 1
       )
       SELECT
-        months.month_start,
+        days.day_start,
         COALESCE(user_counts.user_count, 0)::int AS user_count,
         COALESCE(team_counts.team_count, 0)::int AS team_count
-      FROM months
-      LEFT JOIN user_counts ON user_counts.month_start = months.month_start
-      LEFT JOIN team_counts ON team_counts.month_start = months.month_start
-      ORDER BY months.month_start ASC
+      FROM days
+      LEFT JOIN user_counts ON user_counts.day_start = days.day_start
+      LEFT JOIN team_counts ON team_counts.day_start = days.day_start
+      ORDER BY days.day_start ASC
     `),
       prisma.$queryRaw<OverviewRequestStatusRow[]>(Prisma.sql`
       SELECT
@@ -143,14 +155,15 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
     ]);
 
   const growth: OverviewGrowthPoint[] = growthRows.map(row => ({
-    monthKey: toMonthKey(row.month_start),
-    monthLabel: toMonthLabel(row.month_start),
+    periodKey: toDayKey(row.day_start),
+    periodLabel: toDayLabel(row.day_start),
     users: toNumber(row.user_count),
     teams: toNumber(row.team_count),
   }));
 
-  const latest = growth[growth.length - 1];
   const counts = countRows[0];
+  const usersLast14Days = growth.reduce((sum, point) => sum + point.users, 0);
+  const teamsLast14Days = growth.reduce((sum, point) => sum + point.teams, 0);
   const requestStatus: OverviewRequestStatusPoint[] = requestStatusRows.map(
     row => ({
       id: normalizeRequestStatus(row.request_status) ?? 'unknown',
@@ -187,8 +200,8 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
   return {
     totalUsers: toNumber(counts?.total_users ?? 0),
     totalTeams: toNumber(counts?.total_teams ?? 0),
-    usersThisMonth: latest?.users ?? 0,
-    teamsThisMonth: latest?.teams ?? 0,
+    usersLast14Days,
+    teamsLast14Days,
     growth,
     totalRequests: toNumber(counts?.total_requests ?? 0),
     requestStatus,

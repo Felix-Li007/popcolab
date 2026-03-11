@@ -21,7 +21,7 @@ test.describe('Admin Overview page', () => {
     ).toBeVisible();
     await expect(
       page.getByRole('heading', {
-        name: 'Users and teams over the last 6 months',
+        name: 'Users and teams over the last 14 days',
       })
     ).toBeVisible();
     await expect(page.getByText('Total Users', { exact: true })).toBeVisible();

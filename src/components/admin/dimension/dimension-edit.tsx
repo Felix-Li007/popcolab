@@ -38,6 +38,11 @@ type FormBodyProps = {
   onClose: () => void;
 };
 
+type OptionDraft = {
+  label: string;
+  value: string;
+};
+
 function DimensionFormBody({
   action,
   isEdit,
@@ -53,8 +58,11 @@ function DimensionFormBody({
   const [hardFilter, setHardFilter] = useState<boolean>(
     Boolean(initial?.hardFilter)
   );
-  const [options, setOptions] = useState<string[]>(
-    initial?.options?.map(opt => opt.value) ?? ['']
+  const [options, setOptions] = useState<OptionDraft[]>(
+    initial?.options?.map(opt => ({
+      label: opt.label,
+      value: opt.value,
+    })) ?? [{ label: '', value: '' }]
   );
 
   useEffect(() => {
@@ -62,15 +70,27 @@ function DimensionFormBody({
   }, [state.success, onSuccess]);
 
   function addOption() {
-    setOptions(prev => [...prev, '']);
+    setOptions(prev => [...prev, { label: '', value: '' }]);
   }
 
   function removeOption(index: number) {
-    setOptions(prev => prev.filter((_, i) => i !== index));
+    setOptions(prev =>
+      prev.length === 1
+        ? [{ label: '', value: '' }]
+        : prev.filter((_, i) => i !== index)
+    );
   }
 
-  function updateOption(index: number, value: string) {
-    setOptions(prev => prev.map((v, i) => (i === index ? value : v)));
+  function updateOption(
+    index: number,
+    field: keyof OptionDraft,
+    value: string
+  ) {
+    setOptions(prev =>
+      prev.map((option, i) =>
+        i === index ? { ...option, [field]: value } : option
+      )
+    );
   }
 
   return (
@@ -210,33 +230,39 @@ function DimensionFormBody({
 
         <div>
           <label className="text-body font-bold text-foreground/75">
-            ALLOW VALUE
+            ALLOWED OPTIONS
           </label>
-          <div className="mt-2 grid grid-cols-2 gap-2">
+          <div className="mt-2 space-y-2">
             {options.map((option, index) => (
               <div
                 key={index}
-                className="flex w-full min-w-0 items-stretch rounded-xl border border-gray-200 bg-gray-100 overflow-hidden focus-within:ring-2 focus-within:ring-magenta/30"
+                className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2"
               >
                 <input
                   type="text"
-                  value={option}
-                  onChange={e => updateOption(index, e.target.value)}
-                  placeholder="Allowed value"
-                  className="min-w-0 flex-1 px-3 py-2 text-body bg-transparent outline-none"
+                  value={option.label}
+                  onChange={e => updateOption(index, 'label', e.target.value)}
+                  placeholder="Option label"
+                  className="min-w-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-body outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30"
                 />
-                <input type="hidden" name="optionValue" value={option} />
-                {options.length > 1 && (
-                  <button
-                    type="button"
-                    className="px-2 text-gray-400 hover:text-red-500 border-l border-gray-200 bg-white/70 transition-colors"
-                    onClick={() => removeOption(index)}
-                    title="Remove option"
-                    aria-label="Remove option"
-                  >
-                    ×
-                  </button>
-                )}
+                <input
+                  type="text"
+                  value={option.value}
+                  onChange={e => updateOption(index, 'value', e.target.value)}
+                  placeholder="Option value"
+                  className="min-w-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-body outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30"
+                />
+                <button
+                  type="button"
+                  className="rounded-xl border border-gray-200 bg-white px-3 text-gray-400 transition-colors hover:text-red-500"
+                  onClick={() => removeOption(index)}
+                  title="Remove option"
+                  aria-label="Remove option"
+                >
+                  ×
+                </button>
+                <input type="hidden" name="optionLabel" value={option.label} />
+                <input type="hidden" name="optionValue" value={option.value} />
               </div>
             ))}
           </div>
@@ -248,7 +274,7 @@ function DimensionFormBody({
               className="!h-9 !min-w-0 !px-3 whitespace-nowrap !rounded-xl !border !border-dashed !border-gray-300 !bg-transparent !text-gray-500 hover:!border-magenta/40 hover:!text-magenta hover:!bg-magenta/5"
               onClick={addOption}
             >
-              + add value
+              + add option
             </Button>
           </div>
           {state.errors.options && (

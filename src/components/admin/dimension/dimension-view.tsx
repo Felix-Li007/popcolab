@@ -78,16 +78,14 @@ export default function DimensionView({
           </div>
         </div>
 
-        {dimension.indexNotes && (
-          <div>
-            <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-1">
-              Notes
-            </p>
-            <p className="text-body text-foreground/80">
-              {dimension.indexNotes}
-            </p>
-          </div>
-        )}
+        <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+          <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-1">
+            Notes
+          </p>
+          <p className="text-body whitespace-pre-wrap text-foreground/80">
+            {dimension.indexNotes?.trim() || 'No notes provided.'}
+          </p>
+        </div>
 
         {dimension.dataType === 'scale' && (
           <div>
@@ -103,12 +101,13 @@ export default function DimensionView({
         {dimension.options.length > 0 && (
           <div>
             <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-2">
-              ALLOWED VALUE ({dimension.options.length})
+              ALLOWED OPTIONS ({dimension.options.length})
             </p>
             <div className="flex flex-wrap gap-1.5">
               {dimension.options.map((option, idx) => (
                 <Badge key={idx} variant="secondary" size="xs">
-                  {option.value}
+                  {option.label}
+                  {option.label !== option.value ? ` (${option.value})` : ''}
                 </Badge>
               ))}
             </div>

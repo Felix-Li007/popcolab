@@ -27,9 +27,15 @@ function revalidateAdminPaths() {
   ADMIN_PATHS.forEach(path => revalidatePath(path));
 }
 
-function parseOptions(formData: FormData): string[] {
+function parseOptions(formData: FormData) {
+  const labels = formData.getAll('optionLabel').map(v => v.toString().trim());
   const values = formData.getAll('optionValue').map(v => v.toString().trim());
-  return values.filter(Boolean);
+  const length = Math.max(labels.length, values.length);
+
+  return Array.from({ length }, (_, index) => ({
+    label: labels[index] ?? '',
+    value: values[index] ?? '',
+  })).filter(option => option.label || option.value);
 }
 
 function hashString(value: string): string {

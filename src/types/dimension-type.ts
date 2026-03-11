@@ -8,6 +8,7 @@ export type DimensionCategory = {
 
 export type DimensionOption = {
   id?: number;
+  label: string;
   value: string;
 };
 

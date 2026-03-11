@@ -21,6 +21,7 @@ import {
   deleteDimensionAction,
   updateDimensionAction,
 } from '@/actions/dimension-actions';
+import styles from '@/styles/dimension-content.module.css';
 
 type Props = {
   initialData: Dimension[];
@@ -93,7 +94,7 @@ export default function DimensionContent({ initialData, categories }: Props) {
       d.categoryName,
       d.dataType,
       d.indexNotes ?? '',
-      ...d.options.map(opt => opt.value),
+      ...d.options.flatMap(opt => [opt.label, opt.value]),
     ]
       .join(' ')
       .toLowerCase();
@@ -217,9 +218,9 @@ export default function DimensionContent({ initialData, categories }: Props) {
 
   return (
     <>
-      <div className="flex flex-col">
-        <div className="flex flex-1 min-h-0 px-4 py-3 gap-4">
-          <div className="w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden">
+      <div className={styles.root}>
+        <div className={styles.listSection}>
+          <div className={styles.listPanel}>
             <SearchPanel
               title={`Dimensions (${filtered.length})`}
               searchValue={search}
@@ -240,7 +241,7 @@ export default function DimensionContent({ initialData, categories }: Props) {
                     onClick={handleBulkDelete}
                     variant="secondary"
                     size="sm"
-                    className="hover:!text-red-500"
+                    className={styles.deleteButton}
                     disabled={selectedIds.size === 0}
                   >
                     Delete
@@ -260,7 +261,7 @@ export default function DimensionContent({ initialData, categories }: Props) {
               onHardOnlyChange={setHardOnly}
             />
 
-            <div className="flex-1 overflow-y-auto p-3">
+            <div className={styles.listBody}>
               {filtered.length === 0 ? (
                 <AdminEmptyState
                   emoji="📐"
@@ -272,34 +273,36 @@ export default function DimensionContent({ initialData, categories }: Props) {
                   testId="dimension-empty"
                 />
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:auto-rows-[256px]">
-                  {paginated.map(dimension => {
-                    const selectedForBulk = dimension.id
-                      ? selectedIds.has(dimension.id)
-                      : false;
-                    const isEditingSelected =
-                      dimension.id === selectedId && !isCreating;
-                    const dimensionId = dimension.id;
-                    if (!dimensionId) return null;
+                <div className={styles.cardsWrap}>
+                  <div className={styles.cardsGrid}>
+                    {paginated.map(dimension => {
+                      const selectedForBulk = dimension.id
+                        ? selectedIds.has(dimension.id)
+                        : false;
+                      const isEditingSelected =
+                        dimension.id === selectedId && !isCreating;
+                      const dimensionId = dimension.id;
+                      if (!dimensionId) return null;
 
-                    return (
-                      <DimensionCard
-                        key={dimensionId}
-                        dimension={dimension}
-                        isEditingSelected={isEditingSelected}
-                        isBulkSelected={selectedForBulk}
-                        onSelect={() => {
-                          setSelection(dimensionId);
-                          setIsCreating(false);
-                        }}
-                        onToggleSelect={() => handleSelectToggle(dimensionId)}
-                        onView={() => setViewId(dimensionId)}
-                        onDelete={() =>
-                          handleDelete(dimensionId, dimension.indexName)
-                        }
-                      />
-                    );
-                  })}
+                      return (
+                        <DimensionCard
+                          key={dimensionId}
+                          dimension={dimension}
+                          isEditingSelected={isEditingSelected}
+                          isBulkSelected={selectedForBulk}
+                          onSelect={() => {
+                            setSelection(dimensionId);
+                            setIsCreating(false);
+                          }}
+                          onToggleSelect={() => handleSelectToggle(dimensionId)}
+                          onView={() => setViewId(dimensionId)}
+                          onDelete={() =>
+                            handleDelete(dimensionId, dimension.indexName)
+                          }
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>

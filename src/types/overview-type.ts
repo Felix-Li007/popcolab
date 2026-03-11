@@ -1,8 +1,8 @@
 import type { RequestStatus } from '@/constants/request-status';
 
 export type OverviewGrowthPoint = {
-  monthKey: string;
-  monthLabel: string;
+  periodKey: string;
+  periodLabel: string;
   users: number;
   teams: number;
 };
@@ -21,8 +21,8 @@ export type OverviewRequestTrendPoint = {
 export type OverviewGrowthMetrics = {
   totalUsers: number;
   totalTeams: number;
-  usersThisMonth: number;
-  teamsThisMonth: number;
+  usersLast14Days: number;
+  teamsLast14Days: number;
   growth: OverviewGrowthPoint[];
   totalRequests: number;
   requestStatus: OverviewRequestStatusPoint[];

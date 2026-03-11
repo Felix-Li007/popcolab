@@ -284,7 +284,7 @@ export default function DimensionCard(props: Props) {
         <div className={styles.options}>
           {shownOptions.map((option, index) => (
             <Badge key={index} variant="default" size="xs">
-              {option.value}
+              {option.label}
             </Badge>
           ))}
           {hiddenCount > 0 && (

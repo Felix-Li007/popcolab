@@ -143,10 +143,10 @@ export default function OverviewContent({
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-gray-900">
-                    Users and teams over the last 6 months
+                    Users and teams over the last 14 days
                   </h2>
                   <p className="mt-1 text-sm text-gray-500">
-                    Monthly creation trend for core admin entities.
+                    Daily creation trend for core admin entities.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 md:items-end">
@@ -162,7 +162,7 @@ export default function OverviewContent({
                         {growthMetrics.totalUsers}
                       </p>
                       <p className="text-xs text-teal-deep/70">
-                        {growthMetrics.usersThisMonth} this month
+                        {growthMetrics.usersLast14Days} in last 14 days
                       </p>
                     </Link>
                     <Link
@@ -176,7 +176,7 @@ export default function OverviewContent({
                         {growthMetrics.totalTeams}
                       </p>
                       <p className="text-xs text-coral-red/80">
-                        {growthMetrics.teamsThisMonth} this month
+                        {growthMetrics.teamsLast14Days} in last 14 days
                       </p>
                     </Link>
                   </div>

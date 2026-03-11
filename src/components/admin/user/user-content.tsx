@@ -1,9 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import SearchPanel from '@/components/admin/common/search-panel';
 import UserClient from '@/components/admin/user/user-client';
 import PaginationBar from '@/components/shared/pagination-bar';
-import { USER_STATUS_OPTIONS } from '@/constants/user-status';
+import { isUserStatus, USER_STATUS_OPTIONS } from '@/constants/user-status';
 import type {
   AdminUsersPageData,
   AdminUsersStatusFilter,
@@ -42,6 +45,13 @@ function buildUsersHref(params: {
 }
 
 export default function UserContent({ pageData, query }: Props) {
+  const searchParams = useSearchParams();
+  const statusParam = searchParams.get('status');
+  const normalizedStatusParam = statusParam?.toLowerCase();
+  const activeStatus: AdminUsersStatusFilter =
+    normalizedStatusParam && isUserStatus(normalizedStatusParam)
+      ? normalizedStatusParam
+      : 'all';
   const allCount =
     pageData.statusCounts.active +
     pageData.statusCounts.inactive +
@@ -105,7 +115,7 @@ export default function UserContent({ pageData, query }: Props) {
 
           <div className={styles.tabs}>
             {statusTabs.map(tab => {
-              const isActive = query.status === tab.value;
+              const isActive = activeStatus === tab.value;
               const href = buildUsersHref({
                 search: query.search,
                 status: tab.value,
@@ -117,6 +127,7 @@ export default function UserContent({ pageData, query }: Props) {
                   key={tab.value}
                   href={href}
                   className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
                   data-testid={`user-status-tab-${tab.value}`}
                 >
                   {tab.label}
