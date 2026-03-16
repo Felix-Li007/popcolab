@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import styles from '@/styles/search-panel.module.css';
+import styles from '@/styles/admin/search-panel.module.css';
 
 type HiddenField = {
   name: string;

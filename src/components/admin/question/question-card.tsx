@@ -139,30 +139,27 @@ export default function QuestionCard({
       )}
 
       {/* Dimensions preview */}
-      {question.dimensions.length > 0 && (
+      {question.dimensions[0] && (
         <div className="flex flex-wrap gap-1 pt-1 border-t border-gray-50 mt-auto">
-          {question.dimensions.slice(0, 3).map((d, i) => (
-            <span
-              key={i}
-              className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200"
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
+            <svg
+              viewBox="0 0 12 12"
+              fill="currentColor"
+              className="w-2.5 h-2.5 shrink-0"
             >
-              <svg
-                viewBox="0 0 12 12"
-                fill="currentColor"
-                className="w-2.5 h-2.5 shrink-0"
-              >
-                <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.3" />
-                <circle cx="6" cy="6" r="2.5" fill="currentColor" />
-              </svg>
-              {d.dimensionName}
-              {d.weight !== null && (
-                <span className="text-teal-500 font-normal">×{d.weight}</span>
-              )}
-            </span>
-          ))}
-          {question.dimensions.length > 3 && (
+              <circle cx="6" cy="6" r="5" fill="currentColor" opacity="0.3" />
+              <circle cx="6" cy="6" r="2.5" fill="currentColor" />
+            </svg>
+            {question.dimensions[0].dimensionName}
+            {question.dimensions[0].weight !== null && (
+              <span className="text-teal-500 font-normal">
+                ×{question.dimensions[0].weight}
+              </span>
+            )}
+          </span>
+          {question.dimensions.length > 1 && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-500">
-              +{question.dimensions.length - 3}
+              +{question.dimensions.length - 1}
             </span>
           )}
         </div>

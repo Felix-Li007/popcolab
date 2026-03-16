@@ -12,7 +12,7 @@ import type {
   AdminUsersStatusFilter,
 } from '@/types/user-type';
 import { Badge } from '@/ui';
-import styles from '@/styles/user-content.module.css';
+import styles from '@/styles/admin/users/user-content.module.css';
 
 type Props = {
   pageData: AdminUsersPageData;

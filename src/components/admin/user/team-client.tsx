@@ -4,7 +4,7 @@ import { useState } from 'react';
 import TeamCard from '@/components/admin/user/team-card';
 import TeamViewModal from '@/components/admin/user/team-view';
 import type { AdminTeamCardItem } from '@/types/team-type';
-import styles from '@/styles/team-content.module.css';
+import styles from '@/styles/admin/users/team-content.module.css';
 
 type Props = {
   teams: AdminTeamCardItem[];

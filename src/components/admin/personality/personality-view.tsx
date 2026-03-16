@@ -2,7 +2,7 @@
 
 import ModalShell from '@/components/shared/modal-shell';
 import type { Personality } from '@/types/personality-type';
-import styles from '@/styles/personality-view.module.css';
+import styles from '@/styles/admin/personalities/personality-view.module.css';
 import { Button, Badge } from '@/ui';
 
 type PersonalityViewProps = {

@@ -35,12 +35,27 @@ const QUESTION_TYPES: QuestionType[] = [
   'scale',
   'text_input',
 ];
+const DIMENSIONS_PAGE_SIZE = 9;
 
 function defaultOptions(): OptionRow[] {
   return [
     { label: '', value: '', score: '' },
     { label: '', value: '', score: '' },
   ];
+}
+
+function toDimensionOptionRows(
+  dimension: DimensionIndex | undefined
+): OptionRow[] | null {
+  if (!dimension || dimension.options.length === 0) {
+    return null;
+  }
+
+  return dimension.options.map(option => ({
+    label: option.label,
+    value: option.value,
+    score: '',
+  }));
 }
 
 export default function QuestionPanel({
@@ -65,13 +80,16 @@ export default function QuestionPanel({
         }))
       : defaultOptions()
   );
-  const [dims, setDims] = useState<DimRow[]>(
-    initial?.dimensions?.length
-      ? initial.dimensions.map(d => ({
-          dimensionId: d.dimensionId,
-          weight: d.weight != null ? String(d.weight) : '',
-        }))
-      : []
+  const [selectedDimension, setSelectedDimension] = useState<DimRow | null>(
+    initial?.dimensions?.[0]
+      ? {
+          dimensionId: initial.dimensions[0].dimensionId,
+          weight:
+            initial.dimensions[0].weight != null
+              ? String(initial.dimensions[0].weight)
+              : '',
+        }
+      : null
   );
 
   const needsOptions = qType === 'single_choice' || qType === 'multi_choice';
@@ -89,8 +107,9 @@ export default function QuestionPanel({
   const [dimensionSearch, setDimensionSearch] = useState('');
   const [dimensionCategoryFilter, setDimensionCategoryFilter] =
     useState<string>('all');
+  const [dimensionPage, setDimensionPage] = useState(1);
 
-  const selectedIds = new Set(dims.map(d => d.dimensionId));
+  const selectedDimensionId = selectedDimension?.dimensionId ?? null;
   const dimensionCategories = useMemo(() => {
     return Array.from(
       new Set(availableDimensions.map(dimension => dimension.categoryName))
@@ -116,6 +135,23 @@ export default function QuestionPanel({
         .includes(normalizedDimensionSearch);
     });
   }, [availableDimensions, dimensionCategoryFilter, normalizedDimensionSearch]);
+  const sortedDimensions = useMemo(() => {
+    return [...filteredDimensions].sort((a, b) => {
+      if (a.id === selectedDimensionId) return -1;
+      if (b.id === selectedDimensionId) return 1;
+      return 0;
+    });
+  }, [filteredDimensions, selectedDimensionId]);
+  const dimensionTotalPages = Math.max(
+    1,
+    Math.ceil(sortedDimensions.length / DIMENSIONS_PAGE_SIZE)
+  );
+  const paginatedDimensions = useMemo(() => {
+    return sortedDimensions.slice(
+      (dimensionPage - 1) * DIMENSIONS_PAGE_SIZE,
+      dimensionPage * DIMENSIONS_PAGE_SIZE
+    );
+  }, [sortedDimensions, dimensionPage]);
 
   useEffect(() => {
     if (state.success) onSuccess();
@@ -135,17 +171,39 @@ export default function QuestionPanel({
     );
   }
 
+  function syncOptionsFromDimension(
+    dimensionId: number | null,
+    nextType: QuestionType
+  ) {
+    if (
+      dimensionId === null ||
+      (nextType !== 'single_choice' && nextType !== 'multi_choice')
+    ) {
+      return;
+    }
+
+    const dimension = availableDimensions.find(item => item.id === dimensionId);
+    const nextOptions = toDimensionOptionRows(dimension);
+    if (!nextOptions) {
+      return;
+    }
+
+    setOptions(nextOptions);
+  }
+
   function toggleDimension(dimId: number) {
-    if (selectedIds.has(dimId)) {
-      setDims(prev => prev.filter(d => d.dimensionId !== dimId));
+    setDimensionPage(1);
+    if (selectedDimensionId === dimId) {
+      setSelectedDimension(null);
     } else {
-      setDims(prev => [...prev, { dimensionId: dimId, weight: '' }]);
+      setSelectedDimension({ dimensionId: dimId, weight: '' });
+      syncOptionsFromDimension(dimId, qType);
     }
   }
 
   function updateDimWeight(dimId: number, weight: string) {
-    setDims(prev =>
-      prev.map(d => (d.dimensionId === dimId ? { ...d, weight } : d))
+    setSelectedDimension(prev =>
+      prev && prev.dimensionId === dimId ? { ...prev, weight } : prev
     );
   }
 
@@ -207,7 +265,10 @@ export default function QuestionPanel({
                 <button
                   key={t}
                   type="button"
-                  onClick={() => setQType(t)}
+                  onClick={() => {
+                    setQType(t);
+                    syncOptionsFromDimension(selectedDimensionId, t);
+                  }}
                   className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all flex-1 min-w-[120px] ${
                     qType === t
                       ? 'border-magenta bg-magenta/5 text-magenta'
@@ -246,6 +307,225 @@ export default function QuestionPanel({
           inputSize="sm"
           rows={2}
         />
+
+        {/* Dimensions */}
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-bold text-gray-600 mb-2">
+              DIMENSION <span className="text-magenta">*</span>
+            </label>
+            <span className="text-[10px] text-gray-400">
+              {selectedDimension ? '1 selected' : 'None selected'}
+            </span>
+          </div>
+          <p className="text-[10px] text-gray-400 mb-2">
+            Select up to 1 dimension for this question.
+          </p>
+          <input
+            type="text"
+            value={dimensionSearch}
+            onChange={e => {
+              setDimensionSearch(e.target.value);
+              setDimensionPage(1);
+            }}
+            placeholder="Search dimensions..."
+            className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 mb-2"
+          />
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            <button
+              type="button"
+              onClick={() => {
+                setDimensionCategoryFilter('all');
+                setDimensionPage(1);
+              }}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
+                dimensionCategoryFilter === 'all'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              All
+            </button>
+            {dimensionCategories.map(categoryName => (
+              <button
+                key={categoryName}
+                type="button"
+                onClick={() => {
+                  setDimensionCategoryFilter(categoryName);
+                  setDimensionPage(1);
+                }}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
+                  dimensionCategoryFilter === categoryName
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                {categoryName}
+              </button>
+            ))}
+          </div>
+
+          {state.errors.dimensions && (
+            <p className="text-xs text-red-500 mb-2">
+              {state.errors.dimensions}
+            </p>
+          )}
+
+          {availableDimensions.length === 0 ? (
+            <p className="text-xs text-gray-400 italic">
+              No dimensions available.
+            </p>
+          ) : filteredDimensions.length === 0 ? (
+            <p className="text-xs text-gray-400 italic">
+              No dimensions match your search.
+            </p>
+          ) : (
+            <div className="relative">
+              {dimensionTotalPages > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDimensionPage(prev => Math.max(1, prev - 1))
+                    }
+                    disabled={dimensionPage <= 1}
+                    title="Previous dimension page"
+                    className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-800 disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setDimensionPage(prev =>
+                        Math.min(dimensionTotalPages, prev + 1)
+                      )
+                    }
+                    disabled={dimensionPage >= dimensionTotalPages}
+                    title="Next dimension page"
+                    className="absolute right-0 top-1/2 z-10 flex h-8 w-8 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-800 disabled:pointer-events-none disabled:opacity-30"
+                  >
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="h-4 w-4"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                </>
+              )}
+              <div className="h-[230px] overflow-y-auto rounded-xl border border-gray-200 bg-white px-8 py-2">
+                <div
+                  className="grid gap-2 items-start"
+                  style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}
+                >
+                  {paginatedDimensions.map(dim => {
+                    const isSelected = selectedDimensionId === dim.id;
+                    return (
+                      <div
+                        key={dim.id}
+                        className={`min-w-0 rounded-xl border px-2.5 py-2 transition-colors ${
+                          isSelected
+                            ? 'border-teal-300 bg-teal-50'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleDimension(dim.id)}
+                          className="flex w-full min-w-0 items-start gap-2 text-left"
+                        >
+                          <span
+                            className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-md border-2 transition-colors ${
+                              isSelected
+                                ? 'border-teal-500 bg-teal-500 text-white'
+                                : 'border-gray-300 bg-white'
+                            }`}
+                          >
+                            {isSelected ? (
+                              <svg
+                                viewBox="0 0 12 12"
+                                fill="currentColor"
+                                className="w-2.5 h-2.5"
+                              >
+                                <path
+                                  d="M10 3L5 8.5 2 5.5"
+                                  stroke="white"
+                                  strokeWidth="2"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            ) : null}
+                          </span>
+                          <div className="min-w-0 flex-1 overflow-hidden">
+                            <p
+                              className={`text-xs font-semibold leading-snug break-words ${
+                                isSelected ? 'text-teal-800' : 'text-gray-700'
+                              }`}
+                            >
+                              {dim.indexName}
+                            </p>
+                            <p className="truncate text-[10px] text-gray-400 leading-snug">
+                              {dim.categoryName}
+                              {dim.indexKey ? ` · ${dim.indexKey}` : ''}
+                            </p>
+                          </div>
+                        </button>
+
+                        {isSelected ? (
+                          <input
+                            type="number"
+                            placeholder="Wt."
+                            value={selectedDimension?.weight ?? ''}
+                            onChange={e =>
+                              updateDimWeight(dim.id, e.target.value)
+                            }
+                            className="mt-2 w-full rounded-lg border border-teal-200 bg-white px-2 py-1 text-right text-xs font-semibold outline-none focus:ring-2 focus:ring-teal-300 placeholder:font-normal placeholder-gray-400"
+                            min="0"
+                            step="0.01"
+                          />
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hidden inputs for dim data */}
+          {selectedDimension && (
+            <>
+              <input
+                type="hidden"
+                name="dim_id"
+                value={selectedDimension.dimensionId}
+              />
+              <input
+                type="hidden"
+                name="dim_weight"
+                value={selectedDimension.weight}
+              />
+            </>
+          )}
+        </div>
 
         {/* Options – only for choice types */}
         {needsOptions && (
@@ -406,7 +686,6 @@ export default function QuestionPanel({
                 className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 resize-none font-semibold placeholder:font-normal placeholder-gray-400"
               />
             </div>
-            {/* Max character limit */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[10px] text-gray-400 font-semibold">
@@ -427,7 +706,6 @@ export default function QuestionPanel({
                 className="w-full cursor-pointer accent-magenta"
               />
             </div>
-            {/* Hidden inputs to carry text_input settings as options */}
             <input type="hidden" name="option_label" value={textPlaceholder} />
             <input type="hidden" name="option_value" value="placeholder" />
             <input type="hidden" name="option_score" value="" />
@@ -436,147 +714,6 @@ export default function QuestionPanel({
             <input type="hidden" name="option_score" value="" />
           </>
         )}
-
-        {/* Dimensions */}
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-bold text-gray-600 mb-2">
-              DIMENSIONS <span className="text-magenta">*</span>
-            </label>
-            <span className="text-[10px] text-gray-400">
-              {dims.length} selected
-            </span>
-          </div>
-          <input
-            type="text"
-            value={dimensionSearch}
-            onChange={e => setDimensionSearch(e.target.value)}
-            placeholder="Search dimensions..."
-            className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 mb-2"
-          />
-          <div className="flex flex-wrap gap-1.5 mb-2">
-            <button
-              type="button"
-              onClick={() => setDimensionCategoryFilter('all')}
-              className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
-                dimensionCategoryFilter === 'all'
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              All
-            </button>
-            {dimensionCategories.map(categoryName => (
-              <button
-                key={categoryName}
-                type="button"
-                onClick={() => setDimensionCategoryFilter(categoryName)}
-                className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
-                  dimensionCategoryFilter === categoryName
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {categoryName}
-              </button>
-            ))}
-          </div>
-
-          {state.errors.dimensions && (
-            <p className="text-xs text-red-500 mb-2">
-              {state.errors.dimensions}
-            </p>
-          )}
-
-          {availableDimensions.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">
-              No dimensions available.
-            </p>
-          ) : filteredDimensions.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">
-              No dimensions match your search.
-            </p>
-          ) : (
-            <div className="flex-1 min-h-0 overflow-y-auto rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
-              {filteredDimensions.map(dim => {
-                const isSelected = selectedIds.has(dim.id);
-                const row = dims.find(d => d.dimensionId === dim.id);
-                return (
-                  <div
-                    key={dim.id}
-                    className={`flex items-center gap-2 px-3 py-2.5 transition-colors ${
-                      isSelected ? 'bg-teal-50' : 'hover:bg-gray-50'
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleDimension(dim.id)}
-                      className="flex-1 min-w-0 flex items-center gap-2 text-left"
-                    >
-                      <span
-                        className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected
-                            ? 'bg-teal-500 border-teal-500 text-white'
-                            : 'border-gray-300 bg-white'
-                        }`}
-                      >
-                        {isSelected ? (
-                          <svg
-                            viewBox="0 0 12 12"
-                            fill="currentColor"
-                            className="w-2.5 h-2.5"
-                          >
-                            <path
-                              d="M10 3L5 8.5 2 5.5"
-                              stroke="white"
-                              strokeWidth="2"
-                              fill="none"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        ) : null}
-                      </span>
-                      <div className="min-w-0">
-                        <p
-                          className={`text-xs font-semibold truncate ${
-                            isSelected ? 'text-teal-800' : 'text-gray-700'
-                          }`}
-                        >
-                          {dim.indexName}
-                        </p>
-                        <p className="text-[10px] text-gray-400 truncate">
-                          {dim.categoryName}
-                          {dim.indexKey ? ` · ${dim.indexKey}` : ''}
-                        </p>
-                      </div>
-                    </button>
-
-                    {isSelected ? (
-                      <input
-                        type="number"
-                        placeholder="Wt."
-                        value={row?.weight ?? ''}
-                        onChange={e => updateDimWeight(dim.id, e.target.value)}
-                        className="w-14 px-2 py-1 text-xs bg-white border border-teal-200 rounded-lg outline-none focus:ring-2 focus:ring-teal-300 font-semibold placeholder:font-normal placeholder-gray-400 text-right shrink-0"
-                        min="0"
-                        step="0.01"
-                      />
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Hidden inputs for dim data */}
-          {dims.map((d, i) => (
-            <span key={i}>
-              <input type="hidden" name="dim_id" value={d.dimensionId} />
-              <input type="hidden" name="dim_weight" value={d.weight} />
-            </span>
-          ))}
-        </div>
       </div>
 
       {/* Footer */}

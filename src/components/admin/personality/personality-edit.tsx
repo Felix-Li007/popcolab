@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useActionState } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
-import styles from '@/styles/personality-form.module.css';
+import styles from '@/styles/admin/personalities/personality-form.module.css';
 import { Button, Input, TextArea } from '@/ui';
 import type { PersonalityFormState } from '@/types/personality-type';
 

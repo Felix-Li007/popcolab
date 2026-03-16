@@ -1,8 +1,8 @@
 import { Badge, Button } from '@/ui';
 import { cssVarStyle } from '@/utils/css-helper';
 import type { Dimension, DimensionCategory } from '@/types/dimension-type';
-import styles from '@/styles/dimension-card.module.css';
-import categoryStyles from '@/styles/category-card.module.css';
+import styles from '@/styles/admin/dimensions/dimension-card.module.css';
+import categoryStyles from '@/styles/admin/dimensions/category-card.module.css';
 
 type CategoryCardData = DimensionCategory & { usageCount: number };
 
@@ -28,6 +28,12 @@ type CategoryCardProps = {
 };
 
 type Props = DimensionCardProps | CategoryCardProps;
+
+const INTAKE_FORM_LABELS: Record<Dimension['formNames'][number], string> = {
+  REQUEST: 'LEADER',
+  USER: 'MEMBER',
+  PLAY: 'ASSESS',
+};
 
 const GLOW_COLORS: Record<string, string> = {
   numeric: 'color-mix(in srgb, var(--color-coral-red) 80%, transparent)',
@@ -219,6 +225,7 @@ export default function DimensionCard(props: Props) {
   const hiddenCount =
     dimension.options.length > 3 ? dimension.options.length - 3 : 0;
   const normalizedType = dimension.dataType.toLowerCase();
+  const hasFormNames = dimension.formNames.length > 0;
   const glowStyle = cssVarStyle({
     '--glow-color':
       GLOW_COLORS[normalizedType] ??
@@ -280,6 +287,21 @@ export default function DimensionCard(props: Props) {
         {dimension.indexNotes && (
           <p className={styles.notes}>{dimension.indexNotes}</p>
         )}
+
+        <div className={styles.formSection}>
+          <p className={styles.formLabel}>Forms</p>
+          <div className={styles.formList}>
+            {hasFormNames ? (
+              dimension.formNames.map(formName => (
+                <Badge key={formName} variant="secondary" size="xs">
+                  {INTAKE_FORM_LABELS[formName]}
+                </Badge>
+              ))
+            ) : (
+              <span className={styles.formEmpty}>No forms linked</span>
+            )}
+          </div>
+        </div>
 
         <div className={styles.options}>
           {shownOptions.map((option, index) => (

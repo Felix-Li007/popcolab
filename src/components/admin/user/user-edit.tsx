@@ -20,7 +20,7 @@ import type {
 import UserAvatarPreview from '@/components/admin/user/avatar-preview';
 import ModalShell from '@/components/shared/modal-shell';
 import { Badge, Button } from '@/ui';
-import styles from '@/styles/user-edit.module.css';
+import styles from '@/styles/admin/users/user-edit.module.css';
 
 type Props = {
   user: AdminUserListItem | null;

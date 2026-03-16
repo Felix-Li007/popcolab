@@ -7,7 +7,7 @@ import type {
   AdminUserEditableUpdateInput,
   AdminUserListItem,
 } from '@/types/user-type';
-import styles from '@/styles/user-content.module.css';
+import styles from '@/styles/admin/users/user-content.module.css';
 
 const UserViewModal = dynamic(
   () => import('@/components/admin/user/user-view'),

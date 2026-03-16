@@ -1,0 +1,2 @@
+export const MAX_CATEGORY_LEVEL = 3;
+export const MAX_CATEGORY_DEPTH = MAX_CATEGORY_LEVEL - 1;

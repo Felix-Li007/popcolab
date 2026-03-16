@@ -61,16 +61,16 @@ docker run -d \
    - `npm run dev`
 
 5. Temporary public URL (no custom domain)
-   - `cloudflared tunnel --url http://localhost:3000`
+   - `npx cloudflared tunnel --url http://localhost:3000`
    - The command prints a `https://*.trycloudflare.com` URL.
 
 6. Bind a custom domain to local port `3000` (named tunnel)
    - Login once (creates `~/.cloudflared/cert.pem`):
-     - `cloudflared tunnel login`
+     - `npx cloudflared tunnel login`
    - Create tunnel:
-     - `cloudflared tunnel create popcolab-dev`
+     - `npx cloudflared tunnel create popcolab-dev`
    - Route DNS (replace with your domain):
-     - `cloudflared tunnel route dns popcolab-dev dev.example.com`
+     - `npx cloudflared tunnel route dns popcolab-dev dev.example.com`
    - Create `~/.cloudflared/config.yml`:
 
 ```yaml

@@ -1,10 +1,13 @@
 'use client';
 import { SignIn } from '@clerk/nextjs';
-
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { sanitizeRedirectPath } from '@/utils/auth-redirect';
 
 export default function SignInPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = sanitizeRedirectPath(searchParams.get('redirect'));
+  const email = searchParams.get('email')?.trim() ?? '';
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#19464d] to-[#6390a4] px-4 py-16">
@@ -16,6 +19,9 @@ export default function SignInPage() {
           ← Back to Home
         </button>
         <SignIn
+          fallbackRedirectUrl={redirectUrl}
+          forceRedirectUrl={redirectUrl}
+          initialValues={email ? { emailAddress: email } : undefined}
           appearance={{
             variables: {
               colorPrimary: 'var(--color-magenta)',

@@ -94,6 +94,41 @@ function createTextDimension(
   };
 }
 
+function humanizeKey(value: string): string {
+  return value
+    .split('_')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function createImportedScaleDimension(
+  category: string,
+  index_key: string,
+  hard_filter = false
+): DimensionDefinition {
+  return createScaleDimension(
+    category,
+    index_key,
+    humanizeKey(index_key),
+    hard_filter
+  );
+}
+
+function createImportedTextDimension(
+  category: string,
+  index_key: string,
+  options: string[],
+  hard_filter = false
+): DimensionDefinition {
+  return createTextDimension(
+    category,
+    index_key,
+    humanizeKey(index_key),
+    options,
+    hard_filter
+  );
+}
+
 const dimensionDefinitions: DimensionDefinition[] = [
   createScaleDimension('Experience Design', 'energy_level', 'Energy Level'),
   createScaleDimension('Experience Design', 'activity_level', 'Activity Level'),
@@ -223,54 +258,441 @@ const dimensionDefinitions: DimensionDefinition[] = [
     'Mindful Play',
     'Role Play',
   ]),
-
-  createScaleDimension(
-    'Personality Signals',
-    'personality_joker',
-    'Personality Joker'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_kinesthete',
-    'Personality Kinesthete'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_explorer',
-    'Personality Explorer'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_competitor',
-    'Personality Competitor'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_director',
-    'Personality Director'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_collector',
-    'Personality Collector'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_creator_artist',
-    'Personality Creator & Artist'
-  ),
-  createScaleDimension(
-    'Personality Signals',
-    'personality_storyteller',
-    'Personality Storyteller'
-  ),
 ];
 
-const dimensionIndexes: DimensionSeed[] = dimensionDefinitions.map(
-  ({ options: _options, ...dimension }) => dimension
+const importedDimensionDefinitions: DimensionDefinition[] = [
+  createImportedTextDimension('Accessibility', 'support_category', [
+    'No support (I jump in)',
+    'Light support (a warm-up helps)',
+    'A lot of support (I need strong structure + opt-out options)',
+  ]),
+  createImportedScaleDimension('Accessibility', 'support_need'),
+  createImportedScaleDimension('Team Context', 'psych_safety'),
+  createImportedTextDimension('Team Context', 'social_initiation', [
+    'Start mingling with the first person you see',
+    'Find someone approachable and start a conversation',
+    'Wait until someone comes up to you',
+    'Hang back near the food/edge of the room until you feel comfortable',
+  ]),
+  createImportedTextDimension('Experience Design', 'activity_scenario', [
+    'Jump in immediately',
+    'Try it after watching 1-2 people',
+    'Try it if I can do it with a buddy',
+    'Prefer to observe / pass',
+  ]),
+  createImportedTextDimension('Experience Design', 'spotlight_scenario', [
+    'Love it',
+    "It's okay sometimes",
+    'Prefer small groups',
+    'Prefer to avoid spotlight',
+  ]),
+  createImportedTextDimension('Accessibility', 'supports_helpful', [
+    'Clear step-by-step instructions',
+    'A quick demo example',
+    'Doing it with a buddy',
+    'Choice of roles (talking vs making)',
+    'Permission to pass',
+    'Small-group breakouts',
+    'Quiet corner / breaks',
+    'Time to think before sharing',
+    'No scoring / low competition',
+    'Hands-on task (less talking)',
+  ]),
+  createImportedScaleDimension('Experience Design', 'structure_pref'),
+  createImportedScaleDimension('Accessibility', 'safety_optout'),
+  createImportedScaleDimension('Personality Signals', 'person_joker'),
+  createImportedScaleDimension('Personality Signals', 'person_kinesthete'),
+  createImportedScaleDimension('Personality Signals', 'person_explorer'),
+  createImportedScaleDimension('Personality Signals', 'person_competitor'),
+  createImportedScaleDimension('Personality Signals', 'person_director'),
+  createImportedScaleDimension('Personality Signals', 'person_collector'),
+  createImportedScaleDimension('Personality Signals', 'person_creator_artist'),
+  createImportedScaleDimension('Personality Signals', 'person_storyteller'),
+  createImportedTextDimension('Play Taxonomy', 'play_nature', [
+    'Social (with others)',
+    'Creative/Maker (making things)',
+    'Exploratory (curiosity, discovery)',
+    'Movement/Physical',
+    'Story/Narrative',
+    'Object/Hands-on (tinkering)',
+    'Mindful/Reflective',
+    'Competitive/Challenge',
+    'Imaginative/Role-play',
+  ]),
+  createImportedTextDimension('Play Taxonomy', 'play_types', [
+    'Social Play',
+    'Creative / Maker Play',
+    'Exploratory / Curiosity Play',
+    'Storytelling / Narrative Play',
+    'Object Play',
+  ]),
+  createImportedScaleDimension('Experience Design', 'energy_score'),
+  createImportedScaleDimension('Experience Design', 'noise_level', true),
+  createImportedScaleDimension('Experience Design', 'social_intensity'),
+  createImportedScaleDimension('Experience Design', 'competition_level'),
+  createImportedScaleDimension('Experience Design', 'spotlight_level'),
+  createImportedScaleDimension('Experience Design', 'creative_confidence'),
+  createImportedScaleDimension('Experience Design', 'openness_new'),
+  createImportedTextDimension('Play Taxonomy', 'childhood_play', [
+    'Building LEGO / forts (Object Play)',
+    'Drawing / crafts / making things (Creative Play)',
+    'Sports / tag / running',
+  ]),
+  createImportedTextDimension('Play Taxonomy', 'childhood_open', []),
+  createImportedTextDimension('Accessibility', 'avoid_elements', [
+    'Being put on the spot',
+    'High competition',
+    'Loud noise',
+    'Messy materials',
+    'Physical contact',
+    'Personal sharing',
+  ]),
+  createImportedTextDimension('Accessibility', 'neuro_supports', [
+    'Clear written + spoken instructions',
+    'More time to process',
+    'Breaks / step away',
+    'Quiet/low-sensory',
+  ]),
+  createImportedTextDimension('Accessibility', 'accessibility_notes', []),
+  createImportedTextDimension('Personality Signals', 'enneagram_taken', [
+    'Yes',
+    'No',
+    'Not sure',
+  ]),
+  createImportedTextDimension('Personality Signals', 'enneagram_type', [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'Not sure',
+  ]),
+  createImportedTextDimension('Personality Signals', 'enneagram_wing', [
+    '1w9',
+    '1w2',
+    '2w1',
+    '2w3',
+    '3w2',
+    '3w4',
+    '4w3',
+    '4w5',
+    '5w4',
+    '5w6',
+    '6w5',
+    '6w7',
+    '7w6',
+    '7w8',
+    '8w7',
+    '8w9',
+    '9w8',
+    '9w1',
+    'No',
+  ]),
+  createImportedTextDimension('Personality Signals', 'enneagram_instinct', [
+    'sp/so',
+    'sp/sx',
+    'so/sp',
+    'so/sx',
+    'sx/sp',
+    'sx/so',
+    'Not sure',
+  ]),
+];
+
+const requestDimensionDefinitions: DimensionDefinition[] = [
+  createImportedTextDimension('Team Context', 'activity_for', [
+    'Team Bonding',
+    'Team Building',
+    'Team Development',
+    'Birthday Party',
+    'Staff Party',
+    'Group of friends getting together',
+    'Date night',
+    'Retirement party',
+    'Hosting clients',
+    'Family get together',
+    'Other',
+  ]),
+  createImportedTextDimension('Team Context', 'objective_category', [
+    'Team Bonding',
+    'Team Building',
+    'Team Development',
+    'Not sure',
+  ]),
+  createImportedTextDimension(
+    'Team Context',
+    'team_objective_definitions_info',
+    []
+  ),
+  createImportedTextDimension('Team Context', 'success_criteria', [
+    'Working agreements / norms',
+    'Better communication',
+    'Clearer alignment & expectations',
+    'Action plan / next steps',
+    'More trust & psychological safety',
+    'More connection & belonging',
+    'New skills / tools learned',
+    'More creativity / new ideas',
+    'Lower stress / better morale',
+  ]),
+  createImportedTextDimension(
+    'Accessibility',
+    'constraints_hard',
+    [
+      'No alcohol',
+      'Accessible for mobility needs',
+      'Accessible for sensory needs (low noise/low light)',
+      'Dietary restrictions must be supported',
+      'No physical contact',
+      'Virtual or hybrid only',
+      'Must be travel-friendly (flying teams)',
+    ],
+    true
+  ),
+  createImportedTextDimension('Experience Design', 'constraints_soft', [
+    'Avoid competition',
+    'Avoid being put on the spot',
+    'Avoid personal sharing / vulnerability',
+    'Avoid loud noise',
+    'Avoid messy materials',
+    'Avoid complex instructions',
+    'Keep it low energy',
+  ]),
+  createImportedTextDimension('Experience Design', 'constraint_strictness', [
+    'Soft preferences (try to match)',
+    'Hard filters (do not show if violated)',
+  ]),
+  createImportedScaleDimension('Experience Design', 'debrief_importance'),
+  createImportedTextDimension('Team Context', 'team_context', [
+    'New team / new manager',
+    'Recently reorganized',
+    'Mostly remote / rebuilding',
+  ]),
+  createImportedScaleDimension('Team Context', 'psych_safety'),
+  createImportedScaleDimension('Team Context', 'team_readiness'),
+  createImportedTextDimension('Team Context', 'remote_count', []),
+  createImportedTextDimension('Experience Design', 'date_flexibility', [
+    'Exact date(s) only',
+    'Flexible within 1 week',
+    'Flexible within 2-4 weeks',
+    'Flexible',
+  ]),
+  createImportedTextDimension('Experience Design', 'preferred_time', [
+    'Morning',
+    'Midday / Afternoon',
+    'Evening',
+    'Any',
+  ]),
+  createImportedTextDimension('Experience Design', 'proposal_deadline', []),
+  createImportedTextDimension('Experience Design', 'duration_bucket', [
+    '<45',
+    '45-60',
+    '60-90',
+    '90-120',
+    '120-180',
+    '180+',
+  ]),
+  createImportedTextDimension('Experience Design', 'book_hours', [
+    '0.75',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '4',
+    '4+',
+  ]),
+  createImportedTextDimension('Experience Design', 'delivery_methods', [
+    'On-site (Pop CoLab)',
+    'Off-site (your location)',
+    'Virtual',
+    'Hybrid',
+  ]),
+  createImportedTextDimension('Experience Design', 'location_city', []),
+  createImportedTextDimension('Experience Design', 'location_notes', []),
+  createImportedTextDimension('Team Context', 'budget_range', [
+    '<$500',
+    '$500-$1000',
+    '$1000-$2500',
+    '$2500-$5000',
+    '$5000+',
+    'Not sure yet',
+  ]),
+  createImportedTextDimension('Team Context', 'newsletter_option', [
+    'Yes',
+    'No',
+  ]),
+  createImportedTextDimension('Team Context', 'objectives_support', [
+    'Strengthen team connections',
+    'Spark creativity',
+    'Boost morale',
+    'Improve communication',
+  ]),
+  createImportedTextDimension('Team Context', 'success_criteria_definition', [
+    'People felt more connected',
+    'We have clearer ways of working / norms',
+    'We learned something new',
+    'Energy / morale improved',
+  ]),
+  createImportedTextDimension('Experience Design', 'format_preferences', [
+    'DIY / Make & Take',
+    'Games',
+    'Trivia',
+    'Wellness / Movement',
+    'Learning Lab (talk + activity)',
+  ]),
+  createImportedTextDimension('Experience Design', 'previous_activities', []),
+  createImportedTextDimension('Experience Design', 'lead_preferences', [
+    'Facilitated (host-led)',
+    'Mixed (guided + self-led)',
+    'Stations / drop-in',
+    'Free play (self-led)',
+  ]),
+  createImportedTextDimension('Experience Design', 'provider_preference', [
+    'Pop CoLab only',
+    'Open to Pop CoLab + partners',
+    'Open to Pop CoLab + partners + outside vendors',
+  ]),
+  createImportedTextDimension('Play Taxonomy', 'play_types', [
+    'Social Play',
+    'Creative / Maker Play',
+    'Exploratory / Curiosity Play',
+    'Storytelling / Roleplay',
+  ]),
+  createImportedScaleDimension('Experience Design', 'energy_level'),
+  createImportedScaleDimension('Experience Design', 'activity_level'),
+  createImportedScaleDimension('Experience Design', 'noise_tolerance', true),
+  createImportedTextDimension(
+    'Experience Design',
+    'quiet_requirement',
+    ['No limit', 'Prefer quiet', 'Must be quiet'],
+    true
+  ),
+  createImportedScaleDimension('Experience Design', 'cognitive_load'),
+  createImportedScaleDimension('Experience Design', 'social_intensity'),
+  createImportedScaleDimension('Experience Design', 'competition_level'),
+  createImportedScaleDimension('Experience Design', 'spotlight_level'),
+  createImportedScaleDimension('Experience Design', 'messiness_level'),
+  createImportedScaleDimension('Experience Design', 'creative_confidence'),
+  createImportedScaleDimension('Experience Design', 'openness_surprise'),
+  createImportedScaleDimension('Accessibility', 'neuroinclusive_priority'),
+  createImportedTextDimension(
+    'Accessibility',
+    'accessibility_mobility',
+    [
+      'None',
+      'Wheelchair accessible',
+      'Avoid stairs',
+      'Seated option needed',
+      'Frequent breaks',
+    ],
+    true
+  ),
+  createImportedTextDimension(
+    'Accessibility',
+    'accessibility_sensory',
+    ['None', 'Quiet space available', 'Lower noise preferred', 'Lower scent'],
+    true
+  ),
+  createImportedTextDimension('Accessibility', 'accessibility_hearing', [
+    'None',
+    'Captions (virtual)',
+    'Mic / speaker support',
+    'Face speakers when talking',
+  ]),
+  createImportedTextDimension('Accessibility', 'accessibility_vision', [
+    'None',
+    'Large print',
+    'High contrast visuals',
+    'Verbal instructions',
+    'Other (add in notes)',
+  ]),
+  createImportedTextDimension('Experience Design', 'take_item', [
+    'Yes',
+    'No',
+    'Either',
+  ]),
+  createImportedTextDimension('Experience Design', 'travel_flying', [
+    'No',
+    'Some are flying',
+    'Most are flying',
+  ]),
+  createImportedTextDimension('Experience Design', 'alcohol_policy', [
+    'No alcohol (zero-proof only)',
+    'Alcohol allowed',
+    'Not sure',
+  ]),
+  createImportedTextDimension('Accessibility', 'dietary_considerations', [
+    'None',
+    'Vegetarian',
+    'Vegan',
+    'Gluten-free',
+    'Halal',
+    'Kosher',
+    'Nut allergy',
+    'Dairy-free',
+  ]),
+  createImportedTextDimension('Team Context', 'theme_or_branding', []),
+  createImportedTextDimension('Experience Design', 'customization_level', [
+    'Off-the-shelf',
+    'Some customization',
+    'Fully customized',
+    'Not sure',
+  ]),
+  createImportedTextDimension('Experience Design', 'debrief_level', [
+    'No debrief',
+    'Light debrief (5-10 min)',
+    'Structured debrief (15-20 min)',
+  ]),
+  createImportedTextDimension('Experience Design', 'report_needed', [
+    'No',
+    'Nice to have',
+    'Yes',
+  ]),
+  createImportedTextDimension('Team Context', 'language_preference', [
+    'English',
+    'French',
+    'Bilingual',
+    'Other',
+  ]),
+  createImportedTextDimension('Team Context', 'culture_vibe', [
+    'Playful & silly',
+    'Warm & conversational',
+    'Calm & reflective',
+    'Competitive & energetic',
+  ]),
+  createImportedTextDimension('Team Context', 'additional_notes', []),
+];
+
+function mergeDimensionDefinitions(
+  definitions: DimensionDefinition[]
+): DimensionDefinition[] {
+  const merged = new Map<string, DimensionDefinition>();
+  for (const definition of definitions) {
+    merged.set(definition.index_key, definition);
+  }
+  return Array.from(merged.values());
+}
+
+const mergedDimensionDefinitions = mergeDimensionDefinitions([
+  ...dimensionDefinitions,
+  ...importedDimensionDefinitions,
+  ...requestDimensionDefinitions,
+]);
+
+const dimensionIndexes: DimensionSeed[] = mergedDimensionDefinitions.map(
+  dimension => {
+    const dimensionData = { ...dimension };
+    delete (dimensionData as Partial<DimensionDefinition>).options;
+    return dimensionData;
+  }
 );
 
-const dimensionOptions: DimensionOptionSeed[] = dimensionDefinitions.map(
+const dimensionOptions: DimensionOptionSeed[] = mergedDimensionDefinitions.map(
   dimension => ({
     index_key: dimension.index_key,
     options: createOptionValues(dimension.options),
@@ -280,8 +702,19 @@ const dimensionOptions: DimensionOptionSeed[] = dimensionDefinitions.map(
 export async function seedDimensions(
   prisma: PrismaClient
 ): Promise<Map<string, number>> {
+  async function clearTableIfExists(tableName: string) {
+    await prisma.$executeRawUnsafe(
+      `DO $$ BEGIN IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '${tableName}') THEN EXECUTE 'DELETE FROM "${tableName}"'; END IF; END $$;`
+    );
+  }
+
+  // Clear dependent rows first so restrictive FKs on dimension_index do not block reseeding.
+  await prisma.experienceDimension.deleteMany({});
+  await prisma.questionDimension.deleteMany({});
   await prisma.requestPreference.deleteMany({});
   await prisma.teamAggregate.deleteMany({});
+  await clearTableIfExists('dimension_apply');
+  await clearTableIfExists('form_dimension');
   await prisma.dimensionOption.deleteMany({});
   await prisma.dimensionIndex.deleteMany({});
   await prisma.dimensionCategory.deleteMany({});
@@ -325,6 +758,11 @@ export async function seedDimensions(
       console.warn(
         `⚠️  No dimension with key ${optionSet.index_key} for options`
       );
+      continue;
+    }
+
+    if (optionSet.options.length === 0) {
+      console.log(`  ✅ [${optionSet.index_key}] 0 option value(s)`);
       continue;
     }
 

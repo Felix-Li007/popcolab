@@ -21,7 +21,7 @@ import {
   deleteDimensionAction,
   updateDimensionAction,
 } from '@/actions/dimension-actions';
-import styles from '@/styles/dimension-content.module.css';
+import styles from '@/styles/admin/dimensions/dimension-content.module.css';
 
 type Props = {
   initialData: Dimension[];

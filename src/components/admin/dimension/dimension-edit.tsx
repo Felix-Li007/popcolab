@@ -9,7 +9,8 @@ import type {
   DimensionDataType,
   DimensionFormState,
 } from '@/types/dimension-type';
-import styles from '@/styles/dimension-form.module.css';
+import type { IntakeForm } from '@/types/question-type';
+import styles from '@/styles/admin/dimensions/dimension-form.module.css';
 
 type FormAction = (
   prevState: DimensionFormState,
@@ -18,6 +19,11 @@ type FormAction = (
 
 const EMPTY_STATE: DimensionFormState = { errors: {} };
 const DATA_TYPES: DimensionDataType[] = ['numeric', 'text'];
+const FORM_OPTIONS: Array<{ value: IntakeForm; label: string }> = [
+  { value: 'REQUEST', label: 'LEADER' },
+  { value: 'USER', label: 'MEMBER' },
+  { value: 'PLAY', label: 'ASSESS' },
+];
 
 type Props = {
   isOpen: boolean;
@@ -64,6 +70,9 @@ function DimensionFormBody({
       value: opt.value,
     })) ?? [{ label: '', value: '' }]
   );
+  const [selectedForms, setSelectedForms] = useState<IntakeForm[]>(
+    initial?.formNames ?? []
+  );
 
   useEffect(() => {
     if (state.success) onSuccess();
@@ -90,6 +99,14 @@ function DimensionFormBody({
       prev.map((option, i) =>
         i === index ? { ...option, [field]: value } : option
       )
+    );
+  }
+
+  function toggleFormName(formName: IntakeForm) {
+    setSelectedForms(prev =>
+      prev.includes(formName)
+        ? prev.filter(item => item !== formName)
+        : [...prev, formName]
     );
   }
 
@@ -158,6 +175,40 @@ function DimensionFormBody({
               {state.errors.categoryId}
             </p>
           )}
+        </div>
+
+        <div>
+          <label className="block text-body font-bold text-foreground/75 mb-2">
+            FORM NAME
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {FORM_OPTIONS.map(option => {
+              const checked = selectedForms.includes(option.value);
+              return (
+                <label
+                  key={option.value}
+                  className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-2 text-body font-semibold transition-colors ${
+                    checked
+                      ? 'border-teal-300 bg-teal-50 text-teal-800'
+                      : 'border-gray-200 bg-white text-foreground/70 hover:border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    name="formName"
+                    value={option.value}
+                    checked={checked}
+                    onChange={() => toggleFormName(option.value)}
+                    className="h-4 w-4 rounded border-gray-300 text-teal-700 focus:ring-teal-300"
+                  />
+                  <span>{option.label}</span>
+                </label>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-caption text-foreground/45">
+            Select which intake forms should use this dimension.
+          </p>
         </div>
 
         <div>

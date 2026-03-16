@@ -14,6 +14,7 @@ This directory contains individual model definitions for documentation and refer
 - **TeamVector.prisma** - TeamVector model definition (vector representations of team data)
 - **DimensionCategory.prisma** - DimensionCategory model definition (categories for dimension indexes)
 - **DimensionIndex.prisma** - DimensionIndex model definition (dimension indexes for data analysis and filtering)
+- **DimensionApply.prisma** - DimensionApply model definition (dimension-to-form-name mapping entries)
 - **DimensionOption.prisma** - DimensionOption model definition (allowed values under each dimension index)
 - **Question.prisma** - Question model definition (questions in the system)
 - **QuestionOption.prisma** - QuestionOption model definition (options/choices for questions)
@@ -23,16 +24,14 @@ This directory contains individual model definitions for documentation and refer
 - **UserScore.prisma** - UserScore model definition (calculated scores across dimensions)
 - **UserVector.prisma** - UserVector model definition (vector representations of user responses)
 - **Provider.prisma** - Provider model definition (authentication or service providers)
+- **Category.prisma** - Category model definition (hierarchical categories for experiences)
 - **Experience.prisma** - Experience model definition (experiences/activities offered by providers)
 - **ExperienceCalendar.prisma** - ExperienceCalendar model definition (calendar schedule slots for experiences)
-- **ExperienceDimension.prisma** - ExperienceDimension model definition (relationship between experiences and dimensions with scores)
+- **ExperienceDimension.prisma** - ExperienceDimension model definition (relationship between experiences and dimensions with expected values)
 - **Request.prisma** - Request model definition (user requests for experiences)
 - **InvitedUser.prisma** - InvitedUser model definition (users invited to join a request)
 - **Proposal.prisma** - Proposal model definition (proposals matching requests with experiences)
 - **RequestPreference.prisma** - RequestPreference model definition (user preferences for dimensions in a request)
-- **IntakeForm.prisma** - IntakeForm model definition (admin-managed intake forms used to collect user information)
-- **FormQuestion.prisma** - FormQuestion model definition (join table linking intake forms with questions)
-- **FormDimension.prisma** - FormDimension model definition (join table linking intake forms with dimensions)
 
 ## Usage
 

@@ -6,7 +6,7 @@ import type { AdminUserListItem } from '@/types/user-type';
 import UserAvatarPreview from '@/components/admin/user/avatar-preview';
 import ModalShell from '@/components/shared/modal-shell';
 import { Badge } from '@/ui';
-import styles from '@/styles/user-view.module.css';
+import styles from '@/styles/admin/users/user-view.module.css';
 
 type Props = {
   user: AdminUserListItem | null;

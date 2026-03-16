@@ -100,7 +100,7 @@ export async function enqueueRequestReady(
       request_status: true,
       invited_users: {
         select: {
-          invite_status: true,
+          invited_status: true,
         },
       },
       proposals: {
@@ -135,7 +135,7 @@ export async function enqueueRequestReady(
   const allInvitedAccepted =
     request.invited_users.length > 0 &&
     request.invited_users.every(
-      invite => invite.invite_status !== InviteStatus.pending
+      invite => invite.invited_status !== InviteStatus.pending
     );
   const expired =
     request.expired_at !== null &&

@@ -5,7 +5,7 @@ import { useState } from 'react';
 import type { Personality } from '@/types/personality-type';
 import { cssVarStyle } from '@/utils/css-helper';
 import styles from '@/styles/play-personality.module.css';
-import cardStyles from '@/styles/personality-card.module.css';
+import cardStyles from '@/styles/admin/personalities/personality-card.module.css';
 import ctaStyles from '@/styles/landing-ctasection.module.css';
 
 type PersonalityMatch = {

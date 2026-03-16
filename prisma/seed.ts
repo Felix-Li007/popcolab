@@ -2,14 +2,16 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/libs/prisma/client';
 import { seedDimensions } from './seeds/dimension.seed';
-import { seedIntakeForms } from './seeds/intake-forms.seed';
+import { seedExperienceCategories } from './seeds/experience-categories.seed';
+import { seedExperiencesFromWorkbook } from './seeds/experiences.seed';
 import { seedPersonalities } from './seeds/personalities.seed';
+import { seedProviders } from './seeds/provider.seed';
 import {
   seedQuestionDimensionMappings,
   seedQuestions,
 } from './seeds/questions.seed';
+import { seedRequests } from './seeds/request.seed';
 import { getSeedSchemaState } from './seeds/schema-state';
-import { seedUsersAndTeams } from './seeds/users.seed';
 
 const connectionString = process.env.DATABASE_URL!;
 const adapter = new PrismaPg({ connectionString });
@@ -21,6 +23,8 @@ async function main() {
   const schemaState = await getSeedSchemaState(prisma);
 
   await seedPersonalities(prisma);
+  await seedProviders(prisma);
+  await seedExperienceCategories(prisma);
 
   const questionIdByOrder = await seedQuestions(prisma, schemaState);
   const dimensionIdByKey = await seedDimensions(prisma);
@@ -30,25 +34,10 @@ async function main() {
     questionIdByOrder,
     dimensionIdByKey
   );
+  await seedExperiencesFromWorkbook(prisma);
+  await seedRequests(prisma);
 
-  const { userIdByEmail, userCount, teamCount } = await seedUsersAndTeams(
-    prisma,
-    {
-      hasUserStatusColumn: schemaState.hasUserStatusColumn,
-      dimensionIdByKey,
-    }
-  );
-
-  await seedIntakeForms(prisma, {
-    ...schemaState,
-    userIdByEmail,
-    questionIdByOrder,
-    dimensionIdByKey,
-  });
-
-  console.log(
-    `✅ Created ${userCount} users, ${teamCount} teams, and related records`
-  );
+  console.log('✅ Core seed data created');
   console.log('🎉 Seed completed!');
 }
 

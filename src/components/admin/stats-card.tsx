@@ -1,4 +1,4 @@
-import styles from '@/styles/stats-card.module.css';
+import styles from '@/styles/admin/stats-card.module.css';
 
 export type StatsCardProps = {
   icon: React.ReactNode;

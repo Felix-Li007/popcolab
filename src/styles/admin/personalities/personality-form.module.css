@@ -1,0 +1,24 @@
+@reference "../../../app/globals.css";
+
+.panel {
+  max-width: 39rem;
+}
+
+.body {
+  padding: 0;
+  max-height: none;
+  overflow: hidden;
+}
+
+.footer {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.btnCreate {
+  flex: 2;
+}
+
+.btnCancel {
+  flex: 1;
+}

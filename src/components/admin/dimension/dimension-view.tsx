@@ -3,13 +3,19 @@
 import ModalShell from '@/components/shared/modal-shell';
 import { Badge, Button } from '@/ui';
 import type { Dimension } from '@/types/dimension-type';
-import styles from '@/styles/dimension-view.module.css';
+import styles from '@/styles/admin/dimensions/dimension-view.module.css';
 
 type Props = {
   isOpen: boolean;
   dimension: Dimension | null;
   onClose: () => void;
   onEdit: (id: number) => void;
+};
+
+const INTAKE_FORM_LABELS: Record<Dimension['formNames'][number], string> = {
+  REQUEST: 'LEADER',
+  USER: 'MEMBER',
+  PLAY: 'ASSESS',
 };
 
 export default function DimensionView({
@@ -50,6 +56,25 @@ export default function DimensionView({
           <Badge variant="default" size="sm">
             {dimension.categoryName}
           </Badge>
+        </div>
+
+        <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+          <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-2">
+            Forms
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {dimension.formNames.length > 0 ? (
+              dimension.formNames.map(formName => (
+                <Badge key={formName} variant="secondary" size="xs">
+                  {INTAKE_FORM_LABELS[formName]}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-body text-foreground/50 italic">
+                No forms linked.
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

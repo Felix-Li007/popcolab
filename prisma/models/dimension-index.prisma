@@ -11,9 +11,10 @@ model DimensionIndex {
   created_at            DateTime              @default(now()) @db.Timestamp(6)
   updated_at            DateTime              @updatedAt @db.Timestamp(6)
   category              DimensionCategory     @relation(fields: [category_id], references: [id])
+  dimension_applies     DimensionApply[]
   dimension_options     DimensionOption[]
   experience_dimensions ExperienceDimension[]
-  form_dimensions       FormDimension[]
+  questions             Question[]
   question_dimensions   QuestionDimension[]
   request_preferences   RequestPreference[]
 

@@ -1,9 +1,13 @@
 'use client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { SignUp } from '@clerk/nextjs';
+import { sanitizeRedirectPath } from '@/utils/auth-redirect';
 
 export default function SignUpPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = sanitizeRedirectPath(searchParams.get('redirect'));
+  const email = searchParams.get('email')?.trim() ?? '';
   return (
     <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-[#19464d] to-[#6390a4] px-4 py-16">
       <div className="flex flex-col items-start gap-6 w-full max-w-md">
@@ -15,6 +19,9 @@ export default function SignUpPage() {
         </button>
         {/* Clerk form */}
         <SignUp
+          fallbackRedirectUrl={redirectUrl}
+          forceRedirectUrl={redirectUrl}
+          initialValues={email ? { emailAddress: email } : undefined}
           appearance={{
             variables: {
               colorPrimary: 'var(--color-magenta)',

@@ -9,7 +9,6 @@ model Request {
   id                  Int                 @id @default(autoincrement())
   user_id             Int
   objective_category  String              @db.VarChar(20)
-  invite_code         String              @db.VarChar(6)
   request_status      RequestStatus       @default(opened)
   budget_min          Decimal?            @db.Decimal(19, 0)
   budget_max          Decimal?            @db.Decimal(19, 0)

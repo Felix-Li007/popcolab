@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { USER_STATUS_BADGE } from '@/constants/user-status';
 import type { AdminUserListItem } from '@/types/user-type';
 import { Badge } from '@/ui';
-import styles from '@/styles/user-card.module.css';
+import styles from '@/styles/admin/users/user-card.module.css';
 
 type Props = {
   user: AdminUserListItem;

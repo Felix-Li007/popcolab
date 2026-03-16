@@ -7,7 +7,7 @@ import type {
   DimensionCategory,
   DimensionCategoryFormState,
 } from '@/types/dimension-type';
-import styles from '@/styles/category-form.module.css';
+import styles from '@/styles/admin/category-form.module.css';
 
 type FormAction = (
   prevState: DimensionCategoryFormState,

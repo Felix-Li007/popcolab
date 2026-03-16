@@ -1,0 +1,65 @@
+@reference "../../../app/globals.css";
+
+.root {
+  @apply flex flex-col;
+  min-height: calc(100dvh - 6rem);
+}
+
+.content {
+  @apply flex flex-1 min-h-0 px-4 py-3;
+}
+
+.panel {
+  @apply w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden;
+}
+
+.tabs {
+  @apply border-b border-gray-100 px-4 py-2 flex flex-wrap items-center gap-2 shrink-0;
+}
+
+.tab {
+  @apply h-7 min-w-0 rounded-full px-2 text-[11px] font-semibold text-gray-500 inline-flex items-center gap-1.5;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.tab:hover {
+  @apply bg-gray-100 text-gray-700;
+}
+
+.tabActive {
+  color: white;
+  background: var(--color-teal-deep);
+}
+
+.tabBadge {
+  @apply bg-gray-100 text-gray-500;
+}
+
+.tabBadgeActive {
+  color: white;
+  background: rgb(255 255 255 / 20%);
+}
+
+.listArea {
+  @apply flex-1 overflow-y-auto p-3;
+}
+
+.grid {
+  @apply grid grid-cols-1 gap-3 content-start;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 256px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

@@ -1,3 +1,5 @@
+import type { IntakeForm } from '@/types/question-type';
+
 export type DimensionDataType = 'numeric' | 'scale' | 'text';
 
 export type DimensionCategory = {
@@ -24,6 +26,7 @@ export type Dimension = {
   scaleMin?: number | null;
   scaleMax?: number | null;
   options: DimensionOption[];
+  formNames: IntakeForm[];
   createdAt?: Date;
   updatedAt?: Date;
 };

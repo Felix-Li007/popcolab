@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from '@/styles/sidenav-menu.module.css';
+import styles from '@/styles/admin/sidenav-menu.module.css';
 import { getBadge } from '@/utils/menu-helper';
 import { menuSection, BadgeCounts } from '@/types/menu-item';
 import { menuIcons } from '@/constants/menu-icons';

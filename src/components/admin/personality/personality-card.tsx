@@ -1,6 +1,6 @@
 import { Badge, Button } from '@/ui';
 import { cssVarStyle } from '@/utils/css-helper';
-import styles from '@/styles/personality-card.module.css';
+import styles from '@/styles/admin/personalities/personality-card.module.css';
 
 export type PersonalityCardProps = {
   type: string;

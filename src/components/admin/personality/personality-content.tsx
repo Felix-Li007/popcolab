@@ -11,7 +11,7 @@ import type {
   PersonalityActionHandlers,
 } from '@/types/personality-type';
 import { usePersonality } from '@/hooks/usePersonality';
-import contentStyles from '@/styles/personality-content.module.css';
+import contentStyles from '@/styles/admin/personalities/personality-content.module.css';
 
 const filterTabs = ['All', 'Active', 'Draft'] as const;
 type FilterTab = (typeof filterTabs)[number];

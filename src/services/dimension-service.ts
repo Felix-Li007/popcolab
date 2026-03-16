@@ -7,6 +7,7 @@ import type {
   DimensionCategoryFormState,
   DimensionOption,
 } from '@/types/dimension-type';
+import type { IntakeForm } from '@/types/question-type';
 
 export type {
   Dimension as DimensionData,
@@ -25,6 +26,7 @@ type UpsertDimensionInput = {
   scaleMin: number | null;
   scaleMax: number | null;
   options: DimensionOption[];
+  formNames: IntakeForm[];
 };
 
 type DimensionRow = Awaited<
@@ -37,7 +39,8 @@ type DimensionCategoryRow = Awaited<
 export function mapDimensionRow(
   row: DimensionRow & { category: { category_name: string } },
   indexNotes?: string | null,
-  options?: DimensionOption[]
+  options?: DimensionOption[],
+  formNames?: IntakeForm[]
 ): Dimension {
   return {
     id: row.id,
@@ -52,6 +55,7 @@ export function mapDimensionRow(
     scaleMin: row.scale_min,
     scaleMax: row.scale_max,
     options: options ?? [],
+    formNames: formNames ?? [],
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -181,6 +185,35 @@ async function getOptionsByDimensionId(): Promise<
   }
 }
 
+async function getFormNamesByDimensionId(): Promise<Map<number, IntakeForm[]>> {
+  try {
+    const rows = await prisma.$queryRaw<
+      { dimension_id: number; form_name: string }[]
+    >`SELECT "dimension_id", "form_name"::text AS "form_name" FROM "dimension_apply" ORDER BY "id" ASC`;
+
+    const map = new Map<number, IntakeForm[]>();
+    for (const row of rows) {
+      if (
+        row.form_name !== 'REQUEST' &&
+        row.form_name !== 'USER' &&
+        row.form_name !== 'PLAY'
+      ) {
+        continue;
+      }
+
+      const forms = map.get(row.dimension_id) ?? [];
+      if (!forms.includes(row.form_name)) {
+        forms.push(row.form_name);
+      }
+      map.set(row.dimension_id, forms);
+    }
+
+    return map;
+  } catch {
+    return new Map<number, IntakeForm[]>();
+  }
+}
+
 async function replaceDimensionOptions(
   dimensionId: number,
   options: DimensionOption[]
@@ -195,21 +228,48 @@ async function replaceDimensionOptions(
   }
 }
 
+async function replaceDimensionFormNames(
+  dimensionId: number,
+  formNames: IntakeForm[]
+): Promise<void> {
+  try {
+    await prisma.dimensionApply.deleteMany({
+      where: { dimension_id: dimensionId },
+    });
+
+    if (formNames.length === 0) {
+      return;
+    }
+
+    await prisma.dimensionApply.createMany({
+      data: formNames.map(formName => ({
+        dimension_id: dimensionId,
+        form_name: formName,
+      })),
+    });
+  } catch {
+    // Ignore when table/enum isn't migrated yet.
+  }
+}
+
 export async function getDimensions(): Promise<Dimension[]> {
-  const [indexNotesById, optionsByDimensionId, rows] = await Promise.all([
-    getIndexNotesById(),
-    getOptionsByDimensionId(),
-    prisma.dimensionIndex.findMany({
-      include: { category: true },
-      orderBy: [{ category_id: 'asc' }, { id: 'asc' }],
-    }),
-  ]);
+  const [indexNotesById, optionsByDimensionId, formNamesByDimensionId, rows] =
+    await Promise.all([
+      getIndexNotesById(),
+      getOptionsByDimensionId(),
+      getFormNamesByDimensionId(),
+      prisma.dimensionIndex.findMany({
+        include: { category: true },
+        orderBy: [{ category_id: 'asc' }, { id: 'asc' }],
+      }),
+    ]);
 
   return rows.map(row =>
     mapDimensionRow(
       row,
       indexNotesById.get(row.id),
-      optionsByDimensionId.get(row.id)
+      optionsByDimensionId.get(row.id),
+      formNamesByDimensionId.get(row.id)
     )
   );
 }
@@ -261,6 +321,7 @@ export async function createDimension(
   }
 
   await replaceDimensionOptions(created.id, input.options);
+  await replaceDimensionFormNames(created.id, input.formNames);
 }
 
 export async function updateDimension(
@@ -287,6 +348,7 @@ export async function updateDimension(
   }
 
   await replaceDimensionOptions(id, input.options);
+  await replaceDimensionFormNames(id, input.formNames);
 }
 
 export async function deleteDimension(id: number): Promise<void> {

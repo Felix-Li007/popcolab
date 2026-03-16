@@ -1,10 +1,10 @@
 model DimensionOption {
-  id            Int            @id @default(autoincrement())
-  dimension_id  Int
-  option_label  String         @db.VarChar(50)
-  option_value  String         @db.VarChar(50)
-  created_at    DateTime       @default(now()) @db.Timestamp(6)
-  updated_at    DateTime       @updatedAt @db.Timestamp(6)
+  id              Int            @id @default(autoincrement())
+  dimension_id    Int
+  option_label    String         @db.VarChar(255)
+  option_value    String         @db.VarChar(255)
+  created_at      DateTime       @default(now()) @db.Timestamp(6)
+  updated_at      DateTime       @updatedAt @db.Timestamp(6)
   dimension_index DimensionIndex @relation(fields: [dimension_id], references: [id])
 
   @@map("dimension_option")

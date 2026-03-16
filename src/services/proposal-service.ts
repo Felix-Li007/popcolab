@@ -55,29 +55,25 @@ export async function createFittedProposal(job: RequestQueueJob) {
         request.duration_max !== null
           ? { lte: request.duration_max }
           : undefined,
-      starting_price: {
-        ...(request.budget_min !== null ? { gte: request.budget_min } : {}),
-        ...(request.budget_max !== null ? { lte: request.budget_max } : {}),
-      },
     },
     orderBy: [
-      { starting_price: 'asc' },
+      { popularity_index: 'desc' },
       { duration_max: 'asc' },
       { id: 'asc' },
     ],
     select: {
       id: true,
-      experience_name: true,
+      experience_title: true,
     },
   });
 
   const fallbackCandidate =
     candidate ??
     (await prisma.experience.findFirst({
-      orderBy: [{ starting_price: 'asc' }, { id: 'asc' }],
+      orderBy: [{ popularity_index: 'desc' }, { id: 'asc' }],
       select: {
         id: true,
-        experience_name: true,
+        experience_title: true,
       },
     }));
 
@@ -94,7 +90,7 @@ export async function createFittedProposal(job: RequestQueueJob) {
         objective_alignment: `Generated from ${job.trigger}`,
         base_score: 100,
         risk_adjustment: 0,
-        rationale_desc: `Auto-generated for request ${request.id} using experience ${fallbackCandidate.experience_name}.`,
+        rationale_desc: `Auto-generated for request ${request.id} using experience ${fallbackCandidate.experience_title}.`,
       },
       select: {
         id: true,

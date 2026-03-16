@@ -1,7 +1,7 @@
 import type { AdminTeamCardItem } from '@/types/team-type';
 import { Button } from '@/ui';
 import { getTeamMemberAvatarText } from '@/utils/team-member';
-import styles from '@/styles/team-card.module.css';
+import styles from '@/styles/admin/users/team-card.module.css';
 
 type Props = {
   team: AdminTeamCardItem;

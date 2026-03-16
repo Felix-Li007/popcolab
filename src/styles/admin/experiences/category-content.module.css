@@ -1,0 +1,165 @@
+@reference "../../../app/globals.css";
+
+.root {
+  @apply flex flex-col gap-4 px-4 py-3;
+  height: calc(100dvh - 6rem);
+  min-height: calc(100dvh - 6rem);
+}
+
+.summaryRow {
+  @apply flex flex-wrap items-center justify-end gap-2;
+}
+
+.summaryPill {
+  @apply rounded-full border border-white/60 bg-white/85 px-3 py-1 text-xs font-bold text-gray-700 shadow-sm;
+}
+
+.toolbar {
+  @apply overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm;
+}
+
+.columns {
+  @apply grid flex-1 min-h-0 gap-4;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.treePanel,
+.detailPanel {
+  @apply flex min-h-[20rem] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm;
+}
+
+.panelHeader {
+  @apply border-b border-gray-100 px-4 py-3;
+}
+
+.panelTitle {
+  @apply text-sm font-bold text-gray-800;
+}
+
+.panelSubtitle {
+  @apply mt-1 text-xs text-gray-500;
+}
+
+.panelBody {
+  @apply min-h-0 flex-1 overflow-y-auto p-3;
+}
+
+.detailBody {
+  @apply flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4;
+}
+
+.treeList,
+.treeChildren {
+  @apply m-0 list-none p-0;
+}
+
+.treeNode + .treeNode {
+  @apply mt-2;
+}
+
+.treeChildren {
+  @apply mt-2;
+}
+
+.treeRow {
+  @apply flex items-start gap-3 rounded-2xl border border-gray-100 bg-gray-50/70 px-3 py-3 transition;
+}
+
+.treeRow:hover {
+  @apply border-magenta bg-magenta/5 shadow-sm;
+}
+
+.treeRowActive {
+  @apply border-magenta bg-magenta/5 shadow-sm;
+}
+
+.treeToggle {
+  @apply mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition;
+}
+
+.treeToggle:hover {
+  border-color: rgb(209 213 219);
+  color: rgb(55 65 81);
+}
+
+.treeToggleSpacer {
+  @apply block h-7 w-7 shrink-0;
+}
+
+.treeToggleIcon {
+  @apply h-4 w-4 transition-transform;
+}
+
+.treeToggleIconOpen {
+  transform: rotate(90deg);
+}
+
+.treeMain {
+  @apply min-w-0 flex-1 text-left;
+}
+
+.treeTitleRow {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.treeTitle {
+  @apply text-sm font-bold text-gray-800;
+}
+
+.treeMeta {
+  @apply mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500;
+}
+
+.treeActions {
+  @apply flex shrink-0 items-center gap-1;
+}
+
+.treeDelete {
+  color: inherit;
+}
+
+.treeDelete:hover {
+  color: var(--color-coral-red);
+}
+
+.detailHeader {
+  @apply flex items-start justify-between gap-3;
+}
+
+.detailMeta {
+  @apply text-xs font-bold uppercase tracking-wide text-gray-400;
+}
+
+.detailTitle {
+  @apply mt-1 text-lg font-bold text-gray-800;
+}
+
+.detailStats {
+  @apply grid gap-3 sm:grid-cols-3;
+}
+
+.detailStat {
+  @apply rounded-2xl border border-gray-100 bg-gray-50 px-3 py-3;
+}
+
+.detailStatLabel {
+  @apply block text-[10px] font-bold uppercase tracking-wide text-gray-400;
+}
+
+.detailStatValue {
+  @apply mt-1 block text-sm font-semibold text-gray-800;
+}
+
+.noteBox {
+  @apply rounded-2xl border border-gray-100 bg-white px-4 py-3 text-sm text-gray-600 shadow-sm;
+}
+
+.detailActions {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+@media (min-width: 1280px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

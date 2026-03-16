@@ -7,7 +7,7 @@ import {
   getTeamMemberAvatarText,
   getTeamMemberNameLine,
 } from '@/utils/team-member';
-import styles from '@/styles/team-view.module.css';
+import styles from '@/styles/admin/users/team-view.module.css';
 
 type Props = {
   team: AdminTeamCardItem | null;

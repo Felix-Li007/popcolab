@@ -1,6 +1,5 @@
 import 'server-only';
 import { Prisma } from '@/libs/prisma/client';
-import { clerkClient } from '@clerk/nextjs/server';
 import { prisma } from '@/libs/prisma-client';
 import {
   USER_STATUS,

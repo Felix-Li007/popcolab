@@ -4,6 +4,8 @@ export type QuestionType =
   | 'scale'
   | 'text_input';
 
+export type IntakeForm = 'REQUEST' | 'USER' | 'PLAY';
+
 export type QuestionOption = {
   id?: number;
   label: string;
@@ -20,6 +22,12 @@ export type QuestionDimension = {
   weight: number | null;
 };
 
+export type DimensionOption = {
+  id?: number;
+  label: string;
+  value: string;
+};
+
 export type DimensionIndex = {
   id: number;
   indexKey?: string | null;
@@ -30,10 +38,12 @@ export type DimensionIndex = {
   hardFilter: boolean;
   scaleMin?: number | null;
   scaleMax?: number | null;
+  options: DimensionOption[];
 };
 
 export type Question = {
   id?: number;
+  formName: IntakeForm;
   type: QuestionType;
   text: string;
   description: string;

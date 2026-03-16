@@ -1,6 +1,6 @@
 import PersonalityCard from './personality-card';
 import type { Personality } from '@/types/personality-type';
-import styles from '@/styles/personality-card.module.css';
+import styles from '@/styles/admin/personalities/personality-card.module.css';
 
 type PersonalityGridProps = {
   personalities: Personality[];

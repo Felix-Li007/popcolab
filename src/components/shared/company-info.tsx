@@ -7,7 +7,7 @@ import {
   saveCompanyAction,
   type SaveCompanyFormState,
 } from '@/actions/user-actions';
-import styles from '@/styles/company-info.module.css';
+import styles from '@/styles/admin/users/company-info.module.css';
 import type { CompanyInfo } from '@/types/company-type';
 import { Button } from '@/ui';
 

@@ -1,0 +1,43 @@
+@reference "../../app/globals.css";
+
+.panel {
+  max-width: 34rem;
+}
+
+.body {
+  padding: 0;
+  max-height: none;
+  overflow: hidden;
+}
+
+.form {
+  @apply flex h-full flex-col;
+}
+
+.content {
+  @apply flex-1 overflow-y-auto px-6 py-5 space-y-4;
+}
+
+.formError {
+  @apply rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-body text-red-700;
+}
+
+.usageBox {
+  @apply rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5;
+}
+
+.usageLabel {
+  @apply text-badge font-bold uppercase tracking-wide text-foreground/45;
+}
+
+.usageValue {
+  @apply mt-0.5 text-heading font-semibold text-foreground/80;
+}
+
+.usageHint {
+  @apply mt-1 text-caption text-amber-600;
+}
+
+.footer {
+  @apply shrink-0 border-t border-gray-100 bg-white px-6 py-4 flex items-center justify-end gap-3;
+}

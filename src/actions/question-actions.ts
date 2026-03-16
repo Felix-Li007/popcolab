@@ -36,12 +36,14 @@ function parseDimensions(
   const ids = formData.getAll('dim_id') as string[];
   const weights = formData.getAll('dim_weight') as string[];
 
-  return ids
+  const dimensions = ids
     .map((id, i) => ({
       dimensionId: parseInt(id),
       weight: weights[i] ? parseFloat(weights[i]) : null,
     }))
     .filter(d => !isNaN(d.dimensionId));
+
+  return dimensions.length > 0 ? [dimensions[0]] : [];
 }
 
 export async function getDimensionIndexesAction(): Promise<DimensionIndex[]> {

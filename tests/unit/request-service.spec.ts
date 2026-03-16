@@ -146,8 +146,8 @@ describe('request-service', () => {
         expired_at: null,
         request_status: REQUEST_STATUS.OPENED,
         invited_users: [
-          { invite_status: InviteStatus.accepted },
-          { invite_status: InviteStatus.rejected },
+          { invited_status: InviteStatus.accepted },
+          { invited_status: InviteStatus.rejected },
         ],
         proposals: [],
       });
@@ -269,7 +269,7 @@ describe('request-service', () => {
         id: 22,
         expired_at: new Date('2026-03-09T12:10:00.000Z'),
         request_status: REQUEST_STATUS.OPENED,
-        invited_users: [{ invite_status: InviteStatus.pending }],
+        invited_users: [{ invited_status: InviteStatus.pending }],
         proposals: [],
       });
 
@@ -287,8 +287,8 @@ describe('request-service', () => {
         expired_at: null,
         request_status: REQUEST_STATUS.OPENED,
         invited_users: [
-          { invite_status: InviteStatus.accepted },
-          { invite_status: InviteStatus.rejected },
+          { invited_status: InviteStatus.accepted },
+          { invited_status: InviteStatus.rejected },
         ],
         proposals: [],
       });

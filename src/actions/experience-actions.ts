@@ -1,0 +1,103 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import type { ExperienceFormState } from '@/types/experience-type';
+import {
+  createExperience,
+  deleteExperience,
+  updateExperience,
+  validateExperienceFields,
+} from '@/services/experience-service';
+
+const ADMIN_PATHS = ['/admin', '/admin/experiences'];
+
+function revalidateAdminPaths() {
+  ADMIN_PATHS.forEach(path => revalidatePath(path));
+}
+
+function parseIntegerField(value: FormDataEntryValue | null): number | null {
+  const text = value?.toString().trim() ?? '';
+  if (!text) return null;
+  const parsed = Number.parseInt(text, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseExperienceForm(formData: FormData) {
+  const dimensionValues = Array.from(formData.entries())
+    .filter(([key]) => key.startsWith('dimension_'))
+    .map(([key, value]) => {
+      const dimensionId = Number.parseInt(key.replace('dimension_', ''), 10);
+      return {
+        dimensionId,
+        expectedValue: value.toString().trim(),
+      };
+    })
+    .filter(
+      value =>
+        Number.isInteger(value.dimensionId) &&
+        value.dimensionId > 0 &&
+        value.expectedValue
+    );
+
+  return {
+    experienceTitle: formData.get('experienceTitle')?.toString().trim() ?? '',
+    providerId: parseIntegerField(formData.get('providerId')) ?? 0,
+    categoryId: parseIntegerField(formData.get('categoryId')) ?? 0,
+    popularityIndex: parseIntegerField(formData.get('popularityIndex')) ?? -1,
+    durationMin: parseIntegerField(formData.get('durationMin')) ?? -1,
+    durationMax: parseIntegerField(formData.get('durationMax')) ?? -1,
+    capacityMax: parseIntegerField(formData.get('capacityMax')) ?? -1,
+    leadType: formData.get('leadType')?.toString().trim() ?? '',
+    deliveryMethods: formData.get('deliveryMethods')?.toString().trim() ?? '',
+    dietaryConsiderations:
+      formData.get('dietaryConsiderations')?.toString().trim() || null,
+    takeItem: parseIntegerField(formData.get('takeItem')),
+    travelFlying: parseIntegerField(formData.get('travelFlying')),
+    dimensionValues,
+  };
+}
+
+function mapExperienceError(error: unknown): ExperienceFormState['errors'] {
+  if (error instanceof Error) return { _form: error.message };
+  return { _form: 'Unexpected error. Please try again.' };
+}
+
+export async function createExperienceAction(
+  _prevState: ExperienceFormState,
+  formData: FormData
+): Promise<ExperienceFormState> {
+  const parsed = parseExperienceForm(formData);
+  const errors = validateExperienceFields(parsed);
+  if (Object.keys(errors).length > 0) return { errors };
+
+  try {
+    await createExperience(parsed);
+    revalidateAdminPaths();
+    return { errors: {}, success: true };
+  } catch (error) {
+    return { errors: mapExperienceError(error) };
+  }
+}
+
+export async function updateExperienceAction(
+  id: number,
+  _prevState: ExperienceFormState,
+  formData: FormData
+): Promise<ExperienceFormState> {
+  const parsed = parseExperienceForm(formData);
+  const errors = validateExperienceFields(parsed);
+  if (Object.keys(errors).length > 0) return { errors };
+
+  try {
+    await updateExperience(id, parsed);
+    revalidateAdminPaths();
+    return { errors: {}, success: true };
+  } catch (error) {
+    return { errors: mapExperienceError(error) };
+  }
+}
+
+export async function deleteExperienceAction(id: number): Promise<void> {
+  await deleteExperience(id);
+  revalidateAdminPaths();
+}

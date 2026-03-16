@@ -1,0 +1,31 @@
+@reference "../../../app/globals.css";
+
+.panel {
+  max-width: 39rem;
+}
+
+.emoji {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.footer {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.btnClose {
+  flex: 1;
+}
+
+.btnEdit {
+  flex: 2;
+}
+
+.scrollArea {
+  scrollbar-width: none;
+}
+
+.scrollArea::-webkit-scrollbar {
+  display: none;
+}

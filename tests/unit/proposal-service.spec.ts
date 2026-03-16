@@ -117,7 +117,7 @@ describe('proposal-service', () => {
     });
     prismaMock.experience.findFirst.mockResolvedValue({
       id: 55,
-      experience_name: 'Workshop',
+      experience_title: 'Workshop',
     });
     prismaMock.$transaction.mockImplementation(async callback => callback(tx));
 
@@ -130,19 +130,15 @@ describe('proposal-service', () => {
     expect(prismaMock.experience.findFirst).toHaveBeenCalledWith({
       where: {
         duration_max: { lte: 90 },
-        starting_price: {
-          gte: 100,
-          lte: 200,
-        },
       },
       orderBy: [
-        { starting_price: 'asc' },
+        { popularity_index: 'desc' },
         { duration_max: 'asc' },
         { id: 'asc' },
       ],
       select: {
         id: true,
-        experience_name: true,
+        experience_title: true,
       },
     });
     expect(tx.proposal.create).toHaveBeenCalledWith({
@@ -197,7 +193,7 @@ describe('proposal-service', () => {
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce({
         id: 66,
-        experience_name: 'Fallback experience',
+        experience_title: 'Fallback experience',
       });
     prismaMock.$transaction.mockImplementation(async callback => callback(tx));
 

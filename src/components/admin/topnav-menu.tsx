@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import styles from '@/styles/topnav-menu.module.css';
+import styles from '@/styles/admin/topnav-menu.module.css';
 import { getBadge } from '@/utils/menu-helper';
 import { getMenuItem, topTabs, BadgeCounts } from '@/types/menu-item';
 import UserAvatar from '@/components/shared/user-avatar';

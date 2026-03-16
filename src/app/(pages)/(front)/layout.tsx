@@ -1,5 +1,4 @@
 import Header from '@/components/front/page-header';
-import type { Metadata } from 'next';
 import PageFooter from '@/components/shared/page-footer';
 import { getCompanyAction } from '@/actions/user-actions';
 import { getCurrentAuthContext } from '@/services/clerk-service';

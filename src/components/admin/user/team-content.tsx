@@ -3,7 +3,7 @@ import SearchPanel from '@/components/admin/common/search-panel';
 import TeamClient from '@/components/admin/user/team-client';
 import PaginationBar from '@/components/shared/pagination-bar';
 import type { AdminTeamsPageData } from '@/types/team-type';
-import styles from '@/styles/team-content.module.css';
+import styles from '@/styles/admin/users/team-content.module.css';
 
 type Props = {
   pageData: AdminTeamsPageData;

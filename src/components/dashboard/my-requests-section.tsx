@@ -1,14 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import type { UserRequestSummary } from '@/services/user-dashboard-service';
+import { buildDashboardRequestInvitePath } from '@/utils/url-helper';
 
 const STATUS_STYLES: Record<string, { label: string; className: string }> = {
-  open: {
-    label: 'Open',
+  opened: {
+    label: 'Opened',
     className: 'bg-teal-50 text-teal-deep border-teal-100',
   },
-  in_review: {
-    label: 'In Review',
+  pending: {
+    label: 'Pending',
     className: 'bg-amber-50 text-amber-700 border-amber-100',
   },
   matched: {
@@ -76,11 +78,19 @@ export default function MyRequestsSection({ requests }: Props) {
                     {formatDate(req.createdAt)}
                   </p>
                 </div>
-                <span
-                  className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${style.className}`}
-                >
-                  {style.label}
-                </span>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={buildDashboardRequestInvitePath(req.id)}
+                    className="text-xs font-semibold text-teal-700 hover:text-teal-800"
+                  >
+                    Invite
+                  </Link>
+                  <span
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${style.className}`}
+                  >
+                    {style.label}
+                  </span>
+                </div>
               </div>
             );
           })}

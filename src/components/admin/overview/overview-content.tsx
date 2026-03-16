@@ -20,7 +20,7 @@ import type {
 } from '@/types/personality-type';
 import { type Question } from '@/types/question-type';
 import { usePersonality } from '@/hooks/usePersonality';
-import QuestionStyles from '@/styles/question-content.module.css';
+import QuestionStyles from '@/styles/admin/questions/question-content.module.css';
 
 type OverviewContentProps = {
   initialPersonalities: Personality[];
@@ -45,8 +45,6 @@ function formatUpdatedAt(value: Date | string): string {
 
 export default function OverviewContent({
   initialPersonalities,
-  personalitiesCount,
-  personalitiesActiveCount,
   initialQuestions = [],
   growthMetrics,
   personalityActions,
@@ -264,18 +262,18 @@ export default function OverviewContent({
                                 {q.description}
                               </p>
                             )}
-                            {q.dimensions.length > 0 && (
+                            {q.dimensions[0] && (
                               <div
                                 className={QuestionStyles.previewCardDimensions}
                               >
-                                {q.dimensions.map((d, i) => (
-                                  <span
-                                    key={i}
-                                    className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 whitespace-nowrap"
-                                  >
-                                    {d.dimensionName}
+                                <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 whitespace-nowrap">
+                                  {q.dimensions[0].dimensionName}
+                                </span>
+                                {q.dimensions.length > 1 && (
+                                  <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 border border-purple-100 whitespace-nowrap">
+                                    +{q.dimensions.length - 1}
                                   </span>
-                                ))}
+                                )}
                               </div>
                             )}
                           </div>
@@ -286,8 +284,8 @@ export default function OverviewContent({
                                 {q.options.length !== 1 ? 's' : ''}
                               </span>
                             )}
-                            {q.dimensions.length > 0 && (
-                              <span>🔗 {q.dimensions.length}</span>
+                            {q.dimensions[0] && (
+                              <span>🔗 {q.dimensions[0].dimensionName}</span>
                             )}
                             {q.updatedAt && (
                               <span className="ml-auto">

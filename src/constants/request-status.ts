@@ -1,3 +1,5 @@
+import type { RequestStatus as PrismaRequestStatusValue } from '@/libs/prisma/client';
+
 export const REQUEST_STATUS = {
   OPENED: 'opened',
   PENDING: 'pending',
@@ -5,8 +7,7 @@ export const REQUEST_STATUS = {
   CLOSED: 'closed',
 } as const;
 
-export type RequestStatus =
-  (typeof REQUEST_STATUS)[keyof typeof REQUEST_STATUS];
+export type RequestStatus = PrismaRequestStatusValue;
 
 export const REQUEST_STATUS_OPTIONS: Array<{
   value: RequestStatus;

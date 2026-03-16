@@ -1,20 +1,25 @@
 model Experience {
-  id                    Int                   @id @default(autoincrement())
-  provider_id           Int
-  experience_name       String                @db.VarChar(50)
-  duration_min          Int
-  duration_max          Int
-  capacity_max          Int
-  starting_price        Decimal               @db.Decimal(19, 0)
-  starting_hour         Int
-  adding_price          Decimal               @db.Decimal(19, 0)
-  lead_type             String                @db.VarChar(50)
-  created_at            DateTime              @default(now()) @db.Timestamp(6)
-  updated_at            DateTime              @updatedAt @db.Timestamp(6)
-  provider              Provider              @relation(fields: [provider_id], references: [id])
-  experience_calendars  ExperienceCalendar[]
-  experience_dimensions ExperienceDimension[]
-  proposals             Proposal[]
+  id                     Int                   @id @default(autoincrement())
+  provider_id            Int
+  category_id            Int
+  experience_title       String                @db.VarChar(100)
+  popularity_index       Int
+  duration_min           Int
+  duration_max           Int
+  capacity_max           Int
+  lead_type              String                @db.VarChar(50)
+  delivery_methods       String                @db.VarChar(255)
+  dietary_considerations String?               @db.VarChar(255)
+  take_item              Int?
+  travel_flying          Int?
+  created_by             Int
+  created_at             DateTime              @default(now()) @db.Timestamp(6)
+  updated_at             DateTime              @updatedAt @db.Timestamp(6)
+  category               Category              @relation(fields: [category_id], references: [id])
+  provider               Provider              @relation(fields: [provider_id], references: [id])
+  experience_calendars   ExperienceCalendar[]
+  experience_dimensions  ExperienceDimension[]
+  proposals              Proposal[]
 
   @@map("experience")
 }

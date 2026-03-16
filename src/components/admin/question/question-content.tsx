@@ -3,7 +3,11 @@
 import { useState, useEffect, useMemo, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuestionPanel from '@/components/admin/question/question-panel';
-import type { Question, DimensionIndex } from '@/types/question-type';
+import type {
+  Question,
+  DimensionIndex,
+  IntakeForm,
+} from '@/types/question-type';
 import {
   createQuestionAction,
   updateQuestionAction,
@@ -13,7 +17,7 @@ import { Button, Badge } from '@/ui';
 import PaginationBar from '@/components/shared/pagination-bar';
 import { QUESTION_TYPE_META } from '@/components/admin/question/question-card';
 import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
-import styles from '@/styles/question-content.module.css';
+import styles from '@/styles/admin/questions/question-content.module.css';
 
 type Props = {
   initialData: Question[];
@@ -28,6 +32,12 @@ const TYPE_FILTERS = [
   'text_input',
 ] as const;
 type TypeFilter = (typeof TYPE_FILTERS)[number];
+const FORM_FILTERS: IntakeForm[] = ['REQUEST', 'USER', 'PLAY'];
+const INTAKE_FORM_LABELS: Record<IntakeForm, string> = {
+  REQUEST: 'LEADER',
+  USER: 'MEMBER',
+  PLAY: 'ASSESS',
+};
 
 export default function QuestionContent({
   initialData,
@@ -38,6 +48,8 @@ export default function QuestionContent({
   const [, startDeleteTransition] = useTransition();
   const [questions, setQuestions] = useState<Question[]>(initialData);
   const [filter, setFilter] = useState<TypeFilter>('All');
+  const [selectedForms, setSelectedForms] =
+    useState<IntakeForm[]>(FORM_FILTERS);
   const [search, setSearch] = useState('');
   const idParam = searchParams.get('id');
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -59,7 +71,7 @@ export default function QuestionContent({
   // Reset page when filter or search changes
   useEffect(() => {
     setPage(1);
-  }, [filter, search]);
+  }, [filter, selectedForms, search]);
 
   const filtered = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -72,13 +84,15 @@ export default function QuestionContent({
       })
       .filter(q => {
         const matchType = filter === 'All' || q.type === filter;
+        const matchForm =
+          selectedForms.length === 0 || selectedForms.includes(q.formName);
         const matchSearch =
           !normalizedSearch ||
           q.text.toLowerCase().includes(normalizedSearch) ||
           (q.description ?? '').toLowerCase().includes(normalizedSearch);
-        return matchType && matchSearch;
+        return matchType && matchForm && matchSearch;
       });
-  }, [questions, filter, search]);
+  }, [questions, filter, selectedForms, search]);
 
   const counts: Record<TypeFilter, number> = {
     All: questions.length,
@@ -99,6 +113,14 @@ export default function QuestionContent({
 
   const selectedQuestion = questions.find(q => q.id === selectedId);
   const showPanel = isCreating || selectedId !== null;
+
+  function toggleFormFilter(formName: IntakeForm) {
+    setSelectedForms(prev =>
+      prev.includes(formName)
+        ? prev.filter(item => item !== formName)
+        : [...prev, formName]
+    );
+  }
 
   function handleSuccess() {
     router.refresh();
@@ -176,35 +198,70 @@ export default function QuestionContent({
               </div>
             </div>
 
-            <div className="px-3 py-2 border-b border-gray-100 flex gap-1 shrink-0">
-              {TYPE_FILTERS.map(f => (
-                <Button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  variant="tab"
-                  size="xs"
-                  isActive={filter === f}
-                  className="whitespace-nowrap !h-7 !min-w-0 !px-2 !py-0 !text-[11px]"
-                >
-                  {f === 'All'
-                    ? 'All'
-                    : f === 'single_choice'
-                      ? 'Single'
-                      : f === 'multi_choice'
-                        ? 'Multi'
-                        : f === 'scale'
-                          ? 'Scale'
-                          : 'Text'}
-                  <Badge
-                    variant="default"
-                    size="xs"
-                    bgColor={filter === f ? 'bg-white/20' : 'bg-gray-100'}
-                    textColor={filter === f ? 'text-white' : 'text-gray-500'}
-                  >
-                    {counts[f]}
-                  </Badge>
-                </Button>
-              ))}
+            <div className="px-3 py-2 border-b border-gray-100 shrink-0">
+              <div className="rounded-[28px] border border-gray-200 bg-gray-50 px-3 py-2 shadow-sm">
+                <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+                  {TYPE_FILTERS.map(f => (
+                    <Button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      variant="tab"
+                      size="xs"
+                      isActive={filter === f}
+                      className="whitespace-nowrap !h-8 !min-w-0 !px-3 !py-0 !text-[11px] !font-semibold"
+                    >
+                      {f === 'All'
+                        ? 'All'
+                        : f === 'single_choice'
+                          ? 'Single'
+                          : f === 'multi_choice'
+                            ? 'Multi'
+                            : f === 'scale'
+                              ? 'Scale'
+                              : 'Text'}
+                      <Badge
+                        variant="default"
+                        size="xs"
+                        bgColor={filter === f ? 'bg-white/20' : 'bg-gray-100'}
+                        textColor={
+                          filter === f ? 'text-white' : 'text-gray-500'
+                        }
+                      >
+                        {counts[f]}
+                      </Badge>
+                    </Button>
+                  ))}
+                </div>
+
+                <div className="mt-2 flex items-center justify-between gap-3 border-t border-teal-medium/50 px-1 pt-2">
+                  <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
+                    Form
+                  </span>
+                  <div className="flex flex-wrap items-center justify-end gap-1.5">
+                    {FORM_FILTERS.map(formName => {
+                      const checked = selectedForms.includes(formName);
+                      return (
+                        <label
+                          key={formName}
+                          className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                            checked
+                              ? 'border-teal-200 bg-white text-teal-800 shadow-sm'
+                              : 'border-transparent text-gray-500 hover:border-gray-200 hover:bg-white/80'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleFormFilter(formName)}
+                            className="h-3.5 w-3.5 rounded border-gray-300 text-teal-700 focus:ring-teal-300"
+                          />
+                          <span>{INTAKE_FORM_LABELS[formName]}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -256,10 +313,9 @@ export default function QuestionContent({
                             >
                               {q.text}
                             </p>
-                            {q.dimensions.length > 0 && (
+                            {q.dimensions[0] && (
                               <p className="text-xs text-teal-600 mt-0.5">
-                                {q.dimensions.length} dimension
-                                {q.dimensions.length > 1 ? 's' : ''}
+                                {q.dimensions[0].dimensionName}
                               </p>
                             )}
                           </div>

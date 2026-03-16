@@ -18,7 +18,7 @@ import {
   deleteDimensionCategoryAction,
   updateDimensionCategoryAction,
 } from '@/actions/dimension-actions';
-import styles from '@/styles/category-content.module.css';
+import styles from '@/styles/admin/dimensions/category-content.module.css';
 
 type CategoryWithUsage = DimensionCategory & { usageCount: number };
 

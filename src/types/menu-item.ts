@@ -12,7 +12,8 @@ export type CountKey =
   | 'overview'
   | 'personalities'
   | 'questions'
-  | 'forms'
+  | 'categories'
+  | 'providers'
   | 'events'
   | 'users'
   | 'bookings'
@@ -73,11 +74,6 @@ export const menuSection: MenuGroup[] = [
             href: '/admin/questions',
             countKey: 'questions',
           },
-          {
-            label: 'Forms',
-            href: '/admin/questions/forms',
-            countKey: 'forms',
-          },
         ],
       },
       {
@@ -85,6 +81,16 @@ export const menuSection: MenuGroup[] = [
         href: '/admin/experiences',
         countKey: 'experiences',
         children: [
+          {
+            label: 'Providers',
+            href: '/admin/experiences/providers',
+            countKey: 'providers',
+          },
+          {
+            label: 'Categories',
+            href: '/admin/experiences/categories',
+            countKey: 'categories',
+          },
           {
             label: 'Experiences',
             href: '/admin/experiences',

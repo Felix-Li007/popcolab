@@ -5,6 +5,7 @@ import type {
   DimensionFormState,
   DimensionCategoryFormState,
 } from '@/types/dimension-type';
+import type { IntakeForm } from '@/types/question-type';
 import {
   createDimension,
   updateDimension,
@@ -72,6 +73,13 @@ function parseDimensionForm(formData: FormData) {
   const scaleMinRaw = formData.get('scaleMin')?.toString().trim() ?? '';
   const scaleMaxRaw = formData.get('scaleMax')?.toString().trim() ?? '';
   const options = parseOptions(formData);
+  const formNames = formData
+    .getAll('formName')
+    .map(value => value.toString())
+    .filter(
+      (value): value is IntakeForm =>
+        value === 'REQUEST' || value === 'USER' || value === 'PLAY'
+    );
 
   const scaleMin = scaleMinRaw === '' ? null : Number(scaleMinRaw);
   const scaleMax = scaleMaxRaw === '' ? null : Number(scaleMaxRaw);
@@ -86,6 +94,7 @@ function parseDimensionForm(formData: FormData) {
     scaleMin,
     scaleMax,
     options,
+    formNames,
   };
 }
 

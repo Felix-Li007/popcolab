@@ -7,471 +7,1714 @@ type SeedQuestionOption = {
   option_score: number | null;
 };
 
+type SeedIntakeForm = 'REQUEST' | 'USER' | 'PLAY';
+
 type SeedQuestion = {
+  form_name: SeedIntakeForm;
   question_type: 'single_choice' | 'multi_choice' | 'scale' | 'text_input';
   question_text: string;
   question_desc: string;
   order_index: number;
   options: SeedQuestionOption[];
+  dimension_key?: string;
 };
-
-type DimMapping = { indexKey: string; weight: number };
 
 export type QuestionIdByOrder = Map<number, number>;
 
-const questions: SeedQuestion[] = [
-  {
+function toOptionValue(label: string): string {
+  return (
+    label
+      .toLowerCase()
+      .replace(/&/g, ' and ')
+      .replace(/\+/g, ' plus ')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 50) || 'option'
+  );
+}
+
+function createChoiceOptions(labels: string[]): SeedQuestionOption[] {
+  return labels.map(label => ({
+    option_label: label,
+    option_value: toOptionValue(label),
+    option_score: null,
+  }));
+}
+
+function createScaleOptions(): SeedQuestionOption[] {
+  return [
+    { option_label: '1', option_value: 'min', option_score: null },
+    { option_label: '5', option_value: 'max', option_score: null },
+    { option_label: '1', option_value: 'step', option_score: null },
+  ];
+}
+
+function createTextOptions(
+  placeholder: string,
+  maxChars = 250
+): SeedQuestionOption[] {
+  return [
+    {
+      option_label: placeholder,
+      option_value: 'placeholder',
+      option_score: null,
+    },
+    {
+      option_label: String(maxChars),
+      option_value: 'max_chars',
+      option_score: null,
+    },
+  ];
+}
+
+function single(
+  order_index: number,
+  question_text: string,
+  labels: string[],
+  form_name: SeedIntakeForm = 'REQUEST'
+): SeedQuestion {
+  return {
+    form_name,
     question_type: 'single_choice',
-    question_text:
-      'When you join a group activity, what role do you naturally take?',
-    question_desc: 'Choose the role that best describes your instinct.',
-    order_index: 1,
-    options: [
-      {
-        option_label: 'The Entertainer — I keep the mood light',
-        option_value: 'entertainer',
-        option_score: 1,
-      },
-      {
-        option_label: 'The Organiser — I set rules and structure',
-        option_value: 'organiser',
-        option_score: 2,
-      },
-      {
-        option_label: 'The Explorer — I push for new ideas',
-        option_value: 'explorer',
-        option_score: 3,
-      },
-      {
-        option_label: 'The Creator — I build or craft something',
-        option_value: 'creator',
-        option_score: 4,
-      },
-    ],
-  },
-  {
-    question_type: 'single_choice',
-    question_text: 'What energises you most after a long day at work?',
-    question_desc: 'Pick the one that resonates most.',
-    order_index: 2,
-    options: [
-      {
-        option_label: 'Physical activity — gym, dance, sport',
-        option_value: 'physical',
-        option_score: 1,
-      },
-      {
-        option_label: 'Creative expression — drawing, music, writing',
-        option_value: 'creative',
-        option_score: 2,
-      },
-      {
-        option_label: 'Social fun — games, jokes, shared laughs',
-        option_value: 'social',
-        option_score: 3,
-      },
-      {
-        option_label: 'Competition — any game with a scoreboard',
-        option_value: 'compete',
-        option_score: 4,
-      },
-      {
-        option_label: 'Learning — discovering something new',
-        option_value: 'learn',
-        option_score: 5,
-      },
-    ],
-  },
-  {
-    question_type: 'single_choice',
-    question_text:
-      'At a team event, which activity would you secretly be most excited about?',
-    question_desc: 'Be honest — no wrong answers!',
-    order_index: 3,
-    options: [
-      {
-        option_label: 'An escape room or puzzle challenge',
-        option_value: 'puzzle',
-        option_score: 1,
-      },
-      {
-        option_label: 'An improv or comedy workshop',
-        option_value: 'improv',
-        option_score: 2,
-      },
-      {
-        option_label: 'A trivia competition between teams',
-        option_value: 'trivia',
-        option_score: 3,
-      },
-      {
-        option_label: 'A collaborative mural or craft session',
-        option_value: 'craft',
-        option_score: 4,
-      },
-      {
-        option_label: 'A dance class or movement session',
-        option_value: 'dance',
-        option_score: 5,
-      },
-    ],
-  },
-  {
-    question_type: 'single_choice',
-    question_text: 'How do you usually react when you lose at a game?',
-    question_desc: 'Select the option that feels most true.',
-    order_index: 4,
-    options: [
-      {
-        option_label: 'I brush it off and look for the next challenge',
-        option_value: 'resilient',
-        option_score: 1,
-      },
-      {
-        option_label: 'I analyse what went wrong and how to improve',
-        option_value: 'analytical',
-        option_score: 2,
-      },
-      {
-        option_label: 'I make a joke about it to lighten the mood',
-        option_value: 'humour',
-        option_score: 3,
-      },
-      {
-        option_label: 'I feel genuinely motivated to train harder',
-        option_value: 'drive',
-        option_score: 4,
-      },
-    ],
-  },
-  {
+    question_text,
+    question_desc: '',
+    order_index,
+    options: createChoiceOptions(labels),
+  };
+}
+
+function multi(
+  order_index: number,
+  question_text: string,
+  labels: string[],
+  form_name: SeedIntakeForm = 'REQUEST'
+): SeedQuestion {
+  return {
+    form_name,
     question_type: 'multi_choice',
-    question_text:
-      'Which of the following words describe how you play? (Select all that apply)',
-    question_desc: 'You can pick more than one.',
-    order_index: 5,
-    options: [
-      {
-        option_label: '🧩 Strategic',
-        option_value: 'strategic',
-        option_score: null,
-      },
-      {
-        option_label: '😂 Playful',
-        option_value: 'playful',
-        option_score: null,
-      },
-      { option_label: '🏃 Active', option_value: 'active', option_score: null },
-      {
-        option_label: '🎨 Creative',
-        option_value: 'creative',
-        option_score: null,
-      },
-      {
-        option_label: '🔍 Curious',
-        option_value: 'curious',
-        option_score: null,
-      },
-      {
-        option_label: '🏆 Competitive',
-        option_value: 'competitive',
-        option_score: null,
-      },
-    ],
-  },
-  {
-    question_type: 'multi_choice',
-    question_text:
-      'What types of team-building activities have you genuinely enjoyed in the past?',
-    question_desc: 'Select everything that applies.',
-    order_index: 6,
-    options: [
-      {
-        option_label: 'Outdoor adventure or sports',
-        option_value: 'outdoor',
-        option_score: null,
-      },
-      {
-        option_label: 'Creative workshops',
-        option_value: 'workshop',
-        option_score: null,
-      },
-      {
-        option_label: 'Trivia or quiz nights',
-        option_value: 'quiz',
-        option_score: null,
-      },
-      {
-        option_label: 'Storytelling or roleplay',
-        option_value: 'roleplay',
-        option_score: null,
-      },
-      {
-        option_label: 'Hackathons or problem-solving',
-        option_value: 'hackathon',
-        option_score: null,
-      },
-    ],
-  },
-  {
-    question_type: 'multi_choice',
-    question_text: 'Which situations make you feel most "in your element"?',
-    question_desc: 'Pick up to 3 that fit.',
-    order_index: 7,
-    options: [
-      {
-        option_label: 'Leading a group through a challenge',
-        option_value: 'leading',
-        option_score: null,
-      },
-      {
-        option_label: 'Making the whole room laugh',
-        option_value: 'laughing',
-        option_score: null,
-      },
-      {
-        option_label: 'Discovering a pattern no one else noticed',
-        option_value: 'discovery',
-        option_score: null,
-      },
-      {
-        option_label: 'Finishing a creative project you started',
-        option_value: 'finishing',
-        option_score: null,
-      },
-      {
-        option_label: 'Winning a close, hard-fought contest',
-        option_value: 'winning',
-        option_score: null,
-      },
-      {
-        option_label: 'Moving your body to music or rhythm',
-        option_value: 'moving',
-        option_score: null,
-      },
-    ],
-  },
-  {
+    question_text,
+    question_desc: '',
+    order_index,
+    options: createChoiceOptions(labels),
+  };
+}
+
+function scale(
+  order_index: number,
+  question_text: string,
+  form_name: SeedIntakeForm = 'REQUEST'
+): SeedQuestion {
+  return {
+    form_name,
     question_type: 'scale',
-    question_text:
-      'How comfortable are you stepping into the spotlight during group activities?',
-    question_desc: '1 = very uncomfortable, 5 = absolutely love it.',
-    order_index: 8,
-    options: [
-      {
-        option_label: '1 — Prefer to stay behind the scenes',
-        option_value: 'min',
-        option_score: 1,
-      },
-      {
-        option_label: '5 — Love being centre stage',
-        option_value: 'max',
-        option_score: 5,
-      },
+    question_text,
+    question_desc: '',
+    order_index,
+    options: createScaleOptions(),
+  };
+}
+
+function text(
+  order_index: number,
+  question_text: string,
+  placeholder = 'Type your answer here...',
+  maxChars = 250,
+  form_name: SeedIntakeForm = 'REQUEST'
+): SeedQuestion {
+  return {
+    form_name,
+    question_type: 'text_input',
+    question_text,
+    question_desc: '',
+    order_index,
+    options: createTextOptions(placeholder, maxChars),
+  };
+}
+
+function withDimension(
+  question: SeedQuestion,
+  dimension_key: string
+): SeedQuestion {
+  return {
+    ...question,
+    dimension_key,
+  };
+}
+
+function mergeQuestionsByText(items: SeedQuestion[]): SeedQuestion[] {
+  const merged = new Map<string, SeedQuestion>();
+
+  for (const item of items) {
+    merged.set(item.question_text, item);
+  }
+
+  return [...merged.values()].sort((a, b) => a.order_index - b.order_index);
+}
+
+// The current app only supports single_choice, multi_choice, scale, and
+// text_input. Screenshot rows marked as "number" or free-entry "multi" are
+// initialized as text_input to keep the seed compatible with the UI.
+const baseQuestions: SeedQuestion[] = [
+  single(1, 'What is your group activity for?', [
+    'Team Bonding',
+    'Team Building',
+    'Team Development',
+    'Birthday Party',
+    'Staff Party',
+    'Group of friends getting together',
+    'Date night',
+    'Retirement party',
+    'Hosting clients',
+    'Family get together',
+    'Other',
+  ]),
+  single(
+    2,
+    'Which primary objective best describes what you want most from this experience?',
+    ['Team Bonding', 'Team Building', 'Team Development', 'Not sure']
+  ),
+  multi(3, 'What would make this a success? Pick up to 2 outcomes.', [
+    'Working agreements / norms',
+    'Better communication',
+    'Clearer alignment & expectations',
+    'Action plan / next steps',
+    'More trust & psychological safety',
+    'More connection & belonging',
+    'New skills / tools learned',
+    'More creativity / new ideas',
+    'Lower stress / better morale',
+  ]),
+  multi(
+    4,
+    'Hard constraints (must-have / must-avoid). Select all that apply.',
+    [
+      'No alcohol',
+      'Accessible for mobility needs',
+      'Accessible for sensory needs (low noise/low light)',
+      'Dietary restrictions must be supported',
+      'No physical contact',
+      'Virtual or hybrid only',
+      'Must be travel-friendly (flying teams)',
+    ]
+  ),
+  multi(
+    5,
+    "Preferences (we'd like to avoid these if possible). Select all that apply.",
+    [
+      'Avoid competition',
+      'Avoid being put on the spot',
+      'Avoid personal sharing/vulnerability',
+      'Avoid loud noise',
+      'Avoid messy materials',
+      'Avoid complex instructions',
+      'Keep it low energy',
+    ]
+  ),
+  single(6, 'How strict should we be with your preference constraints?', [
+    'Soft preferences (try to match)',
+    'Hard filters (do not show if violated)',
+  ]),
+  scale(
+    7,
+    'How important is reflection/debrief in the experience? (1 not important - 5 essential)'
+  ),
+  text(8, 'How many people are participating?', 'Enter the participant count'),
+  multi(
+    9,
+    'Which statements best describe your team right now? (select all that apply)',
+    [
+      'New team / new manager',
+      'Recently reorganized',
+      'Mostly remote / rebuilding',
+    ]
+  ),
+  scale(10, 'Team psychological safety baseline (1 low trust - 5 high trust).'),
+  scale(
+    11,
+    'How ready is your team for team-building activities that involve sharing, vulnerability, or personal growth?'
+  ),
+  text(
+    12,
+    'How many will be in-person (if hybrid)?',
+    'Enter the in-person count'
+  ),
+  text(
+    13,
+    'How many will be remote/virtual (if hybrid)?',
+    'Enter the remote count'
+  ),
+  text(14, 'Preferred date(s) (up to 3)', 'List up to 3 preferred dates'),
+  single(15, 'How flexible are you on dates?', [
+    'Exact date(s) only',
+    'Flexible within 1 week',
+    'Flexible within 2-4 weeks',
+    'Flexible',
+  ]),
+  single(16, 'Preferred time window', [
+    'Morning',
+    'Midday/Afternoon',
+    'Evening',
+    'Any',
+  ]),
+  text(
+    17,
+    'Do you have a hard deadline to have a proposal in hand? If so, what date/time?',
+    'Share the deadline date/time'
+  ),
+  single(18, 'How long do you have for the experience?', [
+    '<45',
+    '45-60',
+    '60-90',
+    '90-120',
+    '120-180',
+    '180+',
+  ]),
+  single(19, 'How many hours are you looking to book? (if you know)', [
+    '0.75',
+    '1',
+    '1.5',
+    '2',
+    '2.5',
+    '3',
+    '4',
+    '4+',
+  ]),
+  multi(20, 'Where do you want this to happen? (select all that apply)', [
+    'On-site (Pop CoLab)',
+    'Off-site (your location)',
+    'Virtual',
+    'Hybrid',
+  ]),
+  text(21, 'City (if off-site)', 'Enter the city'),
+  text(
+    22,
+    'If off-site/hybrid: share address area + venue notes (parking, elevators, room setup)',
+    'Share venue details'
+  ),
+  single(23, 'What is your estimated budget range (before tax + travel)?', [
+    '<$500',
+    '$500-$1000',
+    '$1000-$2500',
+    '$2500-$5000',
+    '$5000+',
+    'Not sure yet',
+  ]),
+  single(24, 'Would you like to be added to our newsletter for updates?', [
+    'Yes',
+    'No',
+  ]),
+  multi(25, 'Team objective(s) (select all that apply)', [
+    'Strengthen team connections',
+    'Spark creativity',
+    'Boost morale',
+    'Improve communication',
+  ]),
+  multi(26, 'Pick your top 3 goals (rank 1-3).', [
+    'Connection & trust',
+    'Belonging / team rituals / celebration',
+    'Communication & collaboration',
+    'Creativity & new ideas',
+  ]),
+  multi(27, 'How will you know this was successful? (select all that apply)', [
+    'People felt more connected',
+    'We have clearer ways of working / norms',
+    'We learned something new',
+    'Energy / morale improved',
+  ]),
+  multi(28, 'Preferred formats (select all that apply).', [
+    'DIY / Make & Take',
+    'Games',
+    'Trivia',
+    'Wellness / Movement',
+    'Learning Lab (talk + activity)',
+  ]),
+  text(
+    29,
+    "What have you tried before (team activities) and what worked / didn't work?",
+    'Share what your team has already tried',
+    500
+  ),
+  multi(30, 'How do you want it led? (select all that apply)', [
+    'Facilitated (host-led)',
+    'Mixed (guided + self-led)',
+    'Stations / drop-in',
+    'Free play (self-led)',
+  ]),
+  single(31, 'Provider preference?', [
+    'Pop CoLab only',
+    'Open to Pop CoLab + partners',
+    'Open to Pop CoLab + partners + outside vendors',
+  ]),
+  multi(32, 'What kinds of play should show up? Pick your top 3 (rank 1-3).', [
+    'Social Play',
+    'Creative / Maker Play',
+    'Exploratory / Curiosity Play',
+    'Storytelling / Roleplay',
+  ]),
+  scale(33, 'Energy preference (1 relaxed - 5 high energy).'),
+  scale(34, 'Movement level (1 mostly seated - 5 lots of movement).'),
+  scale(35, 'Noise tolerance (1 prefer quiet - 5 loud is fine).'),
+  single(36, 'Do you need to keep things quiet?', [
+    'No limit',
+    'Prefer quiet',
+    'Must be quiet',
+  ]),
+  scale(37, 'Cognitive load (1 chill + simple - 5 strategic/problem-solving).'),
+  scale(
+    38,
+    'Social intensity (1 low-pressure / parallel - 5 highly interactive).'
+  ),
+  scale(39, 'Competition comfort (1 none - 5 bring the leaderboard).'),
+  scale(40, 'Spotlight comfort (1 no performing - 5 love performing).'),
+  scale(41, 'Messiness tolerance (1 keep it clean - 5 mess is fine).'),
+  scale(
+    42,
+    "Creative confidence required (1 no art skills please - 5 we're all-in on creating)."
+  ),
+  scale(
+    43,
+    'How open is your team to trying something new? (1 stay safe - 5 surprise us)'
+  ),
+  scale(
+    44,
+    'How important is neuroinclusive design for this group? (1 standard - 5 very important/access needs)'
+  ),
+  multi(45, 'Any mobility/access needs? (select all that apply)', [
+    'None',
+    'Wheelchair accessible',
+    'Avoid stairs',
+    'Seated option needed',
+    'Frequent breaks',
+  ]),
+  multi(46, 'Any sensory needs we should plan for? (select all that apply)', [
+    'None',
+    'Quiet space available',
+    'Lower noise preferred',
+    'Lower scent',
+  ]),
+  multi(47, 'Any hearing access needs? (select all that apply)', [
+    'None',
+    'Captions (virtual)',
+    'Mic/speaker support',
+    'Face speakers when talking',
+  ]),
+  multi(48, 'Any vision access needs? (select all that apply)', [
+    'None',
+    'Large print',
+    'High contrast visuals',
+    'Verbal instructions',
+    'Other',
+  ]),
+  single(49, 'Do you want a make-and-take item?', ['Yes', 'No', 'Either']),
+  single(50, 'Are people flying / limited for take-home items?', [
+    'No',
+    'Some are flying',
+    'Most are flying',
+  ]),
+  single(51, 'Alcohol policy for your team event?', [
+    'No alcohol (zero-proof only)',
+    'Alcohol allowed',
+    'Not sure',
+  ]),
+  multi(
+    52,
+    'Any dietary considerations? (only affects tasting/food experiences)',
+    [
+      'None',
+      'Vegetarian',
+      'Vegan',
+      'Gluten-free',
+      'Halal',
+      'Kosher',
+      'Nut allergy',
+      'Dairy-free',
+    ]
+  ),
+  text(
+    53,
+    'Any theme, brand colours, or company values you want woven in? (optional)',
+    'Share any theme, brand, or values notes'
+  ),
+  single(54, 'How customized should this be?', [
+    'Off-the-shelf',
+    'Some customization',
+    'Fully customized',
+    'Not sure',
+  ]),
+  single(55, 'Do you want a debrief/reflection built in?', [
+    'No debrief',
+    'Light debrief (5-10 min)',
+    'Structured debrief (15-20 min)',
+  ]),
+  single(56, 'Do you need a short post-event summary/report?', [
+    'No',
+    'Nice to have',
+    'Yes',
+  ]),
+  single(57, 'Language preference for facilitation/materials (optional)', [
+    'English',
+    'French',
+    'Bilingual',
+    'Other',
+  ]),
+  single(58, "Your team's vibe (optional): what feels right?", [
+    'Playful & silly',
+    'Warm & conversational',
+    'Calm & reflective',
+    'Competitive & energetic',
+  ]),
+  text(
+    59,
+    'Anything else we should know? (schedule, culture, sensitivities, must-avoid, etc.)',
+    'Add any other context',
+    500
+  ),
+  single(
+    60,
+    'When it comes to playful team activities, I usually need...',
+    [
+      'No support (I jump in)',
+      'Light support (a warm-up helps)',
+      'A lot of support (I need strong structure + opt-out options)',
     ],
-  },
-  {
-    question_type: 'scale',
-    question_text: 'How important is winning to you when playing a game?',
-    question_desc: '1 = just here to have fun, 5 = winning is everything.',
-    order_index: 9,
-    options: [
-      {
-        option_label: '1 — Participation is all that matters',
-        option_value: 'min',
-        option_score: 1,
-      },
-      {
-        option_label: '5 — I play to win',
-        option_value: 'max',
-        option_score: 5,
-      },
+    'USER'
+  ),
+  scale(
+    61,
+    'Support need (1 jump in - 5 I need lots of support/structure).',
+    'USER'
+  ),
+  scale(
+    62,
+    'In group settings at work, I feel psychologically safe to try new things. (1 least like me - 5 most like me)',
+    'USER'
+  ),
+  single(
+    63,
+    "You're at a social event where you don't know anyone. You...",
+    [
+      'Start mingling with the first person you see',
+      'Find someone approachable and start a conversation',
+      'Wait until someone comes up to you',
+      'Hang back near the food/edge of the room until you feel comfortable',
     ],
-  },
-  {
-    question_type: 'scale',
-    question_text:
-      'How often do you find yourself making up stories, games, or scenarios for fun?',
-    question_desc: '1 = never, 5 = all the time.',
-    order_index: 10,
-    options: [
-      {
-        option_label: '1 — Almost never',
-        option_value: 'min',
-        option_score: 1,
-      },
-      {
-        option_label: '5 — All the time',
-        option_value: 'max',
-        option_score: 5,
-      },
+    'USER'
+  ),
+  single(
+    64,
+    'A facilitator invites the group to try something new (slightly awkward). You...',
+    [
+      'Jump in immediately',
+      'Try it after watching 1-2 people',
+      'Try it if I can do it with a buddy',
+      'Prefer to observe / pass',
     ],
-  },
-  {
-    question_type: 'text_input',
-    question_text:
-      'Describe your all-time favourite game or play experience in a few words.',
-    question_desc:
-      'No right or wrong answer — just tell us what lights you up!',
-    order_index: 11,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text: 'What does "play" mean to you personally?',
-    question_desc: 'Share your own definition — keep it brief.',
-    order_index: 12,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text: 'What kind of check-in question helps your team open up?',
-    question_desc: 'Short answer.',
-    order_index: 13,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text: 'Describe a moment when your team collaborated really well.',
-    question_desc: 'One concrete example.',
-    order_index: 14,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text:
-      'When a project stalls, what is your first action to regain momentum?',
-    question_desc: 'Keep it to 1-2 sentences.',
-    order_index: 15,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text: 'What kind of feedback style helps you improve fastest?',
-    question_desc: 'Direct, supportive, structured, or other.',
-    order_index: 16,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text: 'How do you prefer decisions to be made in group settings?',
-    question_desc: 'Consensus, lead-decides, vote, etc.',
-    order_index: 17,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text:
-      'What helps you stay engaged during long workshops or meetings?',
-    question_desc: 'Describe tactics that work for you.',
-    order_index: 18,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text:
-      'If you could redesign one team ritual, what would you change first?',
-    question_desc: 'Share one practical change.',
-    order_index: 19,
-    options: [],
-  },
-  {
-    question_type: 'text_input',
-    question_text:
-      'What outcome would make this intake process feel successful to you?',
-    question_desc: 'Briefly define success.',
-    order_index: 20,
-    options: [],
-  },
+    'USER'
+  ),
+  single(
+    65,
+    'If an activity puts me on the spot (performing / sharing in front of everyone), I...',
+    [
+      'Love it',
+      "It's okay sometimes",
+      'Prefer small groups',
+      'Prefer to avoid spotlight',
+    ],
+    'USER'
+  ),
+  multi(
+    66,
+    'What helps you feel comfortable joining in? (select all that apply)',
+    [
+      'Clear step-by-step instructions',
+      'A quick demo example',
+      'Doing it with a buddy',
+      'Choice of roles (talking vs making)',
+      'Permission to pass',
+      'Small-group breakouts',
+      'Quiet corner / breaks',
+      'Time to think before sharing',
+      'No scoring / low competition',
+      'Hands-on task (less talking)',
+    ],
+    'USER'
+  ),
+  scale(
+    67,
+    'I prefer activities with clear steps and structure (1 free-flow - 5 very structured).',
+    'USER'
+  ),
+  scale(
+    68,
+    'If I opt out of an activity, I feel comfortable doing so. (1 not comfortable - 5 very comfortable)',
+    'USER'
+  ),
+  scale(
+    69,
+    'Joker: I like humour, surprises, and keeping things light. (1-5)',
+    'USER'
+  ),
+  scale(
+    70,
+    'Kinesthete: I like movement, hands-on, and physical engagement. (1-5)',
+    'USER'
+  ),
+  scale(
+    71,
+    'Explorer: I like curiosity, trying new things, and discovering. (1-5)',
+    'USER'
+  ),
+  scale(
+    72,
+    'Competitor: I like challenge, goals, and friendly competition. (1-5)',
+    'USER'
+  ),
+  scale(
+    73,
+    'Director: I like organizing people, leading, and shaping the plan. (1-5)',
+    'USER'
+  ),
+  scale(
+    74,
+    'Collector: I like gathering, sorting, and building connections/knowledge. (1-5)',
+    'USER'
+  ),
+  scale(
+    75,
+    'Creator/Artist: I like making, designing, and expressing ideas. (1-5)',
+    'USER'
+  ),
+  scale(
+    76,
+    'Storyteller: I like stories, meaning, and sharing experiences. (1-5)',
+    'USER'
+  ),
+  single(
+    77,
+    "I'm most likely to...",
+    [
+      'Crack a joke and lighten the mood (Joker)',
+      'Organize the group and suggest a plan (Director)',
+    ],
+    'USER'
+  ),
+  single(
+    78,
+    "When I have free time, I'd rather...",
+    [
+      'Explore something new / try a new spot (Explorer)',
+      'Work on a project I can make (Creator/Artist)',
+    ],
+    'USER'
+  ),
+  single(
+    79,
+    'In a group activity, I naturally...',
+    [
+      'Get competitive and chase the goal (Competitor)',
+      "Focus on the story/meaning of what we're doing",
+    ],
+    'USER'
+  ),
+  single(
+    80,
+    'I feel most engaged when...',
+    [
+      "I'm moving / hands-on / doing (Kinesthete)",
+      "I'm collecting info, pieces, or resources (Collector)",
+    ],
+    'USER'
+  ),
+  single(
+    81,
+    "If there's ambiguity, I usually...",
+    [
+      'Make a plan and assign roles (Director)',
+      'Wander, test, and discover as I go (Explorer)',
+    ],
+    'USER'
+  ),
+  single(
+    82,
+    'When someone shares a problem, I tend to...',
+    [
+      'Offer a practical next step / structure (Director)',
+      'Offer a creative idea or twist (Creator/Artist)',
+    ],
+    'USER'
+  ),
+  single(
+    83,
+    "My 'fun' leans more toward...",
+    [
+      'Friendly rivalry and scorekeeping (Competitor)',
+      'Silly moments and playful chaos (Joker)',
+    ],
+    'USER'
+  ),
+  single(
+    84,
+    "If I'm learning something new, I prefer...",
+    [
+      'Hands-on practice right away (Kinesthete)',
+      'Hearing the story/context first (Storyteller)',
+    ],
+    'USER'
+  ),
+  single(
+    85,
+    "I'm most likely to enjoy...",
+    [
+      'Collecting/curating things or knowledge (Collector)',
+      'Making something with my hands (Creator/Artist)',
+    ],
+    'USER'
+  ),
+  single(
+    86,
+    'At events, I usually...',
+    [
+      'Meet new people for fun (Explorer)',
+      'Stick with my people and go deeper (Storyteller)',
+    ],
+    'USER'
+  ),
+  single(
+    87,
+    "If a game is happening, I'm pulled by...",
+    [
+      'Winning / challenge (Competitor)',
+      'The experience / narrative / vibe (Storyteller)',
+    ],
+    'USER'
+  ),
+  single(
+    88,
+    'My default in groups is...',
+    [
+      'Lead or coordinate (Director)',
+      'Support with ideas, jokes, or creativity (Joker/Creator)',
+    ],
+    'USER'
+  ),
+  multi(
+    89,
+    'Play Nature: what feels most natural to you? Pick your top 3 (rank 1-3).',
+    [
+      'Social (with others)',
+      'Creative/Maker (making things)',
+      'Exploratory (curiosity, discovery)',
+      'Movement/Physical',
+      'Story/Narrative',
+      'Object/Hands-on (tinkering)',
+      'Mindful/Reflective',
+      'Competitive/Challenge',
+      'Imaginative/Role-play',
+    ],
+    'USER'
+  ),
+  multi(
+    90,
+    'Types of Play: what do you enjoy most? Pick your top 3 (rank 1-3).',
+    [
+      'Social Play',
+      'Creative / Maker Play',
+      'Exploratory / Curiosity Play',
+      'Storytelling / Narrative Play',
+      'Object Play',
+    ],
+    'USER'
+  ),
+  scale(91, 'Energy preference (1 relaxed - 5 high energy).', 'USER'),
+  scale(92, 'Noise preference (1 quiet - 5 loud is fine).', 'USER'),
+  scale(
+    93,
+    'Social intensity preference (1 low-pressure / parallel play - 5 highly interactive).',
+    'USER'
+  ),
+  scale(94, 'Competition preference (1 none - 5 love it).', 'USER'),
+  scale(
+    95,
+    'Spotlight preference (1 avoid spotlight - 5 love spotlight).',
+    'USER'
+  ),
+  scale(
+    96,
+    "Creative confidence (1 I worry I'm 'not creative' - 5 I love making stuff).",
+    'USER'
+  ),
+  scale(
+    97,
+    'Openness to trying new things (1 stay safe - 5 surprise me).',
+    'USER'
+  ),
+  multi(
+    98,
+    'Kid-you: what did you love doing most? (select all that apply)',
+    [
+      'Building LEGO / forts (Object Play)',
+      'Drawing / crafts / making things (Creative Play)',
+      'Sports / tag / running',
+    ],
+    'USER'
+  ),
+  text(
+    99,
+    'Anything else you loved doing as a kid? (optional)',
+    'Type your answer here...',
+    250,
+    'USER'
+  ),
+  multi(
+    100,
+    'Anything you strongly want to avoid? (select all that apply)',
+    [
+      'Being put on the spot',
+      'High competition',
+      'Loud noise',
+      'Messy materials',
+      'Physical contact',
+      'Personal sharing',
+    ],
+    'USER'
+  ),
+  multi(
+    101,
+    'Needs-based supports that help you participate (select all that apply).',
+    [
+      'Clear written + spoken instructions',
+      'More time to process',
+      'Breaks / step away',
+      'Quiet/low-sensory',
+    ],
+    'USER'
+  ),
+  text(
+    102,
+    'Optional: Any accessibility notes we should plan for?',
+    'Share any accessibility notes',
+    250,
+    'USER'
+  ),
+  single(
+    103,
+    'Have you taken the Enneagram assessment before?',
+    ['Yes', 'No', 'Not sure'],
+    'USER'
+  ),
+  single(
+    104,
+    'If yes: what is your Enneagram type?',
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Not sure'],
+    'USER'
+  ),
+  single(
+    105,
+    'If you know it: your wing?',
+    [
+      '1w9',
+      '1w2',
+      '2w1',
+      '2w3',
+      '3w2',
+      '3w4',
+      '4w3',
+      '4w5',
+      '5w4',
+      '5w6',
+      '6w5',
+      '6w7',
+      '7w6',
+      '7w8',
+      '8w7',
+      '8w9',
+      '9w8',
+      '9w1',
+      'No',
+    ],
+    'USER'
+  ),
+  single(
+    106,
+    'If you know it: your instinct stack?',
+    ['sp/sx', 'sp/so', 'sx/so', 'sx/sp', 'so/sp', 'so/sx', 'Not sure'],
+    'USER'
+  ),
 ];
 
-const questionDimensionMappings: Record<number, DimMapping[]> = {
-  1: [
-    { indexKey: 'personality_director', weight: 10 },
-    { indexKey: 'social_intensity', weight: 8 },
-  ],
-  2: [
-    { indexKey: 'personality_kinesthete', weight: 10 },
-    { indexKey: 'personality_creator_artist', weight: 8 },
-    { indexKey: 'personality_joker', weight: 7 },
-    { indexKey: 'competition_level', weight: 9 },
-    { indexKey: 'personality_explorer', weight: 8 },
-  ],
-  3: [
-    { indexKey: 'cognitive_load', weight: 10 },
-    { indexKey: 'personality_joker', weight: 9 },
-    { indexKey: 'competition_level', weight: 8 },
-    { indexKey: 'personality_creator_artist', weight: 9 },
-    { indexKey: 'personality_kinesthete', weight: 10 },
-  ],
-  4: [
-    { indexKey: 'competition_level', weight: 10 },
-    { indexKey: 'personality_joker', weight: 8 },
-  ],
-  5: [
-    { indexKey: 'cognitive_load', weight: 7 },
-    { indexKey: 'personality_joker', weight: 8 },
-    { indexKey: 'personality_kinesthete', weight: 9 },
-    { indexKey: 'personality_creator_artist', weight: 9 },
-    { indexKey: 'personality_explorer', weight: 8 },
-    { indexKey: 'competition_level', weight: 7 },
-  ],
-  6: [
-    { indexKey: 'personality_kinesthete', weight: 9 },
-    { indexKey: 'personality_creator_artist', weight: 8 },
-    { indexKey: 'personality_collector', weight: 7 },
-    { indexKey: 'personality_explorer', weight: 8 },
-  ],
-  7: [
-    { indexKey: 'personality_director', weight: 10 },
-    { indexKey: 'personality_joker', weight: 9 },
-    { indexKey: 'personality_explorer', weight: 9 },
-    { indexKey: 'personality_creator_artist', weight: 9 },
-    { indexKey: 'competition_level', weight: 10 },
-    { indexKey: 'personality_kinesthete', weight: 9 },
-  ],
-  8: [
-    { indexKey: 'spotlight_level', weight: 10 },
-    { indexKey: 'personality_director', weight: 8 },
-  ],
-  9: [{ indexKey: 'competition_level', weight: 10 }],
-  10: [
-    { indexKey: 'personality_storyteller', weight: 10 },
-    { indexKey: 'personality_explorer', weight: 8 },
-  ],
-  13: [
-    { indexKey: 'psych_safety', weight: 8 },
-    { indexKey: 'social_intensity', weight: 7 },
-  ],
-  14: [
-    { indexKey: 'social_intensity', weight: 9 },
-    { indexKey: 'psych_safety', weight: 8 },
-  ],
-  15: [
-    { indexKey: 'personality_director', weight: 9 },
-    { indexKey: 'cognitive_load', weight: 8 },
-  ],
-  16: [
-    { indexKey: 'debrief_level', weight: 8 },
-    { indexKey: 'psych_safety', weight: 7 },
-  ],
-  17: [
-    { indexKey: 'personality_director', weight: 9 },
-    { indexKey: 'facilitation_level', weight: 8 },
-  ],
-  18: [
-    { indexKey: 'activity_level', weight: 7 },
-    { indexKey: 'cognitive_load', weight: 8 },
-  ],
-  19: [
-    { indexKey: 'personality_explorer', weight: 8 },
-    { indexKey: 'customization_level', weight: 8 },
-  ],
-  20: [
-    { indexKey: 'objectives_supported', weight: 8 },
-    { indexKey: 'objective_category', weight: 7 },
-  ],
-};
+const importedQuestionOverrides: SeedQuestion[] = [
+  withDimension(
+    single(1, 'What is your group activity for?', [
+      'Team Bonding',
+      'Team Building',
+      'Team Development',
+      'Birthday Party',
+      'Staff Party',
+      'Group of friends getting together',
+      'Date night',
+      'Retirement party',
+      'Hosting clients',
+      'Family get together',
+      'Other',
+    ]),
+    'activity_for'
+  ),
+  withDimension(
+    single(
+      2,
+      'Which primary objective best describes what you want most from this experience?',
+      ['Team Bonding', 'Team Building', 'Team Development', 'Not sure']
+    ),
+    'objective_category'
+  ),
+  withDimension(
+    text(
+      107,
+      'Quick definitions: Team Bonding = strengthen relationships/belonging. Team Building = improve how we work together. Team Development = grow skills/mindsets (creativity, problem-solving, resilience).',
+      'Informational content only',
+      0
+    ),
+    'team_objective_definitions_info'
+  ),
+  withDimension(
+    multi(3, 'What would make this a success? Pick up to 2 outcomes.', [
+      'Working agreements / norms',
+      'Better communication',
+      'Clearer alignment & expectations',
+      'Action plan / next steps',
+      'More trust & psychological safety',
+      'More connection & belonging',
+      'New skills / tools learned',
+      'More creativity / new ideas',
+      'Lower stress / better morale',
+    ]),
+    'success_criteria'
+  ),
+  withDimension(
+    multi(
+      4,
+      'Hard constraints (must-have / must-avoid). Select all that apply.',
+      [
+        'No alcohol',
+        'Accessible for mobility needs',
+        'Accessible for sensory needs (low noise/low light)',
+        'Dietary restrictions must be supported',
+        'No physical contact',
+        'Virtual or hybrid only',
+        'Must be travel-friendly (flying teams)',
+      ]
+    ),
+    'constraints_hard'
+  ),
+  withDimension(
+    multi(
+      5,
+      "Preferences (we'd like to avoid these if possible). Select all that apply.",
+      [
+        'Avoid competition',
+        'Avoid being put on the spot',
+        'Avoid personal sharing/vulnerability',
+        'Avoid loud noise',
+        'Avoid messy materials',
+        'Avoid complex instructions',
+        'Keep it low energy',
+      ]
+    ),
+    'constraints_soft'
+  ),
+  withDimension(
+    single(6, 'How strict should we be with your preference constraints?', [
+      'Soft preferences (try to match)',
+      'Hard filters (do not show if violated)',
+    ]),
+    'constraint_strictness'
+  ),
+  withDimension(
+    scale(
+      7,
+      'How important is reflection/debrief in the experience? (1 not important - 5 essential)'
+    ),
+    'debrief_importance'
+  ),
+  withDimension(
+    multi(
+      9,
+      'Which statements best describe your team right now? (select all that apply)',
+      [
+        'New team / new manager',
+        'Recently reorganized',
+        'Mostly remote / rebuilding',
+      ]
+    ),
+    'team_context'
+  ),
+  withDimension(
+    scale(
+      10,
+      'Team psychological safety baseline (1 low trust - 5 high trust).'
+    ),
+    'psych_safety'
+  ),
+  withDimension(
+    scale(
+      11,
+      'How ready is your team for team-building activities that involve sharing, vulnerability, or personal growth?'
+    ),
+    'team_readiness'
+  ),
+  withDimension(
+    text(
+      13,
+      'How many will be remote/virtual (if hybrid)?',
+      'Enter the remote count'
+    ),
+    'remote_count'
+  ),
+  withDimension(
+    single(15, 'How flexible are you on dates?', [
+      'Exact date(s) only',
+      'Flexible within 1 week',
+      'Flexible within 2-4 weeks',
+      'Flexible',
+    ]),
+    'date_flexibility'
+  ),
+  withDimension(
+    single(16, 'Preferred time window', [
+      'Morning',
+      'Midday/Afternoon',
+      'Evening',
+      'Any',
+    ]),
+    'preferred_time'
+  ),
+  withDimension(
+    text(
+      17,
+      'Do you have a hard deadline to have a proposal in hand? If so, what date/time?',
+      'Share the deadline date/time'
+    ),
+    'proposal_deadline'
+  ),
+  withDimension(
+    single(18, 'How long do you have for the experience?', [
+      '<45',
+      '45-60',
+      '60-90',
+      '90-120',
+      '120-180',
+      '180+',
+    ]),
+    'duration_bucket'
+  ),
+  withDimension(
+    single(19, 'How many hours are you looking to book? (if you know)', [
+      '0.75',
+      '1',
+      '1.5',
+      '2',
+      '2.5',
+      '3',
+      '4',
+      '4+',
+    ]),
+    'book_hours'
+  ),
+  withDimension(
+    multi(20, 'Where do you want this to happen? (select all that apply)', [
+      'On-site (Pop CoLab)',
+      'Off-site (your location)',
+      'Virtual',
+      'Hybrid',
+    ]),
+    'delivery_methods'
+  ),
+  withDimension(
+    text(21, 'City (if off-site)', 'Enter the city'),
+    'location_city'
+  ),
+  withDimension(
+    text(
+      22,
+      'If off-site/hybrid: share address area + venue notes (parking, elevators, room setup)',
+      'Share venue details'
+    ),
+    'location_notes'
+  ),
+  withDimension(
+    single(23, 'What is your estimated budget range (before tax + travel)?', [
+      '<$500',
+      '$500-$1000',
+      '$1000-$2500',
+      '$2500-$5000',
+      '$5000+',
+      'Not sure yet',
+    ]),
+    'budget_range'
+  ),
+  withDimension(
+    single(24, 'Would you like to be added to our newsletter for updates?', [
+      'Yes',
+      'No',
+    ]),
+    'newsletter_option'
+  ),
+  withDimension(
+    multi(25, 'Team objective(s) (select all that apply)', [
+      'Strengthen team connections',
+      'Spark creativity',
+      'Boost morale',
+      'Improve communication',
+    ]),
+    'objectives_support'
+  ),
+  withDimension(
+    multi(26, 'Pick your top 3 goals (rank 1-3).', [
+      'Connection & trust',
+      'Belonging / team rituals / celebration',
+      'Communication & collaboration',
+      'Creativity & new ideas',
+    ]),
+    'success_criteria_definition'
+  ),
+  withDimension(
+    multi(
+      27,
+      'How will you know this was successful? (select all that apply)',
+      [
+        'People felt more connected',
+        'We have clearer ways of working / norms',
+        'We learned something new',
+        'Energy / morale improved',
+      ]
+    ),
+    'success_criteria'
+  ),
+  withDimension(
+    multi(28, 'Preferred formats (select all that apply).', [
+      'DIY / Make & Take',
+      'Games',
+      'Trivia',
+      'Wellness / Movement',
+      'Learning Lab (talk + activity)',
+    ]),
+    'format_preferences'
+  ),
+  withDimension(
+    text(
+      29,
+      "What have you tried before (team activities) and what worked / didn't work?",
+      'Share what your team has already tried',
+      500
+    ),
+    'previous_activities'
+  ),
+  withDimension(
+    multi(30, 'How do you want it led? (select all that apply)', [
+      'Facilitated (host-led)',
+      'Mixed (guided + self-led)',
+      'Stations / drop-in',
+      'Free play (self-led)',
+    ]),
+    'lead_preferences'
+  ),
+  withDimension(
+    single(31, 'Provider preference?', [
+      'Pop CoLab only',
+      'Open to Pop CoLab + partners',
+      'Open to Pop CoLab + partners + outside vendors',
+    ]),
+    'provider_preference'
+  ),
+  withDimension(
+    multi(
+      32,
+      'What kinds of play should show up? Pick your top 3 (rank 1-3).',
+      [
+        'Social Play',
+        'Creative / Maker Play',
+        'Exploratory / Curiosity Play',
+        'Storytelling / Roleplay',
+      ]
+    ),
+    'play_types'
+  ),
+  withDimension(
+    scale(33, 'Energy preference (1 relaxed - 5 high energy).'),
+    'energy_level'
+  ),
+  withDimension(
+    scale(34, 'Movement level (1 mostly seated - 5 lots of movement).'),
+    'activity_level'
+  ),
+  withDimension(
+    scale(35, 'Noise tolerance (1 prefer quiet - 5 loud is fine).'),
+    'noise_tolerance'
+  ),
+  withDimension(
+    single(36, 'Do you need to keep things quiet?', [
+      'No limit',
+      'Prefer quiet',
+      'Must be quiet',
+    ]),
+    'quiet_requirement'
+  ),
+  withDimension(
+    scale(
+      37,
+      'Cognitive load (1 chill + simple - 5 strategic/problem-solving).'
+    ),
+    'cognitive_load'
+  ),
+  withDimension(
+    scale(
+      38,
+      'Social intensity (1 low-pressure / parallel - 5 highly interactive).'
+    ),
+    'social_intensity'
+  ),
+  withDimension(
+    scale(39, 'Competition comfort (1 none - 5 bring the leaderboard).'),
+    'competition_level'
+  ),
+  withDimension(
+    scale(40, 'Spotlight comfort (1 no performing - 5 love performing).'),
+    'spotlight_level'
+  ),
+  withDimension(
+    scale(41, 'Messiness tolerance (1 keep it clean - 5 mess is fine).'),
+    'messiness_level'
+  ),
+  withDimension(
+    scale(
+      42,
+      "Creative confidence required (1 no art skills please - 5 we're all-in on creating)."
+    ),
+    'creative_confidence'
+  ),
+  withDimension(
+    scale(
+      43,
+      'How open is your team to trying something new? (1 stay safe - 5 surprise us)'
+    ),
+    'openness_surprise'
+  ),
+  withDimension(
+    scale(
+      44,
+      'How important is neuroinclusive design for this group? (1 standard - 5 very important/access needs)'
+    ),
+    'neuroinclusive_priority'
+  ),
+  withDimension(
+    multi(45, 'Any mobility/access needs? (select all that apply)', [
+      'None',
+      'Wheelchair accessible',
+      'Avoid stairs',
+      'Seated option needed',
+      'Frequent breaks',
+    ]),
+    'accessibility_mobility'
+  ),
+  withDimension(
+    multi(46, 'Any sensory needs we should plan for? (select all that apply)', [
+      'None',
+      'Quiet space available',
+      'Lower noise preferred',
+      'Lower scent',
+    ]),
+    'accessibility_sensory'
+  ),
+  withDimension(
+    multi(47, 'Any hearing access needs? (select all that apply)', [
+      'None',
+      'Captions (virtual)',
+      'Mic/speaker support',
+      'Face speakers when talking',
+    ]),
+    'accessibility_hearing'
+  ),
+  withDimension(
+    multi(48, 'Any vision access needs? (select all that apply)', [
+      'None',
+      'Large print',
+      'High contrast visuals',
+      'Verbal instructions',
+      'Other',
+    ]),
+    'accessibility_vision'
+  ),
+  withDimension(
+    single(49, 'Do you want a make-and-take item?', ['Yes', 'No', 'Either']),
+    'take_item'
+  ),
+  withDimension(
+    single(50, 'Are people flying / limited for take-home items?', [
+      'No',
+      'Some are flying',
+      'Most are flying',
+    ]),
+    'travel_flying'
+  ),
+  withDimension(
+    single(51, 'Alcohol policy for your team event?', [
+      'No alcohol (zero-proof only)',
+      'Alcohol allowed',
+      'Not sure',
+    ]),
+    'alcohol_policy'
+  ),
+  withDimension(
+    multi(
+      52,
+      'Any dietary considerations? (only affects tasting/food experiences)',
+      [
+        'None',
+        'Vegetarian',
+        'Vegan',
+        'Gluten-free',
+        'Halal',
+        'Kosher',
+        'Nut allergy',
+        'Dairy-free',
+      ]
+    ),
+    'dietary_considerations'
+  ),
+  withDimension(
+    text(
+      53,
+      'Any theme, brand colours, or company values you want woven in? (optional)',
+      'Share any theme, brand, or values notes'
+    ),
+    'theme_or_branding'
+  ),
+  withDimension(
+    single(54, 'How customized should this be?', [
+      'Off-the-shelf',
+      'Some customization',
+      'Fully customized',
+      'Not sure',
+    ]),
+    'customization_level'
+  ),
+  withDimension(
+    single(55, 'Do you want a debrief/reflection built in?', [
+      'No debrief',
+      'Light debrief (5-10 min)',
+      'Structured debrief (15-20 min)',
+    ]),
+    'debrief_level'
+  ),
+  withDimension(
+    single(56, 'Do you need a short post-event summary/report?', [
+      'No',
+      'Nice to have',
+      'Yes',
+    ]),
+    'report_needed'
+  ),
+  withDimension(
+    single(57, 'Language preference for facilitation/materials (optional)', [
+      'English',
+      'French',
+      'Bilingual',
+      'Other',
+    ]),
+    'language_preference'
+  ),
+  withDimension(
+    single(58, "Your team's vibe (optional): what feels right?", [
+      'Playful & silly',
+      'Warm & conversational',
+      'Calm & reflective',
+      'Competitive & energetic',
+    ]),
+    'culture_vibe'
+  ),
+  withDimension(
+    text(
+      59,
+      'Anything else we should know? (schedule, culture, sensitivities, must-avoid, etc.)',
+      'Add any other context',
+      500
+    ),
+    'additional_notes'
+  ),
+  withDimension(
+    single(
+      60,
+      'When it comes to playful team activities, I usually need...',
+      [
+        'No support (I jump in)',
+        'Light support (a warm-up helps)',
+        'A lot of support (I need strong structure + opt-out options)',
+      ],
+      'USER'
+    ),
+    'support_category'
+  ),
+  withDimension(
+    scale(
+      61,
+      'Support need (1 jump in - 5 I need lots of support/structure).',
+      'USER'
+    ),
+    'support_need'
+  ),
+  withDimension(
+    scale(
+      62,
+      'In group settings at work, I feel psychologically safe to try new things. (1 least like me - 5 most like me)',
+      'USER'
+    ),
+    'psych_safety'
+  ),
+  withDimension(
+    single(
+      63,
+      "You're at a social event where you don't know anyone. You...",
+      [
+        'Start mingling with the first person you see',
+        'Find someone approachable and start a conversation',
+        'Wait until someone comes up to you',
+        'Hang back near the food/edge of the room until you feel comfortable',
+      ],
+      'USER'
+    ),
+    'social_initiation'
+  ),
+  withDimension(
+    single(
+      64,
+      'A facilitator invites the group to try something new (slightly awkward). You...',
+      [
+        'Jump in immediately',
+        'Try it after watching 1-2 people',
+        'Try it if I can do it with a buddy',
+        'Prefer to observe / pass',
+      ],
+      'USER'
+    ),
+    'activity_scenario'
+  ),
+  withDimension(
+    single(
+      65,
+      'If an activity puts me on the spot (performing / sharing in front of everyone), I...',
+      [
+        'Love it',
+        "It's okay sometimes",
+        'Prefer small groups',
+        'Prefer to avoid spotlight',
+      ],
+      'USER'
+    ),
+    'spotlight_scenario'
+  ),
+  withDimension(
+    multi(
+      66,
+      'What helps you feel comfortable joining in? (select all that apply)',
+      [
+        'Clear step-by-step instructions',
+        'A quick demo example',
+        'Doing it with a buddy',
+        'Choice of roles (talking vs making)',
+        'Permission to pass',
+        'Small-group breakouts',
+        'Quiet corner / breaks',
+        'Time to think before sharing',
+        'No scoring / low competition',
+        'Hands-on task (less talking)',
+      ],
+      'USER'
+    ),
+    'supports_helpful'
+  ),
+  withDimension(
+    scale(
+      67,
+      'I prefer activities with clear steps and structure (1 free-flow - 5 very structured).',
+      'USER'
+    ),
+    'structure_pref'
+  ),
+  withDimension(
+    scale(
+      68,
+      'If I opt out of an activity, I feel comfortable doing so. (1 not comfortable - 5 very comfortable)',
+      'USER'
+    ),
+    'safety_optout'
+  ),
+  withDimension(
+    scale(
+      69,
+      'Joker: I like humour, surprises, and keeping things light. (1-5)',
+      'PLAY'
+    ),
+    'person_joker'
+  ),
+  withDimension(
+    scale(
+      70,
+      'Kinesthete: I like movement, hands-on, and physical engagement. (1-5)',
+      'PLAY'
+    ),
+    'person_kinesthete'
+  ),
+  withDimension(
+    scale(
+      71,
+      'Explorer: I like curiosity, trying new things, and discovering. (1-5)',
+      'PLAY'
+    ),
+    'person_explorer'
+  ),
+  withDimension(
+    scale(
+      72,
+      'Competitor: I like challenge, goals, and friendly competition. (1-5)',
+      'PLAY'
+    ),
+    'person_competitor'
+  ),
+  withDimension(
+    scale(
+      73,
+      'Director: I like organizing people, leading, and shaping the plan. (1-5)',
+      'PLAY'
+    ),
+    'person_director'
+  ),
+  withDimension(
+    scale(
+      74,
+      'Collector: I like gathering, sorting, and building connections/knowledge. (1-5)',
+      'PLAY'
+    ),
+    'person_collector'
+  ),
+  withDimension(
+    scale(
+      75,
+      'Creator/Artist: I like making, designing, and expressing ideas. (1-5)',
+      'PLAY'
+    ),
+    'person_creator_artist'
+  ),
+  withDimension(
+    scale(
+      76,
+      'Storyteller: I like stories, meaning, and sharing experiences. (1-5)',
+      'PLAY'
+    ),
+    'person_storyteller'
+  ),
+  withDimension(
+    multi(
+      89,
+      'Play Nature: what feels most natural to you? Pick your top 3 (rank 1-3).',
+      [
+        'Social (with others)',
+        'Creative/Maker (making things)',
+        'Exploratory (curiosity, discovery)',
+        'Movement/Physical',
+        'Story/Narrative',
+        'Object/Hands-on (tinkering)',
+        'Mindful/Reflective',
+        'Competitive/Challenge',
+        'Imaginative/Role-play',
+      ],
+      'PLAY'
+    ),
+    'play_nature'
+  ),
+  withDimension(
+    multi(
+      90,
+      'Types of Play: what do you enjoy most? Pick your top 3 (rank 1-3).',
+      [
+        'Social Play',
+        'Creative / Maker Play',
+        'Exploratory / Curiosity Play',
+        'Storytelling / Narrative Play',
+        'Object Play',
+      ],
+      'PLAY'
+    ),
+    'play_types'
+  ),
+  withDimension(
+    scale(91, 'Energy preference (1 relaxed - 5 high energy).', 'USER'),
+    'energy_score'
+  ),
+  withDimension(
+    scale(92, 'Noise preference (1 quiet - 5 loud is fine).', 'USER'),
+    'noise_level'
+  ),
+  withDimension(
+    scale(
+      93,
+      'Social intensity preference (1 low-pressure / parallel play - 5 highly interactive).',
+      'USER'
+    ),
+    'social_intensity'
+  ),
+  withDimension(
+    scale(94, 'Competition preference (1 none - 5 love it).', 'USER'),
+    'competition_level'
+  ),
+  withDimension(
+    scale(
+      95,
+      'Spotlight preference (1 avoid spotlight - 5 love spotlight).',
+      'USER'
+    ),
+    'spotlight_level'
+  ),
+  withDimension(
+    scale(
+      96,
+      "Creative confidence (1 I worry I'm 'not creative' - 5 I love making stuff).",
+      'USER'
+    ),
+    'creative_confidence'
+  ),
+  withDimension(
+    scale(
+      97,
+      'Openness to trying new things (1 stay safe - 5 surprise me).',
+      'USER'
+    ),
+    'openness_new'
+  ),
+  withDimension(
+    multi(
+      98,
+      'Kid-you: what did you love doing most? (select all that apply)',
+      [
+        'Building LEGO / forts (Object Play)',
+        'Drawing / crafts / making things (Creative Play)',
+        'Sports / tag / running',
+      ],
+      'USER'
+    ),
+    'childhood_play'
+  ),
+  withDimension(
+    text(
+      99,
+      'Anything else you loved doing as a kid? (optional)',
+      'Type your answer here...',
+      250,
+      'USER'
+    ),
+    'childhood_open'
+  ),
+  withDimension(
+    multi(
+      100,
+      'Anything you strongly want to avoid? (select all that apply)',
+      [
+        'Being put on the spot',
+        'High competition',
+        'Loud noise',
+        'Messy materials',
+        'Physical contact',
+        'Personal sharing',
+      ],
+      'USER'
+    ),
+    'avoid_elements'
+  ),
+  withDimension(
+    multi(
+      101,
+      'Needs-based supports that help you participate (select all that apply).',
+      [
+        'Clear written + spoken instructions',
+        'More time to process',
+        'Breaks / step away',
+        'Quiet/low-sensory',
+      ],
+      'USER'
+    ),
+    'neuro_supports'
+  ),
+  withDimension(
+    text(
+      102,
+      'Optional: Any accessibility notes we should plan for?',
+      'Share any accessibility notes',
+      250,
+      'USER'
+    ),
+    'accessibility_notes'
+  ),
+  withDimension(
+    single(
+      103,
+      'Have you taken the Enneagram assessment before?',
+      ['Yes', 'No', 'Not sure'],
+      'USER'
+    ),
+    'enneagram_taken'
+  ),
+  withDimension(
+    single(
+      104,
+      'If yes: what is your Enneagram type?',
+      ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Not sure'],
+      'USER'
+    ),
+    'enneagram_type'
+  ),
+  withDimension(
+    single(
+      105,
+      'If you know it: your wing?',
+      [
+        '1w9',
+        '1w2',
+        '2w1',
+        '2w3',
+        '3w2',
+        '3w4',
+        '4w3',
+        '4w5',
+        '5w4',
+        '5w6',
+        '6w5',
+        '6w7',
+        '7w6',
+        '7w8',
+        '8w7',
+        '8w9',
+        '9w8',
+        '9w1',
+        'No',
+      ],
+      'USER'
+    ),
+    'enneagram_wing'
+  ),
+  withDimension(
+    single(
+      106,
+      'If you know it: your instinct stack?',
+      ['sp/sx', 'sp/so', 'sx/so', 'sx/sp', 'so/sp', 'so/sx', 'Not sure'],
+      'USER'
+    ),
+    'enneagram_instinct'
+  ),
+];
+
+const questions = mergeQuestionsByText([
+  ...baseQuestions,
+  ...importedQuestionOverrides,
+]);
 
 export async function seedQuestions(
   prisma: PrismaClient,
@@ -482,29 +1725,30 @@ export async function seedQuestions(
 ): Promise<QuestionIdByOrder> {
   if (schemaState.hasFormQuestionTable) {
     await prisma.$executeRaw`DELETE FROM "form_question"`;
-    console.log('🗑️  Cleared existing form_question mappings');
+    console.log('Cleared existing form_question mappings');
   }
   if (schemaState.hasFormDimensionTable) {
     await prisma.$executeRaw`DELETE FROM "form_dimension"`;
-    console.log('🗑️  Cleared existing form_dimension mappings');
+    console.log('Cleared existing form_dimension mappings');
   }
   if (schemaState.hasIntakeFormTable) {
     await prisma.$executeRaw`DELETE FROM "intake_form"`;
-    console.log('🗑️  Cleared existing intake forms');
+    console.log('Cleared existing intake forms');
   }
 
   await prisma.answer.deleteMany({});
   await prisma.questionDimension.deleteMany({});
   await prisma.questionOption.deleteMany({});
   await prisma.question.deleteMany({});
-  console.log('🗑️  Cleared existing questions');
+  console.log('Cleared existing questions');
 
   for (const question of questions) {
-    const { options, ...questionData } = question;
+    const { options, dimension_key, ...questionData } = question;
+    void dimension_key;
     await prisma.question.create({
       data: {
         ...questionData,
-        options: {
+        question_options: {
           create: options.map(option => ({
             option_label: option.option_label,
             option_value: option.option_value,
@@ -514,7 +1758,7 @@ export async function seedQuestions(
       },
     });
     console.log(
-      `✅ Created question [${questionData.question_type}]: ${questionData.question_text.slice(0, 50)}…`
+      `Created question [${questionData.question_type}]: ${questionData.question_text.slice(0, 50)}...`
     );
   }
 
@@ -537,31 +1781,36 @@ export async function seedQuestionDimensionMappings(
   questionIdByOrder: QuestionIdByOrder,
   dimensionIdByKey: Map<string, number>
 ): Promise<void> {
-  for (const [orderIndex, mappings] of Object.entries(
-    questionDimensionMappings
-  )) {
-    const questionId = questionIdByOrder.get(Number(orderIndex));
-    if (!questionId) {
-      console.warn(`⚠️  No question with order_index ${orderIndex}`);
+  for (const question of questions) {
+    if (!question.dimension_key) {
       continue;
     }
 
-    for (const mapping of mappings) {
-      const dimensionId = dimensionIdByKey.get(mapping.indexKey);
-      if (!dimensionId) {
-        console.warn(`⚠️  No dimension with key ${mapping.indexKey}`);
-        continue;
-      }
-
-      await prisma.questionDimension.create({
-        data: {
-          question_id: questionId,
-          dimension_id: dimensionId,
-          weight_rate: mapping.weight,
-        },
-      });
+    const questionId = questionIdByOrder.get(question.order_index);
+    if (!questionId) {
+      console.warn(`No question with order_index ${question.order_index}`);
+      continue;
     }
 
-    console.log(`✅ Wired ${mappings.length} dimension(s) → Q#${orderIndex}`);
+    const dimensionId = dimensionIdByKey.get(question.dimension_key);
+    if (!dimensionId) {
+      console.warn(`No dimension with key ${question.dimension_key}`);
+      continue;
+    }
+
+    await prisma.question.update({
+      where: { id: questionId },
+      data: { dimension_id: dimensionId },
+    });
+
+    await prisma.questionDimension.create({
+      data: {
+        question_id: questionId,
+        dimension_id: dimensionId,
+        weight_rate: 1,
+      },
+    });
+
+    console.log(`Wired ${question.dimension_key} -> Q#${question.order_index}`);
   }
 }
