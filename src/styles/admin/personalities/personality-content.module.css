@@ -30,20 +30,13 @@
 }
 
 .personalityGrid {
-  @apply grid gap-4;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 256px;
+  @apply grid gap-4 content-start;
   align-content: start;
 }
 
-@media (max-width: 1279px) {
+@media (min-width: 640px) {
   .personalityGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 767px) {
-  .personalityGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+    grid-auto-rows: minmax(312px, auto);
   }
 }

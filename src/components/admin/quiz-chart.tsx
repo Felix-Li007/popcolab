@@ -1,40 +1,70 @@
 import styles from '@/styles/quiz-chart.module.css';
+import type { OverviewQuizMetrics } from '@/types/overview-type';
 
-const weekData = [
-  { day: 'M', value: 28 },
-  { day: 'T', value: 45 },
-  { day: 'W', value: 35 },
-  { day: 'T', value: 60 },
-  { day: 'F', value: 55 },
-  { day: 'S', value: 40 },
-  { day: 'S', value: 30 },
-];
+type QuizChartProps = {
+  metrics: OverviewQuizMetrics;
+};
 
-const maxValue = Math.max(...weekData.map(d => d.value));
+export default function QuizChart({ metrics }: QuizChartProps) {
+  const maxValue = Math.max(...metrics.trend.map(item => item.value), 1);
+  const changeLabel =
+    metrics.weeklyChangePct === 0
+      ? 'No change vs last week'
+      : `${metrics.weeklyChangePct > 0 ? '↑' : '↓'} ${Math.abs(
+          metrics.weeklyChangePct
+        ).toFixed(1)}% vs last week`;
 
-export default function QuizChart() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
       <div className="flex items-center gap-1.5 mb-1">
-        <span className="text-base">📊</span>
+        <span className="text-base">🧠</span>
         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-          Quiz – This Week
+          Assessment
         </h3>
       </div>
-      <div className="text-[10px] text-green-500 font-semibold mb-3">
-        ↑ 18% vs last week · 347 total
+      <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-semibold">
+        <span
+          className={
+            metrics.weeklyChangePct > 0
+              ? 'text-green-500'
+              : metrics.weeklyChangePct < 0
+                ? 'text-amber-600'
+                : 'text-gray-400'
+          }
+        >
+          {changeLabel}
+        </span>
+        <span className="text-gray-300">·</span>
+        <span className="text-gray-500">
+          {metrics.completionsThisWeek} this week
+        </span>
+        <span className="text-gray-300">·</span>
+        <span className="text-gray-500">{metrics.totalCompletions} total</span>
+        <span className="text-gray-300">·</span>
+        <span className="text-gray-500">
+          {metrics.uniqueParticipants} participants
+        </span>
       </div>
-      <div className="flex items-end gap-1.5 h-16">
-        {weekData.map((d, i) => {
-          const heightPct = Math.round((d.value / maxValue) * 100);
+      <div className="flex h-20 items-end gap-1.5">
+        {metrics.trend.map(item => {
+          const heightPct = Math.round((item.value / maxValue) * 100);
           return (
-            <div key={i} className="flex-1 flex flex-col items-center gap-1">
-              <div
-                className={`w-full rounded-t-sm bg-magenta opacity-80 hover:opacity-100 transition-opacity ${styles.bar}`}
-                style={{ height: `${heightPct}%` }}
-                title={`${d.value} completions`}
-              />
-              <span className="text-[9px] text-gray-400">{d.day}</span>
+            <div
+              key={item.periodKey}
+              className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"
+            >
+              <div className="flex h-14 w-full items-end">
+                <div
+                  className={`w-full rounded-t-sm bg-magenta opacity-80 hover:opacity-100 transition-opacity ${styles.bar}`}
+                  style={{
+                    height: `${Math.max(heightPct, item.value > 0 ? 12 : 0)}%`,
+                  }}
+                  title={`${item.value} completions`}
+                />
+              </div>
+              <span className="text-[9px] text-gray-400">
+                {item.periodLabel}
+              </span>
             </div>
           );
         })}

@@ -31,8 +31,9 @@ type Props = DimensionCardProps | CategoryCardProps;
 
 const INTAKE_FORM_LABELS: Record<Dimension['formNames'][number], string> = {
   REQUEST: 'LEADER',
-  USER: 'MEMBER',
-  PLAY: 'ASSESS',
+  MEMBER: 'MEMBER',
+  ASSESS: 'ASSESS',
+  EXPERIENCE: 'EXPERIENCE',
 };
 
 const GLOW_COLORS: Record<string, string> = {

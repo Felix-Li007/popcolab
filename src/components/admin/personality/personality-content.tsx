@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import PersonalityCard from '@/components/admin/personality/personality-card';
-import StatsCard from '@/components/admin/stats-card';
 import PersonalityForm from '@/components/admin/personality/personality-edit';
 import PersonalityView from '@/components/admin/personality/personality-view';
 import { Button, Badge } from '@/ui';
@@ -62,43 +61,6 @@ export default function PersonalityContent({
     <>
       <div className={contentStyles.root}>
         <div className={contentStyles.content}>
-          <div className={contentStyles.statsGrid}>
-            <StatsCard
-              bgColor="bg-pink-light"
-              glowColor="rgba(255, 187, 240, 0.5)"
-              icon={<span className="text-lg">🎭</span>}
-              value={counts.All}
-              label="Personalities"
-              trendLabel="personality types"
-            />
-            <StatsCard
-              bgColor="bg-green-100"
-              glowColor="rgba(134, 239, 172, 0.5)"
-              icon={<span className="text-lg">✅</span>}
-              value={counts.Active}
-              label="Active"
-              trend={`${Math.round((counts.Active / (counts.All || 1)) * 100)}%`}
-              trendLabel="of total"
-            />
-            <StatsCard
-              bgColor="bg-brand-yellow/40"
-              glowColor="rgba(245, 221, 66, 0.45)"
-              icon={<span className="text-lg">🎯</span>}
-              value="2.4k"
-              label="Quiz Results"
-              trend="18%"
-              trendLabel="this month"
-            />
-            <StatsCard
-              bgColor="bg-lavender"
-              glowColor="rgba(196, 181, 253, 0.45)"
-              icon={<span className="text-lg">⭐</span>}
-              value="91%"
-              label="Top: Collector"
-              trendLabel="match rate"
-            />
-          </div>
-
           <div className={contentStyles.listPanel}>
             <div className={contentStyles.filterBar}>
               <div className={contentStyles.filterTabs}>
@@ -131,7 +93,7 @@ export default function PersonalityContent({
                 icon={<span>+</span>}
                 className="shrink-0"
               >
-                New
+                Add
               </Button>
             </div>
 

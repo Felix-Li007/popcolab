@@ -1,0 +1,204 @@
+@reference "../../../app/globals.css";
+
+.titleWrap {
+  @apply flex min-w-0 items-center gap-2;
+}
+
+.titleIcon {
+  @apply text-display leading-none;
+}
+
+.titleText {
+  @apply truncate;
+}
+
+.popularityBadge {
+  @apply shrink-0 rounded-full border border-coral-vibe bg-coral-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-coral-vibe;
+}
+
+.statusBadge {
+  @apply shrink-0;
+}
+
+.shell {
+  @apply flex h-full min-h-0 flex-col;
+}
+
+.body {
+  @apply flex flex-1 min-h-0 flex-col gap-5 px-6 py-5;
+}
+
+.topSection {
+  border-radius: 28px;
+  @apply shrink-0 border border-gray-200 bg-white px-5 py-5 shadow-sm;
+}
+
+.topGrid {
+  @apply grid gap-4 md:grid-cols-2 xl:grid-cols-12;
+}
+
+.fieldLabel {
+  @apply mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500;
+}
+
+.fieldValue {
+  @apply rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800;
+}
+
+.fieldValueTall {
+  @apply min-h-20;
+}
+
+.bottomSection {
+  border-radius: 28px;
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden border border-gray-200 bg-gray-50 shadow-sm;
+}
+
+.emptyWrap {
+  @apply flex flex-1 items-center justify-center px-5 py-8;
+}
+
+.emptyCard {
+  @apply rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-8 text-center;
+}
+
+.emptyTitle {
+  @apply text-sm font-semibold text-gray-700;
+}
+
+.tabsHeader {
+  @apply relative shrink-0 border-b border-gray-200;
+}
+
+.tabsScroller {
+  @apply overflow-x-auto px-5 py-3;
+}
+
+.tabsRow {
+  @apply flex min-w-max gap-2;
+}
+
+.tabButton {
+  @apply shrink-0 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 transition;
+}
+
+.tabButton:hover {
+  @apply border-gray-300 text-gray-700;
+}
+
+.tabButtonActive {
+  @apply border-teal-deep bg-teal-deep text-white;
+}
+
+.tabCount {
+  @apply ml-2 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500;
+}
+
+.tabCountActive {
+  @apply bg-white/20 text-white;
+}
+
+.scrollFadeLeft,
+.scrollFadeRight {
+  @apply pointer-events-none absolute inset-y-0 flex w-12 items-center;
+}
+
+.scrollFadeLeft {
+  @apply left-0 justify-start pl-2;
+  background: linear-gradient(
+    to right,
+    rgb(249 250 251),
+    rgb(249 250 251 / 0.9),
+    transparent
+  );
+}
+
+.scrollFadeRight {
+  @apply right-0 justify-end pr-2;
+  background: linear-gradient(
+    to left,
+    rgb(249 250 251),
+    rgb(249 250 251 / 0.9),
+    transparent
+  );
+}
+
+.scrollArrow {
+  @apply rounded-full border border-gray-200 bg-white/95 px-1.5 py-0.5 text-[11px] font-bold text-gray-400 shadow-sm;
+}
+
+.scrollIndicator {
+  @apply pointer-events-none absolute right-5 bottom-1 text-[10px] font-semibold text-gray-300;
+}
+
+.dimensionPanel {
+  @apply min-h-0 flex-1 overflow-y-auto bg-white px-5 py-4;
+}
+
+.dimensionGrid {
+  @apply grid gap-4 lg:grid-cols-2;
+}
+
+.dimensionCard {
+  @apply rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 shadow-sm;
+}
+
+.dimensionCardHeader {
+  @apply flex items-center justify-between gap-3;
+}
+
+.dimensionTitle {
+  @apply text-xs font-bold uppercase tracking-[0.12em] text-gray-500;
+}
+
+.dimensionMode {
+  @apply rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-400;
+}
+
+.optionGroup {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.tagGroup {
+  @apply mt-4 flex flex-wrap gap-1.5;
+}
+
+.optionChip {
+  @apply border border-gray-300 bg-white text-[11px] text-gray-600;
+}
+
+.optionChipSelected {
+  @apply border-coral-vibe bg-coral-vibe text-white shadow-sm;
+}
+
+.pillOption {
+  @apply rounded-full px-3.5 py-2 font-medium leading-none;
+}
+
+.circleOption {
+  @apply flex h-9 w-9 items-center justify-center rounded-full px-0 font-semibold;
+}
+
+.optionLabel {
+  @apply max-w-[14rem] truncate;
+}
+
+.tagBadge {
+  @apply border border-coral-vibe bg-coral-soft text-coral-vibe;
+}
+
+.plainValue {
+  @apply mt-4 whitespace-pre-wrap break-words text-sm text-gray-700;
+}
+
+.footer {
+  @apply flex shrink-0 items-center justify-between gap-3 border-t border-gray-100 px-6 py-4;
+}
+
+.meta {
+  @apply flex flex-wrap items-center gap-4 text-[11px] text-gray-500;
+}
+
+.actions {
+  @apply flex gap-3;
+}

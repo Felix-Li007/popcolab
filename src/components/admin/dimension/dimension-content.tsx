@@ -235,7 +235,7 @@ export default function DimensionContent({ initialData, categories }: Props) {
                     size="sm"
                     icon={<span>+</span>}
                   >
-                    New
+                    Add
                   </Button>
                   <Button
                     onClick={handleBulkDelete}

@@ -26,5 +26,12 @@
 }
 
 .cardsGrid {
-  @apply grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 sm:auto-rows-[256px];
+  @apply grid grid-cols-1 gap-3 content-start;
+}
+
+@media (min-width: 640px) {
+  .cardsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+    grid-auto-rows: minmax(312px, auto);
+  }
 }

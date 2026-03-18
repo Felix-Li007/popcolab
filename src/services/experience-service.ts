@@ -4,13 +4,14 @@ import type {
   Experience,
   ExperienceDimensionValue,
   ExperienceFormState,
+  ExperienceStatus,
 } from '@/types/experience-type';
 
 type UpsertExperienceInput = {
   providerId: number;
   categoryId: number;
   experienceTitle: string;
-  popularityIndex: number;
+  experienceStatus: ExperienceStatus;
   durationMin: number;
   durationMax: number;
   capacityMax: number;
@@ -155,6 +156,7 @@ function mapExperienceRow(
     categoryId: row.category_id,
     categoryTitle: row.category.category_title,
     experienceTitle: row.experience_title,
+    experienceStatus: row.experience_status,
     popularityIndex: row.popularity_index,
     durationMin: row.duration_min,
     durationMax: row.duration_max,
@@ -176,9 +178,9 @@ function mapExperienceRow(
 
 export function validateExperienceFields(fields: {
   experienceTitle: string;
+  experienceStatus: ExperienceStatus;
   providerId: number;
   categoryId: number;
-  popularityIndex: number;
   durationMin: number;
   durationMax: number;
   capacityMax: number;
@@ -200,16 +202,16 @@ export function validateExperienceFields(fields: {
     errors.experienceTitle = 'Experience title must be 100 characters or less';
   }
 
+  if (!['draft', 'inactive', 'active'].includes(fields.experienceStatus)) {
+    errors.experienceStatus = 'Please select a valid status';
+  }
+
   if (!Number.isInteger(fields.providerId) || fields.providerId <= 0) {
     errors.providerId = 'Please select a provider';
   }
 
   if (!Number.isInteger(fields.categoryId) || fields.categoryId <= 0) {
     errors.categoryId = 'Please select a category';
-  }
-
-  if (!Number.isInteger(fields.popularityIndex) || fields.popularityIndex < 0) {
-    errors.popularityIndex = 'Popularity index must be a non-negative integer';
   }
 
   if (!Number.isInteger(fields.durationMin) || fields.durationMin < 0) {
@@ -337,6 +339,59 @@ export async function getExperiences(): Promise<Experience[]> {
   return rows.map(row => mapExperienceRow(row, dimensionOptionsById));
 }
 
+export async function getDashboardExperiences(
+  limit = 5
+): Promise<Experience[]> {
+  const take = Number.isInteger(limit) && limit > 0 ? limit : 5;
+
+  const [dimensionOptionsById, rows] = await Promise.all([
+    getOptionsByDimensionId(),
+    prisma.experience.findMany({
+      include: {
+        provider: {
+          select: {
+            provider_label: true,
+            provider_type: true,
+          },
+        },
+        category: {
+          select: {
+            category_title: true,
+          },
+        },
+        experience_dimensions: {
+          include: {
+            dimension_index: {
+              include: {
+                category: {
+                  select: {
+                    category_name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            experience_dimensions: true,
+            proposals: true,
+            experience_calendars: true,
+          },
+        },
+      },
+      orderBy: [
+        { popularity_index: 'desc' },
+        { updated_at: 'desc' },
+        { id: 'desc' },
+      ],
+      take,
+    }),
+  ]);
+
+  return rows.map(row => mapExperienceRow(row, dimensionOptionsById));
+}
+
 export async function createExperience(
   input: UpsertExperienceInput
 ): Promise<void> {
@@ -352,7 +407,8 @@ export async function createExperience(
       provider_id: input.providerId,
       category_id: input.categoryId,
       experience_title: input.experienceTitle,
-      popularity_index: input.popularityIndex,
+      experience_status: input.experienceStatus,
+      popularity_index: 0,
       duration_min: input.durationMin,
       duration_max: input.durationMax,
       capacity_max: input.capacityMax,
@@ -377,7 +433,11 @@ export async function updateExperience(
 ): Promise<void> {
   const existing = await prisma.experience.findUnique({
     where: { id },
-    select: { id: true, created_by: true },
+    select: {
+      id: true,
+      created_by: true,
+      popularity_index: true,
+    },
   });
 
   if (!existing) {
@@ -396,7 +456,8 @@ export async function updateExperience(
       provider_id: input.providerId,
       category_id: input.categoryId,
       experience_title: input.experienceTitle,
-      popularity_index: input.popularityIndex,
+      experience_status: input.experienceStatus,
+      popularity_index: existing.popularity_index,
       duration_min: input.durationMin,
       duration_max: input.durationMax,
       capacity_max: input.capacityMax,

@@ -17,6 +17,22 @@
   @apply flex-1 overflow-y-auto p-3;
 }
 
+.filterRow {
+  @apply flex flex-wrap items-center gap-2 border-b border-gray-100 px-3 py-2;
+}
+
+.filterSelect {
+  @apply min-w-[10rem] rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30;
+}
+
+.filterCheckbox {
+  @apply inline-flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700;
+}
+
+.checkboxInput {
+  @apply h-4 w-4 rounded border-gray-300 text-magenta focus:ring-magenta/30;
+}
+
 .cardsGrid {
   @apply grid grid-cols-1 gap-3 content-start;
 }

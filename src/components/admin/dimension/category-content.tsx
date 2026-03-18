@@ -240,7 +240,7 @@ export default function CategoryContent({ initialData }: Props) {
                     size="sm"
                     icon={<span>+</span>}
                   >
-                    New
+                    Add
                   </Button>
                   <Button
                     onClick={handleBulkDelete}

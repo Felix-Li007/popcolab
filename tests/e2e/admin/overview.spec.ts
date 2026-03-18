@@ -14,18 +14,51 @@ test.describe('Admin Overview page', () => {
 
   test('overview analytics sections are visible', async ({ page }) => {
     await expect(
-      page.getByRole('heading', { name: 'Request status distribution' })
+      page.getByRole('heading', { name: 'Experience library overview' })
+    ).toBeVisible();
+    await expect(
+      page.getByText('Total Experiences', { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText('New This Week', { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Status Mix' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'New Experiences Trend' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Top Categories' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Request matching overview' })
     ).toBeVisible();
     await expect(
       page.getByText('Total Requests', { exact: true })
     ).toBeVisible();
+    await expect(page.getByText('Match Rate', { exact: true })).toBeVisible();
     await expect(
-      page.getByRole('heading', {
-        name: 'Users and teams over the last 14 days',
-      })
+      page.getByText('Avg Time To Match', { exact: true })
     ).toBeVisible();
-    await expect(page.getByText('Total Users', { exact: true })).toBeVisible();
-    await expect(page.getByText('Total Teams', { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Top Requested Categories' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Top Matched Experiences' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Question health overview' })
+    ).toBeVisible();
+    await expect(
+      page.getByText('Mapped To Dimensions', { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'By Form Usage' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'By Question Type' })
+    ).toBeVisible();
   });
 
   test('Personalities preview section renders cards', async ({ page }) => {
@@ -43,65 +76,5 @@ test.describe('Admin Overview page', () => {
     await expect(
       section.getByRole('link', { name: /view all/i })
     ).toBeVisible();
-  });
-
-  test('Questions preview section renders question cards', async ({ page }) => {
-    const section = page
-      .getByRole('heading', { name: /questions/i })
-      .locator('xpath=ancestor::section[1]');
-
-    await expect(section).toBeVisible();
-    const cards = section.locator('a[href^="/admin/questions?id="]');
-    if ((await cards.count()) > 0) {
-      await expect(cards.first()).toBeVisible();
-      return;
-    }
-
-    await expect(section.getByText(/no questions yet/i)).toBeVisible();
-  });
-
-  test('"View all" link in Questions section navigates to /admin/questions', async ({
-    page,
-  }) => {
-    const questionsSection = page
-      .getByRole('heading', { name: /questions/i })
-      .locator('xpath=ancestor::section[1]');
-    const link = questionsSection.getByRole('link', { name: /view all/i });
-
-    await expect(link).toHaveAttribute('href', '/admin/questions');
-    await Promise.all([
-      page.waitForURL(url => /^\/admin\/questions\/?$/.test(url.pathname)),
-      link.click(),
-    ]);
-    const url = new URL(page.url());
-    expect(url.pathname).toMatch(/^\/admin\/questions\/?$/);
-  });
-
-  test('clicking a question preview card navigates with ?id= param', async ({
-    page,
-  }) => {
-    const cards = page.locator('a[href^="/admin/questions?id="]');
-    if ((await cards.count()) === 0) {
-      await expect(page.getByText(/no questions yet/i)).toBeVisible();
-      return;
-    }
-    const card = cards.first();
-    await expect(card).toBeVisible();
-
-    const href = await card.getAttribute('href');
-    expect(href).toMatch(/^\/admin\/questions\?id=\d+$/);
-
-    await Promise.all([
-      page.waitForURL(
-        url =>
-          /^\/admin\/questions\/?$/.test(url.pathname) &&
-          /^\d+$/.test(url.searchParams.get('id') ?? '')
-      ),
-      card.click(),
-    ]);
-
-    const url = new URL(page.url());
-    expect(url.pathname).toMatch(/^\/admin\/questions\/?$/);
-    expect(url.searchParams.get('id')).toMatch(/^\d+$/);
   });
 });

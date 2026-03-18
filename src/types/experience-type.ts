@@ -1,5 +1,7 @@
 import type { DimensionOption } from '@/types/dimension-type';
 
+export type ExperienceStatus = 'draft' | 'inactive' | 'active';
+
 export type ExperienceDimensionValue = {
   dimensionId: number;
   indexKey: string | null;
@@ -20,6 +22,7 @@ export type Experience = {
   categoryId: number;
   categoryTitle: string;
   experienceTitle: string;
+  experienceStatus: ExperienceStatus;
   popularityIndex: number;
   durationMin: number;
   durationMax: number;
@@ -41,9 +44,9 @@ export type Experience = {
 export type ExperienceFormState = {
   errors: {
     experienceTitle?: string;
+    experienceStatus?: string;
     providerId?: string;
     categoryId?: string;
-    popularityIndex?: string;
     durationMin?: string;
     durationMax?: string;
     capacityMax?: string;

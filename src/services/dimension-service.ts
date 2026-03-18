@@ -195,8 +195,9 @@ async function getFormNamesByDimensionId(): Promise<Map<number, IntakeForm[]>> {
     for (const row of rows) {
       if (
         row.form_name !== 'REQUEST' &&
-        row.form_name !== 'USER' &&
-        row.form_name !== 'PLAY'
+        row.form_name !== 'MEMBER' &&
+        row.form_name !== 'ASSESS' &&
+        row.form_name !== 'EXPERIENCE'
       ) {
         continue;
       }

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import styles from '@/styles/modal-shell.module.css';
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
   bodyTestId?: string;
   panelClassName?: string;
   bodyClassName?: string;
+  panelStyle?: CSSProperties;
   showCloseButton?: boolean;
 };
 
@@ -37,6 +38,7 @@ export default function ModalShell({
   bodyTestId,
   panelClassName,
   bodyClassName,
+  panelStyle,
   showCloseButton = true,
 }: Props) {
   if (!isOpen) return null;
@@ -48,6 +50,7 @@ export default function ModalShell({
       <div
         className={buildClassName(styles.panel, panelClassName)}
         data-testid={panelTestId}
+        style={panelStyle}
       >
         <div className={styles.header}>
           <div className={styles.headerIdentity}>

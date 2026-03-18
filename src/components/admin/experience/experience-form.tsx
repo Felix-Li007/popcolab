@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo } from 'react';
+import { useActionState, useEffect, useMemo, useRef, useState } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import type { ExperienceCategory } from '@/types/category-type';
 import { Button, Input, TextArea } from '@/ui';
@@ -11,6 +11,7 @@ import {
   buildExperienceCategoryTree,
   flattenExperienceCategoryOptions,
 } from '@/utils/experience-category-tree';
+import styles from '@/styles/admin/experiences/experience-form.module.css';
 
 type FormAction = (
   prevState: ExperienceFormState,
@@ -30,18 +31,33 @@ type Props = {
 };
 
 const EMPTY_STATE: ExperienceFormState = { errors: {} };
-const SELECT_TEXT_KEYS = new Set([
+const SINGLE_SELECT_TEXT_KEYS = new Set([
+  'delivery_methods',
   'lead_preferences',
   'take_item',
   'travel_flying',
 ]);
-const TEXTAREA_KEYS = new Set([
-  'play_nature',
-  'play_types',
-  'objectives_supported',
-  'delivery_methods',
-  'dietary_considerations',
-]);
+const LEAD_TYPE_OPTIONS = [
+  'Facilitated',
+  'Free Play & Facilitated',
+  'Free-Play (Self-led)',
+  'Mixed (guided + self-led)',
+] as const;
+const EXPERIENCE_STATUS_OPTIONS = [
+  { value: 'active', label: 'Active' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'inactive', label: 'Inactive' },
+] as const;
+const DELIVERY_METHOD_OPTIONS = [
+  'Off-site',
+  'On-site',
+  'Virtual',
+  'Hybrid',
+] as const;
+
+function joinClasses(...classNames: Array<string | false | null | undefined>) {
+  return classNames.filter(Boolean).join(' ');
+}
 
 function normalizeDimensionKey(value: string | null | undefined): string {
   return value?.trim().toLowerCase() ?? '';
@@ -57,6 +73,48 @@ function getInitialDimensionValue(
   );
 }
 
+function parseDimensionSelections(value: string | null | undefined): string[] {
+  if (!value) return [];
+
+  return Array.from(
+    new Set(
+      value
+        .split(/[\n,;|]+/)
+        .map(item => item.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function getDimensionOptions(dimension: Dimension) {
+  if (dimension.options.length > 0) {
+    return dimension.options.map(option => ({
+      label: option.label,
+      value: option.value,
+    }));
+  }
+
+  if (dimension.dataType === 'scale' || dimension.dataType === 'numeric') {
+    const min = dimension.scaleMin ?? 1;
+    const max = dimension.scaleMax ?? min;
+    return Array.from({ length: max - min + 1 }, (_, index) => {
+      const value = String(min + index);
+      return { label: value, value };
+    });
+  }
+
+  return [];
+}
+
+function isSingleSelectDimension(dimension: Dimension) {
+  const normalizedKey = normalizeDimensionKey(dimension.indexKey);
+  return (
+    dimension.dataType === 'scale' ||
+    dimension.dataType === 'numeric' ||
+    SINGLE_SELECT_TEXT_KEYS.has(normalizedKey)
+  );
+}
+
 function ExperienceFormBody({
   action,
   isEdit,
@@ -68,16 +126,62 @@ function ExperienceFormBody({
   onSuccess,
 }: Omit<Props, 'isOpen'>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const [selectedCategoryName, setSelectedCategoryName] = useState('');
+  const categoryTabsRef = useRef<HTMLDivElement | null>(null);
+  const [dimensionSelections, setDimensionSelections] = useState<
+    Record<number, string[]>
+  >(() =>
+    Object.fromEntries(
+      (initial?.dimensionValues ?? []).map(value => [
+        value.dimensionId,
+        parseDimensionSelections(value.expectedValue),
+      ])
+    )
+  );
+  const [categoryTabScrollState, setCategoryTabScrollState] = useState({
+    hasOverflow: false,
+    canScrollLeft: false,
+    canScrollRight: false,
+  });
+
+  const appliedDimensions = useMemo(
+    () =>
+      dimensions.filter(dimension =>
+        dimension.formNames.includes('EXPERIENCE')
+      ),
+    [dimensions]
+  );
 
   const groupedDimensions = useMemo(() => {
     const map = new Map<string, Dimension[]>();
-    for (const dimension of dimensions) {
+    for (const dimension of appliedDimensions) {
       const current = map.get(dimension.categoryName) ?? [];
       current.push(dimension);
       map.set(dimension.categoryName, current);
     }
-    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
-  }, [dimensions]);
+    return Array.from(map.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(
+        ([categoryName, values]) =>
+          [
+            categoryName,
+            values.sort((a, b) => a.indexName.localeCompare(b.indexName)),
+          ] as const
+      );
+  }, [appliedDimensions]);
+
+  const activeCategoryName = groupedDimensions.some(
+    ([categoryName]) => categoryName === selectedCategoryName
+  )
+    ? selectedCategoryName
+    : (groupedDimensions[0]?.[0] ?? '');
+
+  const selectedDimensions =
+    groupedDimensions.find(
+      ([categoryName]) => categoryName === activeCategoryName
+    )?.[1] ??
+    groupedDimensions[0]?.[1] ??
+    [];
 
   const categoryOptions = useMemo(() => {
     const tree = buildExperienceCategoryTree(categories);
@@ -98,49 +202,122 @@ function ExperienceFormBody({
     if (state.success) onSuccess();
   }, [onSuccess, state.success]);
 
+  useEffect(() => {
+    const node = categoryTabsRef.current;
+    if (!node) return;
+
+    const updateScrollState = () => {
+      const maxScrollLeft = node.scrollWidth - node.clientWidth;
+      const hasOverflow = maxScrollLeft > 4;
+      const nextState = {
+        hasOverflow,
+        canScrollLeft: hasOverflow && node.scrollLeft > 4,
+        canScrollRight: hasOverflow && node.scrollLeft < maxScrollLeft - 4,
+      };
+
+      setCategoryTabScrollState(current =>
+        current.hasOverflow === nextState.hasOverflow &&
+        current.canScrollLeft === nextState.canScrollLeft &&
+        current.canScrollRight === nextState.canScrollRight
+          ? current
+          : nextState
+      );
+    };
+
+    updateScrollState();
+    node.addEventListener('scroll', updateScrollState, { passive: true });
+
+    const resizeObserver = new ResizeObserver(updateScrollState);
+    resizeObserver.observe(node);
+    if (node.firstElementChild instanceof HTMLElement) {
+      resizeObserver.observe(node.firstElementChild);
+    }
+
+    return () => {
+      node.removeEventListener('scroll', updateScrollState);
+      resizeObserver.disconnect();
+    };
+  }, [groupedDimensions]);
+
+  function toggleDimensionValue(dimension: Dimension, optionValue: string) {
+    const dimensionId = dimension.id ?? 0;
+    if (!dimensionId) return;
+
+    const singleSelect = isSingleSelectDimension(dimension);
+
+    setDimensionSelections(current => {
+      const existing = current[dimensionId] ?? [];
+      const isSelected = existing.includes(optionValue);
+      const nextValues = singleSelect
+        ? isSelected
+          ? []
+          : [optionValue]
+        : isSelected
+          ? existing.filter(value => value !== optionValue)
+          : [...existing, optionValue];
+
+      return {
+        ...current,
+        [dimensionId]: nextValues,
+      };
+    });
+  }
+
   return (
-    <form action={formAction} className="flex h-full flex-col">
-      <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+    <form action={formAction} className={styles.form}>
+      <div className={styles.body}>
         {state.errors._form ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">
-            {state.errors._form}
-          </div>
+          <div className={styles.formError}>{state.errors._form}</div>
         ) : null}
 
-        <section className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Input
-              name="experienceTitle"
-              label="Experience Title"
-              placeholder="e.g. Pop Quiz Trivia Experiences"
-              defaultValue={initial?.experienceTitle ?? ''}
-              error={state.errors.experienceTitle}
-              inputSize="sm"
-              required
-            />
+        <section className={styles.topSection}>
+          <div className={styles.topGrid}>
+            <div className="xl:col-span-4">
+              <Input
+                name="experienceTitle"
+                label="Experience Title"
+                placeholder="e.g. Pop Quiz Trivia Experiences"
+                defaultValue={initial?.experienceTitle ?? ''}
+                error={state.errors.experienceTitle}
+                inputSize="sm"
+                required
+              />
+            </div>
 
-            <Input
-              name="leadType"
-              label="Lead Type"
-              placeholder="e.g. Facilitated"
-              defaultValue={initial?.leadType ?? ''}
-              error={state.errors.leadType}
-              inputSize="sm"
-              required
-            />
-          </div>
+            <div className="xl:col-span-3">
+              <label className={styles.fieldLabel}>Lead Type</label>
+              <select
+                name="leadType"
+                defaultValue={initial?.leadType ?? ''}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.leadType && styles.selectError
+                )}
+                required
+              >
+                <option value="" disabled>
+                  Select lead type
+                </option>
+                {LEAD_TYPE_OPTIONS.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {state.errors.leadType ? (
+                <p className={styles.fieldError}>{state.errors.leadType}</p>
+              ) : null}
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
-                Provider
-              </label>
+            <div className="lg:col-span-5">
+              <label className={styles.fieldLabel}>Provider</label>
               <select
                 name="providerId"
                 defaultValue={initial?.providerId ?? ''}
-                className={`w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30 ${
-                  state.errors.providerId ? 'bg-red-50 ring-2 ring-red-300' : ''
-                }`}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.providerId && styles.selectError
+                )}
                 required
               >
                 <option value="" disabled>
@@ -153,22 +330,19 @@ function ExperienceFormBody({
                 ))}
               </select>
               {state.errors.providerId ? (
-                <p className="mt-1 text-[10px] text-red-500">
-                  {state.errors.providerId}
-                </p>
+                <p className={styles.fieldError}>{state.errors.providerId}</p>
               ) : null}
             </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
-                Category
-              </label>
+            <div className="xl:col-span-6">
+              <label className={styles.fieldLabel}>Category</label>
               <select
                 name="categoryId"
                 defaultValue={initial?.categoryId ?? ''}
-                className={`w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30 ${
-                  state.errors.categoryId ? 'bg-red-50 ring-2 ring-red-300' : ''
-                }`}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.categoryId && styles.selectError
+                )}
                 required
               >
                 <option value="" disabled>
@@ -181,258 +355,313 @@ function ExperienceFormBody({
                 ))}
               </select>
               {state.errors.categoryId ? (
-                <p className="mt-1 text-[10px] text-red-500">
-                  {state.errors.categoryId}
+                <p className={styles.fieldError}>{state.errors.categoryId}</p>
+              ) : null}
+            </div>
+
+            <div className="xl:col-span-2">
+              <Input
+                name="durationMin"
+                label="Duration Min"
+                type="number"
+                min={0}
+                defaultValue={initial?.durationMin ?? 0}
+                error={state.errors.durationMin}
+                inputSize="sm"
+                required
+              />
+            </div>
+            <div className="xl:col-span-2">
+              <Input
+                name="durationMax"
+                label="Duration Max"
+                type="number"
+                min={0}
+                defaultValue={initial?.durationMax ?? 0}
+                error={state.errors.durationMax}
+                inputSize="sm"
+                required
+              />
+            </div>
+            <div className="xl:col-span-2">
+              <Input
+                name="capacityMax"
+                label="Capacity"
+                type="number"
+                min={0}
+                defaultValue={initial?.capacityMax ?? 0}
+                error={state.errors.capacityMax}
+                inputSize="sm"
+                required
+              />
+            </div>
+
+            <div className="xl:col-span-4">
+              <label className={styles.fieldLabel}>Delivery Methods</label>
+              <select
+                name="deliveryMethods"
+                defaultValue={initial?.deliveryMethods ?? ''}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.deliveryMethods && styles.selectError
+                )}
+                required
+              >
+                <option value="" disabled>
+                  Select delivery methods
+                </option>
+                {DELIVERY_METHOD_OPTIONS.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+              {state.errors.deliveryMethods ? (
+                <p className={styles.fieldError}>
+                  {state.errors.deliveryMethods}
                 </p>
               ) : null}
             </div>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-4">
-            <Input
-              name="popularityIndex"
-              label="Popularity"
-              type="number"
-              min={0}
-              defaultValue={initial?.popularityIndex ?? 0}
-              error={state.errors.popularityIndex}
-              inputSize="sm"
-              required
-            />
-            <Input
-              name="durationMin"
-              label="Duration Min"
-              type="number"
-              min={0}
-              defaultValue={initial?.durationMin ?? 0}
-              error={state.errors.durationMin}
-              inputSize="sm"
-              required
-            />
-            <Input
-              name="durationMax"
-              label="Duration Max"
-              type="number"
-              min={0}
-              defaultValue={initial?.durationMax ?? 0}
-              error={state.errors.durationMax}
-              inputSize="sm"
-              required
-            />
-            <Input
-              name="capacityMax"
-              label="Capacity"
-              type="number"
-              min={0}
-              defaultValue={initial?.capacityMax ?? 0}
-              error={state.errors.capacityMax}
-              inputSize="sm"
-              required
-            />
-          </div>
+            <div className="xl:col-span-2">
+              <label className={styles.fieldLabel}>Status</label>
+              <select
+                name="experienceStatus"
+                defaultValue={initial?.experienceStatus ?? 'active'}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.experienceStatus && styles.selectError
+                )}
+                required
+              >
+                {EXPERIENCE_STATUS_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {state.errors.experienceStatus ? (
+                <p className={styles.fieldError}>
+                  {state.errors.experienceStatus}
+                </p>
+              ) : null}
+            </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <TextArea
-              name="deliveryMethods"
-              label="Delivery Methods"
-              placeholder="e.g. Off-site;On-site"
-              defaultValue={initial?.deliveryMethods ?? ''}
-              error={state.errors.deliveryMethods}
-              inputSize="sm"
-              rows={3}
-            />
-
-            <TextArea
-              name="dietaryConsiderations"
-              label="Dietary Considerations"
-              placeholder="Optional dietary notes"
-              defaultValue={initial?.dietaryConsiderations ?? ''}
-              error={state.errors.dietaryConsiderations}
-              inputSize="sm"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
-                Take Item
-              </label>
+            <div className="xl:col-span-3">
+              <label className={styles.fieldLabel}>Take Item</label>
               <select
                 name="takeItem"
                 defaultValue={initial?.takeItem ?? ''}
-                className={`w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30 ${
-                  state.errors.takeItem ? 'bg-red-50 ring-2 ring-red-300' : ''
-                }`}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.takeItem && styles.selectError
+                )}
               >
                 <option value="">Not set</option>
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
               {state.errors.takeItem ? (
-                <p className="mt-1 text-[10px] text-red-500">
-                  {state.errors.takeItem}
-                </p>
+                <p className={styles.fieldError}>{state.errors.takeItem}</p>
               ) : null}
             </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
-                Travel Flying
-              </label>
+            <div className="xl:col-span-3">
+              <label className={styles.fieldLabel}>Travel Flying</label>
               <select
                 name="travelFlying"
                 defaultValue={initial?.travelFlying ?? ''}
-                className={`w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30 ${
-                  state.errors.travelFlying
-                    ? 'bg-red-50 ring-2 ring-red-300'
-                    : ''
-                }`}
+                className={joinClasses(
+                  styles.select,
+                  state.errors.travelFlying && styles.selectError
+                )}
               >
                 <option value="">Not set</option>
                 <option value="1">Yes</option>
                 <option value="0">No</option>
               </select>
               {state.errors.travelFlying ? (
-                <p className="mt-1 text-[10px] text-red-500">
-                  {state.errors.travelFlying}
-                </p>
+                <p className={styles.fieldError}>{state.errors.travelFlying}</p>
               ) : null}
+            </div>
+
+            <div className="xl:col-span-12">
+              <TextArea
+                name="dietaryConsiderations"
+                label="Dietary Considerations"
+                placeholder="Optional dietary notes"
+                defaultValue={initial?.dietaryConsiderations ?? ''}
+                error={state.errors.dietaryConsiderations}
+                inputSize="sm"
+                rows={3}
+              />
             </div>
           </div>
         </section>
 
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-gray-800">
-                Expected Dimension Values
-              </h4>
-              <p className="text-xs text-gray-500">
-                Maintain the expected values used for matching and filtering.
-              </p>
-            </div>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-[11px] font-semibold text-gray-500">
-              {dimensions.length} dimensions
-            </span>
-          </div>
-
+        <section className={styles.bottomSection}>
           {state.errors.dimensions ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700">
-              {state.errors.dimensions}
-            </div>
+            <div className={styles.sectionError}>{state.errors.dimensions}</div>
           ) : null}
 
-          <div className="space-y-5">
-            {groupedDimensions.map(([categoryName, categoryDimensions]) => (
-              <section
-                key={categoryName}
-                className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4"
-              >
-                <h5 className="text-xs font-bold uppercase tracking-[0.14em] text-gray-500">
-                  {categoryName}
+          {groupedDimensions.length === 0 ? (
+            <div className={styles.emptyWrap}>
+              <div className={styles.emptyCard}>
+                <h5 className={styles.emptyTitle}>
+                  No applied dimensions available
                 </h5>
-
-                <div className="mt-3 grid gap-4 md:grid-cols-2">
-                  {categoryDimensions.map(dimension => {
-                    const normalizedKey = normalizeDimensionKey(
-                      dimension.indexKey
-                    );
-                    const defaultValue = getInitialDimensionValue(
-                      initial,
-                      dimension.id ?? 0
-                    );
-                    const helperText =
-                      dimension.dataType === 'scale'
-                        ? `Range: ${dimension.scaleMin ?? '-'} to ${dimension.scaleMax ?? '-'}`
-                        : dimension.options.length > 0
-                          ? `Options: ${dimension.options.map(option => option.label).join(', ')}`
-                          : undefined;
-
-                    if (
-                      dimension.dataType === 'text' &&
-                      dimension.options.length > 0 &&
-                      SELECT_TEXT_KEYS.has(normalizedKey)
-                    ) {
-                      return (
-                        <div key={dimension.id}>
-                          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
-                            {dimension.indexName}
-                          </label>
-                          <select
-                            name={`dimension_${dimension.id}`}
-                            defaultValue={defaultValue}
-                            className="w-full rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:ring-2 focus:ring-magenta/30"
+                <p className={styles.emptyText}>
+                  Add records in `dimension_apply` first, then those dimensions
+                  will appear here for experience editing.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className={styles.tabsHeader}>
+                <div ref={categoryTabsRef} className={styles.tabsScroller}>
+                  <div className={styles.tabsRow}>
+                    {groupedDimensions.map(
+                      ([categoryName, categoryDimensions]) => {
+                        const isActive = categoryName === activeCategoryName;
+                        return (
+                          <button
+                            key={categoryName}
+                            type="button"
+                            onClick={() =>
+                              setSelectedCategoryName(categoryName)
+                            }
+                            className={joinClasses(
+                              styles.tabButton,
+                              isActive && styles.tabButtonActive
+                            )}
                           >
-                            <option value="">Not set</option>
-                            {dimension.options.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                          {helperText ? (
-                            <p className="mt-1 text-[10px] text-gray-400">
-                              {helperText}
-                            </p>
-                          ) : null}
-                        </div>
-                      );
-                    }
+                            {categoryName}
+                            <span
+                              className={joinClasses(
+                                styles.tabCount,
+                                isActive && styles.tabCountActive
+                              )}
+                            >
+                              {categoryDimensions.length}
+                            </span>
+                          </button>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
 
-                    if (
+                {categoryTabScrollState.canScrollLeft ? (
+                  <div className={styles.scrollFadeLeft}>
+                    <span className={styles.scrollArrow}>‹</span>
+                  </div>
+                ) : null}
+
+                {categoryTabScrollState.canScrollRight ? (
+                  <div className={styles.scrollFadeRight}>
+                    <span className={styles.scrollArrow}>›</span>
+                  </div>
+                ) : null}
+
+                {categoryTabScrollState.hasOverflow ? (
+                  <div className={styles.scrollIndicator}>↔</div>
+                ) : null}
+              </div>
+
+              <div className={styles.dimensionPanel}>
+                <div className={styles.dimensionGrid}>
+                  {selectedDimensions.map(dimension => {
+                    const dimensionId = dimension.id ?? 0;
+                    const options = getDimensionOptions(dimension);
+                    const selectedValues =
+                      dimensionSelections[dimensionId] ??
+                      parseDimensionSelections(
+                        getInitialDimensionValue(initial, dimensionId)
+                      );
+                    const usesCircleStyle =
                       dimension.dataType === 'scale' ||
-                      (dimension.dataType === 'numeric' &&
-                        !TEXTAREA_KEYS.has(normalizedKey))
-                    ) {
-                      return (
-                        <Input
-                          key={dimension.id}
-                          name={`dimension_${dimension.id}`}
-                          label={dimension.indexName}
-                          type="number"
-                          min={dimension.scaleMin ?? undefined}
-                          max={dimension.scaleMax ?? undefined}
-                          defaultValue={defaultValue}
-                          helperText={helperText}
-                          inputSize="sm"
-                        />
-                      );
-                    }
+                      dimension.dataType === 'numeric';
 
-                    const useTextArea =
-                      TEXTAREA_KEYS.has(normalizedKey) ||
-                      dimension.options.length > 6;
+                    return (
+                      <section
+                        key={dimensionId}
+                        className={styles.dimensionCard}
+                      >
+                        <div className={styles.dimensionCardHeader}>
+                          <div className={styles.dimensionTitle}>
+                            {dimension.indexName}
+                          </div>
+                          <span className={styles.dimensionMode}>
+                            {usesCircleStyle ? 'Single select' : 'Multi select'}
+                          </span>
+                        </div>
 
-                    return useTextArea ? (
-                      <TextArea
-                        key={dimension.id}
-                        name={`dimension_${dimension.id}`}
-                        label={dimension.indexName}
-                        defaultValue={defaultValue}
-                        helperText={helperText}
-                        inputSize="sm"
-                        rows={3}
-                      />
-                    ) : (
-                      <Input
-                        key={dimension.id}
-                        name={`dimension_${dimension.id}`}
-                        label={dimension.indexName}
-                        defaultValue={defaultValue}
-                        helperText={helperText}
-                        inputSize="sm"
-                      />
+                        {options.length === 0 ? (
+                          <p className={styles.dimensionEmptyOptions}>
+                            No configured options available for this dimension.
+                          </p>
+                        ) : (
+                          <div className={styles.optionGroup}>
+                            {options.map(option => {
+                              const isSelected = selectedValues.includes(
+                                option.value
+                              );
+
+                              return (
+                                <button
+                                  key={`${dimensionId}-${option.value}`}
+                                  type="button"
+                                  onClick={() =>
+                                    toggleDimensionValue(
+                                      dimension,
+                                      option.value
+                                    )
+                                  }
+                                  className={joinClasses(
+                                    styles.optionButton,
+                                    usesCircleStyle
+                                      ? styles.circleOption
+                                      : styles.pillOption,
+                                    isSelected && styles.optionButtonSelected
+                                  )}
+                                  title={option.label}
+                                  aria-pressed={isSelected}
+                                >
+                                  <span
+                                    className={
+                                      usesCircleStyle
+                                        ? undefined
+                                        : styles.optionLabel
+                                    }
+                                  >
+                                    {option.label}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {selectedValues.map(value => (
+                          <input
+                            key={`${dimensionId}-input-${value}`}
+                            type="hidden"
+                            name={`dimension_${dimensionId}`}
+                            value={value}
+                          />
+                        ))}
+                      </section>
                     );
                   })}
                 </div>
-              </section>
-            ))}
-          </div>
+              </div>
+            </>
+          )}
         </section>
       </div>
 
-      <div className="flex shrink-0 items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
+      <div className={styles.footer}>
         <Button
           type="button"
           variant="secondary"
@@ -479,7 +708,7 @@ export default function ExperienceForm({
           ? `${initial?.categoryTitle ?? ''} · ${initial?.providerLabel ?? ''}`
           : 'Create and maintain an experience with its matching signals'
       }
-      panelClassName="max-w-6xl"
+      panelClassName="!max-w-[calc(100vw-2rem)] sm:!max-w-5xl"
       bodyClassName="overflow-hidden"
       rootTestId="experience-form-modal-root"
       panelTestId="experience-form-modal"

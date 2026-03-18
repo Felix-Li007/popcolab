@@ -1,8 +1,15 @@
+enum ExperienceStatus {
+  draft
+  inactive
+  active
+}
+
 model Experience {
   id                     Int                   @id @default(autoincrement())
   provider_id            Int
   category_id            Int
   experience_title       String                @db.VarChar(100)
+  experience_status      ExperienceStatus      @default(active)
   popularity_index       Int
   duration_min           Int
   duration_max           Int

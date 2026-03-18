@@ -23,13 +23,7 @@
 
 @media (min-width: 640px) {
   .cardsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: 268px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .cardsGrid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+    grid-auto-rows: minmax(312px, auto);
   }
 }

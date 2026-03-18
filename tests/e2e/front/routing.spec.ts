@@ -9,6 +9,10 @@
  *   TEST_ADMIN_EMAIL / TEST_ADMIN_PASSWORD           — an admin role test user
  */
 
+function primaryAuthButton(page: Page) {
+  return page.getByRole('button', { name: /^(Continue|Sign in)$/i }).first();
+}
+
 async function signInAs(page: Page, email: string, password: string) {
   await page.goto('/sign-in');
   const emailInput = page
@@ -16,13 +20,11 @@ async function signInAs(page: Page, email: string, password: string) {
     .or(page.getByPlaceholder(/email/i));
   await emailInput.waitFor({ state: 'visible', timeout: 8000 });
   await emailInput.fill(email);
-  await page.getByRole('button', { name: /continue/i }).click();
-  const passwordInput = page
-    .getByLabel(/password/i)
-    .or(page.getByPlaceholder(/password/i));
+  await primaryAuthButton(page).click();
+  const passwordInput = page.locator('input[name="password"]').first();
   await passwordInput.waitFor({ state: 'visible', timeout: 8000 });
   await passwordInput.fill(password);
-  await page.getByRole('button', { name: /sign in/i }).click();
+  await primaryAuthButton(page).click();
 }
 
 test.describe('Unauthenticated route protection', () => {

@@ -1,0 +1,193 @@
+@reference "../../../app/globals.css";
+
+.form {
+  @apply flex h-full min-h-0 flex-col;
+}
+
+.body {
+  @apply flex flex-1 min-h-0 flex-col gap-5 px-6 py-5;
+}
+
+.formError,
+.sectionError {
+  @apply rounded-2xl border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-700;
+}
+
+.sectionError {
+  @apply mx-5 mt-4;
+}
+
+.topSection {
+  border-radius: 28px;
+  @apply shrink-0 border border-gray-200 bg-white px-5 py-5 shadow-sm;
+}
+
+.topGrid {
+  @apply grid gap-4 md:grid-cols-2 xl:grid-cols-12;
+}
+
+.fieldLabel {
+  @apply mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500;
+}
+
+.select {
+  @apply w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition;
+}
+
+.select:focus {
+  @apply bg-white ring-2 ring-magenta/30;
+}
+
+.selectError {
+  @apply bg-red-50 ring-2 ring-red-300;
+}
+
+.fieldError {
+  @apply mt-1 text-[10px] text-red-500;
+}
+
+.bottomSection {
+  border-radius: 28px;
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden border border-gray-200 bg-gray-50 shadow-sm;
+}
+
+.emptyWrap {
+  @apply flex flex-1 items-center justify-center px-5 py-8;
+}
+
+.emptyCard {
+  @apply rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-8 text-center;
+}
+
+.emptyTitle {
+  @apply text-sm font-semibold text-gray-700;
+}
+
+.emptyText {
+  @apply mt-2 max-w-md text-xs leading-5 text-gray-500;
+}
+
+.tabsHeader {
+  @apply relative shrink-0 border-b border-gray-200;
+}
+
+.tabsScroller {
+  @apply overflow-x-auto px-5 py-3;
+}
+
+.tabsRow {
+  @apply flex min-w-max gap-2;
+}
+
+.tabButton {
+  @apply shrink-0 whitespace-nowrap rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 transition;
+}
+
+.tabButton:hover {
+  @apply border-gray-300 text-gray-700;
+}
+
+.tabButtonActive {
+  @apply border-teal-deep bg-teal-deep text-white;
+}
+
+.tabCount {
+  @apply ml-2 rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-500;
+}
+
+.tabCountActive {
+  @apply bg-white/20 text-white;
+}
+
+.scrollFadeLeft,
+.scrollFadeRight {
+  @apply pointer-events-none absolute inset-y-0 flex w-12 items-center;
+}
+
+.scrollFadeLeft {
+  @apply left-0 justify-start pl-2;
+  background: linear-gradient(
+    to right,
+    rgb(249 250 251),
+    rgb(249 250 251 / 0.9),
+    transparent
+  );
+}
+
+.scrollFadeRight {
+  @apply right-0 justify-end pr-2;
+  background: linear-gradient(
+    to left,
+    rgb(249 250 251),
+    rgb(249 250 251 / 0.9),
+    transparent
+  );
+}
+
+.scrollArrow {
+  @apply rounded-full border border-gray-200 bg-white/95 px-1.5 py-0.5 text-[11px] font-bold text-gray-400 shadow-sm;
+}
+
+.scrollIndicator {
+  @apply pointer-events-none absolute right-5 bottom-1 text-[10px] font-semibold text-gray-300;
+}
+
+.dimensionPanel {
+  @apply min-h-0 flex-1 overflow-y-auto bg-white px-5 py-4;
+}
+
+.dimensionGrid {
+  @apply grid gap-4 lg:grid-cols-2;
+}
+
+.dimensionCard {
+  @apply rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4 shadow-sm;
+}
+
+.dimensionCardHeader {
+  @apply flex items-center justify-between gap-3;
+}
+
+.dimensionTitle {
+  @apply text-xs font-bold uppercase tracking-[0.12em] text-gray-500;
+}
+
+.dimensionMode {
+  @apply rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-gray-400;
+}
+
+.dimensionEmptyOptions {
+  @apply mt-4 text-xs text-gray-500;
+}
+
+.optionGroup {
+  @apply mt-4 flex flex-wrap gap-2;
+}
+
+.optionButton {
+  @apply border border-gray-300 bg-white text-[11px] text-gray-600 transition;
+}
+
+.optionButton:hover {
+  @apply border-gray-400 text-gray-800;
+}
+
+.optionButtonSelected {
+  @apply border-coral-vibe bg-coral-vibe text-white shadow-sm;
+}
+
+.pillOption {
+  @apply rounded-full px-3.5 py-2 font-medium leading-none;
+}
+
+.circleOption {
+  @apply flex h-9 w-9 items-center justify-center rounded-full px-0 font-semibold;
+}
+
+.optionLabel {
+  @apply max-w-[14rem] truncate;
+}
+
+.footer {
+  @apply flex shrink-0 items-center justify-end gap-3 border-t border-gray-100 px-6 py-4;
+}

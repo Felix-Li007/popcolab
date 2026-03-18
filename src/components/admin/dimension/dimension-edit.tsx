@@ -21,8 +21,9 @@ const EMPTY_STATE: DimensionFormState = { errors: {} };
 const DATA_TYPES: DimensionDataType[] = ['numeric', 'text'];
 const FORM_OPTIONS: Array<{ value: IntakeForm; label: string }> = [
   { value: 'REQUEST', label: 'LEADER' },
-  { value: 'USER', label: 'MEMBER' },
-  { value: 'PLAY', label: 'ASSESS' },
+  { value: 'MEMBER', label: 'MEMBER' },
+  { value: 'ASSESS', label: 'ASSESS' },
+  { value: 'EXPERIENCE', label: 'EXPERIENCE' },
 ];
 
 type Props = {

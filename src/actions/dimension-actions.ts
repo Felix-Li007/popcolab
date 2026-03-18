@@ -78,7 +78,10 @@ function parseDimensionForm(formData: FormData) {
     .map(value => value.toString())
     .filter(
       (value): value is IntakeForm =>
-        value === 'REQUEST' || value === 'USER' || value === 'PLAY'
+        value === 'REQUEST' ||
+        value === 'MEMBER' ||
+        value === 'ASSESS' ||
+        value === 'EXPERIENCE'
     );
 
   const scaleMin = scaleMinRaw === '' ? null : Number(scaleMinRaw);

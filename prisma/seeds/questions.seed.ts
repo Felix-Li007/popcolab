@@ -7,7 +7,7 @@ type SeedQuestionOption = {
   option_score: number | null;
 };
 
-type SeedIntakeForm = 'REQUEST' | 'USER' | 'PLAY';
+type SeedIntakeForm = 'REQUEST' | 'MEMBER' | 'ASSESS' | 'EXPERIENCE';
 
 type SeedQuestion = {
   form_name: SeedIntakeForm;
@@ -477,17 +477,17 @@ const baseQuestions: SeedQuestion[] = [
       'Light support (a warm-up helps)',
       'A lot of support (I need strong structure + opt-out options)',
     ],
-    'USER'
+    'MEMBER'
   ),
   scale(
     61,
     'Support need (1 jump in - 5 I need lots of support/structure).',
-    'USER'
+    'MEMBER'
   ),
   scale(
     62,
     'In group settings at work, I feel psychologically safe to try new things. (1 least like me - 5 most like me)',
-    'USER'
+    'MEMBER'
   ),
   single(
     63,
@@ -498,7 +498,7 @@ const baseQuestions: SeedQuestion[] = [
       'Wait until someone comes up to you',
       'Hang back near the food/edge of the room until you feel comfortable',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     64,
@@ -509,7 +509,7 @@ const baseQuestions: SeedQuestion[] = [
       'Try it if I can do it with a buddy',
       'Prefer to observe / pass',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     65,
@@ -520,7 +520,7 @@ const baseQuestions: SeedQuestion[] = [
       'Prefer small groups',
       'Prefer to avoid spotlight',
     ],
-    'USER'
+    'MEMBER'
   ),
   multi(
     66,
@@ -537,57 +537,57 @@ const baseQuestions: SeedQuestion[] = [
       'No scoring / low competition',
       'Hands-on task (less talking)',
     ],
-    'USER'
+    'MEMBER'
   ),
   scale(
     67,
     'I prefer activities with clear steps and structure (1 free-flow - 5 very structured).',
-    'USER'
+    'MEMBER'
   ),
   scale(
     68,
     'If I opt out of an activity, I feel comfortable doing so. (1 not comfortable - 5 very comfortable)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     69,
     'Joker: I like humour, surprises, and keeping things light. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     70,
     'Kinesthete: I like movement, hands-on, and physical engagement. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     71,
     'Explorer: I like curiosity, trying new things, and discovering. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     72,
     'Competitor: I like challenge, goals, and friendly competition. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     73,
     'Director: I like organizing people, leading, and shaping the plan. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     74,
     'Collector: I like gathering, sorting, and building connections/knowledge. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     75,
     'Creator/Artist: I like making, designing, and expressing ideas. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   scale(
     76,
     'Storyteller: I like stories, meaning, and sharing experiences. (1-5)',
-    'USER'
+    'MEMBER'
   ),
   single(
     77,
@@ -596,7 +596,7 @@ const baseQuestions: SeedQuestion[] = [
       'Crack a joke and lighten the mood (Joker)',
       'Organize the group and suggest a plan (Director)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     78,
@@ -605,7 +605,7 @@ const baseQuestions: SeedQuestion[] = [
       'Explore something new / try a new spot (Explorer)',
       'Work on a project I can make (Creator/Artist)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     79,
@@ -614,7 +614,7 @@ const baseQuestions: SeedQuestion[] = [
       'Get competitive and chase the goal (Competitor)',
       "Focus on the story/meaning of what we're doing",
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     80,
@@ -623,7 +623,7 @@ const baseQuestions: SeedQuestion[] = [
       "I'm moving / hands-on / doing (Kinesthete)",
       "I'm collecting info, pieces, or resources (Collector)",
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     81,
@@ -632,7 +632,7 @@ const baseQuestions: SeedQuestion[] = [
       'Make a plan and assign roles (Director)',
       'Wander, test, and discover as I go (Explorer)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     82,
@@ -641,7 +641,7 @@ const baseQuestions: SeedQuestion[] = [
       'Offer a practical next step / structure (Director)',
       'Offer a creative idea or twist (Creator/Artist)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     83,
@@ -650,7 +650,7 @@ const baseQuestions: SeedQuestion[] = [
       'Friendly rivalry and scorekeeping (Competitor)',
       'Silly moments and playful chaos (Joker)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     84,
@@ -659,7 +659,7 @@ const baseQuestions: SeedQuestion[] = [
       'Hands-on practice right away (Kinesthete)',
       'Hearing the story/context first (Storyteller)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     85,
@@ -668,7 +668,7 @@ const baseQuestions: SeedQuestion[] = [
       'Collecting/curating things or knowledge (Collector)',
       'Making something with my hands (Creator/Artist)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     86,
@@ -677,7 +677,7 @@ const baseQuestions: SeedQuestion[] = [
       'Meet new people for fun (Explorer)',
       'Stick with my people and go deeper (Storyteller)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     87,
@@ -686,7 +686,7 @@ const baseQuestions: SeedQuestion[] = [
       'Winning / challenge (Competitor)',
       'The experience / narrative / vibe (Storyteller)',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     88,
@@ -695,7 +695,7 @@ const baseQuestions: SeedQuestion[] = [
       'Lead or coordinate (Director)',
       'Support with ideas, jokes, or creativity (Joker/Creator)',
     ],
-    'USER'
+    'MEMBER'
   ),
   multi(
     89,
@@ -711,7 +711,7 @@ const baseQuestions: SeedQuestion[] = [
       'Competitive/Challenge',
       'Imaginative/Role-play',
     ],
-    'USER'
+    'MEMBER'
   ),
   multi(
     90,
@@ -723,30 +723,30 @@ const baseQuestions: SeedQuestion[] = [
       'Storytelling / Narrative Play',
       'Object Play',
     ],
-    'USER'
+    'MEMBER'
   ),
-  scale(91, 'Energy preference (1 relaxed - 5 high energy).', 'USER'),
-  scale(92, 'Noise preference (1 quiet - 5 loud is fine).', 'USER'),
+  scale(91, 'Energy preference (1 relaxed - 5 high energy).', 'MEMBER'),
+  scale(92, 'Noise preference (1 quiet - 5 loud is fine).', 'MEMBER'),
   scale(
     93,
     'Social intensity preference (1 low-pressure / parallel play - 5 highly interactive).',
-    'USER'
+    'MEMBER'
   ),
-  scale(94, 'Competition preference (1 none - 5 love it).', 'USER'),
+  scale(94, 'Competition preference (1 none - 5 love it).', 'MEMBER'),
   scale(
     95,
     'Spotlight preference (1 avoid spotlight - 5 love spotlight).',
-    'USER'
+    'MEMBER'
   ),
   scale(
     96,
     "Creative confidence (1 I worry I'm 'not creative' - 5 I love making stuff).",
-    'USER'
+    'MEMBER'
   ),
   scale(
     97,
     'Openness to trying new things (1 stay safe - 5 surprise me).',
-    'USER'
+    'MEMBER'
   ),
   multi(
     98,
@@ -756,14 +756,14 @@ const baseQuestions: SeedQuestion[] = [
       'Drawing / crafts / making things (Creative Play)',
       'Sports / tag / running',
     ],
-    'USER'
+    'MEMBER'
   ),
   text(
     99,
     'Anything else you loved doing as a kid? (optional)',
     'Type your answer here...',
     250,
-    'USER'
+    'MEMBER'
   ),
   multi(
     100,
@@ -776,7 +776,7 @@ const baseQuestions: SeedQuestion[] = [
       'Physical contact',
       'Personal sharing',
     ],
-    'USER'
+    'MEMBER'
   ),
   multi(
     101,
@@ -787,26 +787,26 @@ const baseQuestions: SeedQuestion[] = [
       'Breaks / step away',
       'Quiet/low-sensory',
     ],
-    'USER'
+    'MEMBER'
   ),
   text(
     102,
     'Optional: Any accessibility notes we should plan for?',
     'Share any accessibility notes',
     250,
-    'USER'
+    'MEMBER'
   ),
   single(
     103,
     'Have you taken the Enneagram assessment before?',
     ['Yes', 'No', 'Not sure'],
-    'USER'
+    'MEMBER'
   ),
   single(
     104,
     'If yes: what is your Enneagram type?',
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Not sure'],
-    'USER'
+    'MEMBER'
   ),
   single(
     105,
@@ -832,13 +832,13 @@ const baseQuestions: SeedQuestion[] = [
       '9w1',
       'No',
     ],
-    'USER'
+    'MEMBER'
   ),
   single(
     106,
     'If you know it: your instinct stack?',
     ['sp/sx', 'sp/so', 'sx/so', 'sx/sp', 'so/sp', 'so/sx', 'Not sure'],
-    'USER'
+    'MEMBER'
   ),
 ];
 
@@ -1350,7 +1350,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Light support (a warm-up helps)',
         'A lot of support (I need strong structure + opt-out options)',
       ],
-      'USER'
+      'MEMBER'
     ),
     'support_category'
   ),
@@ -1358,7 +1358,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       61,
       'Support need (1 jump in - 5 I need lots of support/structure).',
-      'USER'
+      'MEMBER'
     ),
     'support_need'
   ),
@@ -1366,7 +1366,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       62,
       'In group settings at work, I feel psychologically safe to try new things. (1 least like me - 5 most like me)',
-      'USER'
+      'MEMBER'
     ),
     'psych_safety'
   ),
@@ -1380,7 +1380,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Wait until someone comes up to you',
         'Hang back near the food/edge of the room until you feel comfortable',
       ],
-      'USER'
+      'MEMBER'
     ),
     'social_initiation'
   ),
@@ -1394,7 +1394,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Try it if I can do it with a buddy',
         'Prefer to observe / pass',
       ],
-      'USER'
+      'MEMBER'
     ),
     'activity_scenario'
   ),
@@ -1408,7 +1408,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Prefer small groups',
         'Prefer to avoid spotlight',
       ],
-      'USER'
+      'MEMBER'
     ),
     'spotlight_scenario'
   ),
@@ -1428,7 +1428,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'No scoring / low competition',
         'Hands-on task (less talking)',
       ],
-      'USER'
+      'MEMBER'
     ),
     'supports_helpful'
   ),
@@ -1436,7 +1436,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       67,
       'I prefer activities with clear steps and structure (1 free-flow - 5 very structured).',
-      'USER'
+      'MEMBER'
     ),
     'structure_pref'
   ),
@@ -1444,7 +1444,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       68,
       'If I opt out of an activity, I feel comfortable doing so. (1 not comfortable - 5 very comfortable)',
-      'USER'
+      'MEMBER'
     ),
     'safety_optout'
   ),
@@ -1452,7 +1452,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       69,
       'Joker: I like humour, surprises, and keeping things light. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_joker'
   ),
@@ -1460,7 +1460,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       70,
       'Kinesthete: I like movement, hands-on, and physical engagement. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_kinesthete'
   ),
@@ -1468,7 +1468,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       71,
       'Explorer: I like curiosity, trying new things, and discovering. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_explorer'
   ),
@@ -1476,7 +1476,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       72,
       'Competitor: I like challenge, goals, and friendly competition. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_competitor'
   ),
@@ -1484,7 +1484,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       73,
       'Director: I like organizing people, leading, and shaping the plan. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_director'
   ),
@@ -1492,7 +1492,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       74,
       'Collector: I like gathering, sorting, and building connections/knowledge. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_collector'
   ),
@@ -1500,7 +1500,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       75,
       'Creator/Artist: I like making, designing, and expressing ideas. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_creator_artist'
   ),
@@ -1508,7 +1508,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       76,
       'Storyteller: I like stories, meaning, and sharing experiences. (1-5)',
-      'PLAY'
+      'ASSESS'
     ),
     'person_storyteller'
   ),
@@ -1527,7 +1527,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Competitive/Challenge',
         'Imaginative/Role-play',
       ],
-      'PLAY'
+      'ASSESS'
     ),
     'play_nature'
   ),
@@ -1542,35 +1542,35 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Storytelling / Narrative Play',
         'Object Play',
       ],
-      'PLAY'
+      'ASSESS'
     ),
     'play_types'
   ),
   withDimension(
-    scale(91, 'Energy preference (1 relaxed - 5 high energy).', 'USER'),
+    scale(91, 'Energy preference (1 relaxed - 5 high energy).', 'MEMBER'),
     'energy_score'
   ),
   withDimension(
-    scale(92, 'Noise preference (1 quiet - 5 loud is fine).', 'USER'),
+    scale(92, 'Noise preference (1 quiet - 5 loud is fine).', 'MEMBER'),
     'noise_level'
   ),
   withDimension(
     scale(
       93,
       'Social intensity preference (1 low-pressure / parallel play - 5 highly interactive).',
-      'USER'
+      'MEMBER'
     ),
     'social_intensity'
   ),
   withDimension(
-    scale(94, 'Competition preference (1 none - 5 love it).', 'USER'),
+    scale(94, 'Competition preference (1 none - 5 love it).', 'MEMBER'),
     'competition_level'
   ),
   withDimension(
     scale(
       95,
       'Spotlight preference (1 avoid spotlight - 5 love spotlight).',
-      'USER'
+      'MEMBER'
     ),
     'spotlight_level'
   ),
@@ -1578,7 +1578,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       96,
       "Creative confidence (1 I worry I'm 'not creative' - 5 I love making stuff).",
-      'USER'
+      'MEMBER'
     ),
     'creative_confidence'
   ),
@@ -1586,7 +1586,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
     scale(
       97,
       'Openness to trying new things (1 stay safe - 5 surprise me).',
-      'USER'
+      'MEMBER'
     ),
     'openness_new'
   ),
@@ -1599,7 +1599,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Drawing / crafts / making things (Creative Play)',
         'Sports / tag / running',
       ],
-      'USER'
+      'MEMBER'
     ),
     'childhood_play'
   ),
@@ -1609,7 +1609,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
       'Anything else you loved doing as a kid? (optional)',
       'Type your answer here...',
       250,
-      'USER'
+      'MEMBER'
     ),
     'childhood_open'
   ),
@@ -1625,7 +1625,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Physical contact',
         'Personal sharing',
       ],
-      'USER'
+      'MEMBER'
     ),
     'avoid_elements'
   ),
@@ -1639,7 +1639,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         'Breaks / step away',
         'Quiet/low-sensory',
       ],
-      'USER'
+      'MEMBER'
     ),
     'neuro_supports'
   ),
@@ -1649,7 +1649,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
       'Optional: Any accessibility notes we should plan for?',
       'Share any accessibility notes',
       250,
-      'USER'
+      'MEMBER'
     ),
     'accessibility_notes'
   ),
@@ -1658,7 +1658,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
       103,
       'Have you taken the Enneagram assessment before?',
       ['Yes', 'No', 'Not sure'],
-      'USER'
+      'MEMBER'
     ),
     'enneagram_taken'
   ),
@@ -1667,7 +1667,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
       104,
       'If yes: what is your Enneagram type?',
       ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'Not sure'],
-      'USER'
+      'MEMBER'
     ),
     'enneagram_type'
   ),
@@ -1696,7 +1696,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
         '9w1',
         'No',
       ],
-      'USER'
+      'MEMBER'
     ),
     'enneagram_wing'
   ),
@@ -1705,7 +1705,7 @@ const importedQuestionOverrides: SeedQuestion[] = [
       106,
       'If you know it: your instinct stack?',
       ['sp/sx', 'sp/so', 'sx/so', 'sx/sp', 'so/sp', 'so/sx', 'Not sure'],
-      'USER'
+      'MEMBER'
     ),
     'enneagram_instinct'
   ),

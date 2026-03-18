@@ -17,11 +17,11 @@ export type CountKey =
   | 'events'
   | 'users'
   | 'bookings'
-  | 'facilitators'
   | 'teams'
   | 'requests'
   | 'experiences'
-  | 'dimensions';
+  | 'dimensions'
+  | 'dimensionCategories';
 
 export type BadgeCounts = Partial<Record<CountKey, number>>;
 
@@ -111,6 +111,7 @@ export const menuSection: MenuGroup[] = [
           {
             label: 'Categories',
             href: '/admin/dimensions/categories',
+            countKey: 'dimensionCategories',
           },
         ],
       },
@@ -136,18 +137,7 @@ export const menuSection: MenuGroup[] = [
           },
         ],
       },
-      {
-        label: 'Facilitators',
-        href: '/admin/facilitators',
-        countKey: 'facilitators',
-        children: [
-          {
-            label: 'Facilitators',
-            href: '/admin/facilitators',
-            countKey: 'facilitators',
-          },
-        ],
-      },
+
       {
         label: 'Events',
         href: '/admin/events',

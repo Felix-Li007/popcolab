@@ -8,8 +8,15 @@ import {
 import { Prisma } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import type {
+  OverviewBreakdownItem,
   OverviewGrowthMetrics,
   OverviewGrowthPoint,
+  OverviewExperienceMetrics,
+  OverviewExperienceTrendPoint,
+  OverviewQuestionMetrics,
+  OverviewQuizMetrics,
+  OverviewQuizTrendPoint,
+  OverviewRequestMetrics,
   OverviewRequestStatusPoint,
   OverviewRequestTrendPoint,
 } from '@/types/overview-type';
@@ -36,6 +43,43 @@ type OverviewRequestTrendRow = {
   request_status: string | null;
   count: number | string | bigint;
 };
+
+type OverviewCategoryRow = {
+  label: string;
+  value: number | string | bigint;
+};
+
+type OverviewMatchSummaryRow = {
+  matched_count: number | string | bigint;
+  backlog_count: number | string | bigint;
+  avg_match_hours: number | string | bigint | null;
+};
+
+type OverviewExperienceTrendRow = {
+  week_start: Date | string;
+  count: number | string | bigint;
+};
+
+type OverviewQuizSummaryRow = {
+  total_completions: number | string | bigint;
+  unique_participants: number | string | bigint;
+  completions_this_week: number | string | bigint;
+  completions_previous_week: number | string | bigint;
+};
+
+type OverviewQuizTrendRow = {
+  day_start: Date | string;
+  count: number | string | bigint;
+};
+
+type OverviewQuestionSummaryRow = {
+  total_questions: number | string | bigint;
+  mapped_questions: number | string | bigint;
+  unmapped_questions: number | string | bigint;
+  choice_questions_without_options: number | string | bigint;
+};
+
+const NEW_EXPERIENCE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 function toNumber(value: number | string | bigint | null | undefined): number {
   if (value === null || value === undefined) return 0;
@@ -66,16 +110,112 @@ function toDayKey(value: Date | string): string {
   return new Date(value).toISOString().slice(0, 10);
 }
 
+function toWeekLabel(value: Date | string): string {
+  return new Date(value).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+function toWeekKey(value: Date | string): string {
+  return new Date(value).toISOString().slice(0, 10);
+}
+
+function toWeekdayLabel(value: Date | string): string {
+  return new Date(value).toLocaleString('en-US', {
+    weekday: 'narrow',
+    timeZone: 'UTC',
+  });
+}
+
+function parseDeliveryMethodTokens(value: string | null | undefined): string[] {
+  if (!value) return [];
+
+  return Array.from(
+    new Set(
+      value
+        .split(/[\n,;|]+/)
+        .map(item => item.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function buildDeliveryMethodBreakdown(
+  values: Array<{ delivery_methods: string }>
+): OverviewBreakdownItem[] {
+  const counts = new Map<string, number>();
+
+  values.forEach(row => {
+    parseDeliveryMethodTokens(row.delivery_methods).forEach(token => {
+      counts.set(token, (counts.get(token) ?? 0) + 1);
+    });
+  });
+
+  return Array.from(counts.entries())
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
+    .slice(0, 5);
+}
+
+function getQuestionFormLabel(value: string): string {
+  switch (value) {
+    case 'ASSESS':
+      return 'Assessment';
+    case 'REQUEST':
+      return 'Request';
+    case 'EXPERIENCE':
+      return 'Experience';
+    case 'MEMBER':
+      return 'Member';
+    default:
+      return value;
+  }
+}
+
+function getQuestionTypeLabel(value: string): string {
+  switch (value) {
+    case 'single_choice':
+      return 'Single Choice';
+    case 'multi_choice':
+      return 'Multi Choice';
+    case 'scale':
+      return 'Scale';
+    case 'text_input':
+      return 'Text Input';
+    default:
+      return value;
+  }
+}
+
 export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics> {
-  const [countRows, growthRows, requestStatusRows, requestTrendRows] =
-    await Promise.all([
-      prisma.$queryRaw<OverviewCountRow[]>(Prisma.sql`
+  const [
+    countRows,
+    growthRows,
+    requestStatusRows,
+    requestTrendRows,
+    requestMatchSummaryRows,
+    topRequestedCategoryRows,
+    topMatchedExperienceRows,
+    quizSummaryRows,
+    quizTrendRows,
+    questionSummaryRows,
+    questionFormRows,
+    questionTypeRows,
+    experienceStatusRows,
+    newExperiencesThisWeek,
+    newExperienceTrendRows,
+    deliveryMethodRows,
+    topCategoryRows,
+  ] = await Promise.all([
+    prisma.$queryRaw<OverviewCountRow[]>(Prisma.sql`
       SELECT
         (SELECT COUNT(*)::int FROM "user") AS total_users,
         (SELECT COUNT(*)::int FROM "team") AS total_teams,
         (SELECT COUNT(*)::int FROM "request") AS total_requests
     `),
-      prisma.$queryRaw<OverviewGrowthRow[]>(Prisma.sql`
+    prisma.$queryRaw<OverviewGrowthRow[]>(Prisma.sql`
       WITH days AS (
         SELECT generate_series(
           CURRENT_DATE - INTERVAL '13 days',
@@ -108,7 +248,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       LEFT JOIN team_counts ON team_counts.day_start = days.day_start
       ORDER BY days.day_start ASC
     `),
-      prisma.$queryRaw<OverviewRequestStatusRow[]>(Prisma.sql`
+    prisma.$queryRaw<OverviewRequestStatusRow[]>(Prisma.sql`
       SELECT
         request_status::text AS request_status,
         COUNT(*)::int AS count
@@ -116,7 +256,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       GROUP BY request_status::text
       ORDER BY COUNT(*) DESC, request_status ASC
     `),
-      prisma.$queryRaw<OverviewRequestTrendRow[]>(Prisma.sql`
+    prisma.$queryRaw<OverviewRequestTrendRow[]>(Prisma.sql`
       WITH months AS (
         SELECT generate_series(
           date_trunc('month', CURRENT_DATE) - INTERVAL '5 months',
@@ -152,7 +292,186 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
         AND request_counts.request_status = statuses.request_status
       ORDER BY months.month_start ASC, statuses.request_status ASC
     `),
-    ]);
+    prisma.$queryRaw<OverviewMatchSummaryRow[]>(Prisma.sql`
+      WITH first_proposals AS (
+        SELECT
+          request_id,
+          MIN(created_at) AS first_proposal_at
+        FROM "proposal"
+        GROUP BY request_id
+      )
+      SELECT
+        COUNT(*) FILTER (
+          WHERE r.request_status::text IN (${REQUEST_STATUS.MATCHED}, ${REQUEST_STATUS.CLOSED})
+        )::int AS matched_count,
+        COUNT(*) FILTER (
+          WHERE r.request_status::text IN (${REQUEST_STATUS.OPENED}, ${REQUEST_STATUS.PENDING})
+        )::int AS backlog_count,
+        COALESCE(
+          AVG(
+            EXTRACT(EPOCH FROM (fp.first_proposal_at - r.created_at)) / 3600.0
+          ) FILTER (WHERE fp.first_proposal_at IS NOT NULL),
+          0
+        ) AS avg_match_hours
+      FROM "request" r
+      LEFT JOIN first_proposals fp ON fp.request_id = r.id
+    `),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        objective_category AS label,
+        COUNT(*)::int AS value
+      FROM "request"
+      GROUP BY objective_category
+      ORDER BY COUNT(*) DESC, objective_category ASC
+      LIMIT 5
+    `),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        e.experience_title AS label,
+        COUNT(*)::int AS value
+      FROM "proposal" p
+      INNER JOIN "experience" e ON e.id = p.experience_id
+      GROUP BY e.id, e.experience_title
+      ORDER BY COUNT(*) DESC, e.experience_title ASC
+      LIMIT 5
+    `),
+    prisma.$queryRaw<OverviewQuizSummaryRow[]>(Prisma.sql`
+      WITH completed_responses AS (
+        SELECT
+          user_id,
+          completed_at::date AS completed_day
+        FROM "response"
+        WHERE completed_at IS NOT NULL
+      )
+      SELECT
+        COUNT(*)::int AS total_completions,
+        COUNT(DISTINCT user_id)::int AS unique_participants,
+        COUNT(*) FILTER (
+          WHERE completed_day >= CURRENT_DATE - INTERVAL '6 days'
+        )::int AS completions_this_week,
+        COUNT(*) FILTER (
+          WHERE completed_day BETWEEN CURRENT_DATE - INTERVAL '13 days'
+          AND CURRENT_DATE - INTERVAL '7 days'
+        )::int AS completions_previous_week
+      FROM completed_responses
+    `),
+    prisma.$queryRaw<OverviewQuizTrendRow[]>(Prisma.sql`
+      WITH days AS (
+        SELECT generate_series(
+          CURRENT_DATE - INTERVAL '6 days',
+          CURRENT_DATE,
+          INTERVAL '1 day'
+        )::date AS day_start
+      ),
+      response_counts AS (
+        SELECT
+          completed_at::date AS day_start,
+          COUNT(*)::int AS count
+        FROM "response"
+        WHERE completed_at >= CURRENT_DATE - INTERVAL '6 days'
+          AND completed_at IS NOT NULL
+        GROUP BY 1
+      )
+      SELECT
+        days.day_start,
+        COALESCE(response_counts.count, 0)::int AS count
+      FROM days
+      LEFT JOIN response_counts
+        ON response_counts.day_start = days.day_start
+      ORDER BY days.day_start ASC
+    `),
+    prisma.$queryRaw<OverviewQuestionSummaryRow[]>(Prisma.sql`
+      WITH mapped_questions AS (
+        SELECT DISTINCT question_id FROM "question_dimension"
+      ),
+      question_options AS (
+        SELECT DISTINCT question_id FROM "question_option"
+      )
+      SELECT
+        COUNT(*)::int AS total_questions,
+        COUNT(*) FILTER (
+          WHERE q.dimension_id IS NOT NULL OR mq.question_id IS NOT NULL
+        )::int AS mapped_questions,
+        COUNT(*) FILTER (
+          WHERE q.dimension_id IS NULL AND mq.question_id IS NULL
+        )::int AS unmapped_questions,
+        COUNT(*) FILTER (
+          WHERE q.question_type IN ('single_choice', 'multi_choice')
+            AND qo.question_id IS NULL
+        )::int AS choice_questions_without_options
+      FROM "question" q
+      LEFT JOIN mapped_questions mq ON mq.question_id = q.id
+      LEFT JOIN question_options qo ON qo.question_id = q.id
+    `),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        form_name::text AS label,
+        COUNT(*)::int AS value
+      FROM "question"
+      GROUP BY form_name::text
+      ORDER BY COUNT(*) DESC, form_name::text ASC
+    `),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        question_type AS label,
+        COUNT(*)::int AS value
+      FROM "question"
+      GROUP BY question_type
+      ORDER BY COUNT(*) DESC, question_type ASC
+    `),
+    prisma.experience.groupBy({
+      by: ['experience_status'],
+      _count: {
+        _all: true,
+      },
+    }),
+    prisma.experience.count({
+      where: {
+        created_at: {
+          gte: new Date(Date.now() - NEW_EXPERIENCE_WINDOW_MS),
+        },
+      },
+    }),
+    prisma.$queryRaw<OverviewExperienceTrendRow[]>(Prisma.sql`
+      WITH weeks AS (
+        SELECT generate_series(
+          date_trunc('week', CURRENT_DATE) - INTERVAL '7 weeks',
+          date_trunc('week', CURRENT_DATE),
+          INTERVAL '1 week'
+        ) AS week_start
+      ),
+      experience_counts AS (
+        SELECT
+          date_trunc('week', created_at) AS week_start,
+          COUNT(*)::int AS count
+        FROM "experience"
+        WHERE created_at >= date_trunc('week', CURRENT_DATE) - INTERVAL '7 weeks'
+        GROUP BY 1
+      )
+      SELECT
+        weeks.week_start,
+        COALESCE(experience_counts.count, 0)::int AS count
+      FROM weeks
+      LEFT JOIN experience_counts
+        ON experience_counts.week_start = weeks.week_start
+      ORDER BY weeks.week_start ASC
+    `),
+    prisma.experience.findMany({
+      select: {
+        delivery_methods: true,
+      },
+    }),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        c.category_title AS label,
+        COUNT(*)::int AS value
+      FROM "experience" e
+      INNER JOIN "category" c ON c.id = e.category_id
+      GROUP BY c.id, c.category_title
+      ORDER BY COUNT(*) DESC, c.category_title ASC
+      LIMIT 5
+    `),
+  ]);
 
   const growth: OverviewGrowthPoint[] = growthRows.map(row => ({
     periodKey: toDayKey(row.day_start),
@@ -196,6 +515,111 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
   const requestTrend = Array.from(requestTrendMap.values()).sort((a, b) =>
     a.monthKey.localeCompare(b.monthKey)
   );
+  const requestMatchSummary = requestMatchSummaryRows[0];
+  const matchedRequests = toNumber(requestMatchSummary?.matched_count ?? 0);
+  const requestMetrics: OverviewRequestMetrics = {
+    matchRate:
+      toNumber(counts?.total_requests ?? 0) === 0
+        ? 0
+        : (matchedRequests / toNumber(counts?.total_requests ?? 0)) * 100,
+    backlogRequests: toNumber(requestMatchSummary?.backlog_count ?? 0),
+    averageMatchTimeHours: Number(
+      toNumber(requestMatchSummary?.avg_match_hours ?? 0).toFixed(1)
+    ),
+    topRequestedCategories: topRequestedCategoryRows.map(row => ({
+      label: row.label,
+      value: toNumber(row.value),
+    })),
+    topMatchedExperiences: topMatchedExperienceRows.map(row => ({
+      label: row.label,
+      value: toNumber(row.value),
+    })),
+  };
+
+  const quizSummary = quizSummaryRows[0];
+  const completionsThisWeek = toNumber(quizSummary?.completions_this_week ?? 0);
+  const completionsPreviousWeek = toNumber(
+    quizSummary?.completions_previous_week ?? 0
+  );
+  const weeklyChangePct =
+    completionsPreviousWeek === 0
+      ? completionsThisWeek === 0
+        ? 0
+        : 100
+      : ((completionsThisWeek - completionsPreviousWeek) /
+          completionsPreviousWeek) *
+        100;
+  const quizTrend: OverviewQuizTrendPoint[] = quizTrendRows.map(row => ({
+    periodKey: toDayKey(row.day_start),
+    periodLabel: toWeekdayLabel(row.day_start),
+    value: toNumber(row.count),
+  }));
+  const quizMetrics: OverviewQuizMetrics = {
+    totalCompletions: toNumber(quizSummary?.total_completions ?? 0),
+    uniqueParticipants: toNumber(quizSummary?.unique_participants ?? 0),
+    completionsThisWeek,
+    completionsPreviousWeek,
+    weeklyChangePct: Number(weeklyChangePct.toFixed(1)),
+    trend: quizTrend,
+  };
+  const questionSummary = questionSummaryRows[0];
+  const questionMetrics: OverviewQuestionMetrics = {
+    totalQuestions: toNumber(questionSummary?.total_questions ?? 0),
+    mappedQuestions: toNumber(questionSummary?.mapped_questions ?? 0),
+    unmappedQuestions: toNumber(questionSummary?.unmapped_questions ?? 0),
+    choiceQuestionsWithoutOptions: toNumber(
+      questionSummary?.choice_questions_without_options ?? 0
+    ),
+    byForm: questionFormRows.map(row => ({
+      label: getQuestionFormLabel(row.label),
+      value: toNumber(row.value),
+    })),
+    byType: questionTypeRows.map(row => ({
+      label: getQuestionTypeLabel(row.label),
+      value: toNumber(row.value),
+    })),
+  };
+
+  const experienceStatusMap = new Map(
+    experienceStatusRows.map(row => [row.experience_status, row._count._all])
+  );
+  const statusBreakdown: OverviewBreakdownItem[] = [
+    {
+      label: 'Active',
+      value: toNumber(experienceStatusMap.get('active')),
+    },
+    {
+      label: 'Draft',
+      value: toNumber(experienceStatusMap.get('draft')),
+    },
+    {
+      label: 'Inactive',
+      value: toNumber(experienceStatusMap.get('inactive')),
+    },
+  ];
+  const newExperienceTrend: OverviewExperienceTrendPoint[] =
+    newExperienceTrendRows.map(row => ({
+      periodKey: toWeekKey(row.week_start),
+      periodLabel: toWeekLabel(row.week_start),
+      value: toNumber(row.count),
+    }));
+  const experienceMetrics: OverviewExperienceMetrics = {
+    totalExperiences: statusBreakdown.reduce(
+      (sum, item) => sum + item.value,
+      0
+    ),
+    activeExperiences: statusBreakdown[0].value,
+    draftExperiences: statusBreakdown[1].value,
+    inactiveExperiences: statusBreakdown[2].value,
+    newExperiencesThisWeek,
+    statusBreakdown,
+    newExperienceTrend,
+    deliveryMethodBreakdown: buildDeliveryMethodBreakdown(deliveryMethodRows),
+    topCategories: topCategoryRows.map(row => ({
+      label: row.label,
+      value: toNumber(row.value),
+    })),
+  };
 
   return {
     totalUsers: toNumber(counts?.total_users ?? 0),
@@ -206,5 +630,9 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
     totalRequests: toNumber(counts?.total_requests ?? 0),
     requestStatus,
     requestTrend,
+    requestMetrics,
+    experienceMetrics,
+    quizMetrics,
+    questionMetrics,
   };
 }

@@ -1,7 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import type { ExperienceFormState } from '@/types/experience-type';
+import type {
+  ExperienceFormState,
+  ExperienceStatus,
+} from '@/types/experience-type';
 import {
   createExperience,
   deleteExperience,
@@ -23,13 +26,22 @@ function parseIntegerField(value: FormDataEntryValue | null): number | null {
 }
 
 function parseExperienceForm(formData: FormData) {
-  const dimensionValues = Array.from(formData.entries())
-    .filter(([key]) => key.startsWith('dimension_'))
-    .map(([key, value]) => {
+  const dimensionKeys = Array.from(new Set(Array.from(formData.keys())))
+    .filter(key => key.startsWith('dimension_'))
+    .sort();
+
+  const dimensionValues = dimensionKeys
+    .map(key => {
       const dimensionId = Number.parseInt(key.replace('dimension_', ''), 10);
+      const expectedValue = formData
+        .getAll(key)
+        .map(value => value.toString().trim())
+        .filter(Boolean)
+        .join(';');
+
       return {
         dimensionId,
-        expectedValue: value.toString().trim(),
+        expectedValue,
       };
     })
     .filter(
@@ -41,9 +53,10 @@ function parseExperienceForm(formData: FormData) {
 
   return {
     experienceTitle: formData.get('experienceTitle')?.toString().trim() ?? '',
+    experienceStatus: (formData.get('experienceStatus')?.toString().trim() ??
+      'active') as ExperienceStatus,
     providerId: parseIntegerField(formData.get('providerId')) ?? 0,
     categoryId: parseIntegerField(formData.get('categoryId')) ?? 0,
-    popularityIndex: parseIntegerField(formData.get('popularityIndex')) ?? -1,
     durationMin: parseIntegerField(formData.get('durationMin')) ?? -1,
     durationMax: parseIntegerField(formData.get('durationMax')) ?? -1,
     capacityMax: parseIntegerField(formData.get('capacityMax')) ?? -1,

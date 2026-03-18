@@ -1,14 +1,19 @@
-type ActionButton = {
+'use client';
+
+import Link from 'next/link';
+
+type ActionLink = {
   icon: React.ReactNode;
   label: string;
-  onClick?: () => void;
+  href: string;
+  tone: string;
 };
 
-const actions: ActionButton[] = [
+const actions: ActionLink[] = [
   {
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -21,12 +26,14 @@ const actions: ActionButton[] = [
         />
       </svg>
     ),
-    label: 'New Type',
+    label: 'Experiences',
+    href: '/admin/experiences',
+    tone: 'border-coral-soft bg-rose-50 text-coral-red hover:border-coral-vibe/40 hover:bg-rose-100/70',
   },
   {
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -35,16 +42,18 @@ const actions: ActionButton[] = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z"
         />
       </svg>
     ),
-    label: 'Quiz Editor',
+    label: 'Requests',
+    href: '/admin/requests',
+    tone: 'border-amber-100 bg-amber-50 text-amber-700 hover:border-amber-200 hover:bg-amber-100/70',
   },
   {
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -53,22 +62,18 @@ const actions: ActionButton[] = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+          d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"
         />
       </svg>
     ),
-    label: 'Preview',
+    label: 'Questions',
+    href: '/admin/questions',
+    tone: 'border-purple-100 bg-purple-50 text-purple-700 hover:border-purple-200 hover:bg-purple-100/70',
   },
   {
     icon: (
       <svg
-        className="w-5 h-5"
+        className="h-5 w-5"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -77,34 +82,76 @@ const actions: ActionButton[] = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M4 6h16M4 10h16M4 14h16M4 18h16"
+          d="M17 20h5V4H2v16h5m10 0v-2a4 4 0 00-4-4H11a4 4 0 00-4 4v2m10 0H7m10-8a4 4 0 11-8 0 4 4 0 018 0z"
         />
       </svg>
     ),
-    label: 'Bulk Edit',
+    label: 'Personalities',
+    href: '/admin/personalities',
+    tone: 'border-teal-100 bg-teal-50 text-teal-deep hover:border-teal-200 hover:bg-teal-100/70',
+  },
+  {
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M4 7h16M4 12h16M4 17h16"
+        />
+      </svg>
+    ),
+    label: 'Dimensions',
+    href: '/admin/dimensions',
+    tone: 'border-sky-100 bg-sky-50 text-sky-700 hover:border-sky-200 hover:bg-sky-100/70',
+  },
+  {
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 7l9-4 9 4-9 4-9-4zm0 0v6l9 4 9-4V7m-9 4v6"
+        />
+      </svg>
+    ),
+    label: 'Providers',
+    href: '/admin/experiences/providers',
+    tone: 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300 hover:bg-gray-100',
   },
 ];
 
 export default function QuickActions() {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+      <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
         Quick Actions
       </h3>
       <div className="grid grid-cols-2 gap-2">
         {actions.map(action => (
-          <button
+          <Link
             key={action.label}
-            onClick={action.onClick}
-            className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg border border-gray-100 hover:border-magenta hover:bg-lavender transition-all text-gray-600 hover:text-magenta group"
+            href={action.href}
+            className={`group flex min-h-[74px] flex-col items-center justify-center gap-1.5 rounded-lg border p-2.5 text-center transition-all ${action.tone}`}
           >
-            <span className="group-hover:scale-110 transition-transform">
+            <span className="transition-transform group-hover:scale-110">
               {action.icon}
             </span>
-            <span className="text-[10px] font-semibold text-center">
+            <span className="text-[10px] font-semibold leading-tight">
               {action.label}
             </span>
-          </button>
+          </Link>
         ))}
       </div>
     </div>

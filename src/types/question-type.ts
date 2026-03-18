@@ -4,7 +4,7 @@ export type QuestionType =
   | 'scale'
   | 'text_input';
 
-export type IntakeForm = 'REQUEST' | 'USER' | 'PLAY';
+export type IntakeForm = 'REQUEST' | 'MEMBER' | 'ASSESS' | 'EXPERIENCE';
 
 export type QuestionOption = {
   id?: number;

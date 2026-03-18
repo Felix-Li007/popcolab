@@ -1,7 +1,8 @@
 enum IntakeForm {
   REQUEST
-  USER
-  PLAY
+  MEMBER
+  ASSESS
+  EXPERIENCE
 }
 
 model Question {

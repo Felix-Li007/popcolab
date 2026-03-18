@@ -11,7 +11,9 @@ export async function getBadgeCounts(): Promise<BadgeCounts> {
     questions,
     categories,
     providers,
+    experiences,
     dimensions,
+    dimensionCategories,
     teams,
     userRows,
   ] = await Promise.all([
@@ -19,7 +21,9 @@ export async function getBadgeCounts(): Promise<BadgeCounts> {
     prisma.question.count(),
     prisma.category.count(),
     prisma.provider.count(),
+    prisma.experience.count(),
     prisma.dimensionIndex.count(),
+    prisma.dimensionCategory.count(),
     prisma.team.count(),
     prisma.$queryRaw<{ count: number | string | bigint }[]>`
         SELECT COUNT(*)::int AS count FROM "user"
@@ -31,7 +35,9 @@ export async function getBadgeCounts(): Promise<BadgeCounts> {
     questions,
     categories,
     providers,
+    experiences,
     dimensions,
+    dimensionCategories,
     teams,
     users: Number(userRows[0]?.count ?? 0),
   };

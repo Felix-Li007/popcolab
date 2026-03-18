@@ -37,7 +37,7 @@ export default function ProviderCard({
     <article
       data-testid="provider-card"
       onClick={onSelect}
-      className={`flex h-full min-h-[268px] w-full cursor-pointer flex-col overflow-hidden rounded-xl border bg-white p-2.5 shadow-sm transition ${
+      className={`flex h-full min-h-[312px] w-full cursor-pointer flex-col overflow-hidden rounded-xl border bg-white p-2.5 shadow-sm transition ${
         isEditingSelected
           ? 'border-magenta shadow-[0_0_0_2px_rgba(233,30,99,0.14),0_4px_16px_rgba(0,0,0,0.08)]'
           : 'border-gray-200 hover:-translate-y-0.5 hover:border-magenta/20 hover:shadow-[0_0_0_1.5px_rgba(233,30,99,0.12),0_0_20px_6px_rgba(233,30,99,0.10)]'

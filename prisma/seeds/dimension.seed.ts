@@ -1,4 +1,5 @@
 import type { PrismaClient } from '@/libs/prisma/client';
+import { EXPERIENCE_DIMENSION_KEYS } from './experience-dimension-keys';
 
 type DimensionDataType = 'scale' | 'text';
 
@@ -776,6 +777,31 @@ export async function seedDimensions(
 
     console.log(
       `  ✅ [${optionSet.index_key}] ${optionSet.options.length} option value(s)`
+    );
+  }
+
+  const experienceDimensionApplyRows = EXPERIENCE_DIMENSION_KEYS.map(
+    indexKey => {
+      const dimensionId = dimensionIdByKey.get(indexKey);
+      if (!dimensionId) {
+        throw new Error(
+          `Missing dimension with key ${indexKey} for EXPERIENCE form mapping`
+        );
+      }
+
+      return {
+        dimension_id: dimensionId,
+        form_name: 'EXPERIENCE' as const,
+      };
+    }
+  );
+
+  if (experienceDimensionApplyRows.length > 0) {
+    await prisma.dimensionApply.createMany({
+      data: experienceDimensionApplyRows,
+    });
+    console.log(
+      `  ✅ [EXPERIENCE] ${experienceDimensionApplyRows.length} dimension apply mapping(s)`
     );
   }
 

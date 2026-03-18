@@ -4,32 +4,6 @@ function uniqueSuffix(testName: string) {
   return `${testName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`;
 }
 
-async function ensureSignedIn(page: Page) {
-  if (!page.url().includes('/sign-in')) return;
-
-  const email = process.env.TEST_USER_EMAIL;
-  const password = process.env.TEST_USER_PASSWORD;
-
-  test.skip(
-    !email || !password,
-    'Admin E2E requires TEST_USER_EMAIL and TEST_USER_PASSWORD.'
-  );
-
-  await page
-    .getByLabel(/email address/i)
-    .or(page.getByPlaceholder(/email/i))
-    .fill(email!);
-  await page.getByRole('button', { name: /continue/i }).click();
-  await page
-    .getByLabel(/password/i)
-    .or(page.getByPlaceholder(/password/i))
-    .fill(password!);
-  await page.getByRole('button', { name: /sign in|continue/i }).click();
-  await page.waitForURL('**/admin/experiences/categories**', {
-    timeout: 15000,
-  });
-}
-
 async function createRootCategory(page: Page, title: string) {
   await page.getByRole('button', { name: /new root/i }).click();
   const modal = page.getByTestId('experience-category-form');
@@ -53,7 +27,6 @@ async function createChildCategory(page: Page, title: string) {
 test.describe('Experience categories page', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/admin/experiences/categories');
-    await ensureSignedIn(page);
   });
 
   test('page loads with core controls', async ({ page }) => {

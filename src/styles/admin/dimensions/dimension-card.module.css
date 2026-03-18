@@ -1,7 +1,7 @@
 @reference "../../../app/globals.css";
 
 .card {
-  @apply bg-white rounded-xl border border-gray-100 shadow-sm h-full flex flex-col w-full overflow-hidden;
+  @apply bg-white rounded-xl border border-gray-100 shadow-sm h-full min-h-[312px] flex flex-col w-full overflow-hidden;
   position: relative;
   transition:
     box-shadow 0.3s ease,

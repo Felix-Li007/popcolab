@@ -32,11 +32,17 @@ const TYPE_FILTERS = [
   'text_input',
 ] as const;
 type TypeFilter = (typeof TYPE_FILTERS)[number];
-const FORM_FILTERS: IntakeForm[] = ['REQUEST', 'USER', 'PLAY'];
+const FORM_FILTERS: IntakeForm[] = [
+  'REQUEST',
+  'MEMBER',
+  'ASSESS',
+  'EXPERIENCE',
+];
 const INTAKE_FORM_LABELS: Record<IntakeForm, string> = {
   REQUEST: 'LEADER',
-  USER: 'MEMBER',
-  PLAY: 'ASSESS',
+  MEMBER: 'MEMBER',
+  ASSESS: 'ASSESS',
+  EXPERIENCE: 'EXPERIENCE',
 };
 
 export default function QuestionContent({
