@@ -48,9 +48,11 @@ type EditFormState = {
   lastName: string;
   phoneNumber: string;
   preferredContact: PreferredContactValue;
-  corporateName: string;
+  companyName: string;
   departmentName: string;
   roleTitle: string;
+  companySize: string;
+  companyWebsite: string;
   workMode: WorkModeValue;
 };
 
@@ -69,12 +71,21 @@ const PREFERRED_CONTACT_OPTIONS = [
 ] as const;
 
 const CORPORATE_FIELDS: Array<{
-  key: 'corporateName' | 'departmentName' | 'roleTitle' | 'workMode';
+  key:
+    | 'companyName'
+    | 'departmentName'
+    | 'roleTitle'
+    | 'companySize'
+    | 'companyWebsite'
+    | 'workMode';
   label: string;
+  inputType?: 'text' | 'number' | 'url';
 }> = [
-  { key: 'corporateName', label: 'Company' },
+  { key: 'companyName', label: 'Company Name' },
   { key: 'departmentName', label: 'Department' },
   { key: 'roleTitle', label: 'Role' },
+  { key: 'companySize', label: 'Company Size', inputType: 'number' },
+  { key: 'companyWebsite', label: 'Company Website', inputType: 'url' },
   { key: 'workMode', label: 'Work Mode' },
 ];
 
@@ -103,14 +114,24 @@ function buildForm(user: AdminUserListItem): EditFormState {
     lastName: user.lastName ?? '',
     phoneNumber: user.phoneNumber ?? '',
     preferredContact: normalizePreferredContact(user.preferredContact),
-    corporateName: user.corporateName ?? '',
+    companyName: user.companyName ?? '',
     departmentName: user.departmentName ?? '',
     roleTitle: user.roleTitle ?? '',
+    companySize:
+      user.companySize === null || user.companySize === undefined
+        ? ''
+        : String(user.companySize),
+    companyWebsite: user.companyWebsite ?? '',
     workMode: user.workMode ?? '',
   };
 }
 
 function toUpdatePayload(form: EditFormState): AdminUserEditableUpdateInput {
+  const normalizedCompanySize = toNullableTrimmed(form.companySize);
+  const companySize = normalizedCompanySize
+    ? Number.parseInt(normalizedCompanySize, 10)
+    : null;
+
   return {
     userName: form.userName.trim(),
     status: form.status,
@@ -118,9 +139,14 @@ function toUpdatePayload(form: EditFormState): AdminUserEditableUpdateInput {
     lastName: toNullableTrimmed(form.lastName),
     phoneNumber: toNullableTrimmed(form.phoneNumber),
     preferredContact: form.preferredContact || null,
-    corporateName: toNullableTrimmed(form.corporateName),
+    companyName: toNullableTrimmed(form.companyName),
     departmentName: toNullableTrimmed(form.departmentName),
     roleTitle: toNullableTrimmed(form.roleTitle),
+    companySize:
+      companySize !== null && Number.isInteger(companySize)
+        ? companySize
+        : null,
+    companyWebsite: toNullableTrimmed(form.companyWebsite),
     workMode: normalizeWorkMode(form.workMode),
   };
 }
@@ -310,7 +336,7 @@ function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
       </div>
 
       <div>
-        <p className={styles.sectionTitle}>Corporate</p>
+        <p className={styles.sectionTitle}>Company</p>
         <div className={styles.sectionCard}>
           <div className={styles.corporateGrid}>
             {CORPORATE_FIELDS.map(field => {
@@ -349,6 +375,9 @@ function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
                     <input
                       id={meta.inputId}
                       value={form[field.key]}
+                      type={field.inputType ?? 'text'}
+                      min={field.inputType === 'number' ? 1 : undefined}
+                      step={field.inputType === 'number' ? 1 : undefined}
                       onChange={event =>
                         handleFieldChange(field.key, event.target.value)
                       }

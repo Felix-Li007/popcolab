@@ -69,3 +69,5 @@ session.json
 
 prisma
 !/prisma/
+
+mcp.json

@@ -91,13 +91,13 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
         </div>
 
         <div>
-          <p className={styles.sectionTitle}>Corporate</p>
+          <p className={styles.sectionTitle}>Company</p>
           <div className={styles.sectionCard}>
             <div className={styles.corporateGrid}>
               <div className={styles.corporateItem}>
-                <p className={styles.corporateLabel}>Company</p>
+                <p className={styles.corporateLabel}>Company Name</p>
                 <p className={styles.corporateValue}>
-                  {renderValue(user.corporateName)}
+                  {renderValue(user.companyName)}
                 </p>
               </div>
               <div className={styles.corporateItem}>
@@ -118,6 +118,18 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
                   {renderValue(getWorkModeLabel(user.workMode))}
                 </p>
               </div>
+              <div className={styles.corporateItem}>
+                <p className={styles.corporateLabel}>Company Size</p>
+                <p className={styles.corporateValue}>
+                  {user.companySize ?? '—'}
+                </p>
+              </div>
+              <div className={styles.corporateItem}>
+                <p className={styles.corporateLabel}>Company Website</p>
+                <p className={styles.corporateValue}>
+                  {renderValue(user.companyWebsite)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -136,6 +148,13 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+
+        <div>
+          <p className={styles.sectionTitle}>Short Bio</p>
+          <div className={`${styles.infoCard} ${styles.privacyCard}`}>
+            <p className={styles.privacyText}>{renderValue(user.shortBio)}</p>
           </div>
         </div>
 

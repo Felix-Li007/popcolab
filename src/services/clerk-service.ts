@@ -150,3 +150,18 @@ export async function requireAdminActionAccess(): Promise<void> {
     throw new Error('Admin access required.');
   }
 }
+
+export async function updateClerkUserProfileName(
+  userId: string,
+  params: {
+    firstName: string | null;
+    lastName: string | null;
+  }
+): Promise<void> {
+  const client = await clerkClient();
+
+  await client.users.updateUser(userId, {
+    firstName: params.firstName as string | null | undefined,
+    lastName: params.lastName as string | null | undefined,
+  } as never);
+}

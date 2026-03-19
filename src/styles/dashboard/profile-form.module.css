@@ -1,0 +1,73 @@
+@reference "../../app/globals.css";
+
+.form {
+  @apply space-y-5;
+}
+
+.field {
+  @apply block;
+}
+
+.label {
+  @apply mb-1 block text-xs font-semibold text-gray-600;
+}
+
+.hint {
+  @apply mt-1 text-gray-400;
+}
+
+.input {
+  @apply w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-teal-deep focus:outline-none focus:ring-2 focus:ring-teal-deep/30;
+}
+
+.readOnlyInput {
+  @apply w-full cursor-not-allowed rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-400;
+}
+
+.twoColumnGrid {
+  @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+}
+
+.consentCard {
+  @apply rounded-xl border border-coral-vibe/25 bg-linear-to-r from-coral-light via-coral-soft/75 to-lavender/40 px-4 py-3 shadow-sm;
+}
+
+.consentTag {
+  @apply mb-2 inline-flex rounded-full bg-white/75 px-2 py-0.5 text-caption font-bold uppercase tracking-[0.16em] text-coral-vibe;
+}
+
+.consentRow {
+  @apply flex items-start gap-3;
+}
+
+.consentCheckbox {
+  @apply mt-0.5 h-4 w-4 rounded border-coral-vibe/40 text-coral-vibe focus:ring-coral-vibe/30;
+}
+
+.consentTitle {
+  @apply block text-sm font-bold text-gray-900;
+}
+
+.consentDescription {
+  @apply block text-[11px] font-semibold text-gray-700;
+}
+
+.statusError {
+  @apply rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600;
+}
+
+.statusSuccess {
+  @apply rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700;
+}
+
+.actions {
+  @apply flex justify-end pt-1;
+}
+
+.saveButton {
+  @apply !min-w-0 !rounded-lg !bg-coral-vibe;
+}
+
+.saveButton:hover {
+  @apply !bg-coral-red;
+}

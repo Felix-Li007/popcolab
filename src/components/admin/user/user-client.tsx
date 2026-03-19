@@ -44,10 +44,12 @@ function mergeEditableUserUpdate(
     lastName: payload.lastName,
     phoneNumber: payload.phoneNumber,
     preferredContact: payload.preferredContact,
-    corporateName: payload.corporateName,
+    companyName: payload.companyName,
     departmentName: payload.departmentName,
     roleTitle: payload.roleTitle,
     workMode: payload.workMode,
+    companySize: payload.companySize,
+    companyWebsite: payload.companyWebsite,
     updatedAt: new Date().toISOString(),
   };
 

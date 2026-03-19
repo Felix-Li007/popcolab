@@ -8,6 +8,7 @@ import {
   type SaveCompanyFormState,
 } from '@/actions/user-actions';
 import styles from '@/styles/admin/users/company-info.module.css';
+import dashboardFormStyles from '@/styles/dashboard/profile-form.module.css';
 import type { CompanyInfo } from '@/types/company-type';
 import { Button } from '@/ui';
 
@@ -21,8 +22,10 @@ const INITIAL_SAVE_STATE: SaveCompanyFormState = {
 
 export default function CompanyProfile({
   initialCompany,
+  embedded = false,
 }: {
   initialCompany?: CompanyInfo | null;
+  embedded?: boolean;
 }) {
   const router = useRouter();
   const initialState: SaveCompanyFormState = {
@@ -44,34 +47,52 @@ export default function CompanyProfile({
     initialState
   );
   const resolvedValues = saveState.values ?? initialCompany ?? null;
+  const actionButton = (
+    <Button
+      type="submit"
+      disabled={isPending}
+      size="sm"
+      className={dashboardFormStyles.saveButton}
+    >
+      {isPending ? 'Saving...' : 'Save'}
+    </Button>
+  );
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Company details</h2>
+      {!embedded ? <h2 className={styles.title}>Company details</h2> : null}
 
-      <div className={styles.panel}>
-        <form
-          key={saveState.version}
-          className={styles.form}
-          action={formAction}
-        >
-          <div className={styles.rows}>
-            <div className={styles.row}>
-              <label htmlFor="company-corporate-name" className={styles.label}>
-                Corporate Name
+      <div className={embedded ? '' : styles.panel}>
+        {embedded ? (
+          <form
+            // Force uncontrolled inputs to re-read the latest saved values after
+            // a successful server action returns updated company data.
+            key={saveState.version}
+            className={dashboardFormStyles.form}
+            action={formAction}
+          >
+            <div className={dashboardFormStyles.field}>
+              <label
+                htmlFor="company-name"
+                className={dashboardFormStyles.label}
+              >
+                Company Name
               </label>
               <input
-                id="company-corporate-name"
-                name="corporateName"
+                id="company-name"
+                name="companyName"
                 type="text"
-                defaultValue={resolvedValues?.corporateName ?? ''}
+                defaultValue={resolvedValues?.companyName ?? ''}
                 placeholder="Enter company name"
-                className={styles.input}
+                className={dashboardFormStyles.input}
               />
             </div>
 
-            <div className={styles.row}>
-              <label htmlFor="company-department-name" className={styles.label}>
+            <div className={dashboardFormStyles.field}>
+              <label
+                htmlFor="company-department-name"
+                className={dashboardFormStyles.label}
+              >
                 Department Name
               </label>
               <input
@@ -80,12 +101,15 @@ export default function CompanyProfile({
                 type="text"
                 defaultValue={resolvedValues?.departmentName ?? ''}
                 placeholder="Enter department"
-                className={styles.input}
+                className={dashboardFormStyles.input}
               />
             </div>
 
-            <div className={styles.row}>
-              <label htmlFor="company-role-title" className={styles.label}>
+            <div className={dashboardFormStyles.field}>
+              <label
+                htmlFor="company-role-title"
+                className={dashboardFormStyles.label}
+              >
                 Role Title
               </label>
               <input
@@ -94,19 +118,41 @@ export default function CompanyProfile({
                 type="text"
                 defaultValue={resolvedValues?.roleTitle ?? ''}
                 placeholder="Enter role title"
-                className={styles.input}
+                className={dashboardFormStyles.input}
               />
             </div>
 
-            <div className={styles.row}>
-              <label htmlFor="company-work-mode" className={styles.label}>
+            <div className={dashboardFormStyles.field}>
+              <label
+                htmlFor="company-size"
+                className={dashboardFormStyles.label}
+              >
+                Company Size
+              </label>
+              <input
+                id="company-size"
+                name="companySize"
+                type="number"
+                min="1"
+                step="1"
+                defaultValue={resolvedValues?.companySize ?? ''}
+                placeholder="Enter company size"
+                className={dashboardFormStyles.input}
+              />
+            </div>
+
+            <div className={dashboardFormStyles.field}>
+              <label
+                htmlFor="company-work-mode"
+                className={dashboardFormStyles.label}
+              >
                 Work Mode
               </label>
               <select
                 id="company-work-mode"
                 name="workMode"
                 defaultValue={resolvedValues?.workMode ?? ''}
-                className={styles.input}
+                className={dashboardFormStyles.input}
               >
                 <option value="">Select work mode</option>
                 {WORK_MODE_OPTIONS.map(option => (
@@ -116,22 +162,149 @@ export default function CompanyProfile({
                 ))}
               </select>
             </div>
-          </div>
-          <div className={styles.footer}>
-            <p className={styles.statusText}>{saveState.message}</p>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className={styles.saveButton}
-              size="sm"
-            >
-              {isPending ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-          {saveState.error ? (
-            <p className={styles.errorText}>{saveState.error}</p>
-          ) : null}
-        </form>
+
+            <div className={dashboardFormStyles.field}>
+              <label
+                htmlFor="company-website"
+                className={dashboardFormStyles.label}
+              >
+                Company Website
+              </label>
+              <input
+                id="company-website"
+                name="companyWebsite"
+                type="url"
+                defaultValue={resolvedValues?.companyWebsite ?? ''}
+                placeholder="https://example.com"
+                className={dashboardFormStyles.input}
+              />
+            </div>
+
+            {saveState.message ? (
+              <p className={dashboardFormStyles.statusSuccess}>
+                {saveState.message}
+              </p>
+            ) : null}
+            {saveState.error ? (
+              <p className={dashboardFormStyles.statusError}>
+                {saveState.error}
+              </p>
+            ) : null}
+
+            <div className={dashboardFormStyles.actions}>{actionButton}</div>
+          </form>
+        ) : (
+          <form
+            // Keep the standalone admin form in sync with the latest saved state
+            // without converting every field into a controlled input.
+            key={saveState.version}
+            className={styles.form}
+            action={formAction}
+          >
+            <div className={styles.rows}>
+              <div className={styles.row}>
+                <label htmlFor="company-name" className={styles.label}>
+                  Company Name
+                </label>
+                <input
+                  id="company-name"
+                  name="companyName"
+                  type="text"
+                  defaultValue={resolvedValues?.companyName ?? ''}
+                  placeholder="Enter company name"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.row}>
+                <label
+                  htmlFor="company-department-name"
+                  className={styles.label}
+                >
+                  Department Name
+                </label>
+                <input
+                  id="company-department-name"
+                  name="departmentName"
+                  type="text"
+                  defaultValue={resolvedValues?.departmentName ?? ''}
+                  placeholder="Enter department"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.row}>
+                <label htmlFor="company-role-title" className={styles.label}>
+                  Role Title
+                </label>
+                <input
+                  id="company-role-title"
+                  name="roleTitle"
+                  type="text"
+                  defaultValue={resolvedValues?.roleTitle ?? ''}
+                  placeholder="Enter role title"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.row}>
+                <label htmlFor="company-size" className={styles.label}>
+                  Company Size
+                </label>
+                <input
+                  id="company-size"
+                  name="companySize"
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue={resolvedValues?.companySize ?? ''}
+                  placeholder="Enter company size"
+                  className={styles.input}
+                />
+              </div>
+
+              <div className={styles.row}>
+                <label htmlFor="company-work-mode" className={styles.label}>
+                  Work Mode
+                </label>
+                <select
+                  id="company-work-mode"
+                  name="workMode"
+                  defaultValue={resolvedValues?.workMode ?? ''}
+                  className={styles.input}
+                >
+                  <option value="">Select work mode</option>
+                  {WORK_MODE_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.row}>
+                <label htmlFor="company-website" className={styles.label}>
+                  Company Website
+                </label>
+                <input
+                  id="company-website"
+                  name="companyWebsite"
+                  type="url"
+                  defaultValue={resolvedValues?.companyWebsite ?? ''}
+                  placeholder="https://example.com"
+                  className={styles.input}
+                />
+              </div>
+            </div>
+            <div className={styles.footer}>
+              <p className={styles.statusText}>{saveState.message}</p>
+              {actionButton}
+            </div>
+            {saveState.error ? (
+              <p className={styles.errorText}>{saveState.error}</p>
+            ) : null}
+          </form>
+        )}
       </div>
     </div>
   );

@@ -30,12 +30,15 @@ type UserListRow = {
   last_name: string | null;
   phone_number: string | null;
   preferred_contact: string | null;
+  short_bio: string | null;
   consent_given: number | null;
   privacy_notes: string | null;
-  corporate_name: string | null;
+  company_name: string | null;
   department_name: string | null;
   role_title: string | null;
   work_mode: string | null;
+  company_size: number | string | bigint | null;
+  company_website: string | null;
   team_count: number | string | bigint | null;
   team_names: string | null;
   request_count: number | string | bigint | null;
@@ -59,6 +62,7 @@ const PHONE_MAX_LENGTH = 20;
 const COMPANY_NAME_MAX_LENGTH = 255;
 const DEPARTMENT_MAX_LENGTH = 100;
 const ROLE_TITLE_MAX_LENGTH = 50;
+const COMPANY_WEBSITE_MAX_LENGTH = 255;
 const AVATAR_IMAGE_MAX_LENGTH = 255;
 const USER_PREFERRED_CONTACT_SET = new Set(['email', 'phone']);
 
@@ -95,13 +99,16 @@ function mapUserRow(row: UserListRow): AdminUserListItem {
     lastName: row.last_name,
     phoneNumber: row.phone_number,
     preferredContact: row.preferred_contact,
+    shortBio: row.short_bio,
     consentGiven:
       row.consent_given === null ? null : Number(row.consent_given) > 0,
     privacyNotes: row.privacy_notes,
-    corporateName: row.corporate_name,
+    companyName: row.company_name,
     departmentName: row.department_name,
     roleTitle: row.role_title,
     workMode: normalizeWorkMode(row.work_mode),
+    companySize: row.company_size === null ? null : toNumber(row.company_size),
+    companyWebsite: row.company_website,
     teamCount: toNumber(row.team_count),
     teamNames: row.team_names
       ? row.team_names
@@ -144,10 +151,12 @@ export function normalizeUserEditableUpdateInput(
     preferredContact: normalizedPreferredContact
       ? normalizedPreferredContact.toLowerCase()
       : null,
-    corporateName: toNullableTrimmed(input.corporateName),
+    companyName: toNullableTrimmed(input.companyName),
     departmentName: toNullableTrimmed(input.departmentName),
     roleTitle: toNullableTrimmed(input.roleTitle),
     workMode: normalizeWorkMode(input.workMode),
+    companySize: input.companySize,
+    companyWebsite: toNullableTrimmed(input.companyWebsite),
   };
 }
 
@@ -187,8 +196,8 @@ export function validateUserEditableUpdateInput(
   ) {
     errors.preferredContact = 'Preferred contact must be email or phone.';
   }
-  errors.corporateName = validateMaxLength(
-    input.corporateName,
+  errors.companyName = validateMaxLength(
+    input.companyName,
     COMPANY_NAME_MAX_LENGTH,
     `Company must be ${COMPANY_NAME_MAX_LENGTH} characters or fewer.`
   );
@@ -201,6 +210,16 @@ export function validateUserEditableUpdateInput(
     input.roleTitle,
     ROLE_TITLE_MAX_LENGTH,
     `Role must be ${ROLE_TITLE_MAX_LENGTH} characters or fewer.`
+  );
+  if (input.companySize !== null) {
+    if (!Number.isInteger(input.companySize) || input.companySize <= 0) {
+      errors.companySize = 'Company size must be a positive integer.';
+    }
+  }
+  errors.companyWebsite = validateMaxLength(
+    input.companyWebsite,
+    COMPANY_WEBSITE_MAX_LENGTH,
+    `Company website must be ${COMPANY_WEBSITE_MAX_LENGTH} characters or fewer.`
   );
   if (input.workMode !== null && !normalizeWorkMode(input.workMode)) {
     errors.workMode = 'Work mode must be remote, hybrid, or onsite.';
@@ -271,10 +290,11 @@ function buildUserWhereSql(
       OR LOWER(COALESCE(u.user_name, '')) LIKE ${like}
       OR LOWER(COALESCE(p.first_name, '')) LIKE ${like}
       OR LOWER(COALESCE(p.last_name, '')) LIKE ${like}
-      OR LOWER(COALESCE(c.corporate_name, '')) LIKE ${like}
+      OR LOWER(COALESCE(c.company_name, '')) LIKE ${like}
       OR LOWER(COALESCE(c.department_name, '')) LIKE ${like}
       OR LOWER(COALESCE(c.role_title, '')) LIKE ${like}
       OR LOWER(COALESCE(c.work_mode, '')) LIKE ${like}
+      OR LOWER(COALESCE(c.company_website, '')) LIKE ${like}
       OR EXISTS (
         SELECT 1
         FROM "team" team
@@ -321,12 +341,15 @@ async function getUserRows(
       p.last_name,
       p.phone_number,
       p.preferred_contact,
+      p.short_bio,
       p.consent_given,
       p.privacy_notes,
-      c.corporate_name,
+      c.company_name,
       c.department_name,
       c.role_title,
       c.work_mode,
+      c.company_size,
+      c.company_website,
       COALESCE(tm.team_count, 0)::int AS team_count,
       COALESCE(tm.team_names, '') AS team_names,
       COALESCE(rq.request_count, 0)::int AS request_count
@@ -585,29 +608,35 @@ export async function updateUserEditableFields(
     select: { id: true },
   });
   const hasCompanyPayload =
-    normalized.corporateName !== null ||
+    normalized.companyName !== null ||
     normalized.departmentName !== null ||
     normalized.roleTitle !== null ||
-    normalized.workMode !== null;
+    normalized.workMode !== null ||
+    normalized.companySize !== null ||
+    normalized.companyWebsite !== null;
   if (existingCompany || hasCompanyPayload) {
     if (existingCompany) {
       await prisma.company.update({
         where: { user_id: userId },
         data: {
-          corporate_name: normalized.corporateName,
+          company_name: normalized.companyName,
           department_name: normalized.departmentName,
           role_title: normalized.roleTitle,
           work_mode: normalized.workMode,
+          company_size: normalized.companySize,
+          company_website: normalized.companyWebsite,
         },
       });
     } else {
       await prisma.company.create({
         data: {
           user_id: userId,
-          corporate_name: normalized.corporateName,
+          company_name: normalized.companyName,
           department_name: normalized.departmentName,
           role_title: normalized.roleTitle,
           work_mode: normalized.workMode,
+          company_size: normalized.companySize,
+          company_website: normalized.companyWebsite,
         },
       });
     }

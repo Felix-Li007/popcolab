@@ -16,12 +16,15 @@ export type AdminUserListItem = {
   lastName: string | null;
   phoneNumber: string | null;
   preferredContact: string | null;
+  shortBio: string | null;
   consentGiven: boolean | null;
   privacyNotes: string | null;
-  corporateName: string | null;
+  companyName: string | null;
   departmentName: string | null;
   roleTitle: string | null;
   workMode: WorkMode | null;
+  companySize: number | null;
+  companyWebsite: string | null;
   teamCount: number;
   teamNames: string[];
   requestCount: number;
@@ -36,10 +39,12 @@ export type AdminUserEditableUpdateInput = {
   lastName: string | null;
   phoneNumber: string | null;
   preferredContact: string | null;
-  corporateName: string | null;
+  companyName: string | null;
   departmentName: string | null;
   roleTitle: string | null;
   workMode: WorkMode | null;
+  companySize: number | null;
+  companyWebsite: string | null;
 };
 
 export type AdminUserEditableUpdateErrors = Partial<

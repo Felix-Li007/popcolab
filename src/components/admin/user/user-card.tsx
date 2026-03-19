@@ -95,10 +95,10 @@ export default function UserCard({ user, onViewDetails, onEdit }: Props) {
   const status = getStatusBadge(user.status);
   const avatarText = user.userName.slice(0, 1).toUpperCase() || '?';
   const showAvatarImage = hasText(user.avatarImage);
-  const hasCompanyInfo = hasText(user.corporateName) || hasText(user.roleTitle);
+  const hasCompanyInfo = hasText(user.companyName) || hasText(user.roleTitle);
   const companyFields = [
     { label: 'Role', value: user.roleTitle },
-    { label: 'Company', value: user.corporateName },
+    { label: 'Company Name', value: user.companyName },
   ];
 
   return (

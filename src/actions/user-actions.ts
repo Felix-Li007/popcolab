@@ -29,10 +29,12 @@ export type SignedInUserSummary = {
 export type SignedInCompany = CompanyInfo;
 
 export type SignedInCompanyUpdateInput = {
-  corporateName: string;
+  companyName: string;
   departmentName: string;
   roleTitle: string;
   workMode: WorkMode | '';
+  companySize: string;
+  companyWebsite: string;
 };
 
 export type SaveCompanyFormState = {
@@ -46,6 +48,7 @@ export type SaveCompanyFormState = {
 const COMPANY_NAME_MAX_LENGTH = 255;
 const DEPARTMENT_MAX_LENGTH = 100;
 const ROLE_TITLE_MAX_LENGTH = 50;
+const COMPANY_WEBSITE_MAX_LENGTH = 255;
 function revalidateAdminPaths() {
   ADMIN_PATHS.forEach(path => revalidatePath(path));
 }
@@ -108,10 +111,16 @@ export async function getCompanyAction(): Promise<SignedInCompany | null> {
       },
     },
     select: {
-      corporate_name: true,
+      id: true,
+      user_id: true,
+      company_name: true,
       department_name: true,
       role_title: true,
       work_mode: true,
+      company_size: true,
+      company_website: true,
+      created_at: true,
+      updated_at: true,
     },
   });
 
@@ -120,10 +129,16 @@ export async function getCompanyAction(): Promise<SignedInCompany | null> {
   }
 
   return {
-    corporateName: company.corporate_name,
+    id: company.id,
+    userId: company.user_id,
+    companyName: company.company_name,
     departmentName: company.department_name,
     roleTitle: company.role_title,
     workMode: normalizeWorkMode(company.work_mode),
+    companySize: company.company_size,
+    companyWebsite: company.company_website,
+    createdAt: company.created_at,
+    updatedAt: company.updated_at,
   };
 }
 
@@ -148,15 +163,19 @@ export async function updateCompanyAction(
   }
   const clerkId = authContext.user.id;
 
-  const corporateName = toNullableTrimmed(input.corporateName);
+  const companyName = toNullableTrimmed(input.companyName);
   const departmentName = toNullableTrimmed(input.departmentName);
   const roleTitle = toNullableTrimmed(input.roleTitle);
   const workMode = normalizeWorkMode(input.workMode);
+  const companyWebsite = toNullableTrimmed(input.companyWebsite);
+  const rawCompanySize = input.companySize.trim();
+  const companySize =
+    rawCompanySize.length === 0 ? null : Number.parseInt(rawCompanySize, 10);
 
-  if (corporateName && corporateName.length > COMPANY_NAME_MAX_LENGTH) {
+  if (companyName && companyName.length > COMPANY_NAME_MAX_LENGTH) {
     return {
       success: false,
-      error: `Corporate name must be ${COMPANY_NAME_MAX_LENGTH} characters or fewer.`,
+      error: `Company name must be ${COMPANY_NAME_MAX_LENGTH} characters or fewer.`,
     };
   }
 
@@ -181,8 +200,27 @@ export async function updateCompanyAction(
     };
   }
 
+  if (
+    rawCompanySize.length > 0 &&
+    (companySize === null || !Number.isInteger(companySize) || companySize <= 0)
+  ) {
+    return {
+      success: false,
+      error: 'Company size must be a positive integer.',
+    };
+  }
+
+  if (companyWebsite && companyWebsite.length > COMPANY_WEBSITE_MAX_LENGTH) {
+    return {
+      success: false,
+      error: `Company website must be ${COMPANY_WEBSITE_MAX_LENGTH} characters or fewer.`,
+    };
+  }
+
   try {
     const userName = deriveUserNameFromEmail(email);
+    // Dashboard users may exist in Clerk before we have a local user row, so
+    // ensure the relational owner record exists before saving company details.
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ clerk_id: clerkId }, { email }],
@@ -209,30 +247,52 @@ export async function updateCompanyAction(
           select: { id: true },
         });
 
-    await prisma.company.upsert({
+    const company = await prisma.company.upsert({
       where: { user_id: user.id },
       update: {
-        corporate_name: corporateName,
+        company_name: companyName,
         department_name: departmentName,
         role_title: roleTitle,
         work_mode: workMode,
+        company_size: companySize,
+        company_website: companyWebsite,
       },
       create: {
         user_id: user.id,
-        corporate_name: corporateName,
+        company_name: companyName,
         department_name: departmentName,
         role_title: roleTitle,
         work_mode: workMode,
+        company_size: companySize,
+        company_website: companyWebsite,
+      },
+      select: {
+        id: true,
+        user_id: true,
+        company_name: true,
+        department_name: true,
+        role_title: true,
+        work_mode: true,
+        company_size: true,
+        company_website: true,
+        created_at: true,
+        updated_at: true,
       },
     });
 
     return {
       success: true,
       data: {
-        corporateName,
-        departmentName,
-        roleTitle,
-        workMode,
+        id: company.id,
+        userId: company.user_id,
+        companyName: company.company_name,
+        departmentName: company.department_name,
+        roleTitle: company.role_title,
+        workMode: normalizeWorkMode(company.work_mode),
+        companySize: company.company_size,
+        companyWebsite: company.company_website,
+        createdAt: company.created_at,
+        updatedAt: company.updated_at,
       },
     };
   } catch {
@@ -247,19 +307,23 @@ export async function saveCompanyAction(
   prevState: SaveCompanyFormState,
   formData: FormData
 ): Promise<SaveCompanyFormState> {
-  const corporateName = String(formData.get('corporateName') ?? '');
+  const companyName = String(formData.get('companyName') ?? '');
   const departmentName = String(formData.get('departmentName') ?? '');
   const roleTitle = String(formData.get('roleTitle') ?? '');
   const rawWorkMode = String(formData.get('workMode') ?? '')
     .trim()
     .toLowerCase();
   const workMode: WorkMode | '' = isWorkMode(rawWorkMode) ? rawWorkMode : '';
+  const companySize = String(formData.get('companySize') ?? '');
+  const companyWebsite = String(formData.get('companyWebsite') ?? '');
 
   const result = await updateCompanyAction({
-    corporateName,
+    companyName,
     departmentName,
     roleTitle,
     workMode,
+    companySize,
+    companyWebsite,
   });
 
   if (!result.success) {
