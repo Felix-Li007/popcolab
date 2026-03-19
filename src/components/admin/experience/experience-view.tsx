@@ -7,6 +7,10 @@ import type {
   Experience,
   ExperienceDimensionValue,
 } from '@/types/experience-type';
+import {
+  formatCadAmount,
+  getExperiencePricingSummary,
+} from '@/utils/experience';
 import styles from '@/styles/admin/experiences/experience-view.module.css';
 
 type Props = {
@@ -66,6 +70,12 @@ const SINGLE_SELECT_TEXT_KEYS = new Set([
   'take_item',
   'travel_flying',
 ]);
+const TOP_SECTION_TABS = [
+  { value: 'basic', label: 'Basic Info' },
+  { value: 'pricing', label: 'Pricing' },
+] as const;
+
+type TopSectionTab = (typeof TOP_SECTION_TABS)[number]['value'];
 
 function getDimensionOptions(value: ExperienceDimensionValue) {
   if (value.options.length > 0) {
@@ -107,8 +117,12 @@ export default function ExperienceView({
   onEdit,
 }: Props) {
   const [selectedCategoryName, setSelectedCategoryName] = useState('');
+  const [activeTopTab, setActiveTopTab] = useState<TopSectionTab>('basic');
   const categoryTabsRef = useRef<HTMLDivElement | null>(null);
   const statusBadge = getStatusBadge(experience?.experienceStatus ?? 'draft');
+  const pricingSummary = experience
+    ? getExperiencePricingSummary(experience)
+    : 'Pricing not configured';
   const [categoryTabScrollState, setCategoryTabScrollState] = useState({
     hasOverflow: false,
     canScrollLeft: false,
@@ -216,91 +230,170 @@ export default function ExperienceView({
       <div className={styles.shell}>
         <div className={styles.body}>
           <section className={styles.topSection}>
-            <div className={styles.topGrid}>
-              <div className="xl:col-span-4">
-                <p className={styles.fieldLabel}>Experience Title</p>
-                <div className={styles.fieldValue}>
-                  {experience.experienceTitle}
+            <div className={styles.topTabsHeader}>
+              <div className={styles.topTabsRow}>
+                {TOP_SECTION_TABS.map(tab => {
+                  const isActive = tab.value === activeTopTab;
+                  return (
+                    <button
+                      key={tab.value}
+                      type="button"
+                      onClick={() => setActiveTopTab(tab.value)}
+                      className={joinClasses(
+                        styles.topTabButton,
+                        isActive && styles.topTabButtonActive
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={styles.topPanelBody}>
+              {activeTopTab === 'basic' ? (
+                <div className={styles.topGrid}>
+                  <div className="xl:col-span-4">
+                    <p className={styles.fieldLabel}>Experience Title</p>
+                    <div className={styles.fieldValue}>
+                      {experience.experienceTitle}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-3">
+                    <p className={styles.fieldLabel}>Lead Type</p>
+                    <div className={styles.fieldValue}>
+                      {experience.leadType}
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5">
+                    <p className={styles.fieldLabel}>Provider</p>
+                    <div className={styles.fieldValue}>
+                      {experience.providerLabel}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-6">
+                    <p className={styles.fieldLabel}>Category</p>
+                    <div className={styles.fieldValue}>
+                      {experience.categoryTitle}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-2">
+                    <p className={styles.fieldLabel}>Duration Min</p>
+                    <div className={styles.fieldValue}>
+                      {experience.durationMin}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-2">
+                    <p className={styles.fieldLabel}>Duration Max</p>
+                    <div className={styles.fieldValue}>
+                      {experience.durationMax}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-2">
+                    <p className={styles.fieldLabel}>Capacity</p>
+                    <div className={styles.fieldValue}>
+                      {experience.capacityMax}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-4">
+                    <p className={styles.fieldLabel}>Delivery Methods</p>
+                    <div className={styles.fieldValue}>
+                      {experience.deliveryMethods}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-2">
+                    <p className={styles.fieldLabel}>Status</p>
+                    <div className={styles.fieldValue}>{statusBadge.label}</div>
+                  </div>
+
+                  <div className="xl:col-span-3">
+                    <p className={styles.fieldLabel}>Take Item</p>
+                    <div className={styles.fieldValue}>
+                      {flagLabel(experience.takeItem)}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-3">
+                    <p className={styles.fieldLabel}>Travel Flying</p>
+                    <div className={styles.fieldValue}>
+                      {flagLabel(experience.travelFlying)}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-12">
+                    <p className={styles.fieldLabel}>Dietary Considerations</p>
+                    <div
+                      className={joinClasses(
+                        styles.fieldValue,
+                        styles.fieldValueTall
+                      )}
+                    >
+                      {experience.dietaryConsiderations?.trim() || 'None'}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className={styles.topGrid}>
+                  <div className="xl:col-span-3">
+                    <p className={styles.fieldLabel}>Starting Price</p>
+                    <div className={styles.fieldValue}>
+                      {formatCadAmount(experience.pricing.startingPrice)}
+                    </div>
+                  </div>
 
-              <div className="xl:col-span-3">
-                <p className={styles.fieldLabel}>Lead Type</p>
-                <div className={styles.fieldValue}>{experience.leadType}</div>
-              </div>
+                  <div className="xl:col-span-3">
+                    <p className={styles.fieldLabel}>Adding Price</p>
+                    <div className={styles.fieldValue}>
+                      {formatCadAmount(experience.pricing.addingPrice)}
+                    </div>
+                  </div>
 
-              <div className="lg:col-span-5">
-                <p className={styles.fieldLabel}>Provider</p>
-                <div className={styles.fieldValue}>
-                  {experience.providerLabel}
+                  <div className="xl:col-span-3">
+                    <p className={styles.fieldLabel}>Starting Hour</p>
+                    <div className={styles.fieldValue}>
+                      {experience.pricing.startingHour ?? 'Not set'}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-4">
+                    <p className={styles.fieldLabel}>Pricing Model</p>
+                    <div
+                      className={joinClasses(
+                        styles.fieldValue,
+                        styles.fieldValueTall
+                      )}
+                    >
+                      {experience.pricing.pricingModel?.trim() || 'Not set'}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-8">
+                    <p className={styles.fieldLabel}>Pricing Notes</p>
+                    <div
+                      className={joinClasses(
+                        styles.fieldValue,
+                        styles.fieldValueTall
+                      )}
+                    >
+                      {experience.pricing.pricingNotes?.trim() || 'None'}
+                    </div>
+                  </div>
+
+                  <div className="xl:col-span-12">
+                    <p className={styles.fieldLabel}>Pricing Summary</p>
+                    <div className={styles.fieldValue}>{pricingSummary}</div>
+                  </div>
                 </div>
-              </div>
-
-              <div className="xl:col-span-6">
-                <p className={styles.fieldLabel}>Category</p>
-                <div className={styles.fieldValue}>
-                  {experience.categoryTitle}
-                </div>
-              </div>
-
-              <div className="xl:col-span-2">
-                <p className={styles.fieldLabel}>Duration Min</p>
-                <div className={styles.fieldValue}>
-                  {experience.durationMin}
-                </div>
-              </div>
-
-              <div className="xl:col-span-2">
-                <p className={styles.fieldLabel}>Duration Max</p>
-                <div className={styles.fieldValue}>
-                  {experience.durationMax}
-                </div>
-              </div>
-
-              <div className="xl:col-span-2">
-                <p className={styles.fieldLabel}>Capacity</p>
-                <div className={styles.fieldValue}>
-                  {experience.capacityMax}
-                </div>
-              </div>
-
-              <div className="xl:col-span-4">
-                <p className={styles.fieldLabel}>Delivery Methods</p>
-                <div className={styles.fieldValue}>
-                  {experience.deliveryMethods}
-                </div>
-              </div>
-
-              <div className="xl:col-span-2">
-                <p className={styles.fieldLabel}>Status</p>
-                <div className={styles.fieldValue}>{statusBadge.label}</div>
-              </div>
-
-              <div className="xl:col-span-3">
-                <p className={styles.fieldLabel}>Take Item</p>
-                <div className={styles.fieldValue}>
-                  {flagLabel(experience.takeItem)}
-                </div>
-              </div>
-
-              <div className="xl:col-span-3">
-                <p className={styles.fieldLabel}>Travel Flying</p>
-                <div className={styles.fieldValue}>
-                  {flagLabel(experience.travelFlying)}
-                </div>
-              </div>
-
-              <div className="xl:col-span-12">
-                <p className={styles.fieldLabel}>Dietary Considerations</p>
-                <div
-                  className={joinClasses(
-                    styles.fieldValue,
-                    styles.fieldValueTall
-                  )}
-                >
-                  {experience.dietaryConsiderations?.trim() || 'None'}
-                </div>
-              </div>
+              )}
             </div>
           </section>
 

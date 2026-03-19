@@ -60,6 +60,11 @@ function parseExperienceForm(formData: FormData) {
     durationMin: parseIntegerField(formData.get('durationMin')) ?? -1,
     durationMax: parseIntegerField(formData.get('durationMax')) ?? -1,
     capacityMax: parseIntegerField(formData.get('capacityMax')) ?? -1,
+    startingPrice: parseIntegerField(formData.get('startingPrice')) ?? -1,
+    addingPrice: parseIntegerField(formData.get('addingPrice')) ?? -1,
+    startingHour: parseIntegerField(formData.get('startingHour')),
+    pricingModel: formData.get('pricingModel')?.toString().trim() || null,
+    pricingNotes: formData.get('pricingNotes')?.toString().trim() || null,
     leadType: formData.get('leadType')?.toString().trim() ?? '',
     deliveryMethods: formData.get('deliveryMethods')?.toString().trim() ?? '',
     dietaryConsiderations:

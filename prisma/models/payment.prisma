@@ -1,0 +1,19 @@
+model Payment {
+  id             Int      @id @default(autoincrement())
+  order_amount   Decimal? @db.Decimal(19, 0)
+  gst_rate       Int?
+  pst_rate       Int?
+  hst_rate       Int?
+  grand_total    Decimal? @db.Decimal(19, 0)
+  gst_amount     Decimal? @db.Decimal(19, 0)
+  hst_amount     Decimal? @db.Decimal(19, 0)
+  payment_method String   @db.VarChar(20)
+  customer_id    String   @db.VarChar(255)
+  customer_email String   @db.VarChar(50)
+  payment_status String   @db.VarChar(20)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+  updated_at     DateTime @updatedAt @db.Timestamp(6)
+  orders         Order[]
+
+  @@map("payment")
+}

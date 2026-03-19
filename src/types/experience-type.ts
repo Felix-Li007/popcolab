@@ -14,6 +14,14 @@ export type ExperienceDimensionValue = {
   expectedValue: string | null;
 };
 
+export type ExperiencePricing = {
+  startingPrice: number | null;
+  addingPrice: number | null;
+  startingHour: number | null;
+  pricingModel: string | null;
+  pricingNotes: string | null;
+};
+
 export type Experience = {
   id: number;
   providerId: number;
@@ -29,6 +37,7 @@ export type Experience = {
   capacityMax: number;
   leadType: string;
   deliveryMethods: string;
+  pricing: ExperiencePricing;
   dietaryConsiderations?: string | null;
   takeItem?: number | null;
   travelFlying?: number | null;
@@ -50,6 +59,11 @@ export type ExperienceFormState = {
     durationMin?: string;
     durationMax?: string;
     capacityMax?: string;
+    startingPrice?: string;
+    addingPrice?: string;
+    startingHour?: string;
+    pricingModel?: string;
+    pricingNotes?: string;
     leadType?: string;
     deliveryMethods?: string;
     dietaryConsiderations?: string;

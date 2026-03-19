@@ -26,11 +26,15 @@ This directory contains individual model definitions for documentation and refer
 - **Provider.prisma** - Provider model definition (authentication or service providers)
 - **Category.prisma** - Category model definition (hierarchical categories for experiences)
 - **Experience.prisma** - Experience model definition (experiences/activities offered by providers)
+- **experience-pricing.prisma** - ExperiencePricing model definition (per-experience pricing details and billing model)
 - **ExperienceCalendar.prisma** - ExperienceCalendar model definition (calendar schedule slots for experiences)
 - **ExperienceDimension.prisma** - ExperienceDimension model definition (relationship between experiences and dimensions with expected values)
 - **Request.prisma** - Request model definition (user requests for experiences)
 - **InvitedUser.prisma** - InvitedUser model definition (users invited to join a request)
 - **Proposal.prisma** - Proposal model definition (proposals matching requests with experiences)
+- **order.prisma** - Order model definition (purchase/order records tied to proposals and users)
+- **order-item.prisma** - OrderItem model definition (line items under each order)
+- **payment.prisma** - Payment model definition (payment and tax records tied to orders)
 - **RequestPreference.prisma** - RequestPreference model definition (user preferences for dimensions in a request)
 
 ## Usage

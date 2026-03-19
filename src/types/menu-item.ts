@@ -17,6 +17,8 @@ export type CountKey =
   | 'events'
   | 'users'
   | 'bookings'
+  | 'orders'
+  | 'payments'
   | 'teams'
   | 'requests'
   | 'experiences'
@@ -157,6 +159,11 @@ export const menuSection: MenuGroup[] = [
         countKey: 'bookings',
         children: [
           { label: 'Bookings', href: '/admin/bookings', countKey: 'bookings' },
+          {
+            label: 'Payments',
+            href: '/admin/bookings/payments',
+            countKey: 'payments',
+          },
         ],
       },
       {

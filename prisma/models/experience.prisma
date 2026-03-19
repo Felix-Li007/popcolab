@@ -26,6 +26,8 @@ model Experience {
   provider               Provider              @relation(fields: [provider_id], references: [id])
   experience_calendars   ExperienceCalendar[]
   experience_dimensions  ExperienceDimension[]
+  order_items            OrderItem[]
+  experience_pricing     ExperiencePricing?
   proposals              Proposal[]
 
   @@map("experience")

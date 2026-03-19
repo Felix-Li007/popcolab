@@ -5,9 +5,11 @@ import {
   deleteRequestQueueJob,
   readRequestQueueJobs,
 } from '@/services/queue-service';
+import { expireExperienceOrderIfDue } from '@/services/order-service';
 import { createFittedProposal } from '@/services/proposal-service';
 import { enqueueRequestReady } from '@/services/request-service';
 import {
+  type ExperienceOrderExpirePayload,
   QSTASH_TASK_TYPE,
   type RequestProcessPayload,
   type QStashTaskPayload,
@@ -76,6 +78,8 @@ export async function handleQStashTask(payload: QStashTaskPayload) {
       return handleRequestReady(payload);
     case QSTASH_TASK_TYPE.REQUEST_QUEUE_PROCESS:
       return handleRequestProcess(payload);
+    case QSTASH_TASK_TYPE.EXPERIENCE_ORDER_EXPIRE:
+      return handleExperienceOrderExpiry(payload);
     default:
       return assertNever(payload);
   }
@@ -124,6 +128,20 @@ async function handleRequestProcess(payload: RequestProcessPayload) {
     handled: true,
     type: payload.type,
     processed,
+  };
+}
+
+async function handleExperienceOrderExpiry(
+  payload: ExperienceOrderExpirePayload
+) {
+  const result = await expireExperienceOrderIfDue(payload.orderId);
+
+  return {
+    ok: true,
+    handled: true,
+    type: payload.type,
+    orderId: payload.orderId,
+    result,
   };
 }
 

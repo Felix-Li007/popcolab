@@ -99,3 +99,41 @@ describe('url-helper base URL resolution', () => {
     expect(getFallbackAppBaseUrl()).toBe('https://preview.popcolab.app');
   });
 });
+
+describe('url-helper dashboard checkout paths', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  test('buildDashboardExperienceCheckoutPath returns a stable checkout path without a trailing slash', async () => {
+    const { buildDashboardExperienceCheckoutPath } =
+      await import('@/utils/url-helper');
+
+    expect(buildDashboardExperienceCheckoutPath(42)).toBe(
+      '/dashboard/experiences/42/checkout'
+    );
+  });
+
+  test('buildDashboardExperienceCheckoutResultPath appends result to the checkout path without duplicate slashes', async () => {
+    const { buildDashboardExperienceCheckoutResultPath } =
+      await import('@/utils/url-helper');
+
+    expect(buildDashboardExperienceCheckoutResultPath(42)).toBe(
+      '/dashboard/experiences/42/checkout/result'
+    );
+  });
+
+  test('dashboard checkout path builders preserve numeric parameter formatting for zero-valued ids', async () => {
+    const {
+      buildDashboardExperienceCheckoutPath,
+      buildDashboardExperienceCheckoutResultPath,
+    } = await import('@/utils/url-helper');
+
+    expect(buildDashboardExperienceCheckoutPath(0)).toBe(
+      '/dashboard/experiences/0/checkout'
+    );
+    expect(buildDashboardExperienceCheckoutResultPath(0)).toBe(
+      '/dashboard/experiences/0/checkout/result'
+    );
+  });
+});

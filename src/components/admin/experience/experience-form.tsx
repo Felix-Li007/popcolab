@@ -54,6 +54,12 @@ const DELIVERY_METHOD_OPTIONS = [
   'Virtual',
   'Hybrid',
 ] as const;
+const TOP_SECTION_TABS = [
+  { value: 'basic', label: 'Basic Info' },
+  { value: 'pricing', label: 'Pricing' },
+] as const;
+
+type TopSectionTab = (typeof TOP_SECTION_TABS)[number]['value'];
 
 function joinClasses(...classNames: Array<string | false | null | undefined>) {
   return classNames.filter(Boolean).join(' ');
@@ -127,6 +133,7 @@ function ExperienceFormBody({
 }: Omit<Props, 'isOpen'>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
   const [selectedCategoryName, setSelectedCategoryName] = useState('');
+  const [activeTopTab, setActiveTopTab] = useState<TopSectionTab>('basic');
   const categoryTabsRef = useRef<HTMLDivElement | null>(null);
   const [dimensionSelections, setDimensionSelections] = useState<
     Record<number, string[]>
@@ -202,6 +209,30 @@ function ExperienceFormBody({
     if (state.success) onSuccess();
   }, [onSuccess, state.success]);
 
+  const forcedTopTab: TopSectionTab | null =
+    state.errors.startingPrice ||
+    state.errors.addingPrice ||
+    state.errors.startingHour ||
+    state.errors.pricingModel ||
+    state.errors.pricingNotes
+      ? 'pricing'
+      : state.errors.experienceTitle ||
+          state.errors.experienceStatus ||
+          state.errors.providerId ||
+          state.errors.categoryId ||
+          state.errors.durationMin ||
+          state.errors.durationMax ||
+          state.errors.capacityMax ||
+          state.errors.leadType ||
+          state.errors.deliveryMethods ||
+          state.errors.dietaryConsiderations ||
+          state.errors.takeItem ||
+          state.errors.travelFlying
+        ? 'basic'
+        : null;
+
+  const visibleTopTab = forcedTopTab ?? activeTopTab;
+
   useEffect(() => {
     const node = categoryTabsRef.current;
     if (!node) return;
@@ -271,230 +302,341 @@ function ExperienceFormBody({
         ) : null}
 
         <section className={styles.topSection}>
-          <div className={styles.topGrid}>
-            <div className="xl:col-span-4">
-              <Input
-                name="experienceTitle"
-                label="Experience Title"
-                placeholder="e.g. Pop Quiz Trivia Experiences"
-                defaultValue={initial?.experienceTitle ?? ''}
-                error={state.errors.experienceTitle}
-                inputSize="sm"
-                required
-              />
+          <div className={styles.topTabsHeader}>
+            <div className={styles.topTabsRow}>
+              {TOP_SECTION_TABS.map(tab => {
+                const isActive = tab.value === visibleTopTab;
+                return (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => setActiveTopTab(tab.value)}
+                    className={joinClasses(
+                      styles.topTabButton,
+                      isActive && styles.topTabButtonActive
+                    )}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.topPanelBody}>
+            <div
+              className={joinClasses(
+                styles.topPanelSection,
+                visibleTopTab !== 'basic' && styles.topPanelSectionHidden
+              )}
+              aria-hidden={visibleTopTab !== 'basic'}
+            >
+              <div className={styles.topGrid}>
+                <div className="xl:col-span-4">
+                  <Input
+                    name="experienceTitle"
+                    label="Experience Title"
+                    placeholder="e.g. Pop Quiz Trivia Experiences"
+                    defaultValue={initial?.experienceTitle ?? ''}
+                    error={state.errors.experienceTitle}
+                    inputSize="sm"
+                    required
+                  />
+                </div>
+
+                <div className="xl:col-span-3">
+                  <label className={styles.fieldLabel}>Lead Type</label>
+                  <select
+                    name="leadType"
+                    defaultValue={initial?.leadType ?? ''}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.leadType && styles.selectError
+                    )}
+                    required
+                  >
+                    <option value="" disabled>
+                      Select lead type
+                    </option>
+                    {LEAD_TYPE_OPTIONS.map(option => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  {state.errors.leadType ? (
+                    <p className={styles.fieldError}>{state.errors.leadType}</p>
+                  ) : null}
+                </div>
+
+                <div className="lg:col-span-5">
+                  <label className={styles.fieldLabel}>Provider</label>
+                  <select
+                    name="providerId"
+                    defaultValue={initial?.providerId ?? ''}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.providerId && styles.selectError
+                    )}
+                    required
+                  >
+                    <option value="" disabled>
+                      Select provider
+                    </option>
+                    {providers.map(provider => (
+                      <option key={provider.id} value={provider.id}>
+                        {provider.providerLabel} ({provider.providerType})
+                      </option>
+                    ))}
+                  </select>
+                  {state.errors.providerId ? (
+                    <p className={styles.fieldError}>
+                      {state.errors.providerId}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="xl:col-span-6">
+                  <label className={styles.fieldLabel}>Category</label>
+                  <select
+                    name="categoryId"
+                    defaultValue={initial?.categoryId ?? ''}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.categoryId && styles.selectError
+                    )}
+                    required
+                  >
+                    <option value="" disabled>
+                      Select category
+                    </option>
+                    {categoryOptions.map(category => (
+                      <option key={category.id} value={category.id}>
+                        {category.label}
+                      </option>
+                    ))}
+                  </select>
+                  {state.errors.categoryId ? (
+                    <p className={styles.fieldError}>
+                      {state.errors.categoryId}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="xl:col-span-2">
+                  <Input
+                    name="durationMin"
+                    label="Duration Min"
+                    type="number"
+                    min={0}
+                    defaultValue={initial?.durationMin ?? 0}
+                    error={state.errors.durationMin}
+                    inputSize="sm"
+                    required
+                  />
+                </div>
+
+                <div className="xl:col-span-2">
+                  <Input
+                    name="durationMax"
+                    label="Duration Max"
+                    type="number"
+                    min={0}
+                    defaultValue={initial?.durationMax ?? 0}
+                    error={state.errors.durationMax}
+                    inputSize="sm"
+                    required
+                  />
+                </div>
+
+                <div className="xl:col-span-2">
+                  <Input
+                    name="capacityMax"
+                    label="Capacity"
+                    type="number"
+                    min={0}
+                    defaultValue={initial?.capacityMax ?? 0}
+                    error={state.errors.capacityMax}
+                    inputSize="sm"
+                    required
+                  />
+                </div>
+
+                <div className="xl:col-span-4">
+                  <label className={styles.fieldLabel}>Delivery Methods</label>
+                  <select
+                    name="deliveryMethods"
+                    defaultValue={initial?.deliveryMethods ?? ''}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.deliveryMethods && styles.selectError
+                    )}
+                    required
+                  >
+                    <option value="" disabled>
+                      Select delivery methods
+                    </option>
+                    {DELIVERY_METHOD_OPTIONS.map(option => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                  {state.errors.deliveryMethods ? (
+                    <p className={styles.fieldError}>
+                      {state.errors.deliveryMethods}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="xl:col-span-2">
+                  <label className={styles.fieldLabel}>Status</label>
+                  <select
+                    name="experienceStatus"
+                    defaultValue={initial?.experienceStatus ?? 'active'}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.experienceStatus && styles.selectError
+                    )}
+                    required
+                  >
+                    {EXPERIENCE_STATUS_OPTIONS.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {state.errors.experienceStatus ? (
+                    <p className={styles.fieldError}>
+                      {state.errors.experienceStatus}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="xl:col-span-3">
+                  <label className={styles.fieldLabel}>Take Item</label>
+                  <select
+                    name="takeItem"
+                    defaultValue={initial?.takeItem ?? ''}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.takeItem && styles.selectError
+                    )}
+                  >
+                    <option value="">Not set</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                  {state.errors.takeItem ? (
+                    <p className={styles.fieldError}>{state.errors.takeItem}</p>
+                  ) : null}
+                </div>
+
+                <div className="xl:col-span-3">
+                  <label className={styles.fieldLabel}>Travel Flying</label>
+                  <select
+                    name="travelFlying"
+                    defaultValue={initial?.travelFlying ?? ''}
+                    className={joinClasses(
+                      styles.select,
+                      state.errors.travelFlying && styles.selectError
+                    )}
+                  >
+                    <option value="">Not set</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                  </select>
+                  {state.errors.travelFlying ? (
+                    <p className={styles.fieldError}>
+                      {state.errors.travelFlying}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="xl:col-span-12">
+                  <TextArea
+                    name="dietaryConsiderations"
+                    label="Dietary Considerations"
+                    placeholder="Optional dietary notes"
+                    defaultValue={initial?.dietaryConsiderations ?? ''}
+                    error={state.errors.dietaryConsiderations}
+                    inputSize="sm"
+                    rows={3}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div className="xl:col-span-3">
-              <label className={styles.fieldLabel}>Lead Type</label>
-              <select
-                name="leadType"
-                defaultValue={initial?.leadType ?? ''}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.leadType && styles.selectError
-                )}
-                required
-              >
-                <option value="" disabled>
-                  Select lead type
-                </option>
-                {LEAD_TYPE_OPTIONS.map(option => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              {state.errors.leadType ? (
-                <p className={styles.fieldError}>{state.errors.leadType}</p>
-              ) : null}
-            </div>
+            <div
+              className={joinClasses(
+                styles.topPanelSection,
+                visibleTopTab !== 'pricing' && styles.topPanelSectionHidden
+              )}
+              aria-hidden={visibleTopTab !== 'pricing'}
+            >
+              <div className={styles.topGrid}>
+                <div className="xl:col-span-3">
+                  <Input
+                    name="startingPrice"
+                    label="Starting Price (CAD)"
+                    type="number"
+                    min={1}
+                    defaultValue={initial?.pricing.startingPrice ?? ''}
+                    error={state.errors.startingPrice}
+                    inputSize="sm"
+                    required
+                  />
+                </div>
 
-            <div className="lg:col-span-5">
-              <label className={styles.fieldLabel}>Provider</label>
-              <select
-                name="providerId"
-                defaultValue={initial?.providerId ?? ''}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.providerId && styles.selectError
-                )}
-                required
-              >
-                <option value="" disabled>
-                  Select provider
-                </option>
-                {providers.map(provider => (
-                  <option key={provider.id} value={provider.id}>
-                    {provider.providerLabel} ({provider.providerType})
-                  </option>
-                ))}
-              </select>
-              {state.errors.providerId ? (
-                <p className={styles.fieldError}>{state.errors.providerId}</p>
-              ) : null}
-            </div>
+                <div className="xl:col-span-3">
+                  <Input
+                    name="addingPrice"
+                    label="Adding Price (CAD)"
+                    type="number"
+                    min={0}
+                    defaultValue={initial?.pricing.addingPrice ?? ''}
+                    error={state.errors.addingPrice}
+                    inputSize="sm"
+                    required
+                  />
+                </div>
 
-            <div className="xl:col-span-6">
-              <label className={styles.fieldLabel}>Category</label>
-              <select
-                name="categoryId"
-                defaultValue={initial?.categoryId ?? ''}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.categoryId && styles.selectError
-                )}
-                required
-              >
-                <option value="" disabled>
-                  Select category
-                </option>
-                {categoryOptions.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.label}
-                  </option>
-                ))}
-              </select>
-              {state.errors.categoryId ? (
-                <p className={styles.fieldError}>{state.errors.categoryId}</p>
-              ) : null}
-            </div>
+                <div className="xl:col-span-3">
+                  <Input
+                    name="startingHour"
+                    label="Starting Hour"
+                    type="number"
+                    min={0}
+                    defaultValue={initial?.pricing.startingHour ?? ''}
+                    error={state.errors.startingHour}
+                    inputSize="sm"
+                  />
+                </div>
 
-            <div className="xl:col-span-2">
-              <Input
-                name="durationMin"
-                label="Duration Min"
-                type="number"
-                min={0}
-                defaultValue={initial?.durationMin ?? 0}
-                error={state.errors.durationMin}
-                inputSize="sm"
-                required
-              />
-            </div>
-            <div className="xl:col-span-2">
-              <Input
-                name="durationMax"
-                label="Duration Max"
-                type="number"
-                min={0}
-                defaultValue={initial?.durationMax ?? 0}
-                error={state.errors.durationMax}
-                inputSize="sm"
-                required
-              />
-            </div>
-            <div className="xl:col-span-2">
-              <Input
-                name="capacityMax"
-                label="Capacity"
-                type="number"
-                min={0}
-                defaultValue={initial?.capacityMax ?? 0}
-                error={state.errors.capacityMax}
-                inputSize="sm"
-                required
-              />
-            </div>
+                <div className="xl:col-span-4">
+                  <TextArea
+                    name="pricingModel"
+                    label="Pricing Model"
+                    placeholder="e.g. Base + add-on"
+                    defaultValue={initial?.pricing.pricingModel ?? ''}
+                    error={state.errors.pricingModel}
+                    inputSize="sm"
+                    rows={3}
+                  />
+                </div>
 
-            <div className="xl:col-span-4">
-              <label className={styles.fieldLabel}>Delivery Methods</label>
-              <select
-                name="deliveryMethods"
-                defaultValue={initial?.deliveryMethods ?? ''}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.deliveryMethods && styles.selectError
-                )}
-                required
-              >
-                <option value="" disabled>
-                  Select delivery methods
-                </option>
-                {DELIVERY_METHOD_OPTIONS.map(option => (
-                  <option key={option} value={option}>
-                    {option}
-                  </option>
-                ))}
-              </select>
-              {state.errors.deliveryMethods ? (
-                <p className={styles.fieldError}>
-                  {state.errors.deliveryMethods}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="xl:col-span-2">
-              <label className={styles.fieldLabel}>Status</label>
-              <select
-                name="experienceStatus"
-                defaultValue={initial?.experienceStatus ?? 'active'}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.experienceStatus && styles.selectError
-                )}
-                required
-              >
-                {EXPERIENCE_STATUS_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {state.errors.experienceStatus ? (
-                <p className={styles.fieldError}>
-                  {state.errors.experienceStatus}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="xl:col-span-3">
-              <label className={styles.fieldLabel}>Take Item</label>
-              <select
-                name="takeItem"
-                defaultValue={initial?.takeItem ?? ''}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.takeItem && styles.selectError
-                )}
-              >
-                <option value="">Not set</option>
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
-              {state.errors.takeItem ? (
-                <p className={styles.fieldError}>{state.errors.takeItem}</p>
-              ) : null}
-            </div>
-
-            <div className="xl:col-span-3">
-              <label className={styles.fieldLabel}>Travel Flying</label>
-              <select
-                name="travelFlying"
-                defaultValue={initial?.travelFlying ?? ''}
-                className={joinClasses(
-                  styles.select,
-                  state.errors.travelFlying && styles.selectError
-                )}
-              >
-                <option value="">Not set</option>
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
-              {state.errors.travelFlying ? (
-                <p className={styles.fieldError}>{state.errors.travelFlying}</p>
-              ) : null}
-            </div>
-
-            <div className="xl:col-span-12">
-              <TextArea
-                name="dietaryConsiderations"
-                label="Dietary Considerations"
-                placeholder="Optional dietary notes"
-                defaultValue={initial?.dietaryConsiderations ?? ''}
-                error={state.errors.dietaryConsiderations}
-                inputSize="sm"
-                rows={3}
-              />
+                <div className="xl:col-span-8">
+                  <TextArea
+                    name="pricingNotes"
+                    label="Pricing Notes"
+                    placeholder="Optional notes about pricing structure or inclusions"
+                    defaultValue={initial?.pricing.pricingNotes ?? ''}
+                    error={state.errors.pricingNotes}
+                    inputSize="sm"
+                    rows={3}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>

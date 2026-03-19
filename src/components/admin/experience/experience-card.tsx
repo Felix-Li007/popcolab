@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
 import { Badge, Button } from '@/ui';
 import type { Experience } from '@/types/experience-type';
-import { isNewExperience } from '@/utils/experience';
+import {
+  getExperiencePricingSummary,
+  isNewExperience,
+} from '@/utils/experience';
 
 type Props = {
   experience: Experience;
@@ -53,6 +56,7 @@ export default function ExperienceCard({
 }: Props) {
   const isNew = isNewExperience(experience.createdAt);
   const statusBadge = getStatusBadge(experience.experienceStatus);
+  const pricingSummary = getExperiencePricingSummary(experience);
 
   return (
     <article
@@ -126,6 +130,15 @@ export default function ExperienceCard({
       </div>
 
       <div className="mt-3 flex-1 space-y-2 text-xs text-gray-500">
+        <div className="rounded-lg border border-magenta/15 bg-magenta/5 px-2.5 py-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-magenta/80">
+            Pricing
+          </p>
+          <p className="mt-1 text-xs font-semibold text-slate-700">
+            {pricingSummary}
+          </p>
+        </div>
+
         <div className="grid grid-cols-2 gap-2">
           <div className="rounded-lg bg-gray-50 px-2 py-1.5">
             <p className="text-[10px] text-gray-400">Take Item</p>

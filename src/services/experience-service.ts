@@ -15,6 +15,11 @@ type UpsertExperienceInput = {
   durationMin: number;
   durationMax: number;
   capacityMax: number;
+  startingPrice: number;
+  addingPrice: number;
+  startingHour: number | null;
+  pricingModel: string | null;
+  pricingNotes: string | null;
   leadType: string;
   deliveryMethods: string;
   dietaryConsiderations: string | null;
@@ -24,6 +29,17 @@ type UpsertExperienceInput = {
     dimensionId: number;
     expectedValue: string;
   }>;
+};
+
+export type ExperiencePurchaseQuote = {
+  experience: Experience;
+  currency: 'CAD';
+  requestedHours: number;
+  includedHours: number | null;
+  extraHours: number;
+  baseAmountCad: number;
+  extraAmountCad: number;
+  totalAmountCad: number;
 };
 
 type ExperienceRow = Awaited<
@@ -38,6 +54,13 @@ type ExperienceWithRelations = ExperienceRow & {
   category: {
     category_title: string;
   };
+  experience_pricing: {
+    adding_price: { toString(): string };
+    starting_price: { toString(): string };
+    starting_hour: number | null;
+    pricing_model: string | null;
+    pricing_notes: string | null;
+  } | null;
   experience_dimensions: Array<{
     dimension_id: number;
     expected_value: string | null;
@@ -161,6 +184,17 @@ function mapExperienceRow(
     durationMin: row.duration_min,
     durationMax: row.duration_max,
     capacityMax: row.capacity_max,
+    pricing: {
+      startingPrice: row.experience_pricing
+        ? Number(row.experience_pricing.starting_price.toString())
+        : null,
+      addingPrice: row.experience_pricing
+        ? Number(row.experience_pricing.adding_price.toString())
+        : null,
+      startingHour: row.experience_pricing?.starting_hour ?? null,
+      pricingModel: row.experience_pricing?.pricing_model ?? null,
+      pricingNotes: row.experience_pricing?.pricing_notes ?? null,
+    },
     leadType: row.lead_type,
     deliveryMethods: row.delivery_methods,
     dietaryConsiderations: row.dietary_considerations,
@@ -176,6 +210,66 @@ function mapExperienceRow(
   };
 }
 
+function getDefaultRequestedHours(experience: Experience): number {
+  if (
+    experience.pricing.startingHour !== null &&
+    experience.pricing.startingHour > 0
+  ) {
+    return experience.pricing.startingHour;
+  }
+
+  return Math.max(1, Math.ceil(experience.durationMax / 60));
+}
+
+function isExperiencePurchasable(experience: Experience): boolean {
+  return (
+    experience.experienceStatus === 'active' &&
+    experience.pricing.startingPrice !== null &&
+    experience.pricing.startingPrice > 0 &&
+    experience.pricing.addingPrice !== null &&
+    experience.pricing.addingPrice >= 0
+  );
+}
+
+export function buildExperiencePurchaseQuote(
+  experience: Experience,
+  requestedHours?: number | null
+): ExperiencePurchaseQuote {
+  if (!isExperiencePurchasable(experience)) {
+    throw new Error('This experience is not available for checkout.');
+  }
+
+  const includedHours = experience.pricing.startingHour;
+  const normalizedRequestedHours: number = Number.isInteger(requestedHours)
+    ? Number(requestedHours)
+    : getDefaultRequestedHours(experience);
+  const minHours = includedHours !== null ? includedHours : 1;
+  const safeRequestedHours =
+    normalizedRequestedHours >= minHours ? normalizedRequestedHours : minHours;
+  const extraHours =
+    includedHours === null
+      ? 0
+      : Math.max(0, safeRequestedHours - includedHours);
+  const baseAmountCad = experience.pricing.startingPrice ?? 0;
+  const extraAmountCad = extraHours * (experience.pricing.addingPrice ?? 0);
+  const totalAmountCad = baseAmountCad + extraAmountCad;
+
+  if (totalAmountCad <= 0) {
+    throw new Error('This experience is not available for checkout.');
+  }
+
+  return {
+    experience,
+    currency: 'CAD',
+    requestedHours: safeRequestedHours,
+    includedHours,
+    extraHours,
+    baseAmountCad,
+    extraAmountCad,
+    totalAmountCad,
+  };
+}
+
 export function validateExperienceFields(fields: {
   experienceTitle: string;
   experienceStatus: ExperienceStatus;
@@ -184,6 +278,11 @@ export function validateExperienceFields(fields: {
   durationMin: number;
   durationMax: number;
   capacityMax: number;
+  startingPrice: number;
+  addingPrice: number;
+  startingHour: number | null;
+  pricingModel: string | null;
+  pricingNotes: string | null;
   leadType: string;
   deliveryMethods: string;
   dietaryConsiderations: string | null;
@@ -227,6 +326,28 @@ export function validateExperienceFields(fields: {
 
   if (!Number.isInteger(fields.capacityMax) || fields.capacityMax < 0) {
     errors.capacityMax = 'Capacity must be a non-negative integer';
+  }
+
+  if (!Number.isInteger(fields.startingPrice) || fields.startingPrice <= 0) {
+    errors.startingPrice = 'Starting price must be a positive integer';
+  }
+
+  if (!Number.isInteger(fields.addingPrice) || fields.addingPrice < 0) {
+    errors.addingPrice = 'Adding price must be a non-negative integer';
+  }
+
+  if (fields.startingHour !== null && !Number.isInteger(fields.startingHour)) {
+    errors.startingHour = 'Starting hour must be blank or a whole number';
+  } else if (fields.startingHour !== null && fields.startingHour < 0) {
+    errors.startingHour = 'Starting hour must be a non-negative integer';
+  }
+
+  if ((fields.pricingModel ?? '').length > 255) {
+    errors.pricingModel = 'Pricing model must be 255 characters or less';
+  }
+
+  if ((fields.pricingNotes ?? '').length > 255) {
+    errors.pricingNotes = 'Pricing notes must be 255 characters or less';
   }
 
   if (!fields.leadType) {
@@ -276,22 +397,60 @@ async function getDefaultCreatedById(): Promise<number> {
   return user.id;
 }
 
+type ExperienceWriteClient = Pick<
+  typeof prisma,
+  'experience' | 'experienceDimension' | 'experiencePricing'
+>;
+
 async function replaceExperienceDimensions(
+  db: ExperienceWriteClient,
   experienceId: number,
   values: Array<{ dimensionId: number; expectedValue: string }>
 ) {
-  await prisma.experienceDimension.deleteMany({
+  await db.experienceDimension.deleteMany({
     where: { experience_id: experienceId },
   });
 
   if (values.length === 0) return;
 
-  await prisma.experienceDimension.createMany({
+  await db.experienceDimension.createMany({
     data: values.map(value => ({
       experience_id: experienceId,
       dimension_id: value.dimensionId,
       expected_value: value.expectedValue,
     })),
+  });
+}
+
+async function upsertExperiencePricing(
+  db: ExperienceWriteClient,
+  experienceId: number,
+  input: Pick<
+    UpsertExperienceInput,
+    | 'startingPrice'
+    | 'addingPrice'
+    | 'startingHour'
+    | 'pricingModel'
+    | 'pricingNotes'
+  >
+) {
+  await db.experiencePricing.upsert({
+    where: { experience_id: experienceId },
+    create: {
+      experience_id: experienceId,
+      starting_price: input.startingPrice,
+      adding_price: input.addingPrice,
+      starting_hour: input.startingHour,
+      pricing_model: input.pricingModel,
+      pricing_notes: input.pricingNotes,
+    },
+    update: {
+      starting_price: input.startingPrice,
+      adding_price: input.addingPrice,
+      starting_hour: input.startingHour,
+      pricing_model: input.pricingModel,
+      pricing_notes: input.pricingNotes,
+    },
   });
 }
 
@@ -309,6 +468,15 @@ export async function getExperiences(): Promise<Experience[]> {
         category: {
           select: {
             category_title: true,
+          },
+        },
+        experience_pricing: {
+          select: {
+            adding_price: true,
+            starting_price: true,
+            starting_hour: true,
+            pricing_model: true,
+            pricing_notes: true,
           },
         },
         experience_dimensions: {
@@ -359,6 +527,15 @@ export async function getDashboardExperiences(
             category_title: true,
           },
         },
+        experience_pricing: {
+          select: {
+            adding_price: true,
+            starting_price: true,
+            starting_hour: true,
+            pricing_model: true,
+            pricing_notes: true,
+          },
+        },
         experience_dimensions: {
           include: {
             dimension_index: {
@@ -392,6 +569,129 @@ export async function getDashboardExperiences(
   return rows.map(row => mapExperienceRow(row, dimensionOptionsById));
 }
 
+export async function getPurchasableExperiences(): Promise<Experience[]> {
+  const [dimensionOptionsById, rows] = await Promise.all([
+    getOptionsByDimensionId(),
+    prisma.experience.findMany({
+      where: {
+        experience_status: 'active',
+        experience_pricing: { isNot: null },
+      },
+      include: {
+        provider: {
+          select: {
+            provider_label: true,
+            provider_type: true,
+          },
+        },
+        category: {
+          select: {
+            category_title: true,
+          },
+        },
+        experience_pricing: {
+          select: {
+            adding_price: true,
+            starting_price: true,
+            starting_hour: true,
+            pricing_model: true,
+            pricing_notes: true,
+          },
+        },
+        experience_dimensions: {
+          include: {
+            dimension_index: {
+              include: {
+                category: {
+                  select: {
+                    category_name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            experience_dimensions: true,
+            proposals: true,
+            experience_calendars: true,
+          },
+        },
+      },
+      orderBy: [
+        { popularity_index: 'desc' },
+        { updated_at: 'desc' },
+        { id: 'desc' },
+      ],
+    }),
+  ]);
+
+  return rows
+    .map(row => mapExperienceRow(row, dimensionOptionsById))
+    .filter(isExperiencePurchasable);
+}
+
+export async function getPurchasableExperienceById(
+  id: number
+): Promise<Experience | null> {
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  const [dimensionOptionsById, row] = await Promise.all([
+    getOptionsByDimensionId(),
+    prisma.experience.findUnique({
+      where: { id },
+      include: {
+        provider: {
+          select: {
+            provider_label: true,
+            provider_type: true,
+          },
+        },
+        category: {
+          select: {
+            category_title: true,
+          },
+        },
+        experience_pricing: {
+          select: {
+            adding_price: true,
+            starting_price: true,
+            starting_hour: true,
+            pricing_model: true,
+            pricing_notes: true,
+          },
+        },
+        experience_dimensions: {
+          include: {
+            dimension_index: {
+              include: {
+                category: {
+                  select: {
+                    category_name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            experience_dimensions: true,
+            proposals: true,
+            experience_calendars: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  if (!row) return null;
+
+  const experience = mapExperienceRow(row, dimensionOptionsById);
+  return isExperiencePurchasable(experience) ? experience : null;
+}
+
 export async function createExperience(
   input: UpsertExperienceInput
 ): Promise<void> {
@@ -402,29 +702,32 @@ export async function createExperience(
   );
 
   const createdBy = await getDefaultCreatedById();
-  const experience = await prisma.experience.create({
-    data: {
-      provider_id: input.providerId,
-      category_id: input.categoryId,
-      experience_title: input.experienceTitle,
-      experience_status: input.experienceStatus,
-      popularity_index: 0,
-      duration_min: input.durationMin,
-      duration_max: input.durationMax,
-      capacity_max: input.capacityMax,
-      lead_type: input.leadType,
-      delivery_methods: input.deliveryMethods,
-      dietary_considerations: input.dietaryConsiderations,
-      take_item: input.takeItem,
-      travel_flying: input.travelFlying,
-      created_by: createdBy,
-    },
-    select: {
-      id: true,
-    },
-  });
+  await prisma.$transaction(async tx => {
+    const experience = await tx.experience.create({
+      data: {
+        provider_id: input.providerId,
+        category_id: input.categoryId,
+        experience_title: input.experienceTitle,
+        experience_status: input.experienceStatus,
+        popularity_index: 0,
+        duration_min: input.durationMin,
+        duration_max: input.durationMax,
+        capacity_max: input.capacityMax,
+        lead_type: input.leadType,
+        delivery_methods: input.deliveryMethods,
+        dietary_considerations: input.dietaryConsiderations,
+        take_item: input.takeItem,
+        travel_flying: input.travelFlying,
+        created_by: createdBy,
+      },
+      select: {
+        id: true,
+      },
+    });
 
-  await replaceExperienceDimensions(experience.id, input.dimensionValues);
+    await replaceExperienceDimensions(tx, experience.id, input.dimensionValues);
+    await upsertExperiencePricing(tx, experience.id, input);
+  });
 }
 
 export async function updateExperience(
@@ -450,27 +753,30 @@ export async function updateExperience(
     input.dimensionValues
   );
 
-  await prisma.experience.update({
-    where: { id },
-    data: {
-      provider_id: input.providerId,
-      category_id: input.categoryId,
-      experience_title: input.experienceTitle,
-      experience_status: input.experienceStatus,
-      popularity_index: existing.popularity_index,
-      duration_min: input.durationMin,
-      duration_max: input.durationMax,
-      capacity_max: input.capacityMax,
-      lead_type: input.leadType,
-      delivery_methods: input.deliveryMethods,
-      dietary_considerations: input.dietaryConsiderations,
-      take_item: input.takeItem,
-      travel_flying: input.travelFlying,
-      created_by: existing.created_by,
-    },
-  });
+  await prisma.$transaction(async tx => {
+    await tx.experience.update({
+      where: { id },
+      data: {
+        provider_id: input.providerId,
+        category_id: input.categoryId,
+        experience_title: input.experienceTitle,
+        experience_status: input.experienceStatus,
+        popularity_index: existing.popularity_index,
+        duration_min: input.durationMin,
+        duration_max: input.durationMax,
+        capacity_max: input.capacityMax,
+        lead_type: input.leadType,
+        delivery_methods: input.deliveryMethods,
+        dietary_considerations: input.dietaryConsiderations,
+        take_item: input.takeItem,
+        travel_flying: input.travelFlying,
+        created_by: existing.created_by,
+      },
+    });
 
-  await replaceExperienceDimensions(id, input.dimensionValues);
+    await replaceExperienceDimensions(tx, id, input.dimensionValues);
+    await upsertExperiencePricing(tx, id, input);
+  });
 }
 
 export async function deleteExperience(id: number): Promise<void> {

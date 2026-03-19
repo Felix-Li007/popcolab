@@ -1,0 +1,225 @@
+@reference "../../../app/globals.css";
+
+.root {
+  @apply flex flex-col;
+  min-height: calc(100dvh - 6rem);
+}
+
+.content {
+  @apply flex flex-1 min-h-0 px-4 py-3;
+}
+
+.panel {
+  @apply w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden;
+}
+
+.panelHeader {
+  @apply px-4 py-3;
+}
+
+.panelTitle {
+  @apply text-xs font-bold text-gray-700;
+}
+
+.toolbar {
+  @apply border-b border-gray-100 px-4 pb-3;
+}
+
+.filterForm {
+  @apply flex flex-col gap-3;
+}
+
+.searchWrap {
+  @apply relative min-w-0;
+}
+
+.searchIcon {
+  @apply w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none;
+}
+
+.searchInput {
+  @apply h-8 w-full min-w-0 rounded-lg bg-gray-100 pl-8 pr-3 text-xs text-gray-700 outline-none transition placeholder:text-gray-400;
+}
+
+.searchInput:focus {
+  @apply bg-white;
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-magenta) 30%, transparent);
+}
+
+.filterControl {
+  @apply h-8 rounded-lg bg-gray-100 px-3 text-xs text-gray-700 outline-none transition;
+}
+
+.filterControl:focus {
+  @apply bg-white;
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--color-magenta) 30%, transparent);
+}
+
+.filterButton {
+  @apply h-8 rounded-full px-3 text-xs font-semibold text-white transition;
+  background: var(--color-teal-deep);
+}
+
+.filterButton:hover {
+  opacity: 0.9;
+}
+
+.clearLink {
+  @apply text-xs font-semibold text-gray-500 transition;
+}
+
+.clearLink:hover {
+  color: var(--color-magenta);
+}
+
+.tableHeader {
+  @apply hidden gap-4 bg-gray-50 px-5 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-gray-400;
+  grid-template-columns: 120px 1.4fr 1.2fr 1.2fr 170px 150px;
+}
+
+.listArea {
+  @apply flex-1 overflow-y-auto;
+}
+
+.emptyState {
+  @apply px-5 py-10 text-center text-sm text-gray-500;
+}
+
+.row {
+  @apply border-t border-gray-100;
+  --row-glow: color-mix(in srgb, var(--color-magenta) 22%, transparent);
+  position: relative;
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.row:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.row:nth-child(even) {
+  background: color-mix(in srgb, white 76%, var(--color-grey-light) 24%);
+}
+
+.row:first-child {
+  border-top: 0;
+}
+
+.row:hover {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, white 84%, var(--color-pink-bright) 16%) 0%,
+    color-mix(in srgb, white 88%, var(--color-coral-vibe) 12%) 100%
+  );
+  box-shadow:
+    0 0 0 1.5px var(--row-glow),
+    0 0 24px 8px var(--row-glow);
+  transform: translateY(-1px);
+  z-index: 1;
+}
+
+.rowGrid {
+  @apply grid gap-4 px-5 py-5;
+}
+
+.mobileLabel {
+  @apply text-xs font-semibold uppercase tracking-[0.18em] text-gray-400 lg:hidden;
+}
+
+.primaryText {
+  @apply text-sm font-semibold text-gray-900;
+}
+
+.secondaryText {
+  @apply mt-1 text-sm text-gray-500;
+}
+
+.secondarySmall {
+  @apply mt-1 text-xs text-gray-500;
+}
+
+.badges {
+  @apply flex flex-wrap gap-2;
+}
+
+.badge {
+  @apply rounded-full px-3 py-1 text-xs font-semibold;
+}
+
+.paymentStatusSuccess,
+.orderStatusSuccess {
+  @apply bg-emerald-50 text-emerald-700;
+}
+
+.paymentStatusProcessing,
+.orderStatusProcessing {
+  @apply bg-amber-50 text-amber-700;
+}
+
+.paymentStatusError,
+.orderStatusError {
+  @apply bg-rose-50 text-rose-700;
+}
+
+.paymentStatusDefault,
+.orderStatusDefault {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.orderLink {
+  @apply transition;
+}
+
+.orderLink:hover {
+  color: var(--color-teal-deep);
+}
+
+.metaRow {
+  @apply border-t border-dashed border-gray-100 px-5 py-3 text-xs text-gray-500;
+}
+
+.metaLabel {
+  @apply font-semibold text-gray-700;
+}
+
+@media (min-width: 640px) {
+  .filterForm {
+    @apply flex-row flex-wrap items-center;
+  }
+
+  .searchWrap {
+    flex: 1 1 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .filterForm {
+    @apply flex-nowrap items-center;
+  }
+
+  .searchWrap {
+    flex: 1 1 auto;
+  }
+
+  .filterControl {
+    width: 146px;
+  }
+
+  .filterForm select.filterControl {
+    width: 156px;
+  }
+
+  .tableHeader {
+    @apply grid;
+  }
+
+  .rowGrid {
+    @apply items-start;
+    grid-template-columns: 120px 1.4fr 1.2fr 1.2fr 170px 150px;
+  }
+}

@@ -23,7 +23,7 @@ const CHART_KEYS = REQUEST_STATUS_OPTIONS.map(option => option.value);
 
 export default function RequestStatusTrendChart({ data }: Props) {
   return (
-    <div className="h-[280px] w-full">
+    <div className="h-[280px] w-full rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
       <ResponsiveBar
         data={data}
         keys={CHART_KEYS}
@@ -33,6 +33,46 @@ export default function RequestStatusTrendChart({ data }: Props) {
         innerPadding={2}
         borderRadius={6}
         borderWidth={0}
+        defs={[
+          {
+            id: 'openedBarGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.75 },
+            ],
+          },
+          {
+            id: 'pendingBarGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.75 },
+            ],
+          },
+          {
+            id: 'matchedBarGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.75 },
+            ],
+          },
+          {
+            id: 'closedBarGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.75 },
+            ],
+          },
+        ]}
+        fill={[
+          { match: { id: REQUEST_STATUS.OPENED }, id: 'openedBarGradient' },
+          { match: { id: REQUEST_STATUS.PENDING }, id: 'pendingBarGradient' },
+          { match: { id: REQUEST_STATUS.MATCHED }, id: 'matchedBarGradient' },
+          { match: { id: REQUEST_STATUS.CLOSED }, id: 'closedBarGradient' },
+        ]}
         groupMode="stacked"
         valueScale={{ type: 'linear' }}
         indexScale={{ type: 'band', round: true }}
@@ -97,7 +137,7 @@ export default function RequestStatusTrendChart({ data }: Props) {
               background: '#ffffff',
               color: '#111827',
               borderRadius: '14px',
-              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.12)',
+              boxShadow: '0 16px 36px rgba(15, 23, 42, 0.16)',
               padding: '10px 12px',
             },
           },

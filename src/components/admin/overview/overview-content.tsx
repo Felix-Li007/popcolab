@@ -47,9 +47,9 @@ function renderBreakdownList(
             <span className="font-semibold text-gray-700">{item.label}</span>
             <span className="font-bold text-gray-500">{item.value}</span>
           </div>
-          <div className="h-2 rounded-full bg-gray-100">
+          <div className="h-2 rounded-full bg-gradient-to-b from-white to-gray-100 shadow-[inset_0_1px_2px_rgba(255,255,255,0.85),inset_0_-1px_2px_rgba(15,23,42,0.08)]">
             <div
-              className="h-2 rounded-full bg-teal-deep"
+              className="h-2 rounded-full bg-gradient-to-r from-teal-500 via-teal-deep to-emerald-500 shadow-[0_6px_16px_rgba(15,118,110,0.22)]"
               style={{ width: `${(item.value / maxValue) * 100}%` }}
             />
           </div>
@@ -136,13 +136,15 @@ function renderTrendBars(
           <span className="text-[10px] font-bold text-gray-400">
             {item.value}
           </span>
-          <div className="flex h-32 w-full items-end rounded-full bg-gray-100/80 px-1.5 py-1.5">
+          <div className="flex h-32 w-full items-end rounded-full bg-gradient-to-b from-white via-gray-50 to-gray-100/90 px-1.5 py-1.5 shadow-[inset_0_2px_6px_rgba(255,255,255,0.9),inset_0_-2px_8px_rgba(15,23,42,0.08),0_10px_24px_rgba(15,23,42,0.06)]">
             <div
-              className="w-full rounded-full bg-gradient-to-t from-coral-vibe via-coral-vibe to-coral-red shadow-[0_8px_20px_rgba(239,68,68,0.18)]"
+              className="relative w-full overflow-hidden rounded-full bg-gradient-to-t from-coral-vibe via-coral-red to-orange-300 shadow-[0_14px_28px_rgba(239,68,68,0.26)]"
               style={{
                 height: `${Math.max((item.value / maxValue) * 100, item.value > 0 ? 12 : 0)}%`,
               }}
-            />
+            >
+              <div className="absolute inset-x-[18%] top-1 h-2 rounded-full bg-white/45 blur-[2px]" />
+            </div>
           </div>
           <span className="text-[10px] font-medium text-gray-500">
             {item.periodLabel}
@@ -173,7 +175,7 @@ function renderTopCategoryBars(
       {items.map((item, index) => (
         <div
           key={item.label}
-          className="rounded-[18px] border border-gray-100 bg-white/85 px-3 py-3 shadow-sm"
+          className="rounded-[18px] border border-gray-100 bg-white/85 px-3 py-3 shadow-[0_12px_24px_rgba(15,23,42,0.06)]"
         >
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
@@ -188,11 +190,13 @@ function renderTopCategoryBars(
               {item.value}
             </span>
           </div>
-          <div className="h-2.5 rounded-full bg-gray-100">
+          <div className="h-2.5 rounded-full bg-gradient-to-b from-white to-gray-100 shadow-[inset_0_1px_2px_rgba(255,255,255,0.85),inset_0_-1px_2px_rgba(15,23,42,0.08)]">
             <div
-              className="h-2.5 rounded-full bg-gradient-to-r from-coral-vibe via-coral-red to-amber-400 shadow-[0_8px_20px_rgba(239,68,68,0.16)]"
+              className="relative h-2.5 rounded-full bg-gradient-to-r from-coral-vibe via-coral-red to-amber-400 shadow-[0_10px_24px_rgba(239,68,68,0.22)]"
               style={{ width: `${(item.value / maxValue) * 100}%` }}
-            />
+            >
+              <div className="absolute inset-y-[1px] left-2 right-4 rounded-full bg-white/35 blur-[2px]" />
+            </div>
           </div>
         </div>
       ))}
@@ -219,7 +223,7 @@ function renderRankedBars(
       {items.map((item, index) => (
         <div
           key={item.label}
-          className="rounded-[18px] border border-gray-100 bg-white/85 px-3 py-3 shadow-sm"
+          className="rounded-[18px] border border-gray-100 bg-white/85 px-3 py-3 shadow-[0_12px_24px_rgba(15,23,42,0.06)]"
         >
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
@@ -234,11 +238,13 @@ function renderRankedBars(
               {item.value}
             </span>
           </div>
-          <div className="h-2.5 rounded-full bg-gray-100">
+          <div className="h-2.5 rounded-full bg-gradient-to-b from-white to-gray-100 shadow-[inset_0_1px_2px_rgba(255,255,255,0.85),inset_0_-1px_2px_rgba(15,23,42,0.08)]">
             <div
-              className="h-2.5 rounded-full bg-gradient-to-r from-coral-vibe via-coral-red to-amber-400 shadow-[0_8px_20px_rgba(239,68,68,0.16)]"
+              className="relative h-2.5 rounded-full bg-gradient-to-r from-coral-vibe via-coral-red to-amber-400 shadow-[0_10px_24px_rgba(239,68,68,0.22)]"
               style={{ width: `${(item.value / maxValue) * 100}%` }}
-            />
+            >
+              <div className="absolute inset-y-[1px] left-2 right-4 rounded-full bg-white/35 blur-[2px]" />
+            </div>
           </div>
         </div>
       ))}
@@ -280,12 +286,7 @@ export default function OverviewContent({
       <div className="flex flex-col">
         <div className="flex flex-1 gap-0">
           <div className="flex-1 min-w-0 p-4 space-y-5">
-            {/* <StatsGrid
-              personalitiesCount={personalitiesCount}
-              personalitiesActiveCount={personalitiesActiveCount}
-            /> */}
-
-            <section className="rounded-[28px] border border-gray-200 bg-white/90 p-4 shadow-sm">
+            <section className="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-gray-900">
@@ -305,7 +306,7 @@ export default function OverviewContent({
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-                <div className="rounded-[22px] border border-coral-soft bg-rose-50 px-4 py-3">
+                <div className="rounded-[22px] border border-coral-soft bg-rose-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-coral-red/80">
                     Total Experiences
                   </p>
@@ -313,7 +314,7 @@ export default function OverviewContent({
                     {growthMetrics.experienceMetrics.totalExperiences}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-emerald-100 bg-emerald-50 px-4 py-3">
+                <div className="rounded-[22px] border border-emerald-100 bg-emerald-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700/80">
                     Active
                   </p>
@@ -321,7 +322,7 @@ export default function OverviewContent({
                     {growthMetrics.experienceMetrics.activeExperiences}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-3">
+                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700/80">
                     Draft
                   </p>
@@ -329,7 +330,7 @@ export default function OverviewContent({
                     {growthMetrics.experienceMetrics.draftExperiences}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="rounded-[22px] border border-gray-200 bg-gray-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
                     Inactive
                   </p>
@@ -337,7 +338,7 @@ export default function OverviewContent({
                     {growthMetrics.experienceMetrics.inactiveExperiences}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-teal-100 bg-teal-50 px-4 py-3">
+                <div className="rounded-[22px] border border-teal-100 bg-teal-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-teal-deep/70">
                     New This Week
                   </p>
@@ -361,10 +362,11 @@ export default function OverviewContent({
                   <div className="grid gap-4 md:grid-cols-[auto_minmax(0,1fr)] md:items-center">
                     <div className="relative mx-auto h-40 w-40">
                       <div
-                        className="h-40 w-40 rounded-full border border-white shadow-[0_10px_35px_rgba(15,23,42,0.08)]"
+                        className="h-40 w-40 rounded-full border border-white shadow-[0_18px_40px_rgba(15,23,42,0.14),inset_0_2px_8px_rgba(255,255,255,0.5)]"
                         style={{ background: statusDonut.background }}
                       />
-                      <div className="absolute inset-[1.35rem] flex flex-col items-center justify-center rounded-full bg-white shadow-inner">
+                      <div className="pointer-events-none absolute inset-2 rounded-full bg-[radial-gradient(circle_at_30%_28%,rgba(255,255,255,0.38),transparent_42%)]" />
+                      <div className="absolute inset-[1.35rem] flex flex-col items-center justify-center rounded-full bg-white shadow-[inset_0_2px_8px_rgba(255,255,255,0.85),0_10px_24px_rgba(15,23,42,0.08)]">
                         <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-400">
                           Total
                         </span>
@@ -381,7 +383,7 @@ export default function OverviewContent({
                           return (
                             <div
                               key={item.label}
-                              className={`flex items-center justify-between gap-3 rounded-[18px] border px-3 py-3 ${tone.ring} ${tone.bg}`}
+                              className={`flex items-center justify-between gap-3 rounded-[18px] border px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.07)] ${tone.ring} ${tone.bg}`}
                             >
                               <div className="flex items-center gap-3">
                                 <span
@@ -466,7 +468,7 @@ export default function OverviewContent({
                 <div className="flex flex-col gap-2 md:items-end">
                   <Link
                     href="/admin/requests"
-                    className="block min-w-[128px] rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 transition-colors hover:border-amber-200 hover:bg-amber-100/70"
+                    className="block min-w-[128px] rounded-2xl border border-amber-100 bg-amber-50 px-3 py-2 shadow-[0_12px_28px_rgba(15,23,42,0.08)] transition-colors hover:border-amber-200 hover:bg-amber-100/70"
                   >
                     <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-800/70">
                       Total Requests
@@ -482,7 +484,7 @@ export default function OverviewContent({
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-3">
+                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-800/70">
                     Total Requests
                   </p>
@@ -490,7 +492,7 @@ export default function OverviewContent({
                     {growthMetrics.totalRequests}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-teal-100 bg-teal-50 px-4 py-3">
+                <div className="rounded-[22px] border border-teal-100 bg-teal-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-teal-deep/70">
                     Match Rate
                   </p>
@@ -498,7 +500,7 @@ export default function OverviewContent({
                     {growthMetrics.requestMetrics.matchRate.toFixed(1)}%
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-coral-soft bg-rose-50 px-4 py-3">
+                <div className="rounded-[22px] border border-coral-soft bg-rose-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-coral-red/80">
                     Avg Time To Match
                   </p>
@@ -506,7 +508,7 @@ export default function OverviewContent({
                     {growthMetrics.requestMetrics.averageMatchTimeHours}h
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-gray-200 bg-gray-50 px-4 py-3">
+                <div className="rounded-[22px] border border-gray-200 bg-gray-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">
                     Backlog
                   </p>
@@ -613,7 +615,7 @@ export default function OverviewContent({
               </div>
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[22px] border border-purple-100 bg-purple-50 px-4 py-3">
+                <div className="rounded-[22px] border border-purple-100 bg-purple-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-purple-700/80">
                     Total Questions
                   </p>
@@ -621,7 +623,7 @@ export default function OverviewContent({
                     {growthMetrics.questionMetrics.totalQuestions}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-teal-100 bg-teal-50 px-4 py-3">
+                <div className="rounded-[22px] border border-teal-100 bg-teal-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-teal-deep/70">
                     Mapped To Dimensions
                   </p>
@@ -629,7 +631,7 @@ export default function OverviewContent({
                     {growthMetrics.questionMetrics.mappedQuestions}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-3">
+                <div className="rounded-[22px] border border-amber-100 bg-amber-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700/80">
                     Unmapped
                   </p>
@@ -637,7 +639,7 @@ export default function OverviewContent({
                     {growthMetrics.questionMetrics.unmappedQuestions}
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-coral-soft bg-rose-50 px-4 py-3">
+                <div className="rounded-[22px] border border-coral-soft bg-rose-50 px-4 py-3 shadow-[0_12px_28px_rgba(15,23,42,0.08)]">
                   <p className="text-[11px] font-semibold uppercase tracking-wide text-coral-red/80">
                     Missing Options
                   </p>
@@ -693,7 +695,7 @@ export default function OverviewContent({
                     </p>
                   </div>
                   <div className="space-y-3">
-                    <div className="rounded-[18px] border border-amber-100 bg-amber-50 px-3 py-3">
+                    <div className="rounded-[18px] border border-amber-100 bg-amber-50 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.07)]">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-700/80">
                         Unmapped Questions
                       </p>
@@ -704,7 +706,7 @@ export default function OverviewContent({
                         Questions not linked to any dimension yet.
                       </p>
                     </div>
-                    <div className="rounded-[18px] border border-rose-100 bg-rose-50 px-3 py-3">
+                    <div className="rounded-[18px] border border-rose-100 bg-rose-50 px-3 py-3 shadow-[0_10px_24px_rgba(15,23,42,0.07)]">
                       <p className="text-[11px] font-semibold uppercase tracking-wide text-coral-red/80">
                         Choice Questions Missing Options
                       </p>

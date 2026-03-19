@@ -1,3 +1,128 @@
+## Pop CoLab
+
+Pop CoLab is a `Next.js` application for personality-driven experiences, requests, invitations, proposals, and checkout.
+
+## Tech Stack
+
+Application:
+
+- `Next.js 16` with App Router
+- `React 19`
+- `TypeScript`
+- `Tailwind CSS 4`
+
+Authentication and user management:
+
+- `Clerk`
+- Webhook sync for user create, update, and delete events
+
+Database and data access:
+
+- `PostgreSQL`
+- `Prisma ORM`
+- `@prisma/adapter-pg` with `pg`
+
+Payments:
+
+- `Stripe`
+- `@stripe/react-stripe-js`
+- `@stripe/stripe-js`
+- `Stripe Elements`
+- `Stripe webhooks`
+
+Email:
+
+- `Resend`
+- `@react-email/render`
+
+Async jobs and scheduling:
+
+- `Upstash QStash`
+- `PGMQ` queue tables in Postgres
+- `Supabase` is used as the managed Postgres/queue host in the current infrastructure setup
+
+Charts and UI helpers:
+
+- `@nivo/bar`
+- `@nivo/line`
+- `@nivo/pie`
+- `lucide-react`
+
+Infra and deployment:
+
+- `Vercel`
+- `Terraform` for `vercel` and `supabase` providers
+- `Cloudflared` for exposing local webhooks during development
+
+Testing and tooling:
+
+- `ESLint`
+- `Prettier`
+- `Jest`
+- `Playwright`
+- `Cucumber`
+- `Husky`
+
+## Environment Variables by Service
+
+Database and Prisma:
+
+- `DATABASE_URL`
+- `DIRECT_URL`
+
+Clerk:
+
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `CLERK_WEBHOOK_SIGNING_SECRET`
+- `NEXT_PUBLIC_CLERK_SIGN_IN_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL`
+- `NEXT_PUBLIC_CLERK_ACTION_DASHBOARD_URL`
+
+Stripe:
+
+- `STRIPE_SECRET_KEY`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
+Resend:
+
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
+
+Upstash QStash:
+
+- `QSTASH_APP_URL`
+- `QSTASH_ENDPOINT_PATH`
+- `QSTASH_TOKEN`
+- `QSTASH_CURRENT_SIGNING_KEY`
+- `QSTASH_NEXT_SIGNING_KEY`
+
+Supabase / queue:
+
+- `SUPABASE_QUEUE_NAME`
+
+Testing:
+
+- `TEST_USER_EMAIL`
+- `TEST_USER_PASSWORD`
+
+Key service entry points:
+
+- Clerk auth helpers: `src/services/clerk-service.ts`
+- Clerk webhook: `src/app/api/webhooks/clerk/route.ts`
+- Prisma client: `src/libs/prisma-client.ts`
+- Stripe checkout action: `src/actions/stripe-actions.ts`
+- Stripe webhook: `src/app/api/webhooks/stripe/route.ts`
+- Resend mailer: `src/services/resend-service.ts`
+- QStash webhook: `src/app/api/qstash/route.ts`
+- Queue helpers: `src/services/qstash-service.ts`, `src/services/queue-service.ts`
+
 ## Deploy on Vercel
 
 To deploy this Next.js app, we use the Vercel Platform (https://vercel.com). Below are concise, step-by-step instructions.
@@ -43,6 +168,117 @@ docker run -d \
  -e CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
     -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
  ghcr.io/${{ github.repository_owner }}/popcolab-app:latest
+
+## Stripe Integration
+
+This project uses `Next.js + Stripe Elements` for experience checkout.
+
+Current checkout flow:
+
+1. User opens `/dashboard/experiences`
+2. User selects an experience and goes to `/dashboard/experiences/[experienceId]/checkout`
+3. The frontend calls a Server Action to:
+   - create `payment`
+   - create `order`
+   - create `order_item`
+   - create a Stripe `PaymentIntent`
+4. The action returns a `clientSecret`
+5. Stripe `PaymentElement` confirms the payment on the client
+6. Stripe webhook updates local `order` and `payment` statuses
+
+Relevant files:
+
+- `src/actions/stripe-actions.ts`
+- `src/components/dashboard/checkout-client.tsx`
+- `src/services/order-service.ts`
+- `src/app/api/webhooks/stripe/route.ts`
+
+Required environment variables:
+
+- `STRIPE_SECRET_KEY`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
+Notes:
+
+- Payment intent creation now uses a Server Action, not a custom API route.
+- Stripe webhook handling still uses `/api/webhooks/stripe` because Stripe must call a public HTTP endpoint.
+- Currency is currently `CAD`.
+
+## Stripe Local Testing
+
+0. Install Stripe CLI
+
+- macOS with Homebrew:
+
+```bash
+brew install stripe/stripe-cli/stripe
+```
+
+- Verify installation:
+
+```bash
+stripe version
+```
+
+- Authenticate once:
+
+```bash
+stripe login
+```
+
+1. Add Stripe env vars to `.env`
+
+```bash
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+2. Start the app
+
+```bash
+npm run dev
+```
+
+3. Start Stripe webhook forwarding
+
+```bash
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+```
+
+4. Copy the printed webhook signing secret into `.env`
+
+```bash
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
+5. Complete a checkout from the dashboard
+
+- Open `/dashboard/experiences`
+- Choose an experience
+- Load the payment form
+- Confirm payment with a Stripe test card such as `4242 4242 4242 4242`
+
+6. Verify webhook-driven status sync
+
+- `payment.payment_status` should update after Stripe sends the event
+- `order.order_status` should update with the corresponding local status
+- The result page at `/dashboard/experiences/[experienceId]/checkout/result` should reflect the latest payment state
+
+Useful Stripe CLI commands:
+
+```bash
+stripe trigger payment_intent.succeeded
+stripe trigger payment_intent.payment_failed
+stripe trigger payment_intent.canceled
+stripe trigger payment_intent.processing
+```
+
+Webhook endpoint:
+
+- `POST /api/webhooks/stripe`
 
 ## Expose Local Port with Cloudflared
 

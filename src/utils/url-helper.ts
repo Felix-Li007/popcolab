@@ -28,6 +28,7 @@ export const SIGN_UP_PATH = normalizeAppPath(
 );
 export const DASHBOARD_PATH = '/dashboard';
 export const DASHBOARD_REQUESTS_PATH = `${DASHBOARD_PATH}/requests`;
+export const DASHBOARD_EXPERIENCES_PATH = `${DASHBOARD_PATH}/experiences`;
 
 function toQueryString(
   query?: Record<string, string | number | boolean | null | undefined>
@@ -148,4 +149,16 @@ export function buildAuthPath(params: {
 
 export function buildDashboardRequestInvitePath(requestId: number): string {
   return `${DASHBOARD_REQUESTS_PATH}/${requestId}/invite`;
+}
+
+export function buildDashboardExperienceCheckoutPath(
+  experienceId: number
+): string {
+  return `${DASHBOARD_EXPERIENCES_PATH}/${experienceId}/checkout`;
+}
+
+export function buildDashboardExperienceCheckoutResultPath(
+  experienceId: number
+): string {
+  return `${buildDashboardExperienceCheckoutPath(experienceId)}/result`;
 }

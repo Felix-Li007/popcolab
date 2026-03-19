@@ -101,6 +101,7 @@ export default function ExperienceContent({
   const [experiences, setExperiences] = useState<Experience[]>(initialData);
   const [search, setSearch] = useState('');
   const idParam = searchParams.get('id');
+  const viewParam = searchParams.get('view');
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [viewId, setViewId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -124,6 +125,16 @@ export default function ExperienceContent({
     setSelectedId(Number(idParam));
     setIsCreating(false);
   }, [idParam]);
+
+  useEffect(() => {
+    if (!viewParam || !/^\d+$/.test(viewParam)) {
+      setViewId(null);
+      return;
+    }
+
+    setViewId(Number(viewParam));
+    setIsCreating(false);
+  }, [viewParam]);
 
   useEffect(() => {
     setPage(1);
@@ -181,6 +192,8 @@ export default function ExperienceContent({
             experience.experienceTitle,
             experience.providerLabel,
             experience.categoryTitle,
+            experience.pricing.pricingModel ?? '',
+            experience.pricing.pricingNotes ?? '',
             experience.leadType,
             experience.deliveryMethods,
             experience.dietaryConsiderations ?? '',
@@ -271,6 +284,17 @@ export default function ExperienceContent({
     }
   }
 
+  function setViewSelection(id: number | null) {
+    setViewId(id);
+    if (id !== null) {
+      router.replace(`/admin/experiences?view=${id}`, {
+        scroll: false,
+      });
+    } else {
+      router.replace('/admin/experiences', { scroll: false });
+    }
+  }
+
   function handleCreate() {
     setSelection(null);
     setIsCreating(true);
@@ -300,7 +324,7 @@ export default function ExperienceContent({
       try {
         await deleteExperienceAction(id);
         if (selectedId === id) setSelection(null);
-        if (viewId === id) setViewId(null);
+        if (viewId === id) setViewSelection(null);
         setIsCreating(false);
         router.refresh();
       } catch (error) {
@@ -473,7 +497,7 @@ export default function ExperienceContent({
                         setSelection(experience.id);
                         setIsCreating(false);
                       }}
-                      onView={() => setViewId(experience.id)}
+                      onView={() => setViewSelection(experience.id)}
                       onDelete={() =>
                         handleDelete(experience.id, experience.experienceTitle)
                       }
@@ -507,9 +531,9 @@ export default function ExperienceContent({
       <ExperienceView
         isOpen={viewId !== null}
         experience={viewedExperience}
-        onClose={() => setViewId(null)}
+        onClose={() => setViewSelection(null)}
         onEdit={id => {
-          setViewId(null);
+          setViewSelection(null);
           setSelection(id);
           setIsCreating(false);
         }}
