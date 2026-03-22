@@ -147,6 +147,17 @@ export function buildAuthPath(params: {
   return `${basePath}?${query.toString()}`;
 }
 
+export function buildTeamInvitePath(token: string): string {
+  return `/join/${token}`;
+}
+
+export function buildTeamInviteAbsoluteUrl(
+  appBaseUrl: string,
+  token: string
+): string {
+  return `${normalizeAppBaseUrl(appBaseUrl)}${buildTeamInvitePath(token)}`;
+}
+
 export function buildDashboardRequestInvitePath(requestId: number): string {
   return `${DASHBOARD_REQUESTS_PATH}/${requestId}/invite`;
 }

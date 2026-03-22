@@ -1,6 +1,7 @@
 model Team {
   id              Int             @id @default(autoincrement())
   team_name       String          @db.VarChar(50)
+  team_department String?         @db.VarChar(100)
   team_notes      String?         @db.VarChar(200)
   team_owner      Int
   created_by      Int
@@ -9,6 +10,7 @@ model Team {
   owner           User            @relation("TeamOwner", fields: [team_owner], references: [id])
   creator         User            @relation("TeamCreator", fields: [created_by], references: [id])
   team_aggregates TeamAggregate[]
+  team_invites    TeamInvite[]
   team_mates      TeamMate[]
   team_vector     TeamVector?
 

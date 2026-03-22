@@ -6,7 +6,10 @@ import { sanitizeRedirectPath } from '@/utils/auth-redirect';
 export default function SignInPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = sanitizeRedirectPath(searchParams.get('redirect'));
+  const redirectUrl = sanitizeRedirectPath(
+    searchParams.get('redirect'),
+    '/onboarding/personality-choice'
+  );
   const email = searchParams.get('email')?.trim() ?? '';
 
   return (

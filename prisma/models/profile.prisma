@@ -3,6 +3,7 @@ model Profile {
   user_id           Int       @unique
   first_name        String?   @db.VarChar(50)
   last_name         String?   @db.VarChar(50)
+  pronouns          String?   @db.VarChar(50)
   phone_number      String?   @db.VarChar(20)
   preferred_contact String?   @db.VarChar(20)
   short_bio         String?   @db.VarChar(255)

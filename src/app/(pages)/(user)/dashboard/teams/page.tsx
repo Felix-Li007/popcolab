@@ -1,23 +1,36 @@
 import { redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
-import { getUserDashboardData } from '@/services/user-dashboard-service';
-import MyTeamsSection from '@/components/dashboard/my-teams-section';
+import { prisma } from '@/libs/prisma-client';
+import {
+  getUserTeams,
+  getPendingTeamInvites,
+} from '@/services/user-team-service';
+import TeamsContent from '@/components/teams/teams-content';
 
 export default async function TeamsPage() {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated) redirect('/sign-in');
 
-  const data = await getUserDashboardData(authContext.user!.id);
+  const dbUser = await prisma.user.findUnique({
+    where: { clerk_id: authContext.user!.id },
+    select: { id: true, email: true, user_name: true },
+  });
+  if (!dbUser) redirect('/sign-in');
+
+  const [teams, pendingInvites] = await Promise.all([
+    getUserTeams(dbUser.id),
+    getPendingTeamInvites(dbUser.email, dbUser.user_name),
+  ]);
 
   return (
-    <div className="p-4 max-w-3xl">
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-gray-900">My Teams</h1>
+    <div className="p-6 max-w-5xl">
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-gray-900">Teams</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          Teams you own or belong to.
+          Teams you own or belong to, and any pending invitations.
         </p>
       </div>
-      <MyTeamsSection teams={data.teams} />
+      <TeamsContent teams={teams} pendingInvites={pendingInvites} />
     </div>
   );
 }

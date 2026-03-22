@@ -1,0 +1,21 @@
+enum TeamInviteStatus {
+  pending
+  accepted
+  rejected
+}
+
+model TeamInvite {
+  id             Int              @id @default(autoincrement())
+  team_id        Int
+  invited_by     Int
+  email          String           @db.VarChar(255)
+  username       String?          @db.VarChar(50)
+  token          String           @unique @db.VarChar(255)
+  status         TeamInviteStatus @default(pending)
+  expires_at     DateTime?        @db.Timestamp(6)
+  created_at     DateTime         @default(now()) @db.Timestamp(6)
+  team           Team             @relation(fields: [team_id], references: [id])
+  inviter        User             @relation("TeamInviter", fields: [invited_by], references: [id])
+
+  @@map("team_invite")
+}

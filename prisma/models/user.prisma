@@ -6,6 +6,8 @@ model User {
   user_type            String       @default("INDIVIDUAL") @db.VarChar(20)
   avatar_image         String?      @db.VarChar(255)
   status               String       @default("active") @db.VarChar(20)
+  intake_complete      Boolean      @default(false)
+  personality_complete Boolean      @default(false)
   created_at           DateTime     @default(now()) @db.Timestamp(6)
   updated_at           DateTime     @updatedAt @db.Timestamp(6)
   corporate            Company?
@@ -15,6 +17,7 @@ model User {
   owned_teams          Team[]       @relation("TeamOwner")
   created_teams        Team[]       @relation("TeamCreator")
   team_mates           TeamMate[]
+  team_invites_sent    TeamInvite[] @relation("TeamInviter")
   user_vector          UserVector?
 
   @@map("user")

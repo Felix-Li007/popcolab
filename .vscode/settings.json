@@ -28,5 +28,9 @@
       "password": "eshkibqofgxfivabazrc",
       "name": "Supabase (Prod)"
     }
-  ]
+  ],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "popcolab2026",
+    "projectKey": "popcolab2026_pop"
+  }
 }
