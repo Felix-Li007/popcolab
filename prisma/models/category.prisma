@@ -1,13 +1,13 @@
 model Category {
-  id              Int        @id @default(autoincrement())
-  category_title  String     @db.VarChar(100)
-  category_notes  String?    @db.VarChar(255)
-  category_status String     @db.VarChar(20)
+  id              Int          @id @default(autoincrement())
+  category_title  String       @db.VarChar(100)
+  category_notes  String?      @db.VarChar(255)
+  category_status String       @db.VarChar(20)
   parent_id       Int?
-  created_at      DateTime   @default(now()) @db.Timestamp(6)
-  updated_at      DateTime   @updatedAt @db.Timestamp(6)
-  parent          Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id])
-  children        Category[] @relation("CategoryHierarchy")
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime     @updatedAt @db.Timestamp(6)
+  parent          Category?    @relation("CategoryHierarchy", fields: [parent_id], references: [id])
+  children        Category[]   @relation("CategoryHierarchy")
   experiences     Experience[]
 
   @@map("category")

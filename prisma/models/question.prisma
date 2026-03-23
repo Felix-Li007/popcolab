@@ -1,24 +1,24 @@
+model Question {
+  id               Int              @id @default(autoincrement())
+  dimension_id     Int?
+  form_name        IntakeForm       @default(REQUEST)
+  question_type    String           @db.VarChar(20)
+  question_text    String           @db.VarChar(255)
+  question_desc    String           @db.VarChar(255)
+  created_at       DateTime         @default(now()) @db.Timestamp(6)
+  updated_at       DateTime         @updatedAt @db.Timestamp(6)
+  order_index      Int?
+  question_answers Answer[]
+  dimension_index  DimensionIndex?  @relation(fields: [dimension_id], references: [id])
+  question_options QuestionOption[]
+
+  @@index([dimension_id])
+  @@map("question")
+}
+
 enum IntakeForm {
   REQUEST
   MEMBER
   ASSESS
   EXPERIENCE
-}
-
-model Question {
-  id               Int                 @id @default(autoincrement())
-  dimension_id     Int?
-  form_name        IntakeForm          @default(REQUEST)
-  question_type    String              @db.VarChar(20)
-  question_text    String              @db.VarChar(255)
-  question_desc    String              @db.VarChar(255)
-  created_at       DateTime            @default(now()) @db.Timestamp(6)
-  updated_at       DateTime            @updatedAt @db.Timestamp(6)
-  order_index      Int?
-  question_answers Answer[]
-  dimension_index  DimensionIndex?     @relation(fields: [dimension_id], references: [id], onDelete: SetNull)
-  question_options QuestionOption[]
-
-  @@index([dimension_id], map: "question_dimension_id_idx")
-  @@map("question")
 }

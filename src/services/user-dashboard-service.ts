@@ -30,7 +30,7 @@ export async function getUserDashboardData(
     where: { clerk_id: clerkId },
     select: {
       id: true,
-      owned_teams: {
+      created_teams: {
         select: {
           id: true,
           team_name: true,
@@ -71,7 +71,7 @@ export async function getUserDashboardData(
   const seenIds = new Set<number>();
   const teams: UserTeamSummary[] = [];
 
-  for (const t of user.owned_teams) {
+  for (const t of user.created_teams) {
     if (!seenIds.has(t.id)) {
       seenIds.add(t.id);
       teams.push({

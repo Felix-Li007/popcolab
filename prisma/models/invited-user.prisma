@@ -1,9 +1,3 @@
-enum InviteStatus {
-  pending
-  accepted
-  rejected
-}
-
 model InvitedUser {
   id             Int          @id @default(autoincrement())
   request_id     Int
@@ -19,4 +13,10 @@ model InvitedUser {
 
   @@unique([request_id, user_email])
   @@map("invited_user")
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  rejected
 }

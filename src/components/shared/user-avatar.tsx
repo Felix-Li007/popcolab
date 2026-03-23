@@ -73,7 +73,8 @@ export default function UserAvatar({
                 }
                 onClick={() =>
                   router.push(
-                    `${process.env.NEXT_PUBLIC_CLERK_ACTION_DASHBOARD_URL}`
+                    process.env.NEXT_PUBLIC_CLERK_ACTION_DASHBOARD_URL ??
+                      '/dashboard'
                   )
                 }
               />

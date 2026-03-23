@@ -6,6 +6,6 @@ model DimensionApply {
   updated_at      DateTime       @updatedAt @db.Timestamp(6)
   dimension_index DimensionIndex @relation(fields: [dimension_id], references: [id], onDelete: Cascade)
 
-  @@index([dimension_id], map: "dimension_apply_dimension_id_idx")
+  @@index([dimension_id])
   @@map("dimension_apply")
 }

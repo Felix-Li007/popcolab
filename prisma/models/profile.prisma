@@ -6,11 +6,12 @@ model Profile {
   pronouns          String?   @db.VarChar(50)
   phone_number      String?   @db.VarChar(20)
   preferred_contact String?   @db.VarChar(20)
-  short_bio         String?   @db.VarChar(255)
   consent_given     Int       @default(0) @db.SmallInt
   privacy_notes     String?   @db.VarChar(255)
   created_at        DateTime? @default(now()) @db.Timestamp(6)
   updated_at        DateTime  @updatedAt @db.Timestamp(6)
+  short_bio         String?   @db.VarChar(255)
+  pronouns          String?   @db.VarChar(50)
   user              User      @relation(fields: [user_id], references: [id])
 
   @@map("profile")

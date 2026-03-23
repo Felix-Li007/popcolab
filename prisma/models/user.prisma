@@ -10,12 +10,14 @@ model User {
   personality_complete Boolean      @default(false)
   created_at           DateTime     @default(now()) @db.Timestamp(6)
   updated_at           DateTime     @updatedAt @db.Timestamp(6)
+  intake_complete      Boolean      @default(false)
+  personality_complete Boolean      @default(false)
   corporate            Company?
   orders               Order[]
   profile              Profile?
   requests             Request[]
-  owned_teams          Team[]       @relation("TeamOwner")
   created_teams        Team[]       @relation("TeamCreator")
+  team_invites_sent    TeamInvite[] @relation("TeamInviter")
   team_mates           TeamMate[]
   team_invites_sent    TeamInvite[] @relation("TeamInviter")
   user_vector          UserVector?

@@ -1,15 +1,8 @@
-enum ExperienceStatus {
-  draft
-  inactive
-  active
-}
-
 model Experience {
   id                     Int                   @id @default(autoincrement())
   provider_id            Int
   category_id            Int
   experience_title       String                @db.VarChar(100)
-  experience_status      ExperienceStatus      @default(active)
   popularity_index       Int
   duration_min           Int
   duration_max           Int
@@ -22,13 +15,20 @@ model Experience {
   created_by             Int
   created_at             DateTime              @default(now()) @db.Timestamp(6)
   updated_at             DateTime              @updatedAt @db.Timestamp(6)
+  experience_status      ExperienceStatus      @default(active)
   category               Category              @relation(fields: [category_id], references: [id])
   provider               Provider              @relation(fields: [provider_id], references: [id])
   experience_calendars   ExperienceCalendar[]
   experience_dimensions  ExperienceDimension[]
-  order_items            OrderItem[]
   experience_pricing     ExperiencePricing?
+  order_items            OrderItem[]
   proposals              Proposal[]
 
   @@map("experience")
+}
+
+enum ExperienceStatus {
+  draft
+  inactive
+  active
 }

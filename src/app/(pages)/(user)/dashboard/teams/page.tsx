@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
+import { upsertClerkUser } from '@/services/user-service';
 import { prisma } from '@/libs/prisma-client';
 import {
   getUserTeams,

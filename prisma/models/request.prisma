@@ -1,14 +1,7 @@
-enum RequestStatus {
-  opened
-  pending
-  matched
-  closed
-}
-
 model Request {
   id                  Int                 @id @default(autoincrement())
   user_id             Int
-  objective_category  String              @db.VarChar(20)
+  objective_category  String              @db.VarChar(100)
   request_status      RequestStatus       @default(opened)
   budget_min          Decimal?            @db.Decimal(19, 0)
   budget_max          Decimal?            @db.Decimal(19, 0)
@@ -17,10 +10,20 @@ model Request {
   expired_at          DateTime?           @db.Timestamp(6)
   created_at          DateTime            @default(now()) @db.Timestamp(6)
   updated_at          DateTime            @updatedAt @db.Timestamp(6)
+  notes_for_admin     String?
+  participant_count   Int?
+  preferred_date      DateTime?           @db.Timestamp(6)
   invited_users       InvitedUser[]
   proposals           Proposal[]
   user                User                @relation(fields: [user_id], references: [id])
   request_preferences RequestPreference[]
 
   @@map("request")
+}
+
+enum RequestStatus {
+  opened
+  pending
+  matched
+  closed
 }

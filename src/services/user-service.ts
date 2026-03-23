@@ -296,7 +296,7 @@ function buildUserWhereSql(
       OR EXISTS (
         SELECT 1
         FROM "team" team
-        WHERE team.team_owner = u.id
+        WHERE team.created_by = u.id
           AND LOWER(team.team_name) LIKE ${like}
       )
     )`);
@@ -356,11 +356,11 @@ async function getUserRows(
     LEFT JOIN "company" c ON c.user_id = u.id
     LEFT JOIN (
       SELECT
-        team.team_owner AS user_id,
+        team.created_by AS user_id,
         COUNT(*)::int AS team_count,
         STRING_AGG(team.team_name, ',' ORDER BY team.team_name) AS team_names
       FROM "team" team
-      GROUP BY team.team_owner
+      GROUP BY team.created_by
     ) tm ON tm.user_id = u.id
     LEFT JOIN (
       SELECT

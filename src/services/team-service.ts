@@ -86,7 +86,7 @@ async function getTeamRows(
       owner.email AS owner_email,
       COALESCE(member_counts.member_count, 0)::int AS member_count
     FROM "team" team
-    JOIN "user" owner ON owner.id = team.team_owner
+    JOIN "user" owner ON owner.id = team.created_by
     LEFT JOIN (
       SELECT
         team_mate.team_id,
@@ -114,7 +114,7 @@ async function getTeamTotalCount(search: string): Promise<number> {
   const rows = await prisma.$queryRaw<TeamCountRow[]>(Prisma.sql`
     SELECT COUNT(*)::int AS count
     FROM "team" team
-    JOIN "user" owner ON owner.id = team.team_owner
+    JOIN "user" owner ON owner.id = team.created_by
     ${whereSql}
   `);
 

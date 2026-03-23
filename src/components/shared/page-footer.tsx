@@ -29,12 +29,13 @@ const supportLinks: MenuItem[] = [
 
 export default function PageFooter() {
   const pathname = usePathname();
+  if (pathname.startsWith('/sign-in')) return null;
+  return <PageFooterInner />;
+}
+
+function PageFooterInner() {
   const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
   const { isLoaded: isUserLoaded, user } = useUser();
-
-  if (pathname.startsWith('/sign-in')) {
-    return null;
-  }
 
   const claimRole = normalizeRole(readClaimRole(sessionClaims));
   const metadataRole = normalizeRole(
