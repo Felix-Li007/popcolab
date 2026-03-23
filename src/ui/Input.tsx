@@ -39,6 +39,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
+    const generatedId = React.useId();
+    const inputId = props.id ?? generatedId;
     const baseStyles =
       'font-semibold text-gray-800 rounded-2xl bg-gray-100 border-0 outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white placeholder:font-normal placeholder-gray-400 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50';
     const sizeStyle = sizeStyles[inputSize];
@@ -58,7 +60,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          <label
+            htmlFor={inputId}
+            className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
+          >
             {label}
           </label>
         )}
@@ -70,6 +75,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
+            id={inputId}
             className={`${combinedClassName} ${icon ? 'pl-11' : ''}`}
             {...props}
           />
@@ -98,6 +104,8 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     },
     ref
   ) => {
+    const generatedId = React.useId();
+    const inputId = props.id ?? generatedId;
     const baseStyles =
       'font-semibold text-gray-800 rounded-2xl bg-gray-100 border-0 outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white placeholder:font-normal placeholder-gray-400 resize-none transition leading-relaxed disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-50';
     const sizeStyle = sizeStyles[inputSize];
@@ -117,11 +125,19 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     return (
       <div className={fullWidth ? 'w-full' : ''}>
         {label && (
-          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+          <label
+            htmlFor={inputId}
+            className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
+          >
             {label}
           </label>
         )}
-        <textarea ref={ref} className={combinedClassName} {...props} />
+        <textarea
+          ref={ref}
+          id={inputId}
+          className={combinedClassName}
+          {...props}
+        />
         {error && <p className="text-[10px] text-red-500 mt-1">{error}</p>}
         {!error && helperText && (
           <p className="text-[10px] text-gray-400 mt-1">{helperText}</p>

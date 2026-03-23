@@ -44,7 +44,7 @@ export const adminStandardSidenavAppearance: AppSidenavAppearance = {
   badgeLiveClassName: 'bg-magenta text-white',
 };
 
-function NavIcon({ children }: { children: React.ReactNode }) {
+function NavIcon({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <span className="flex h-5 w-5 shrink-0 items-center justify-center text-white/90">
       {children}
@@ -58,19 +58,34 @@ export default function AppSidenav({
   className = '',
   testId,
   appearance,
-}: {
+}: Readonly<{
   groups: AppSidenavGroup[];
   onNavigate?: () => void;
   className?: string;
   testId?: string;
   appearance?: AppSidenavAppearance;
-}) {
+}>) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
     href === '/admin' || href === '/dashboard'
       ? pathname === href
       : pathname.startsWith(href);
+
+  function getBadgeClassName(item: AppSidenavItem) {
+    const baseClassName =
+      appearance?.badgeClassName ??
+      'text-[10px] px-1.5 py-0.5 rounded-full font-bold';
+
+    if (item.badgeVariant === 'live') {
+      return [
+        baseClassName,
+        appearance?.badgeLiveClassName ?? 'bg-magenta text-white',
+      ].join(' ');
+    }
+
+    return [baseClassName, 'bg-white/20 text-white'].join(' ');
+  }
 
   return (
     <aside
@@ -138,20 +153,11 @@ export default function AppSidenav({
                       <span className="min-w-0 flex-1 truncate">
                         {item.label}
                       </span>
-                      {item.badge !== undefined ? (
-                        <span
-                          className={[
-                            appearance?.badgeClassName ??
-                              'text-[10px] px-1.5 py-0.5 rounded-full font-bold',
-                            item.badgeVariant === 'live'
-                              ? (appearance?.badgeLiveClassName ??
-                                'bg-magenta text-white')
-                              : 'bg-white/20 text-white',
-                          ].join(' ')}
-                        >
+                      {item.badge === undefined ? null : (
+                        <span className={getBadgeClassName(item)}>
                           {item.badge}
                         </span>
-                      ) : null}
+                      )}
                     </Link>
                   );
                 })}

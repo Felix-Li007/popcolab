@@ -1,4 +1,5 @@
 @reference "../../../app/globals.css";
+
 .listPanel {
   flex: 1.2;
   min-width: 420px;
@@ -59,7 +60,7 @@
 .previewCardDimensions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25r em;
+  gap: 0.25rem;
   max-height: 44px;
   overflow: hidden;
 }

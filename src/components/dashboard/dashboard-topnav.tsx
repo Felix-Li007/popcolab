@@ -11,13 +11,13 @@ export default function DashboardTopnav({
   userDisplayName,
   userRoleLabel,
   initialCompany,
-}: {
+}: Readonly<{
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
-}) {
+}>) {
   return (
     <header className="bg-teal-deep text-white">
       <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-14 border-b border-white/10 gap-2">

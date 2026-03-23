@@ -21,7 +21,9 @@ function getDefaultRequestedHours(params: {
   return Math.max(1, Math.ceil(params.durationMax / 60));
 }
 
-export default async function ExperienceCheckoutPage({ params }: PageProps) {
+export default async function ExperienceCheckoutPage({
+  params,
+}: Readonly<PageProps>) {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated || !authContext.user) {
     redirect('/sign-in');

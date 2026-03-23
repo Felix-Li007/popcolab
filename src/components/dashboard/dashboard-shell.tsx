@@ -11,12 +11,12 @@ export default function DashboardShell({
   userDisplayName,
   userRoleLabel,
   initialCompany,
-}: {
+}: Readonly<{
   children: React.ReactNode;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
-}) {
+}>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {

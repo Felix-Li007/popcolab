@@ -24,7 +24,7 @@ export default function DimensionView({
   dimension,
   onClose,
   onEdit,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen || !dimension) return null;
   const createdDate = dimension.createdAt
     ? new Date(dimension.createdAt).toLocaleDateString('en-US')
@@ -130,10 +130,10 @@ export default function DimensionView({
               ALLOWED OPTIONS ({dimension.options.length})
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {dimension.options.map((option, idx) => (
-                <Badge key={idx} variant="secondary" size="xs">
+              {dimension.options.map(option => (
+                <Badge key={option.id} variant="secondary" size="xs">
                   {option.label}
-                  {option.label !== option.value ? ` (${option.value})` : ''}
+                  {option.label === option.value ? '' : ` (${option.value})`}
                 </Badge>
               ))}
             </div>

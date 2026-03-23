@@ -5,9 +5,9 @@ import { getBadgeCounts } from '@/services/statistic-service';
 
 export default async function AdminLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [badgeCounts, authContext, companyInfo] = await Promise.all([
     getBadgeCounts(),
     getCurrentAuthContext(),

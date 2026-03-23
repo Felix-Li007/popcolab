@@ -24,7 +24,7 @@ export default function FilterTabbar<T extends string | number>({
   allCount,
   allLabel = 'All',
   rightSlot,
-}: Props<T>) {
+}: Readonly<Props<T>>) {
   return (
     <div className={styles.root}>
       <div className={styles.tabs}>

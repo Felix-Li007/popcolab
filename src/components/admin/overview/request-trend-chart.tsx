@@ -21,7 +21,7 @@ const STATUS_COLOR_MAP: Record<RequestStatus, string> = {
 
 const CHART_KEYS = REQUEST_STATUS_OPTIONS.map(option => option.value);
 
-export default function RequestStatusTrendChart({ data }: Props) {
+export default function RequestStatusTrendChart({ data }: Readonly<Props>) {
   return (
     <div className="h-[280px] w-full rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
       <ResponsiveBar

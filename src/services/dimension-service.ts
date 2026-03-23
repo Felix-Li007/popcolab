@@ -9,13 +9,6 @@ import type {
 } from '@/types/dimension-type';
 import type { IntakeForm } from '@/types/question-type';
 
-export type {
-  Dimension as DimensionData,
-  DimensionCategory as DimensionCategoryData,
-  DimensionFormState,
-  DimensionCategoryFormState,
-};
-
 type UpsertDimensionInput = {
   indexKey: string | null;
   indexName: string;
@@ -35,6 +28,16 @@ type DimensionRow = Awaited<
 type DimensionCategoryRow = Awaited<
   ReturnType<typeof prisma.dimensionCategory.findMany>
 >[number];
+
+type DimensionValidationFields = {
+  indexKey: string;
+  indexName: string;
+  categoryId: number;
+  dataType: string;
+  scaleMin: number | null;
+  scaleMax: number | null;
+  options: DimensionOption[];
+};
 
 export function mapDimensionRow(
   row: DimensionRow & { category: { category_name: string } },
@@ -69,63 +72,104 @@ export function mapCategoryRow(row: DimensionCategoryRow): DimensionCategory {
   };
 }
 
-export function validateDimensionFields(fields: {
-  indexKey: string;
-  indexName: string;
-  categoryId: number;
-  dataType: string;
-  scaleMin: number | null;
-  scaleMax: number | null;
-  options: DimensionOption[];
-}): DimensionFormState['errors'] {
-  const errors: DimensionFormState['errors'] = {};
-  const normalizedType = fields.dataType as DimensionDataType;
-
-  if (!fields.indexName) errors.indexName = 'Dimension name is required';
-  else if (fields.indexName.length > 50)
-    errors.indexName = 'Dimension name must be 50 characters or less';
-
-  if (fields.indexKey && fields.indexKey.length > 50)
-    errors.indexKey = 'Dimension key must be 50 characters or less';
-  else if (fields.indexKey && !/^[A-Z0-9_]+$/.test(fields.indexKey))
-    errors.indexKey =
-      'Dimension key must contain only uppercase letters, numbers, or underscores';
-
-  if (!Number.isInteger(fields.categoryId) || fields.categoryId <= 0) {
-    errors.categoryId = 'Please select a category';
+function getIndexNameError(indexName: string): string | undefined {
+  if (!indexName) {
+    return 'Dimension name is required';
   }
 
-  if (!['numeric', 'scale', 'text'].includes(normalizedType)) {
-    errors.dataType = 'Data type must be numeric, scale, or text';
+  if (indexName.length > 50) {
+    return 'Dimension name must be 50 characters or less';
   }
 
-  if (normalizedType === 'scale') {
-    if (fields.scaleMin === null || Number.isNaN(fields.scaleMin)) {
-      errors.scaleMin = 'Scale min is required for scale type';
-    }
-    if (fields.scaleMax === null || Number.isNaN(fields.scaleMax)) {
-      errors.scaleMax = 'Scale max is required for scale type';
-    }
-    if (
-      fields.scaleMin !== null &&
-      fields.scaleMax !== null &&
-      fields.scaleMin >= fields.scaleMax
-    ) {
-      errors.scaleMax = 'Scale max must be greater than scale min';
-    }
+  return undefined;
+}
+
+function getIndexKeyError(indexKey: string): string | undefined {
+  if (!indexKey) {
+    return undefined;
   }
 
-  if (fields.options.some(option => !option.label || !option.value)) {
-    errors.options = 'Each option requires both a label and a value';
-  } else if (
-    fields.options.some(
-      option => option.label.length > 50 || option.value.length > 50
-    )
+  if (indexKey.length > 50) {
+    return 'Dimension key must be 50 characters or less';
+  }
+
+  if (!/^[A-Z0-9_]+$/.test(indexKey)) {
+    return 'Dimension key must contain only uppercase letters, numbers, or underscores';
+  }
+
+  return undefined;
+}
+
+function getCategoryIdError(categoryId: number): string | undefined {
+  if (!Number.isInteger(categoryId) || categoryId <= 0) {
+    return 'Please select a category';
+  }
+
+  return undefined;
+}
+
+function getDataTypeError(dataType: string): string | undefined {
+  if (!['numeric', 'scale', 'text'].includes(dataType)) {
+    return 'Data type must be numeric, scale, or text';
+  }
+
+  return undefined;
+}
+
+function getScaleErrors(fields: DimensionValidationFields) {
+  const errors: Pick<DimensionFormState['errors'], 'scaleMin' | 'scaleMax'> =
+    {};
+
+  if (fields.dataType !== 'scale') {
+    return errors;
+  }
+
+  if (fields.scaleMin === null || Number.isNaN(fields.scaleMin)) {
+    errors.scaleMin = 'Scale min is required for scale type';
+  }
+
+  if (fields.scaleMax === null || Number.isNaN(fields.scaleMax)) {
+    errors.scaleMax = 'Scale max is required for scale type';
+  }
+
+  if (
+    fields.scaleMin !== null &&
+    fields.scaleMax !== null &&
+    fields.scaleMin >= fields.scaleMax
   ) {
-    errors.options = 'Option label and value must be 50 characters or less';
+    errors.scaleMax = 'Scale max must be greater than scale min';
   }
 
   return errors;
+}
+
+function getOptionsError(options: DimensionOption[]): string | undefined {
+  if (options.some(option => !option.label || !option.value)) {
+    return 'Each option requires both a label and a value';
+  }
+
+  if (
+    options.some(option => option.label.length > 50 || option.value.length > 50)
+  ) {
+    return 'Option label and value must be 50 characters or less';
+  }
+
+  return undefined;
+}
+
+export function validateDimensionFields(
+  fields: DimensionValidationFields
+): DimensionFormState['errors'] {
+  const normalizedType = fields.dataType as DimensionDataType;
+
+  return {
+    indexName: getIndexNameError(fields.indexName),
+    indexKey: getIndexKeyError(fields.indexKey),
+    categoryId: getCategoryIdError(fields.categoryId),
+    dataType: getDataTypeError(normalizedType),
+    ...getScaleErrors(fields),
+    options: getOptionsError(fields.options),
+  };
 }
 
 export function validateDimensionCategoryFields(fields: {
@@ -403,3 +447,10 @@ export async function deleteDimensionCategory(id: number): Promise<void> {
   }
   await prisma.dimensionCategory.delete({ where: { id } });
 }
+
+export {
+  type Dimension as DimensionData,
+  type DimensionCategory as DimensionCategoryData,
+  type DimensionFormState,
+  type DimensionCategoryFormState,
+} from '@/types/dimension-type';

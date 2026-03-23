@@ -21,7 +21,7 @@ export type Dimension = {
   indexNotes?: string | null;
   categoryId: number;
   categoryName: string;
-  dataType: DimensionDataType | string;
+  dataType: string;
   hardFilter: boolean;
   scaleMin?: number | null;
   scaleMax?: number | null;

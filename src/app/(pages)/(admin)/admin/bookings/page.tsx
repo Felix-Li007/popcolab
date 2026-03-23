@@ -6,6 +6,8 @@ type Props = {
     | Record<string, string | string[] | undefined>;
 };
 
-export default async function AdminBookingsPage({ searchParams }: Props) {
+export default async function AdminBookingsPage({
+  searchParams,
+}: Readonly<Props>) {
   return <OrderContent searchParams={searchParams} />;
 }

@@ -235,19 +235,17 @@ export function validateUserEditableUpdateInput(
 }
 
 async function hasUserStatusColumn(): Promise<boolean> {
-  if (!statusColumnCheckPromise) {
-    statusColumnCheckPromise = prisma.$queryRaw<{ exists: boolean }[]>`
-        SELECT EXISTS (
-          SELECT 1
-          FROM information_schema.columns
-          WHERE table_schema = current_schema()
-            AND table_name = 'user'
-            AND column_name = 'status'
-        ) AS "exists"
-      `
-      .then(rows => Boolean(rows[0]?.exists))
-      .catch(() => false);
-  }
+  statusColumnCheckPromise ??= prisma.$queryRaw<{ exists: boolean }[]>`
+      SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = current_schema()
+          AND table_name = 'user'
+          AND column_name = 'status'
+      ) AS "exists"
+    `
+    .then(rows => Boolean(rows[0]?.exists))
+    .catch(() => false);
 
   return statusColumnCheckPromise;
 }

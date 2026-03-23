@@ -8,7 +8,7 @@ type Props = {
   onViewMembers: (team: AdminTeamCardItem) => void;
 };
 
-function EyeIcon({ className }: { className: string }) {
+function EyeIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -33,7 +33,7 @@ function EyeIcon({ className }: { className: string }) {
   );
 }
 
-export default function TeamCard({ team, onViewMembers }: Props) {
+export default function TeamCard({ team, onViewMembers }: Readonly<Props>) {
   const avatarText = team.name.slice(0, 1).toUpperCase() || '?';
   const previewMembers = team.members.slice(0, 2);
 

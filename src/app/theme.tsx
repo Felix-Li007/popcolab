@@ -2,7 +2,9 @@
 import { ClerkProvider } from '@clerk/nextjs';
 import { dark } from '@clerk/ui/themes';
 import { useTheme } from 'next-themes';
-export function ThemedClerk({ children }: { children: React.ReactNode }) {
+export function ThemedClerk({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   const { resolvedTheme } = useTheme();
   return (
     <ClerkProvider

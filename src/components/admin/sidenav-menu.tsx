@@ -11,11 +11,11 @@ export default function Sidebar({
   badgeCounts,
   onNavigate,
   className = '',
-}: {
+}: Readonly<{
   badgeCounts?: BadgeCounts;
   onNavigate?: () => void;
   className?: string;
-}) {
+}>) {
   const groups = menuSection.map(section => ({
     title: section.title,
     items: section.items.map(item => ({

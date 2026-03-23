@@ -102,9 +102,9 @@ export default function ExperiencesCarousel() {
 
         {/* Pagination Dots */}
         <div className={styles['carousel-pagination']}>
-          {experiences.map((_, idx) => (
+          {experiences.map((experience, idx) => (
             <button
-              key={idx}
+              key={experience.id}
               onClick={() => setCurrentIndex(idx)}
               className={`${styles['pagination-dot']} ${idx === currentIndex ? styles.active : ''}`}
             />

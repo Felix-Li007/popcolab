@@ -60,7 +60,7 @@ function getStatusContent(status: string) {
 export default async function ExperienceCheckoutResultPage({
   params,
   searchParams,
-}: PageProps) {
+}: Readonly<PageProps>) {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated || !authContext.user) {
     redirect('/sign-in');

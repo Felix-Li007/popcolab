@@ -10,7 +10,7 @@ export default function DimensionStatsBar({
   totalCount,
   hardFilterCount,
   softFilterCount,
-}: Props) {
+}: Readonly<Props>) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       <StatsCard

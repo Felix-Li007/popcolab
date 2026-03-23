@@ -256,7 +256,7 @@ export default function OverviewContent({
   initialPersonalities,
   growthMetrics,
   personalityActions,
-}: OverviewContentProps) {
+}: Readonly<OverviewContentProps>) {
   const [personalities, setPersonalities] =
     useState<Personality[]>(initialPersonalities);
 

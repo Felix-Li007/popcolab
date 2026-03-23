@@ -46,7 +46,7 @@ function createInviteRow(): InviteRow {
 export default function RequestInviteForm({
   requestId,
   existingInvites,
-}: Props) {
+}: Readonly<Props>) {
   const router = useRouter();
   const [rows, setRows] = useState<InviteRow[]>([createInviteRow()]);
   const [state, formAction, isPending] = useActionState(

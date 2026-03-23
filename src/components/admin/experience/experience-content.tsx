@@ -94,7 +94,7 @@ export default function ExperienceContent({
   providers,
   categories,
   dimensions,
-}: Props) {
+}: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
@@ -275,23 +275,23 @@ export default function ExperienceContent({
 
   function setSelection(id: number | null) {
     setSelectedId(id);
-    if (id !== null) {
+    if (id === null) {
+      router.replace('/admin/experiences', { scroll: false });
+    } else {
       router.replace(`/admin/experiences?id=${id}`, {
         scroll: false,
       });
-    } else {
-      router.replace('/admin/experiences', { scroll: false });
     }
   }
 
   function setViewSelection(id: number | null) {
     setViewId(id);
-    if (id !== null) {
+    if (id === null) {
+      router.replace('/admin/experiences', { scroll: false });
+    } else {
       router.replace(`/admin/experiences?view=${id}`, {
         scroll: false,
       });
-    } else {
-      router.replace('/admin/experiences', { scroll: false });
     }
   }
 
@@ -313,7 +313,7 @@ export default function ExperienceContent({
 
   function handleDelete(id: number, title: string) {
     if (
-      !window.confirm(
+      !globalThis.confirm(
         `Delete this experience?\n\n"${title}"\n\nThis action cannot be undone.`
       )
     ) {
@@ -341,10 +341,9 @@ export default function ExperienceContent({
     prevState: ExperienceFormState,
     formData: FormData
   ) => Promise<ExperienceFormState> =
-    selectedId !== null
-      ? updateExperienceAction.bind(null, selectedId)
-      : createExperienceAction;
-
+    selectedId === null
+      ? createExperienceAction
+      : updateExperienceAction.bind(null, selectedId);
   return (
     <>
       <div className={styles.root}>

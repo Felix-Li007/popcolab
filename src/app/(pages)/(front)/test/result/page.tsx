@@ -11,9 +11,9 @@ type PersonalityMatch = {
 
 export default async function ResultPage({
   searchParams,
-}: {
+}: Readonly<{
   searchParams: Promise<{ matches?: string }>;
-}) {
+}>) {
   const params = await searchParams;
   const matchesParam = params.matches ?? '';
 
@@ -24,7 +24,7 @@ export default async function ResultPage({
     .filter(Boolean)
     .map(pair => {
       const [key, pct] = pair.split(':');
-      return { key: key ?? '', matchPercent: parseInt(pct ?? '0', 10) };
+      return { key: key ?? '', matchPercent: Number.parseInt(pct ?? '0', 10) };
     })
     .filter(p => p.key);
 

@@ -1,7 +1,7 @@
 import type { UserStatus } from '@/constants/user-status';
 import type { WorkMode } from '@/constants/work-mode';
 
-export type { UserStatus };
+export type { UserStatus } from '@/constants/user-status';
 
 export type AdminUsersStatusFilter = 'all' | UserStatus;
 

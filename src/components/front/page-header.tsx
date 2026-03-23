@@ -15,11 +15,11 @@ export default function Header({
   userDisplayName,
   userRoleLabel,
   initialCompany,
-}: {
+}: Readonly<{
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
-}) {
+}>) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const closeMenu = () => setIsOpen(false);

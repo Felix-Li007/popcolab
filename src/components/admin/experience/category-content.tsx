@@ -42,7 +42,59 @@ type Props = {
   initialData: ExperienceCategory[];
 };
 
-export default function ExperienceCategoryContent({ initialData }: Props) {
+function getCategoryModalTitle(intent: FormIntent | undefined) {
+  if (intent === 'create-root') {
+    return 'New Root Category';
+  }
+
+  if (intent === 'create-child') {
+    return 'New Child Category';
+  }
+
+  return 'Edit Category';
+}
+
+function getCategorySubmitLabel(intent: FormIntent | undefined) {
+  if (intent === 'create-root') {
+    return 'Create Root';
+  }
+
+  if (intent === 'create-child') {
+    return 'Create Child';
+  }
+
+  return 'Save Changes';
+}
+
+function getCategoryStatusBadgeVariant(status: string) {
+  const normalizedStatus = status.toLowerCase();
+
+  if (normalizedStatus === 'active') {
+    return 'success';
+  }
+
+  if (normalizedStatus === 'inactive') {
+    return 'secondary';
+  }
+
+  return 'info';
+}
+
+function getCategoryFormAction(formDraft: FormDraft) {
+  if (!formDraft) {
+    return undefined;
+  }
+
+  if (formDraft.categoryId !== null) {
+    return updateExperienceCategoryAction.bind(null, formDraft.categoryId);
+  }
+
+  return createExperienceCategoryAction;
+}
+
+export default function ExperienceCategoryContent({
+  initialData,
+}: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
@@ -86,15 +138,14 @@ export default function ExperienceCategoryContent({ initialData }: Props) {
   const depthById = useMemo(() => collectCategoryDepths(tree), [tree]);
 
   const selectedCategoryDepth =
-    selectedCategory !== null
-      ? (depthById.get(selectedCategory.id) ?? 0)
-      : null;
+    selectedCategory === null
+      ? null
+      : (depthById.get(selectedCategory.id) ?? 0);
 
   const activeDraftSubtreeHeight =
-    activeDraftCategory !== undefined
-      ? getCategorySubtreeHeight(tree, activeDraftCategory.id)
-      : 0;
-
+    activeDraftCategory === undefined
+      ? 0
+      : getCategorySubtreeHeight(tree, activeDraftCategory.id);
   const maxParentDepth = MAX_CATEGORY_DEPTH - 1 - activeDraftSubtreeHeight;
 
   const parentOptions: ExperienceCategoryOption[] = useMemo(
@@ -111,8 +162,8 @@ export default function ExperienceCategoryContent({ initialData }: Props) {
     (categoryId: number | null) => {
       const params = new URLSearchParams(searchParams.toString());
 
-      if (categoryId !== null) params.set('id', String(categoryId));
-      else params.delete('id');
+      if (categoryId === null) params.delete('id');
+      else params.set('id', String(categoryId));
 
       const query = params.toString();
       router.replace(
@@ -144,7 +195,7 @@ export default function ExperienceCategoryContent({ initialData }: Props) {
   const handleDelete = useCallback(
     (category: ExperienceCategory) => {
       if (
-        !window.confirm(
+        !globalThis.confirm(
           `Delete this category?\n\n"${category.title}"\n\nThis action cannot be undone.`
         )
       ) {
@@ -161,7 +212,7 @@ export default function ExperienceCategoryContent({ initialData }: Props) {
             error instanceof Error
               ? error.message
               : 'Failed to delete category. Please try again.';
-          window.alert(message);
+          globalThis.alert(message);
         }
       });
     },
@@ -183,25 +234,10 @@ export default function ExperienceCategoryContent({ initialData }: Props) {
         prevState: ExperienceCategoryFormState,
         formData: FormData
       ) => Promise<ExperienceCategoryFormState>)
-    | undefined = formDraft
-    ? formDraft.categoryId !== null
-      ? updateExperienceCategoryAction.bind(null, formDraft.categoryId)
-      : createExperienceCategoryAction
-    : undefined;
+    | undefined = getCategoryFormAction(formDraft);
 
-  const modalTitle =
-    formDraft?.intent === 'create-root'
-      ? 'New Root Category'
-      : formDraft?.intent === 'create-child'
-        ? 'New Child Category'
-        : 'Edit Category';
-
-  const submitLabel =
-    formDraft?.intent === 'create-root'
-      ? 'Create Root'
-      : formDraft?.intent === 'create-child'
-        ? 'Create Child'
-        : 'Save Changes';
+  const modalTitle = getCategoryModalTitle(formDraft?.intent);
+  const submitLabel = getCategorySubmitLabel(formDraft?.intent);
 
   return (
     <div className={styles.root}>
@@ -309,13 +345,9 @@ export default function ExperienceCategoryContent({ initialData }: Props) {
                     </h3>
                   </div>
                   <Badge
-                    variant={
-                      selectedCategory.status.toLowerCase() === 'active'
-                        ? 'success'
-                        : selectedCategory.status.toLowerCase() === 'inactive'
-                          ? 'secondary'
-                          : 'info'
-                    }
+                    variant={getCategoryStatusBadgeVariant(
+                      selectedCategory.status
+                    )}
                     size="sm"
                   >
                     {selectedCategory.status}

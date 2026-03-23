@@ -12,7 +12,9 @@ const PREFERRED_CONTACT_OPTIONS = [
   { value: 'phone', label: 'Phone' },
 ];
 
-export default function ProfileForm({ data }: { data: UserProfileData }) {
+export default function ProfileForm({
+  data,
+}: Readonly<{ data: UserProfileData }>) {
   const [isPending, startTransition] = useTransition();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function ProfileForm({ data }: { data: UserProfileData }) {
     setError(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     setSuccess(false);
     setError(null);
@@ -55,11 +57,17 @@ export default function ProfileForm({ data }: { data: UserProfileData }) {
     });
   }
 
+  const emailFieldId = 'profile-email';
+  const consentFieldId = 'profile-consent';
+
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <div className={styles.field}>
-        <label className={styles.label}>Email address</label>
+        <label htmlFor={emailFieldId} className={styles.label}>
+          Email address
+        </label>
         <input
+          id={emailFieldId}
           type="email"
           value={data.email}
           readOnly
@@ -171,22 +179,23 @@ export default function ProfileForm({ data }: { data: UserProfileData }) {
 
       <div className={styles.consentCard}>
         <span className={styles.consentTag}>Privacy</span>
-        <label className={styles.consentRow}>
+        <div className={styles.consentRow}>
           <input
+            id={consentFieldId}
             name="consentGiven"
             type="checkbox"
             checked={values.consentGiven}
             onChange={handleChange}
             className={styles.consentCheckbox}
           />
-          <div>
+          <label htmlFor={consentFieldId}>
             <span className={styles.consentTitle}>Consent given</span>
             <span className={styles.consentDescription}>
               Allow Pop CoLab to use this profile information for account and
               service coordination.
             </span>
-          </div>
-        </label>
+          </label>
+        </div>
       </div>
 
       {error && <p className={styles.statusError}>{error}</p>}

@@ -41,7 +41,7 @@ export default function QuestionCard({
   onView,
   onEdit,
   onDelete,
-}: Props) {
+}: Readonly<Props>) {
   const meta = QUESTION_TYPE_META[question.type] ?? {
     label: question.type,
     icon: '?',
@@ -49,12 +49,15 @@ export default function QuestionCard({
   };
 
   return (
-    <div
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col gap-3 cursor-pointer group"
-      onClick={() => question.id && onView(question.id)}
-    >
+    <article className="relative bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col gap-3 cursor-pointer group">
+      <button
+        type="button"
+        onClick={() => question.id && onView(question.id)}
+        aria-label={`View question ${question.text}`}
+        className="absolute inset-0 z-0"
+      />
       {/* Header row */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="relative z-10 flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-lg leading-none shrink-0">{meta.icon}</span>
           <span
@@ -70,10 +73,7 @@ export default function QuestionCard({
         </div>
 
         {/* Action buttons – show on hover */}
-        <div
-          className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-          onClick={e => e.stopPropagation()}
-        >
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
           <Button
             variant="icon"
             size="xs"
@@ -111,22 +111,22 @@ export default function QuestionCard({
       </div>
 
       {/* Question text */}
-      <p className="font-semibold text-gray-800 line-clamp-2 leading-snug">
+      <p className="relative z-10 font-semibold text-gray-800 line-clamp-2 leading-snug">
         {question.text}
       </p>
 
       {/* Description */}
       {question.description && (
-        <p className="text-xs text-gray-400 line-clamp-1">
+        <p className="relative z-10 text-xs text-gray-400 line-clamp-1">
           {question.description}
         </p>
       )}
 
       {/* Options preview */}
       {question.options.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {question.options.slice(0, 3).map((o, i) => (
-            <Badge key={i} variant="default" size="xs">
+        <div className="relative z-10 flex flex-wrap gap-1">
+          {question.options.slice(0, 3).map(o => (
+            <Badge key={o.value} variant="default" size="xs">
               {o.label}
             </Badge>
           ))}
@@ -140,7 +140,7 @@ export default function QuestionCard({
 
       {/* Dimensions preview */}
       {question.dimensions[0] && (
-        <div className="flex flex-wrap gap-1 pt-1 border-t border-gray-50 mt-auto">
+        <div className="relative z-10 flex flex-wrap gap-1 pt-1 border-t border-gray-50 mt-auto">
           <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
             <svg
               viewBox="0 0 12 12"
@@ -164,6 +164,6 @@ export default function QuestionCard({
           )}
         </div>
       )}
-    </div>
+    </article>
   );
 }

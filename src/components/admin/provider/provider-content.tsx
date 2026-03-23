@@ -22,7 +22,7 @@ type Props = {
   initialData: Provider[];
 };
 
-export default function ProviderContent({ initialData }: Props) {
+export default function ProviderContent({ initialData }: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
@@ -33,19 +33,20 @@ export default function ProviderContent({ initialData }: Props) {
   const [viewId, setViewId] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [page, setPage] = useState(1);
+  const isValidSelectedId = idParam !== null && /^\d+$/.test(idParam);
 
   useEffect(() => {
     setProviders(initialData);
   }, [initialData]);
 
   useEffect(() => {
-    if (!idParam || !/^\d+$/.test(idParam)) {
+    if (!isValidSelectedId) {
       setSelectedId(null);
       return;
     }
-    setSelectedId(Number(idParam));
+    setSelectedId(Number(idParam ?? 0));
     setIsCreating(false);
-  }, [idParam]);
+  }, [idParam, isValidSelectedId]);
 
   useEffect(() => {
     setPage(1);
@@ -101,13 +102,14 @@ export default function ProviderContent({ initialData }: Props) {
 
   function setSelection(id: number | null) {
     setSelectedId(id);
-    if (id !== null) {
-      router.replace(`/admin/experiences/providers?id=${id}`, {
-        scroll: false,
-      });
-    } else {
+    if (id === null) {
       router.replace('/admin/experiences/providers', { scroll: false });
+      return;
     }
+
+    router.replace(`/admin/experiences/providers?id=${id}`, {
+      scroll: false,
+    });
   }
 
   function handleCreate() {
@@ -127,11 +129,11 @@ export default function ProviderContent({ initialData }: Props) {
   }
 
   function handleDelete(id: number, providerLabel: string) {
-    if (
-      !window.confirm(
-        `Delete this provider?\n\n"${providerLabel}"\n\nLinked experiences must be reassigned first.`
-      )
-    ) {
+    const shouldDelete = globalThis.confirm(
+      `Delete this provider?\n\n"${providerLabel}"\n\nLinked experiences must be reassigned first.`
+    );
+
+    if (!shouldDelete) {
       return;
     }
 
@@ -152,13 +154,14 @@ export default function ProviderContent({ initialData }: Props) {
     });
   }
 
-  const panelAction: (
+  let panelAction: (
     prevState: ProviderFormState,
     formData: FormData
-  ) => Promise<ProviderFormState> =
-    selectedId !== null
-      ? updateProviderAction.bind(null, selectedId)
-      : createProviderAction;
+  ) => Promise<ProviderFormState> = createProviderAction;
+
+  if (selectedId !== null) {
+    panelAction = updateProviderAction.bind(null, selectedId);
+  }
 
   return (
     <>

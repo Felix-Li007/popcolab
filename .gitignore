@@ -70,4 +70,7 @@ session.json
 prisma
 !/prisma/
 
-mcp.json
+.vscode
+.scannerwork
+.sonarlint
+.sonar*

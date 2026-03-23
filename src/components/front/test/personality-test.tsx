@@ -12,7 +12,7 @@ type Props = {
   questions: Question[];
 };
 
-export default function PersonalityTest({ questions }: Props) {
+export default function PersonalityTest({ questions }: Readonly<Props>) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,6 +22,13 @@ export default function PersonalityTest({ questions }: Props) {
   const question = questions[currentIndex];
   const isLast = currentIndex === questions.length - 1;
   const hasAnswered = answers.has(question.id!);
+  let submitButtonLabel = 'Next';
+
+  if (isPending) {
+    submitButtonLabel = 'Submitting...';
+  } else if (isLast) {
+    submitButtonLabel = 'See My Result';
+  }
 
   // multi_choice: allow proceeding with 0 selections
   // text_input: require 1–100 words
@@ -100,7 +107,7 @@ export default function PersonalityTest({ questions }: Props) {
           disabled={!canProceed || isPending}
           className="px-6 py-2 text-sm font-semibold text-white rounded-lg bg-teal-deep hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
-          {isPending ? 'Submitting...' : isLast ? 'See My Result' : 'Next'}
+          {submitButtonLabel}
         </button>
       </div>
     </div>

@@ -120,18 +120,18 @@ function PaymentForm({
   experienceId,
   orderId,
   quote,
-}: {
+}: Readonly<{
   experienceId: number;
   orderId: number;
   quote: CheckoutQuote;
-}) {
+}>) {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!stripe || !elements) {
@@ -151,7 +151,7 @@ function PaymentForm({
       return;
     }
 
-    const returnUrl = `${window.location.origin}${buildDashboardExperienceCheckoutResultPath(experienceId)}?orderId=${orderId}`;
+    const returnUrl = `${globalThis.location.origin}${buildDashboardExperienceCheckoutResultPath(experienceId)}?orderId=${orderId}`;
     const result = await stripe.confirmPayment({
       elements,
       redirect: 'if_required',
@@ -233,7 +233,7 @@ export default function ExperienceCheckoutClient({
   experience,
   defaultRequestedHours,
   minRequestedHours,
-}: ExperienceCheckoutClientProps) {
+}: Readonly<ExperienceCheckoutClientProps>) {
   const [requestedHours, setRequestedHours] = useState(
     String(defaultRequestedHours)
   );
@@ -265,7 +265,7 @@ export default function ExperienceCheckoutClient({
   }
 
   async function handlePrepareCheckout(
-    event: React.FormEvent<HTMLFormElement>
+    event: React.SubmitEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
@@ -408,7 +408,7 @@ export default function ExperienceCheckoutClient({
               step="1"
               value={requestedHours}
               helperText={
-                experience.pricing.startingHour !== null
+                experience.pricing.startingHour
                   ? `Minimum ${minRequestedHours} hours`
                   : 'Whole hours only'
               }

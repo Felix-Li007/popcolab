@@ -22,7 +22,7 @@ function formatDate(value: Date | null) {
 export default async function InvitationPage({
   params,
   searchParams,
-}: PageProps) {
+}: Readonly<PageProps>) {
   const [{ token }, query, authContext] = await Promise.all([
     params,
     searchParams,

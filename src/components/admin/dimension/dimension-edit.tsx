@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useId, useState } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
 import type {
@@ -46,9 +46,18 @@ type FormBodyProps = {
 };
 
 type OptionDraft = {
+  id: string;
   label: string;
   value: string;
 };
+
+function createOptionDraft(label = '', value = ''): OptionDraft {
+  return {
+    id: crypto.randomUUID(),
+    label,
+    value,
+  };
+}
 
 function DimensionFormBody({
   action,
@@ -57,8 +66,10 @@ function DimensionFormBody({
   categories,
   onSuccess,
   onClose,
-}: FormBodyProps) {
+}: Readonly<FormBodyProps>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const formFieldId = useId();
+  let submitLabel = 'Create Dimension';
   const [dataType, setDataType] = useState<DimensionDataType>(
     (initial?.dataType as DimensionDataType) ?? 'numeric'
   );
@@ -67,26 +78,38 @@ function DimensionFormBody({
   );
   const [options, setOptions] = useState<OptionDraft[]>(
     initial?.options?.map(opt => ({
+      id: crypto.randomUUID(),
       label: opt.label,
       value: opt.value,
-    })) ?? [{ label: '', value: '' }]
+    })) ?? [createOptionDraft()]
   );
   const [selectedForms, setSelectedForms] = useState<IntakeForm[]>(
     initial?.formNames ?? []
   );
+  const indexNameId = `${formFieldId}-index-name`;
+  const categoryId = `${formFieldId}-category`;
+  const formNameLegendId = `${formFieldId}-form-name`;
+  const dataTypeLegendId = `${formFieldId}-data-type`;
+  const allowedOptionsId = `${formFieldId}-allowed-options`;
+
+  if (isPending) {
+    submitLabel = 'Saving…';
+  } else if (isEdit) {
+    submitLabel = 'Save Changes';
+  }
 
   useEffect(() => {
     if (state.success) onSuccess();
   }, [state.success, onSuccess]);
 
   function addOption() {
-    setOptions(prev => [...prev, { label: '', value: '' }]);
+    setOptions(prev => [...prev, createOptionDraft()]);
   }
 
   function removeOption(index: number) {
     setOptions(prev =>
       prev.length === 1
-        ? [{ label: '', value: '' }]
+        ? [createOptionDraft()]
         : prev.filter((_, i) => i !== index)
     );
   }
@@ -121,10 +144,14 @@ function DimensionFormBody({
         )}
 
         <div>
-          <label className="block text-body font-bold text-foreground/65 uppercase tracking-wider mb-2">
+          <label
+            htmlFor={indexNameId}
+            className="block text-body font-bold text-foreground/65 uppercase tracking-wider mb-2"
+          >
             Dimension Name <span className="text-red-500">*</span>
           </label>
           <input
+            id={indexNameId}
             name="indexName"
             type="text"
             placeholder="e.g. Team Collaboration"
@@ -151,10 +178,14 @@ function DimensionFormBody({
         />
 
         <div>
-          <label className="block text-body font-bold text-foreground/75 mb-2">
+          <label
+            htmlFor={categoryId}
+            className="block text-body font-bold text-foreground/75 mb-2"
+          >
             CATEGORY <span className="text-magenta">*</span>
           </label>
           <select
+            id={categoryId}
             name="categoryId"
             title="Dimension category"
             aria-label="Dimension category"
@@ -178,10 +209,13 @@ function DimensionFormBody({
           )}
         </div>
 
-        <div>
-          <label className="block text-body font-bold text-foreground/75 mb-2">
+        <fieldset>
+          <legend
+            id={formNameLegendId}
+            className="block text-body font-bold text-foreground/75 mb-2"
+          >
             FORM NAME
-          </label>
+          </legend>
           <div className="flex flex-wrap gap-2">
             {FORM_OPTIONS.map(option => {
               const checked = selectedForms.includes(option.value);
@@ -210,13 +244,16 @@ function DimensionFormBody({
           <p className="mt-1 text-caption text-foreground/45">
             Select which intake forms should use this dimension.
           </p>
-        </div>
+        </fieldset>
 
-        <div>
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <label className="block text-body font-bold text-foreground/75">
-              DATA TYPE <span className="text-red-500">*</span>
-            </label>
+        <fieldset>
+          <legend
+            id={dataTypeLegendId}
+            className="block text-body font-bold text-foreground/75"
+          >
+            DATA TYPE <span className="text-red-500">*</span>
+          </legend>
+          <div className="mb-2 mt-2 flex items-center justify-between gap-3">
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <span className="text-caption font-semibold text-foreground/75">
                 Hard Filter
@@ -255,7 +292,7 @@ function DimensionFormBody({
               {state.errors.dataType}
             </p>
           )}
-        </div>
+        </fieldset>
 
         {dataType === 'scale' && (
           <div className="grid grid-cols-2 gap-3">
@@ -281,13 +318,16 @@ function DimensionFormBody({
         )}
 
         <div>
-          <label className="text-body font-bold text-foreground/75">
+          <p
+            id={allowedOptionsId}
+            className="text-body font-bold text-foreground/75"
+          >
             ALLOWED OPTIONS
-          </label>
+          </p>
           <div className="mt-2 space-y-2">
             {options.map((option, index) => (
               <div
-                key={index}
+                key={option.id}
                 className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2"
               >
                 <input
@@ -348,7 +388,7 @@ function DimensionFormBody({
           Cancel
         </Button>
         <Button type="submit" variant="primary" size="md" disabled={isPending}>
-          {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Dimension'}
+          {submitLabel}
         </Button>
       </div>
     </form>
@@ -363,7 +403,7 @@ export default function DimensionForm({
   initial,
   categories,
   onSuccess,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen) return null;
 
   const formKey = `${isEdit ? (initial?.id ?? 'edit') : 'new'}-${categories.length}`;

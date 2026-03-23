@@ -28,7 +28,7 @@ async function computeNumericValue(
   });
 
   const total = options.reduce((sum, o) => {
-    return sum + (o.option_score !== null ? Number(o.option_score) : 0);
+    return sum + Number(o.option_score ?? 0);
   }, 0);
 
   return {
@@ -47,7 +47,7 @@ async function getDimensionMappings(
   return rows.map(r => ({
     questionId: r.question_id,
     dimensionId: r.dimension_id,
-    weight: r.weight_rate !== null ? Number(r.weight_rate) : 1,
+    weight: Number(r.weight_rate ?? 1),
   }));
 }
 

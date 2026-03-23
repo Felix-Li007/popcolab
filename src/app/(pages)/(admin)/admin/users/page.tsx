@@ -29,7 +29,7 @@ type Props = {
   searchParams?: Promise<SearchParamsInput> | SearchParamsInput;
 };
 
-export default async function UsersPage({ searchParams }: Props) {
+export default async function UsersPage({ searchParams }: Readonly<Props>) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const search = getFirstValue(resolvedSearchParams.q)?.trim() ?? '';
   const status = parseStatus(getFirstValue(resolvedSearchParams.status));

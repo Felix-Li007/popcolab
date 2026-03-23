@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 import { RequestInvitationEmail } from '@/emails/templates/request-invitation-template';
 import { InviteStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
@@ -296,7 +296,7 @@ export async function getInvitationByToken(
 
   const isExpired =
     invitation.expired_at !== null &&
-    invitation.expired_at.getTime() < new Date().getTime();
+    invitation.expired_at.getTime() < Date.now();
 
   return {
     id: invitation.id,

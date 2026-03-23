@@ -13,13 +13,13 @@ export default function AdminShell({
   userDisplayName,
   userRoleLabel,
   initialCompany,
-}: {
+}: Readonly<{
   children: React.ReactNode;
   badgeCounts?: BadgeCounts;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
-}) {
+}>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {

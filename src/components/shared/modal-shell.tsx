@@ -40,7 +40,7 @@ export default function ModalShell({
   bodyClassName,
   panelStyle,
   showCloseButton = true,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen) return null;
 
   return (

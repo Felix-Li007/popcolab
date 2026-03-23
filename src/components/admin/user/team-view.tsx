@@ -15,7 +15,11 @@ type Props = {
   onClose: () => void;
 };
 
-export default function TeamViewModal({ team, isOpen, onClose }: Props) {
+export default function TeamViewModal({
+  team,
+  isOpen,
+  onClose,
+}: Readonly<Props>) {
   const [keyword, setKeyword] = useState('');
   const normalizedKeyword = keyword.trim().toLowerCase();
   const filteredMembers = useMemo(() => {
@@ -34,6 +38,31 @@ export default function TeamViewModal({ team, isOpen, onClose }: Props) {
       return haystack.includes(normalizedKeyword);
     });
   }, [team, normalizedKeyword]);
+
+  let membersContent = (
+    <div className={styles.membersList}>
+      {filteredMembers.map(member => (
+        <div key={member.id} className={styles.memberCard}>
+          <div className={styles.memberAvatar} aria-hidden="true">
+            {getTeamMemberAvatarText(member)}
+          </div>
+          <div className={styles.memberBody}>
+            <p className={styles.memberName}>{getTeamMemberNameLine(member)}</p>
+            <p className={styles.memberEmail}>{member.email}</p>
+            <p className={styles.memberRole}>Role: {member.role}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  if (team?.members.length === 0) {
+    membersContent = <p className={styles.emptyText}>No team members found</p>;
+  } else if (filteredMembers.length === 0) {
+    membersContent = (
+      <p className={styles.emptyText}>No matched team members found</p>
+    );
+  }
 
   if (!isOpen || !team) return null;
 
@@ -59,28 +88,7 @@ export default function TeamViewModal({ team, isOpen, onClose }: Props) {
               data-testid="team-member-search"
             />
           </div>
-          {team.members.length === 0 ? (
-            <p className={styles.emptyText}>No team members found</p>
-          ) : filteredMembers.length === 0 ? (
-            <p className={styles.emptyText}>No matched team members found</p>
-          ) : (
-            <div className={styles.membersList}>
-              {filteredMembers.map(member => (
-                <div key={member.id} className={styles.memberCard}>
-                  <div className={styles.memberAvatar} aria-hidden="true">
-                    {getTeamMemberAvatarText(member)}
-                  </div>
-                  <div className={styles.memberBody}>
-                    <p className={styles.memberName}>
-                      {getTeamMemberNameLine(member)}
-                    </p>
-                    <p className={styles.memberEmail}>{member.email}</p>
-                    <p className={styles.memberRole}>Role: {member.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          {membersContent}
         </div>
       </div>
     </ModalShell>

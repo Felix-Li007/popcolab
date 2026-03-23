@@ -26,7 +26,19 @@ function renderValue(value: string | null | undefined) {
   return value && value.trim().length > 0 ? value : '—';
 }
 
-export default function UserViewModal({ user, isOpen, onClose }: Props) {
+function getConsentLabel(consentGiven: boolean | null) {
+  if (consentGiven === null) {
+    return '—';
+  }
+
+  return consentGiven ? 'Yes' : 'No';
+}
+
+export default function UserViewModal({
+  user,
+  isOpen,
+  onClose,
+}: Readonly<Props>) {
   if (!isOpen || !user) return null;
 
   const statusBadge = USER_STATUS_BADGE[user.status];
@@ -76,13 +88,7 @@ export default function UserViewModal({ user, isOpen, onClose }: Props) {
           </div>
           <div className={styles.infoCard}>
             <p className={styles.label}>Consent Given</p>
-            <p className={styles.value}>
-              {user.consentGiven === null
-                ? '—'
-                : user.consentGiven
-                  ? 'Yes'
-                  : 'No'}
-            </p>
+            <p className={styles.value}>{getConsentLabel(user.consentGiven)}</p>
           </div>
           <div className={styles.infoCard}>
             <p className={styles.label}>Created At</p>

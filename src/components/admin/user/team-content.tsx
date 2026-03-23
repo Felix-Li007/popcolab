@@ -26,7 +26,7 @@ function buildTeamsHref(params: { search: string; page: number }) {
     : '/admin/users/teams';
 }
 
-export default function TeamContent({ pageData }: Props) {
+export default function TeamContent({ pageData }: Readonly<Props>) {
   const prevHref =
     pageData.currentPage > 1
       ? buildTeamsHref({

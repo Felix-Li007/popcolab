@@ -4,7 +4,10 @@ import type {
   PersonalityFormState,
 } from '@/types/personality-type';
 
-export type { Personality as PersonalityType, PersonalityFormState };
+export type {
+  Personality as PersonalityType,
+  PersonalityFormState,
+} from '@/types/personality-type';
 
 type CreatePersonalityInput = {
   type: string;
@@ -64,7 +67,7 @@ export function validatePersonalityFields(fields: {
   else if (fields.description.length > 255)
     errors.description = 'Description must be 255 characters or less';
 
-  if (isNaN(fields.threshold) || fields.threshold < 0)
+  if (Number.isNaN(fields.threshold) || fields.threshold < 0)
     errors.threshold = 'Threshold must be a non-negative number';
 
   return errors;

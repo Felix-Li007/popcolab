@@ -14,7 +14,7 @@ type ProfileContentProps = {
 export default function ProfileContent({
   profileData,
   companyData,
-}: ProfileContentProps) {
+}: Readonly<ProfileContentProps>) {
   return (
     <div className={styles.pageRoot}>
       <div className={styles.pageContent}>
@@ -59,7 +59,7 @@ export default function ProfileContent({
                     <span className={styles.emptyIcon}>
                       <Sparkles className="h-4 w-4" />
                     </span>
-                    Could not load profile data.
+                    <span>Could not load profile data.</span>
                   </div>
                 </div>
               </div>

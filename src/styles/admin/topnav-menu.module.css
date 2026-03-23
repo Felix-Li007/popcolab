@@ -1,7 +1,6 @@
 @reference "../../app/globals.css";
 
 .tabBar {
-  /* background-color: #f5dd42; */
   @apply bg-brand-yellow;
 }
 

@@ -5,9 +5,9 @@ import { getCurrentAuthContext } from '@/services/clerk-service';
 
 export default async function DashboardLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [authContext, companyInfo] = await Promise.all([
     getCurrentAuthContext(),
     getCompanyAction(),

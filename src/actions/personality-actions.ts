@@ -8,6 +8,7 @@ import {
   updatePersonality,
   deletePersonality,
 } from '@/services/personality-service';
+import { getFormEntryString, getTrimmedFormString } from '@/utils/form-data';
 
 const ADMIN_PATHS = ['/admin', '/admin/personalities'];
 
@@ -19,13 +20,15 @@ export async function createPersonalityAction(
   _prevState: PersonalityFormState,
   formData: FormData
 ): Promise<PersonalityFormState> {
-  const name = formData.get('name')?.toString().trim() ?? '';
-  const type = formData.get('type')?.toString().trim().toUpperCase() ?? '';
-  const description = formData.get('description')?.toString().trim() ?? '';
-  const emoji = formData.get('emoji')?.toString() ?? '';
-  const status = formData.get('status')?.toString() ?? 'active';
-  const accentColor = formData.get('accentColor')?.toString() ?? '';
-  const threshold = parseFloat(formData.get('threshold')?.toString() ?? '0');
+  const name = getTrimmedFormString(formData, 'name');
+  const type = getTrimmedFormString(formData, 'type').toUpperCase();
+  const description = getTrimmedFormString(formData, 'description');
+  const emoji = getFormEntryString(formData.get('emoji'));
+  const status = getFormEntryString(formData.get('status')) || 'active';
+  const accentColor = getFormEntryString(formData.get('accentColor'));
+  const threshold = Number.parseFloat(
+    getFormEntryString(formData.get('threshold')) || '0'
+  );
 
   const errors = validatePersonalityFields({
     name,
@@ -62,12 +65,14 @@ export async function updatePersonalityAction(
   _prevState: PersonalityFormState,
   formData: FormData
 ): Promise<PersonalityFormState> {
-  const name = formData.get('name')?.toString().trim() ?? '';
-  const description = formData.get('description')?.toString().trim() ?? '';
-  const emoji = formData.get('emoji')?.toString() ?? '';
-  const status = formData.get('status')?.toString() ?? 'active';
-  const accentColor = formData.get('accentColor')?.toString() ?? '';
-  const threshold = parseFloat(formData.get('threshold')?.toString() ?? '0');
+  const name = getTrimmedFormString(formData, 'name');
+  const description = getTrimmedFormString(formData, 'description');
+  const emoji = getFormEntryString(formData.get('emoji'));
+  const status = getFormEntryString(formData.get('status')) || 'active';
+  const accentColor = getFormEntryString(formData.get('accentColor'));
+  const threshold = Number.parseFloat(
+    getFormEntryString(formData.get('threshold')) || '0'
+  );
 
   const errors = validatePersonalityFields({ name, description, threshold });
   if (Object.keys(errors).length > 0) return { errors };

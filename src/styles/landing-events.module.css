@@ -29,6 +29,10 @@
   color: var(--color-magenta);
   font-weight: var(--weight-semibold);
   text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
 }
 
 .events-link:hover {
@@ -102,6 +106,10 @@
   font-size: var(--text-body);
   font-weight: var(--weight-semibold);
   text-decoration: none;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font: inherit;
 }
 
 .event-link:hover {

@@ -42,8 +42,15 @@ function CategoryFormBody({
   usageCount,
   onSuccess,
   onClose,
-}: FormBodyProps) {
+}: Readonly<FormBodyProps>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  let submitLabel = 'Create Category';
+
+  if (isPending) {
+    submitLabel = 'Saving…';
+  } else if (isEdit) {
+    submitLabel = 'Save Changes';
+  }
 
   useEffect(() => {
     if (state.success) onSuccess();
@@ -98,7 +105,7 @@ function CategoryFormBody({
           Cancel
         </Button>
         <Button type="submit" variant="primary" size="md" disabled={isPending}>
-          {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Category'}
+          {submitLabel}
         </Button>
       </div>
     </form>
@@ -113,7 +120,7 @@ export default function DimensionCategoryForm({
   initial,
   usageCount = 0,
   onSuccess,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen) return null;
 
   const formKey = `${isEdit ? (initial?.id ?? 'edit') : 'new'}-${usageCount}`;

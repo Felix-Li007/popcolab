@@ -16,14 +16,14 @@ export default function TopnavMenu({
   userDisplayName,
   userRoleLabel,
   initialCompany,
-}: {
+}: Readonly<{
   badgeCounts?: BadgeCounts;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
-}) {
+}>) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>

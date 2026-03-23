@@ -6,7 +6,7 @@ type Props = {
   teams: UserTeamSummary[];
 };
 
-export default function MyTeamsSection({ teams }: Props) {
+export default function MyTeamsSection({ teams }: Readonly<Props>) {
   return (
     <section data-testid="my-teams-section">
       <div className="flex items-center gap-2 mb-3">
@@ -39,7 +39,7 @@ export default function MyTeamsSection({ teams }: Props) {
                   {team.name}
                 </p>
                 <p className="text-xs text-gray-400">
-                  {team.memberCount} member{team.memberCount !== 1 ? 's' : ''} ·{' '}
+                  {team.memberCount} member{team.memberCount === 1 ? '' : 's'} ·{' '}
                   <span
                     className={
                       team.role === 'owner'

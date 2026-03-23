@@ -25,7 +25,7 @@ function parseOptions(formData: FormData): QuestionOption[] {
     .map((label, i) => ({
       label: label.trim(),
       value: values[i]?.trim() ?? '',
-      score: scores[i] ? parseFloat(scores[i]) : null,
+      score: scores[i] ? Number.parseFloat(scores[i]) : null,
     }))
     .filter(o => o.label !== '');
 }
@@ -38,10 +38,10 @@ function parseDimensions(
 
   const dimensions = ids
     .map((id, i) => ({
-      dimensionId: parseInt(id),
-      weight: weights[i] ? parseFloat(weights[i]) : null,
+      dimensionId: Number.parseInt(id, 10),
+      weight: weights[i] ? Number.parseFloat(weights[i]) : null,
     }))
-    .filter(d => !isNaN(d.dimensionId));
+    .filter(d => !Number.isNaN(d.dimensionId));
 
   return dimensions.length > 0 ? [dimensions[0]] : [];
 }
@@ -60,7 +60,7 @@ export async function createQuestionAction(
   const description = (formData.get('description') as string)?.trim() ?? '';
   const type = (formData.get('type') as string)?.trim() as QuestionType;
   const orderIndex = formData.get('order_index')
-    ? parseInt(formData.get('order_index') as string)
+    ? Number.parseInt(formData.get('order_index') as string, 10)
     : null;
 
   const errors: QuestionFormState['errors'] = {};
@@ -111,7 +111,7 @@ export async function updateQuestionAction(
   const description = (formData.get('description') as string)?.trim() ?? '';
   const type = (formData.get('type') as string)?.trim() as QuestionType;
   const orderIndex = formData.get('order_index')
-    ? parseInt(formData.get('order_index') as string)
+    ? Number.parseInt(formData.get('order_index') as string, 10)
     : null;
 
   const errors: QuestionFormState['errors'] = {};

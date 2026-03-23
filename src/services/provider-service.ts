@@ -20,9 +20,9 @@ export function normalizeProviderType(value: string): string {
   return value
     .trim()
     .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .replace(/_+/g, '_');
+    .replaceAll(/[^A-Z0-9]+/g, '_')
+    .replaceAll(/^_+|_+$/g, '')
+    .replaceAll(/_+/g, '_');
 }
 
 export function mapProviderRow(row: ProviderWithCountRow): Provider {

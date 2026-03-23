@@ -171,7 +171,6 @@
 .team-avatar {
   font-size: 4rem;
   margin-bottom: 1rem;
-  display: inline-block;
   background: linear-gradient(
     135deg,
     var(--palette-pink-bright) 0%,

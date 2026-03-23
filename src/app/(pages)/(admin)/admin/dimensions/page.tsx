@@ -4,7 +4,6 @@ import {
   getDimensions,
   getDimensionSummary,
 } from '@/services/dimension-service';
-import type { Dimension, DimensionCategory } from '@/types/dimension-type';
 import DimensionContent from '@/components/admin/dimension/dimension-content';
 
 export default async function DimensionsPage() {
@@ -17,8 +16,8 @@ export default async function DimensionsPage() {
   return (
     <Suspense fallback={null}>
       <DimensionContent
-        initialData={dimensions as Dimension[]}
-        categories={categories as DimensionCategory[]}
+        initialData={dimensions}
+        categories={categories}
         summary={summary}
       />
     </Suspense>

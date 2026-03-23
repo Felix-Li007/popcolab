@@ -79,6 +79,13 @@ type PrismaUniqueConstraintError = {
   };
 };
 
+type OrderCalendarItem = {
+  experience_id: number;
+  schedule_date: Date;
+};
+
+type ExperienceCalendarSyncAction = 'block' | 'release_locked' | 'noop';
+
 function normalizeCustomerEmail(email: string): string {
   const trimmed = email.trim();
   if (!trimmed) {
@@ -97,7 +104,7 @@ function parseScheduleDate(value: string): Date {
   const parsed = new Date(value);
 
   if (Number.isNaN(parsed.getTime())) {
-    throw new Error('Please select a valid schedule date.');
+    throw new TypeError('Please select a valid schedule date.');
   }
 
   if (parsed.getTime() <= Date.now()) {
@@ -212,69 +219,98 @@ async function lockExperienceScheduleDate(
   }
 }
 
-async function syncExperienceCalendarForOrderStatus(
-  tx: Prisma.TransactionClient,
-  orderItems: Array<{
-    experience_id: number;
-    schedule_date: Date;
-  }>,
+function getExperienceCalendarSyncAction(
   orderStatus: string
+): ExperienceCalendarSyncAction {
+  if (orderStatus === 'paid') {
+    return 'block';
+  }
+
+  if (orderStatus === 'payment_failed' || orderStatus === 'canceled') {
+    return 'release_locked';
+  }
+
+  return 'noop';
+}
+
+async function blockExperienceCalendarSlot(
+  tx: Prisma.TransactionClient,
+  item: OrderCalendarItem
 ): Promise<void> {
-  for (const item of orderItems) {
-    if (orderStatus === 'paid') {
-      const updated = await tx.experienceCalendar.updateMany({
-        where: {
-          experience_id: item.experience_id,
-          schedule_date: item.schedule_date,
-          calendar_status: {
-            in: [
-              EXPERIENCE_CALENDAR_STATUS.LOCKED,
-              EXPERIENCE_CALENDAR_STATUS.BLOCKED,
-            ],
-          },
-        },
-        data: {
-          calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
-        },
-      });
+  const updated = await tx.experienceCalendar.updateMany({
+    where: {
+      experience_id: item.experience_id,
+      schedule_date: item.schedule_date,
+      calendar_status: {
+        in: [
+          EXPERIENCE_CALENDAR_STATUS.LOCKED,
+          EXPERIENCE_CALENDAR_STATUS.BLOCKED,
+        ],
+      },
+    },
+    data: {
+      calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
+    },
+  });
 
-      if (updated.count === 0) {
-        try {
-          await tx.experienceCalendar.create({
-            data: {
-              experience_id: item.experience_id,
-              schedule_date: item.schedule_date,
-              calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
-            },
-          });
-        } catch (error) {
-          if (!isExperienceCalendarSlotUniqueViolation(error)) {
-            throw error;
-          }
+  if (updated.count > 0) {
+    return;
+  }
 
-          await tx.experienceCalendar.updateMany({
-            where: {
-              experience_id: item.experience_id,
-              schedule_date: item.schedule_date,
-            },
-            data: {
-              calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
-            },
-          });
-        }
-      }
-
-      continue;
+  try {
+    await tx.experienceCalendar.create({
+      data: {
+        experience_id: item.experience_id,
+        schedule_date: item.schedule_date,
+        calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
+      },
+    });
+  } catch (error) {
+    if (!isExperienceCalendarSlotUniqueViolation(error)) {
+      throw error;
     }
 
-    if (orderStatus === 'payment_failed' || orderStatus === 'canceled') {
-      await tx.experienceCalendar.deleteMany({
-        where: {
-          experience_id: item.experience_id,
-          schedule_date: item.schedule_date,
-          calendar_status: EXPERIENCE_CALENDAR_STATUS.LOCKED,
-        },
-      });
+    await tx.experienceCalendar.updateMany({
+      where: {
+        experience_id: item.experience_id,
+        schedule_date: item.schedule_date,
+      },
+      data: {
+        calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
+      },
+    });
+  }
+}
+
+async function releaseLockedExperienceCalendarSlot(
+  tx: Prisma.TransactionClient,
+  item: OrderCalendarItem
+): Promise<void> {
+  await tx.experienceCalendar.deleteMany({
+    where: {
+      experience_id: item.experience_id,
+      schedule_date: item.schedule_date,
+      calendar_status: EXPERIENCE_CALENDAR_STATUS.LOCKED,
+    },
+  });
+}
+
+async function syncExperienceCalendarForOrderStatus(
+  tx: Prisma.TransactionClient,
+  orderItems: OrderCalendarItem[],
+  orderStatus: string
+): Promise<void> {
+  const action = getExperienceCalendarSyncAction(orderStatus);
+
+  if (action === 'noop') {
+    return;
+  }
+
+  for (const item of orderItems) {
+    if (action === 'block') {
+      await blockExperienceCalendarSlot(tx, item);
+    } else {
+      await releaseLockedExperienceCalendarSlot(tx, item);
     }
   }
 }
@@ -311,44 +347,45 @@ function toSerializableQuote(
 function mapStripeStatuses(
   status: Stripe.PaymentIntent.Status
 ): Pick<ExperienceOrderResult, 'orderStatus' | 'paymentStatus'> {
-  switch (status) {
-    case 'succeeded':
-      return {
-        orderStatus: 'paid',
-        paymentStatus: 'succeeded',
-      };
-    case 'processing':
-      return {
-        orderStatus: 'processing',
-        paymentStatus: 'processing',
-      };
-    case 'requires_action':
-      return {
-        orderStatus: 'pending_payment',
-        paymentStatus: 'requires_action',
-      };
-    case 'requires_capture':
-    case 'requires_confirmation':
-      return {
-        orderStatus: 'pending_payment',
-        paymentStatus: 'pending',
-      };
-    case 'requires_payment_method':
-      return {
-        orderStatus: 'payment_failed',
-        paymentStatus: 'requires_payment',
-      };
-    case 'canceled':
-      return {
-        orderStatus: 'canceled',
-        paymentStatus: 'canceled',
-      };
-    default:
-      return {
-        orderStatus: 'pending_payment',
-        paymentStatus: 'pending',
-      };
+  if (status === 'succeeded') {
+    return {
+      orderStatus: 'paid',
+      paymentStatus: 'succeeded',
+    };
   }
+
+  if (status === 'processing') {
+    return {
+      orderStatus: 'processing',
+      paymentStatus: 'processing',
+    };
+  }
+
+  if (status === 'requires_action') {
+    return {
+      orderStatus: 'pending_payment',
+      paymentStatus: 'requires_action',
+    };
+  }
+
+  if (status === 'requires_payment_method') {
+    return {
+      orderStatus: 'payment_failed',
+      paymentStatus: 'requires_payment',
+    };
+  }
+
+  if (status === 'canceled') {
+    return {
+      orderStatus: 'canceled',
+      paymentStatus: 'canceled',
+    };
+  }
+
+  return {
+    orderStatus: 'pending_payment',
+    paymentStatus: 'pending',
+  };
 }
 
 function getPaymentMethodLabel(paymentIntent: Stripe.PaymentIntent): string {
@@ -547,14 +584,8 @@ async function applyStripePaymentIntentSync(
       await tx.payment.update({
         where: { id: existingOrder.payment!.id },
         data: {
-          order_amount:
-            totalAmountCad !== null
-              ? totalAmountCad
-              : existingOrder.payment!.grand_total,
-          grand_total:
-            totalAmountCad !== null
-              ? totalAmountCad
-              : existingOrder.payment!.grand_total,
+          order_amount: totalAmountCad ?? existingOrder.payment!.grand_total,
+          grand_total: totalAmountCad ?? existingOrder.payment!.grand_total,
           payment_method: paymentMethod,
           customer_id: customerId.slice(0, 255),
           customer_email: customerEmail,

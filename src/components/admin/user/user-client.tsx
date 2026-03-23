@@ -64,7 +64,19 @@ function mergeEditableUserUpdate(
   };
 }
 
-export default function UserClient({ users }: Props) {
+function updateUserIfMatch(
+  user: AdminUserListItem | null,
+  userId: number,
+  payload: AdminUserEditableUpdateInput
+) {
+  if (user?.id !== userId) {
+    return user;
+  }
+
+  return mergeEditableUserUpdate(user, payload);
+}
+
+export default function UserClient({ users }: Readonly<Props>) {
   const [localUsers, setLocalUsers] = useState(users);
   const [viewUser, setViewUser] = useState<AdminUserListItem | null>(null);
   const [editUser, setEditUser] = useState<AdminUserListItem | null>(null);
@@ -110,16 +122,8 @@ export default function UserClient({ users }: Props) {
             )
           );
 
-          setViewUser(prev =>
-            prev && prev.id === userId
-              ? mergeEditableUserUpdate(prev, payload)
-              : prev
-          );
-          setEditUser(prev =>
-            prev && prev.id === userId
-              ? mergeEditableUserUpdate(prev, payload)
-              : prev
-          );
+          setViewUser(prev => updateUserIfMatch(prev, userId, payload));
+          setEditUser(prev => updateUserIfMatch(prev, userId, payload));
         }}
         onClose={() => {
           setEditUser(null);

@@ -28,7 +28,7 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setStatusMessage('Sending...');
@@ -85,6 +85,7 @@ export default function Contact() {
       description: 'Visit our office anytime',
     },
   ];
+  const statusVariantClass = submitted ? '' : styles['error-message'];
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -102,8 +103,8 @@ export default function Contact() {
         {/* Contact Info Cards */}
         <section className={styles['contact-info-section']}>
           <div className={styles['contact-info-grid']}>
-            {contactInfo.map((info, index) => (
-              <div key={index} className={styles['contact-info-card']}>
+            {contactInfo.map(info => (
+              <div key={info.title} className={styles['contact-info-card']}>
                 <div className={styles['info-icon']}>{info.icon}</div>
                 <h3 className={styles['info-title']}>{info.title}</h3>
                 <p className={styles['info-detail']}>{info.detail}</p>
@@ -123,9 +124,7 @@ export default function Contact() {
 
             {statusMessage && (
               <div
-                className={`${styles['success-message']} ${
-                  !submitted ? styles['error-message'] : ''
-                }`}
+                className={`${styles['success-message']} ${statusVariantClass}`}
               >
                 {statusMessage}
               </div>
@@ -251,15 +250,15 @@ export default function Contact() {
         <section className={styles['contact-social']}>
           <h2 className={styles['social-title']}>Follow Us</h2>
           <div className={styles['social-links']}>
-            <a href="#" className={styles['social-link']}>
+            <button type="button" className={styles['social-link']}>
               LinkedIn
-            </a>
-            <a href="#" className={styles['social-link']}>
+            </button>
+            <button type="button" className={styles['social-link']}>
               Instagram
-            </a>
-            <a href="#" className={styles['social-link']}>
+            </button>
+            <button type="button" className={styles['social-link']}>
               Facebook
-            </a>
+            </button>
           </div>
         </section>
       </main>

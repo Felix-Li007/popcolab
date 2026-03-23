@@ -137,9 +137,10 @@ export function flattenExperienceCategoryOptions(
   const visit = (tree: ExperienceCategoryTreeNode[], depth: number) => {
     for (const node of tree) {
       if (!excludedIds.has(node.id) && depth <= maxDepth) {
+        const indent = depth > 0 ? `${'  '.repeat(depth)}- ` : '';
         options.push({
           id: node.id,
-          label: `${depth > 0 ? `${'  '.repeat(depth)}- ` : ''}${node.title}`,
+          label: `${indent}${node.title}`,
           depth,
         });
       }

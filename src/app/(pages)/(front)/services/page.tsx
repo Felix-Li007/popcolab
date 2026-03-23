@@ -74,8 +74,8 @@ export default function Services() {
         {/* Services Grid */}
         <section className={styles['services-grid-section']}>
           <div className={styles['services-grid']}>
-            {services.map((service, index) => (
-              <div key={index} className={styles['service-card']}>
+            {services.map(service => (
+              <div key={service.title} className={styles['service-card']}>
                 <div className={styles['service-icon']}>{service.icon}</div>
                 <h3 className={styles['service-title']}>{service.title}</h3>
                 <p className={styles['service-description']}>
@@ -85,8 +85,8 @@ export default function Services() {
                 <div className={styles['service-features']}>
                   <h4 className={styles['features-title']}>Includes:</h4>
                   <ul className={styles['features-list']}>
-                    {service.features.map((feature, idx) => (
-                      <li key={idx} className={styles['feature-item']}>
+                    {service.features.map(feature => (
+                      <li key={feature} className={styles['feature-item']}>
                         <span className={styles['feature-check']}>✓</span>
                         {feature}
                       </li>

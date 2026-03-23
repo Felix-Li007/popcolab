@@ -62,7 +62,7 @@ export default function PlayPersonalities({
   matches,
   isAuthenticated,
   primaryKey,
-}: Props) {
+}: Readonly<Props>) {
   const [copied, setCopied] = useState(false);
 
   const primary = matches[0];
@@ -75,12 +75,16 @@ export default function PlayPersonalities({
     const text = top
       ? `I just took the Pop CoLab Play Personality Test and I'm a "${top.personality.name}" ${top.personality.emoji}`
       : 'I just took the Pop CoLab Play Personality Test!';
-    const url = window.location.href;
+    const url = globalThis.location.href;
 
-    if (navigator.share) {
-      await navigator.share({ title: 'My Play Personality', text, url });
+    if (globalThis.navigator.share) {
+      await globalThis.navigator.share({
+        title: 'My Play Personality',
+        text,
+        url,
+      });
     } else {
-      await navigator.clipboard.writeText(`${text} — ${url}`);
+      await globalThis.navigator.clipboard.writeText(`${text} — ${url}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     }
@@ -89,6 +93,9 @@ export default function PlayPersonalities({
   const experienceHref = isAuthenticated
     ? '/dashboard/experiences'
     : `/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`;
+  const savePendingKey = () =>
+    globalThis.localStorage.setItem('pclab_pending_key', primaryKey);
+  const experienceCardClick = isAuthenticated ? undefined : savePendingKey;
 
   return (
     <div className="flex flex-col gap-8" data-testid="results-page">
@@ -258,9 +265,7 @@ export default function PlayPersonalities({
             <Link
               href={`/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`}
               className="self-start mt-1 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 px-4 py-2 text-xs font-semibold text-white transition-colors"
-              onClick={() =>
-                localStorage.setItem('pclab_pending_key', primaryKey)
-              }
+              onClick={() => savePendingKey()}
             >
               Get started →
             </Link>
@@ -296,11 +301,7 @@ export default function PlayPersonalities({
               className={`${cardStyles.card} group`}
               data-testid="results-experience-card"
               style={cssVarStyle({ '--glow-color': `${color}40` })}
-              onClick={
-                !isAuthenticated
-                  ? () => localStorage.setItem('pclab_pending_key', primaryKey)
-                  : undefined
-              }
+              onClick={experienceCardClick}
             >
               <div className={cardStyles.orb} />
               {!isAuthenticated && (

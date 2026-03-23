@@ -23,7 +23,7 @@ type Props = {
 export default function PersonalityContent({
   initialData,
   personalityActions,
-}: Props) {
+}: Readonly<Props>) {
   const [personalities, setPersonalities] =
     useState<Personality[]>(initialData);
   const [filter, setFilter] = useState<FilterTab>('All');

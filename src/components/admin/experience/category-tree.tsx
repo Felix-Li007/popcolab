@@ -80,7 +80,7 @@ function TreeNodeComponent({
   onSelect,
   onEdit,
   onDelete,
-}: TreeNodeProps) {
+}: Readonly<TreeNodeProps>) {
   const isSelected = selectedId === node.id;
   const hasChildren = node.children.length > 0;
   const isExpanded = expandedIds.has(node.id);
@@ -221,7 +221,7 @@ export default function ExperienceCategoryTree({
   onSelect,
   onEdit,
   onDelete,
-}: Props) {
+}: Readonly<Props>) {
   const [collapsedIds, setCollapsedIds] = useState<Set<number>>(
     () => new Set()
   );

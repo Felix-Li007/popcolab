@@ -53,6 +53,14 @@ function formatDate(value: Date | null) {
   return new Date(value).toLocaleString('en-CA');
 }
 
+function toNumberOrNull(value: DecimalLike | null) {
+  if (!value) {
+    return null;
+  }
+
+  return Number(value.toString());
+}
+
 function getPaymentStatusClass(status: string) {
   switch (status) {
     case 'succeeded':
@@ -82,7 +90,111 @@ function getOrderStatusClass(status: string | null | undefined) {
   }
 }
 
-export default function PaymentRow({ payment }: Props) {
+function getLinkedOrdersLabel(orderCount: number) {
+  if (orderCount === 1) {
+    return '1 linked order';
+  }
+
+  return `${orderCount} linked orders`;
+}
+
+function getMoreItemsLabel(itemCount: number) {
+  if (itemCount === 1) {
+    return '+ 1 more item';
+  }
+
+  return `+ ${itemCount} more items`;
+}
+
+function getMoreOrdersLabel(orderCount: number) {
+  if (orderCount === 1) {
+    return '+ 1 more linked order';
+  }
+
+  return `+ ${orderCount} more linked orders`;
+}
+
+function PaymentTotals({ payment }: Readonly<Props>) {
+  return (
+    <>
+      <p className={styles.primaryText}>
+        {formatCadAmount(toNumberOrNull(payment.grand_total))}
+      </p>
+      <p className={styles.secondaryText}>
+        Order Amount {formatCadAmount(toNumberOrNull(payment.order_amount))}
+      </p>
+      <p className={styles.secondarySmall}>
+        GST{' '}
+        {payment.gst_amount
+          ? formatCadAmount(Number(payment.gst_amount.toString()))
+          : 'Not set'}
+        {' · '}
+        HST{' '}
+        {payment.hst_amount
+          ? formatCadAmount(Number(payment.hst_amount.toString()))
+          : 'Not set'}
+      </p>
+    </>
+  );
+}
+
+function PaymentOrderSummary({
+  primaryOrder,
+  primaryItem,
+  additionalItemCount,
+  additionalOrderCount,
+}: Readonly<{
+  primaryOrder: AdminPaymentListItem['orders'][number] | null;
+  primaryItem:
+    | AdminPaymentListItem['orders'][number]['order_items'][number]
+    | null;
+  additionalItemCount: number;
+  additionalOrderCount: number;
+}>) {
+  if (!primaryOrder) {
+    return <p className={styles.secondaryText}>No linked order</p>;
+  }
+
+  return (
+    <>
+      <p className={styles.primaryText}>
+        <Link href="/admin/bookings" className={styles.orderLink}>
+          #{primaryOrder.id}
+        </Link>
+      </p>
+      <p className={styles.secondaryText}>{primaryOrder.user.email}</p>
+      {primaryItem ? (
+        <>
+          <p className={styles.secondaryText}>
+            <Link
+              href={`/admin/experiences?view=${primaryItem.experience_id}`}
+              className={styles.orderLink}
+            >
+              {primaryItem.experience.experience_title}
+            </Link>
+          </p>
+          <p className={styles.secondarySmall}>
+            {primaryItem.experience.provider.provider_label}
+            {' · '}
+            {formatDate(primaryItem.schedule_date)}
+          </p>
+          {additionalItemCount > 0 ? (
+            <p className={styles.secondarySmall}>
+              {getMoreItemsLabel(additionalItemCount)}
+            </p>
+          ) : null}
+        </>
+      ) : null}
+      {additionalOrderCount > 0 ? (
+        <p className={styles.secondarySmall}>
+          {getMoreOrdersLabel(additionalOrderCount)}
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+export default function PaymentRow({ payment }: Readonly<Props>) {
   const primaryOrder = payment.orders[0] ?? null;
   const primaryItem = primaryOrder?.order_items[0] ?? null;
   const additionalOrderCount = Math.max(0, payment.orders.length - 1);
@@ -130,8 +242,7 @@ export default function PaymentRow({ payment }: Props) {
             </span>
           </div>
           <p className={styles.secondarySmall}>
-            {payment.orders.length} linked order
-            {payment.orders.length === 1 ? '' : 's'}
+            {getLinkedOrdersLabel(payment.orders.length)}
           </p>
         </div>
 
@@ -146,77 +257,17 @@ export default function PaymentRow({ payment }: Props) {
 
         <div>
           <p className={styles.mobileLabel}>Total</p>
-          <p className={styles.primaryText}>
-            {formatCadAmount(
-              payment.grand_total
-                ? Number(payment.grand_total.toString())
-                : null
-            )}
-          </p>
-          <p className={styles.secondaryText}>
-            Order Amount{' '}
-            {formatCadAmount(
-              payment.order_amount
-                ? Number(payment.order_amount.toString())
-                : null
-            )}
-          </p>
-          <p className={styles.secondarySmall}>
-            GST{' '}
-            {payment.gst_amount
-              ? formatCadAmount(Number(payment.gst_amount.toString()))
-              : 'Not set'}
-            {' · '}
-            HST{' '}
-            {payment.hst_amount
-              ? formatCadAmount(Number(payment.hst_amount.toString()))
-              : 'Not set'}
-          </p>
+          <PaymentTotals payment={payment} />
         </div>
 
         <div>
           <p className={styles.mobileLabel}>Order</p>
-          {primaryOrder ? (
-            <>
-              <p className={styles.primaryText}>
-                <Link href="/admin/bookings" className={styles.orderLink}>
-                  #{primaryOrder.id}
-                </Link>
-              </p>
-              <p className={styles.secondaryText}>{primaryOrder.user.email}</p>
-              {primaryItem ? (
-                <>
-                  <p className={styles.secondaryText}>
-                    <Link
-                      href={`/admin/experiences?view=${primaryItem.experience_id}`}
-                      className={styles.orderLink}
-                    >
-                      {primaryItem.experience.experience_title}
-                    </Link>
-                  </p>
-                  <p className={styles.secondarySmall}>
-                    {primaryItem.experience.provider.provider_label}
-                    {' · '}
-                    {formatDate(primaryItem.schedule_date)}
-                  </p>
-                  {additionalItemCount > 0 ? (
-                    <p className={styles.secondarySmall}>
-                      + {additionalItemCount} more item
-                      {additionalItemCount === 1 ? '' : 's'}
-                    </p>
-                  ) : null}
-                </>
-              ) : null}
-              {additionalOrderCount > 0 ? (
-                <p className={styles.secondarySmall}>
-                  + {additionalOrderCount} more linked order
-                  {additionalOrderCount === 1 ? '' : 's'}
-                </p>
-              ) : null}
-            </>
-          ) : (
-            <p className={styles.secondaryText}>No linked order</p>
-          )}
+          <PaymentOrderSummary
+            primaryOrder={primaryOrder}
+            primaryItem={primaryItem}
+            additionalItemCount={additionalItemCount}
+            additionalOrderCount={additionalOrderCount}
+          />
         </div>
       </div>
 

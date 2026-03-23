@@ -24,8 +24,8 @@ export default function PersonalityCard({
   onView,
   onDelete,
   accentColor,
-}: PersonalityCardProps) {
-  const typeKey = type.toUpperCase().replace(/\s+/g, '') as string;
+}: Readonly<PersonalityCardProps>) {
+  const typeKey = type.toUpperCase().replaceAll(/\s+/g, '');
   const typeClass =
     (styles as Record<string, string>)[`type${typeKey}`] ?? styles.typeDefault;
 

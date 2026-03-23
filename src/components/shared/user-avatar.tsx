@@ -7,40 +7,35 @@ import {
   UserAvatar as ClerkUserAvatar,
   UserButton,
 } from '@clerk/nextjs';
-import CompanyProfile from '@/components/shared/company-info';
 import type { CompanyInfo } from '@/types/company-type';
 
 export default function UserAvatar({
   displayName = 'User',
   roleLabel = 'User',
   initialCompany,
-}: {
+}: Readonly<{
   displayName?: string;
   roleLabel?: string;
   initialCompany?: CompanyInfo | null;
-}) {
+}>) {
   const router = useRouter();
   const triggerHostRef = useRef<HTMLDivElement | null>(null);
+  void initialCompany;
 
   function openUserMenu() {
     triggerHostRef.current?.querySelector('button')?.click();
   }
 
   return (
-    <div
-      className="relative cursor-pointer rounded-lg transition-colors group hover:bg-white/10 focus-within:bg-white/10"
-      role="button"
-      tabIndex={0}
-      aria-haspopup="dialog"
-      onClick={openUserMenu}
-      onKeyDown={event => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openUserMenu();
-        }
-      }}
-    >
+    <div className="relative rounded-lg transition-colors group hover:bg-white/10 focus-within:bg-white/10">
       <SignedIn>
+        <button
+          type="button"
+          onClick={openUserMenu}
+          aria-haspopup="dialog"
+          aria-label="Open user menu"
+          className="absolute inset-0 z-20 rounded-lg"
+        />
         <div
           ref={triggerHostRef}
           className="pointer-events-none absolute inset-0 z-10"

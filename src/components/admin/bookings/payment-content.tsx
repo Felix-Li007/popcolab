@@ -110,7 +110,9 @@ function buildPaymentWhere(params: {
   };
 }
 
-export default async function PaymentContent({ searchParams }: Props) {
+export default async function PaymentContent({
+  searchParams,
+}: Readonly<Props>) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const search = getFirstValue(resolvedSearchParams.q)?.trim() ?? '';
   const status = getFirstValue(resolvedSearchParams.status)?.trim() ?? '';

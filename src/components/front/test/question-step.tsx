@@ -13,7 +13,7 @@ export default function QuestionStep({
   question,
   answer,
   onAnswerAction,
-}: Props) {
+}: Readonly<Props>) {
   const qId = question.id!;
 
   // ── Scale ──────────────────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ export default function QuestionStep({
   );
 }
 
-function QuestionHeader({ question }: { question: Question }) {
+function QuestionHeader({ question }: Readonly<{ question: Question }>) {
   return (
     <div className="flex flex-col gap-1">
       <h2 className="text-lg font-bold text-gray-800">{question.text}</h2>

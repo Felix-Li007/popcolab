@@ -111,11 +111,7 @@ function toDayKey(value: Date | string): string {
 }
 
 function toWeekLabel(value: Date | string): string {
-  return new Date(value).toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
+  return toDayLabel(value);
 }
 
 function toWeekKey(value: Date | string): string {
@@ -187,6 +183,21 @@ function getQuestionTypeLabel(value: string): string {
     default:
       return value;
   }
+}
+
+function getWeeklyChangePercentage(
+  completionsThisWeek: number,
+  completionsPreviousWeek: number
+) {
+  if (completionsPreviousWeek === 0) {
+    return completionsThisWeek === 0 ? 0 : 100;
+  }
+
+  return (
+    ((completionsThisWeek - completionsPreviousWeek) /
+      completionsPreviousWeek) *
+    100
+  );
 }
 
 export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics> {
@@ -541,14 +552,10 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
   const completionsPreviousWeek = toNumber(
     quizSummary?.completions_previous_week ?? 0
   );
-  const weeklyChangePct =
-    completionsPreviousWeek === 0
-      ? completionsThisWeek === 0
-        ? 0
-        : 100
-      : ((completionsThisWeek - completionsPreviousWeek) /
-          completionsPreviousWeek) *
-        100;
+  const weeklyChangePct = getWeeklyChangePercentage(
+    completionsThisWeek,
+    completionsPreviousWeek
+  );
   const quizTrend: OverviewQuizTrendPoint[] = quizTrendRows.map(row => ({
     periodKey: toDayKey(row.day_start),
     periodLabel: toWeekdayLabel(row.day_start),

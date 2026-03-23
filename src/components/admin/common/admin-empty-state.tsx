@@ -4,7 +4,11 @@ type Props = {
   testId?: string;
 };
 
-export default function AdminEmptyState({ emoji, message, testId }: Props) {
+export default function AdminEmptyState({
+  emoji,
+  message,
+  testId,
+}: Readonly<Props>) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center gap-2">
       <span className="text-3xl">{emoji}</span>

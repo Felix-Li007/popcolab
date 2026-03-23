@@ -26,7 +26,23 @@ const TYPE_TO_NODE: Record<QuestionType, number> = {
 
 const NODE_COUNT = 4;
 
-export default function TestProgress({ current, total, currentType }: Props) {
+function getNodeClassName(isCompleted: boolean, isCurrent: boolean) {
+  if (isCompleted) {
+    return 'bg-teal-deep text-white';
+  }
+
+  if (isCurrent) {
+    return 'bg-teal-deep text-white ring-4 ring-teal-deep/20';
+  }
+
+  return 'bg-gray-200 text-gray-400';
+}
+
+export default function TestProgress({
+  current,
+  total,
+  currentType,
+}: Readonly<Props>) {
   const activeNodeIndex = TYPE_TO_NODE[currentType] ?? 0;
   const currentMessage = MILESTONE_MESSAGES[activeNodeIndex];
   const lineFill = (activeNodeIndex / (NODE_COUNT - 1)) * 100;
@@ -64,23 +80,20 @@ export default function TestProgress({ current, total, currentType }: Props) {
         />
 
         {/* Nodes */}
-        {Array.from({ length: NODE_COUNT }).map((_, i) => {
+        {NODE_LABELS.map((label, i) => {
           const isCompleted = i < activeNodeIndex;
           const isCurrent = i === activeNodeIndex;
 
           return (
             <div
-              key={i}
+              key={label}
               className="relative z-10 flex flex-col items-center gap-1.5"
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${
-                  isCompleted
-                    ? 'bg-teal-deep text-white'
-                    : isCurrent
-                      ? 'bg-teal-deep text-white ring-4 ring-teal-deep/20'
-                      : 'bg-gray-200 text-gray-400'
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 ${getNodeClassName(
+                  isCompleted,
+                  isCurrent
+                )}`}
               >
                 {isCompleted ? (
                   <svg
@@ -105,7 +118,7 @@ export default function TestProgress({ current, total, currentType }: Props) {
                   isCurrent ? 'text-teal-deep' : 'text-gray-400'
                 }`}
               >
-                {NODE_LABELS[i]}
+                {label}
               </span>
             </div>
           );

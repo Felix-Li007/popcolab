@@ -4,7 +4,6 @@ import {
   updatePersonalityAction,
 } from '@/actions/personality-actions';
 import { getPersonalities } from '@/services/personality-service';
-import type { Personality } from '@/types/personality-type';
 import PersonalityContent from '@/components/admin/personality/personality-content';
 
 export default async function PersonalitiesPage() {
@@ -12,7 +11,7 @@ export default async function PersonalitiesPage() {
 
   return (
     <PersonalityContent
-      initialData={personalities as Personality[]}
+      initialData={personalities}
       personalityActions={{
         createPersonalityAction,
         updatePersonalityAction,

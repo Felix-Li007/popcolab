@@ -5,14 +5,18 @@ type QuizChartProps = {
   metrics: OverviewQuizMetrics;
 };
 
-export default function QuizChart({ metrics }: QuizChartProps) {
+export default function QuizChart({ metrics }: Readonly<QuizChartProps>) {
   const maxValue = Math.max(...metrics.trend.map(item => item.value), 1);
-  const changeLabel =
-    metrics.weeklyChangePct === 0
-      ? 'No change vs last week'
-      : `${metrics.weeklyChangePct > 0 ? '↑' : '↓'} ${Math.abs(
-          metrics.weeklyChangePct
-        ).toFixed(1)}% vs last week`;
+  let changeLabel = 'No change vs last week';
+  let changeTextClassName = 'text-gray-400';
+
+  if (metrics.weeklyChangePct > 0) {
+    changeLabel = `↑ ${Math.abs(metrics.weeklyChangePct).toFixed(1)}% vs last week`;
+    changeTextClassName = 'text-green-500';
+  } else if (metrics.weeklyChangePct < 0) {
+    changeLabel = `↓ ${Math.abs(metrics.weeklyChangePct).toFixed(1)}% vs last week`;
+    changeTextClassName = 'text-amber-600';
+  }
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
@@ -23,17 +27,7 @@ export default function QuizChart({ metrics }: QuizChartProps) {
         </h3>
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-semibold">
-        <span
-          className={
-            metrics.weeklyChangePct > 0
-              ? 'text-green-500'
-              : metrics.weeklyChangePct < 0
-                ? 'text-amber-600'
-                : 'text-gray-400'
-          }
-        >
-          {changeLabel}
-        </span>
+        <span className={changeTextClassName}>{changeLabel}</span>
         <span className="text-gray-300">·</span>
         <span className="text-gray-500">
           {metrics.completionsThisWeek} this week

@@ -65,11 +65,11 @@ export default function EventTable() {
               </tr>
             </thead>
             <tbody>
-              {events.map((event, i) => {
+              {events.map(event => {
                 const status = statusConfig[event.status];
                 return (
                   <tr
-                    key={i}
+                    key={`${event.name}-${event.date}`}
                     className="border-t border-gray-50 hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-4 py-3 text-gray-800 font-semibold">

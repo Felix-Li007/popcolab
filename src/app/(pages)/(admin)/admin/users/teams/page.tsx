@@ -21,7 +21,7 @@ type Props = {
   searchParams?: Promise<SearchParamsInput> | SearchParamsInput;
 };
 
-export default async function TeamsPage({ searchParams }: Props) {
+export default async function TeamsPage({ searchParams }: Readonly<Props>) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const search = getFirstValue(resolvedSearchParams.q)?.trim() ?? '';
   const page = parsePage(getFirstValue(resolvedSearchParams.page));

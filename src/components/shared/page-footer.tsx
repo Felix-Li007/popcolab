@@ -106,14 +106,23 @@ export default function PageFooter() {
             <ul className="space-y-1.5">
               {supportLinks.map(link => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    target={link.external ? '_blank' : undefined}
-                    rel={link.external ? 'noopener noreferrer' : undefined}
-                    className="text-xs text-white/70 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </a>
+                  {link.href === '#' ? (
+                    <button
+                      type="button"
+                      className="bg-transparent border-0 p-0 text-xs text-white/70 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </button>
+                  ) : (
+                    <a
+                      href={link.href}
+                      target={link.external ? '_blank' : undefined}
+                      rel={link.external ? 'noopener noreferrer' : undefined}
+                      className="text-xs text-white/70 hover:text-white transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -164,12 +173,18 @@ export default function PageFooter() {
         <div className="max-w-7xl mx-auto flex items-center justify-between text-[10px] text-white/40">
           <span>©2026 Pop CoLab</span>
           <div className="flex gap-3">
-            <a href="#" className="hover:text-white/70 transition-colors">
+            <button
+              type="button"
+              className="bg-transparent border-0 p-0 hover:text-white/70 transition-colors"
+            >
               Privacy
-            </a>
-            <a href="#" className="hover:text-white/70 transition-colors">
+            </button>
+            <button
+              type="button"
+              className="bg-transparent border-0 p-0 hover:text-white/70 transition-colors"
+            >
               Terms
-            </a>
+            </button>
           </div>
         </div>
       </div>

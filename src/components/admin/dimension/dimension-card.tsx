@@ -58,7 +58,7 @@ const TYPE_BADGE_STYLE: Record<
   text: { variant: 'secondary' },
 };
 
-function EditIcon({ className }: { className: string }) {
+function EditIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -76,7 +76,7 @@ function EditIcon({ className }: { className: string }) {
   );
 }
 
-function ViewIcon({ className }: { className: string }) {
+function ViewIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -100,7 +100,7 @@ function ViewIcon({ className }: { className: string }) {
   );
 }
 
-function DeleteIcon({ className }: { className: string }) {
+function DeleteIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -118,115 +118,131 @@ function DeleteIcon({ className }: { className: string }) {
   );
 }
 
-export default function DimensionCard(props: Props) {
-  if (props.variant === 'category') {
-    const {
-      category,
-      isEditingSelected,
-      isBulkSelected,
-      onSelect,
-      onToggleSelect,
-      onDelete,
-    } = props;
-    const isLinked = category.usageCount > 0;
-    const glowStyle = cssVarStyle({
-      '--glow-color': isLinked
-        ? 'color-mix(in srgb, var(--color-teal-accent) 65%, transparent)'
-        : 'color-mix(in srgb, var(--color-lavender) 80%, transparent)',
-    });
-
-    return (
-      <div
-        data-testid="dimension-category-card"
-        className={`${categoryStyles.card} ${isEditingSelected ? categoryStyles.cardActive : ''}`}
-        style={glowStyle}
-        onClick={onSelect}
-      >
-        <div className={categoryStyles.orb} aria-hidden="true" />
-
-        <button
-          type="button"
-          onClick={event => {
-            event.stopPropagation();
-            onToggleSelect();
-          }}
-          title="Select for bulk actions"
-          aria-label="Select for bulk actions"
-          className={`${categoryStyles.selectToggle} ${isBulkSelected ? categoryStyles.selectToggleOn : categoryStyles.selectToggleOff}`}
-        >
-          {isBulkSelected && <span className={categoryStyles.selectDot} />}
-        </button>
-
-        <div className={categoryStyles.cardBody}>
-          <div className={categoryStyles.metaRow}>
-            <span className={categoryStyles.keyText}>#{category.id}</span>
-            <Badge variant={isLinked ? 'success' : 'secondary'} size="xs">
-              {isLinked ? 'In Use' : 'Unused'}
-            </Badge>
-          </div>
-
-          <h3 className={categoryStyles.title}>{category.name}</h3>
-          <p className={categoryStyles.category}>
-            {category.usageCount} linked dimension
-            {category.usageCount === 1 ? '' : 's'}
-          </p>
-
-          {category.description ? (
-            <p className={categoryStyles.notes}>{category.description}</p>
-          ) : (
-            <p className={categoryStyles.notes}>No description provided.</p>
-          )}
-
-          <div className={categoryStyles.options}>
-            <Badge variant="default" size="xs">
-              Linked: {category.usageCount}
-            </Badge>
-          </div>
-        </div>
-
-        <div className={categoryStyles.footer}>
-          <Button
-            variant="text"
-            size="xs"
-            icon={<EditIcon className={categoryStyles.actionIcon} />}
-            onClick={event => {
-              event.stopPropagation();
-              onSelect();
-            }}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="text"
-            size="xs"
-            className={categoryStyles.deleteAction}
-            icon={<DeleteIcon className={categoryStyles.actionIcon} />}
-            onClick={event => {
-              event.stopPropagation();
-              onDelete();
-            }}
-          >
-            Delete
-          </Button>
-        </div>
-      </div>
-    );
+function getLinkedDimensionLabel(usageCount: number) {
+  if (usageCount === 1) {
+    return '1 linked dimension';
   }
 
+  return `${usageCount} linked dimensions`;
+}
+
+function CategoryDimensionCard({
+  category,
+  isEditingSelected,
+  isBulkSelected,
+  onSelect,
+  onToggleSelect,
+  onDelete,
+}: Readonly<CategoryCardProps>) {
+  const isLinked = category.usageCount > 0;
+  const glowStyle = cssVarStyle({
+    '--glow-color': isLinked
+      ? 'color-mix(in srgb, var(--color-teal-accent) 65%, transparent)'
+      : 'color-mix(in srgb, var(--color-lavender) 80%, transparent)',
+  });
+  const categoryStatus = isLinked ? 'In Use' : 'Unused';
+  const categoryDescription =
+    category.description ?? 'No description provided.';
+
+  return (
+    <div
+      data-testid="dimension-category-card"
+      className={`${categoryStyles.card} ${isEditingSelected ? categoryStyles.cardActive : ''}`}
+      style={glowStyle}
+    >
+      <div className={categoryStyles.orb} aria-hidden="true" />
+      <button
+        type="button"
+        className={categoryStyles.cardAction}
+        aria-label={`Edit category ${category.name}`}
+        onClick={onSelect}
+      />
+
+      <button
+        type="button"
+        onClick={event => {
+          event.stopPropagation();
+          onToggleSelect();
+        }}
+        title="Select for bulk actions"
+        aria-label="Select for bulk actions"
+        className={`${categoryStyles.selectToggle} ${isBulkSelected ? categoryStyles.selectToggleOn : categoryStyles.selectToggleOff}`}
+      >
+        {isBulkSelected && <span className={categoryStyles.selectDot} />}
+      </button>
+
+      <div className={categoryStyles.cardBody}>
+        <div className={categoryStyles.metaRow}>
+          <span className={categoryStyles.keyText}>#{category.id}</span>
+          <Badge variant={isLinked ? 'success' : 'secondary'} size="xs">
+            {categoryStatus}
+          </Badge>
+        </div>
+
+        <h3 className={categoryStyles.title}>{category.name}</h3>
+        <p className={categoryStyles.category}>
+          {getLinkedDimensionLabel(category.usageCount)}
+        </p>
+        <p className={categoryStyles.notes}>{categoryDescription}</p>
+
+        <div className={categoryStyles.options}>
+          <Badge variant="default" size="xs">
+            Linked: {category.usageCount}
+          </Badge>
+        </div>
+      </div>
+
+      <div className={categoryStyles.footer}>
+        <Button
+          variant="text"
+          size="xs"
+          icon={<EditIcon className={categoryStyles.actionIcon} />}
+          onClick={event => {
+            event.stopPropagation();
+            onSelect();
+          }}
+        >
+          Edit
+        </Button>
+        <Button
+          variant="text"
+          size="xs"
+          className={categoryStyles.deleteAction}
+          icon={<DeleteIcon className={categoryStyles.actionIcon} />}
+          onClick={event => {
+            event.stopPropagation();
+            onDelete();
+          }}
+        >
+          Delete
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function StandardDimensionCard({
+  dimension,
+  isEditingSelected,
+  isBulkSelected,
+  onSelect,
+  onToggleSelect,
+  onView,
+  onDelete,
+}: Readonly<DimensionCardProps>) {
   const {
-    dimension,
-    isEditingSelected,
-    isBulkSelected,
-    onSelect,
-    onToggleSelect,
-    onView,
-    onDelete,
-  } = props;
-  const shownOptions = dimension.options.slice(0, 3);
-  const hiddenCount =
-    dimension.options.length > 3 ? dimension.options.length - 3 : 0;
-  const normalizedType = dimension.dataType.toLowerCase();
-  const hasFormNames = dimension.formNames.length > 0;
+    options,
+    dataType,
+    formNames,
+    hardFilter,
+    indexKey,
+    indexName,
+    categoryName,
+    indexNotes,
+  } = dimension;
+  const shownOptions = options.slice(0, 3);
+  const hiddenCount = Math.max(0, options.length - shownOptions.length);
+  const normalizedType = dataType.toLowerCase();
   const glowStyle = cssVarStyle({
     '--glow-color':
       GLOW_COLORS[normalizedType] ??
@@ -241,9 +257,14 @@ export default function DimensionCard(props: Props) {
       data-testid="dimension-card"
       className={`${styles.card} ${isEditingSelected ? styles.cardActive : ''}`}
       style={glowStyle}
-      onClick={onSelect}
     >
       <div className={styles.orb} aria-hidden="true" />
+      <button
+        type="button"
+        className={styles.cardAction}
+        aria-label={`Edit dimension ${indexName}`}
+        onClick={onSelect}
+      />
 
       <button
         type="button"
@@ -260,7 +281,7 @@ export default function DimensionCard(props: Props) {
 
       <div className={styles.cardBody}>
         <div className={styles.metaRow}>
-          {dimension.hardFilter && (
+          {hardFilter && (
             <span
               title="Hard Filter"
               aria-label="Hard Filter"
@@ -269,31 +290,27 @@ export default function DimensionCard(props: Props) {
               !
             </span>
           )}
-          <span className={styles.keyText}>
-            {dimension.indexKey || 'NO_KEY'}
-          </span>
+          <span className={styles.keyText}>{indexKey || 'NO_KEY'}</span>
           <Badge
             variant={typeBadgeStyle.variant}
             bgColor={typeBadgeStyle.bgColor}
             textColor={typeBadgeStyle.textColor}
             size="xs"
           >
-            {dimension.dataType}
+            {dataType}
           </Badge>
         </div>
 
-        <h3 className={styles.title}>{dimension.indexName}</h3>
-        <p className={styles.category}>{dimension.categoryName}</p>
+        <h3 className={styles.title}>{indexName}</h3>
+        <p className={styles.category}>{categoryName}</p>
 
-        {dimension.indexNotes && (
-          <p className={styles.notes}>{dimension.indexNotes}</p>
-        )}
+        {indexNotes && <p className={styles.notes}>{indexNotes}</p>}
 
         <div className={styles.formSection}>
           <p className={styles.formLabel}>Forms</p>
           <div className={styles.formList}>
-            {hasFormNames ? (
-              dimension.formNames.map(formName => (
+            {formNames.length > 0 ? (
+              formNames.map(formName => (
                 <Badge key={formName} variant="secondary" size="xs">
                   {INTAKE_FORM_LABELS[formName]}
                 </Badge>
@@ -305,8 +322,8 @@ export default function DimensionCard(props: Props) {
         </div>
 
         <div className={styles.options}>
-          {shownOptions.map((option, index) => (
-            <Badge key={index} variant="default" size="xs">
+          {shownOptions.map(option => (
+            <Badge key={option.id} variant="default" size="xs">
               {option.label}
             </Badge>
           ))}
@@ -357,4 +374,12 @@ export default function DimensionCard(props: Props) {
       </div>
     </div>
   );
+}
+
+export default function DimensionCard(props: Props) {
+  if (props.variant === 'category') {
+    return <CategoryDimensionCard {...props} />;
+  }
+
+  return <StandardDimensionCard {...props} />;
 }

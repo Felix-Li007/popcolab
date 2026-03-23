@@ -24,7 +24,7 @@ export default function UserDashboardContent({
   totalScore,
   teams,
   requests,
-}: Props) {
+}: Readonly<Props>) {
   return (
     <div className="flex flex-col">
       <div className="flex flex-1 gap-0">

@@ -8,8 +8,6 @@ import {
   getPersonalitySummary,
 } from '@/services/personality-service';
 import { getOverviewGrowthMetrics } from '@/services/overview-service';
-import type { Personality } from '@/types/personality-type';
-import type { OverviewGrowthMetrics } from '@/types/overview-type';
 import OverviewContent from '@/components/admin/overview/overview-content';
 
 export default async function OverviewPage() {
@@ -22,10 +20,10 @@ export default async function OverviewPage() {
 
   return (
     <OverviewContent
-      initialPersonalities={personalities as Personality[]}
+      initialPersonalities={personalities}
       personalitiesCount={count}
       personalitiesActiveCount={activeCount}
-      growthMetrics={growthMetrics as OverviewGrowthMetrics}
+      growthMetrics={growthMetrics}
       personalityActions={{
         createPersonalityAction,
         updatePersonalityAction,

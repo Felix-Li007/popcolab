@@ -33,9 +33,9 @@ export default function EventsSection() {
         {/* Section Header */}
         <div className={styles['events-header']}>
           <h2 className={styles['events-title']}>Want to see more?</h2>
-          <a href="#" className={styles['events-link']}>
+          <button type="button" className={styles['events-link']}>
             Find more Events →
-          </a>
+          </button>
         </div>
 
         {/* Events Grid */}
@@ -62,9 +62,9 @@ export default function EventsSection() {
 
               {/* Learn More Link */}
               <div className={styles['event-link-wrapper']}>
-                <a href="#" className={styles['event-link']}>
+                <button type="button" className={styles['event-link']}>
                   Learn More →
-                </a>
+                </button>
               </div>
             </div>
           ))}

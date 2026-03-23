@@ -100,12 +100,12 @@
 
 .secondaryButton {
   border: 2px solid white;
-  background: color-mix(in srgb, white 20%, transparent);
-  color: white;
+  background: color-mix(in srgb, white 82%, transparent);
+  color: var(--color-teal-deep);
 }
 
 .secondaryButton:hover {
-  background: color-mix(in srgb, white 30%, transparent);
+  background: color-mix(in srgb, white 92%, transparent);
 }
 
 .stats {

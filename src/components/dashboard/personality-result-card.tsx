@@ -11,7 +11,7 @@ type Props = {
 export default function PersonalityResultCard({
   personality,
   totalScore,
-}: Props) {
+}: Readonly<Props>) {
   if (!personality) {
     return (
       <section className="rounded-[28px] border border-gray-200 bg-white/90 p-6 shadow-sm">

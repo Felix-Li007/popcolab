@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useId } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
 import type { Provider, ProviderFormState } from '@/types/provider-type';
@@ -29,8 +29,17 @@ function ProviderFormBody({
   providerTypeOptions,
   onClose,
   onSuccess,
-}: Omit<Props, 'isOpen'>) {
+}: Readonly<Omit<Props, 'isOpen'>>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const formFieldId = useId();
+  const providerTypeId = `${formFieldId}-provider-type`;
+  let submitLabel = 'Create Provider';
+
+  if (isPending) {
+    submitLabel = 'Saving…';
+  } else if (isEdit) {
+    submitLabel = 'Save Changes';
+  }
 
   useEffect(() => {
     if (state.success) onSuccess();
@@ -56,10 +65,14 @@ function ProviderFormBody({
         />
 
         <div>
-          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+          <label
+            htmlFor={providerTypeId}
+            className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500"
+          >
             Provider Type
           </label>
           <select
+            id={providerTypeId}
             name="providerType"
             defaultValue={initial?.providerType ?? ''}
             className={`w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30 ${
@@ -119,7 +132,7 @@ function ProviderFormBody({
           Cancel
         </Button>
         <Button type="submit" variant="primary" size="md" disabled={isPending}>
-          {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Provider'}
+          {submitLabel}
         </Button>
       </div>
     </form>
@@ -134,21 +147,20 @@ export default function ProviderForm({
   initial,
   providerTypeOptions,
   onSuccess,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen) return null;
 
   const formKey = `${isEdit ? (initial?.id ?? 'edit') : 'new'}-${initial?.updatedAt?.toString() ?? 'draft'}`;
+  const subtitle = isEdit
+    ? (initial?.providerType ?? '')
+    : 'Add a provider source for experiences';
 
   return (
     <ModalShell
       isOpen={isOpen}
       onClose={onClose}
       title={isEdit ? 'Edit Provider' : 'Create Provider'}
-      subtitle={
-        isEdit
-          ? (initial?.providerType ?? '')
-          : 'Add a provider source for experiences'
-      }
+      subtitle={subtitle}
       panelClassName="max-w-2xl"
       bodyClassName="overflow-hidden"
       rootTestId="provider-form-modal-root"

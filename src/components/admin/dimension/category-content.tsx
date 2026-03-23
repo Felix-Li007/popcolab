@@ -26,7 +26,7 @@ type Props = {
   initialData: CategoryWithUsage[];
 };
 
-export default function CategoryContent({ initialData }: Props) {
+export default function CategoryContent({ initialData }: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
@@ -95,12 +95,12 @@ export default function CategoryContent({ initialData }: Props) {
 
   function setSelection(id: number | null) {
     setSelectedId(id);
-    if (id !== null) {
+    if (id === null) {
+      router.replace('/admin/dimensions/categories', { scroll: false });
+    } else {
       router.replace(`/admin/dimensions/categories?id=${id}`, {
         scroll: false,
       });
-    } else {
-      router.replace('/admin/dimensions/categories', { scroll: false });
     }
   }
 
@@ -127,7 +127,7 @@ export default function CategoryContent({ initialData }: Props) {
     }
 
     if (
-      !window.confirm(
+      !globalThis.confirm(
         `Delete this category?\n\n"${category.name}"\n\nThis action cannot be undone.`
       )
     ) {
@@ -187,7 +187,7 @@ export default function CategoryContent({ initialData }: Props) {
     }
 
     if (
-      !window.confirm(
+      !globalThis.confirm(
         `Delete ${ids.length} selected categor${ids.length > 1 ? 'ies' : 'y'}?\n\nThis action cannot be undone.`
       )
     ) {
@@ -217,9 +217,9 @@ export default function CategoryContent({ initialData }: Props) {
     prevState: DimensionCategoryFormState,
     formData: FormData
   ) => Promise<DimensionCategoryFormState> =
-    selectedId !== null
-      ? updateDimensionCategoryAction.bind(null, selectedId)
-      : createDimensionCategoryAction;
+    selectedId === null
+      ? createDimensionCategoryAction
+      : updateDimensionCategoryAction.bind(null, selectedId);
 
   return (
     <>

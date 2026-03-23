@@ -16,6 +16,11 @@ import {
   deleteDimensionCategory,
   validateDimensionCategoryFields,
 } from '@/services/dimension-service';
+import {
+  getFormEntryString,
+  getTrimmedFormString,
+  getTrimmedFormStrings,
+} from '@/utils/form-data';
 
 const ADMIN_PATHS = [
   '/admin',
@@ -29,8 +34,8 @@ function revalidateAdminPaths() {
 }
 
 function parseOptions(formData: FormData) {
-  const labels = formData.getAll('optionLabel').map(v => v.toString().trim());
-  const values = formData.getAll('optionValue').map(v => v.toString().trim());
+  const labels = getTrimmedFormStrings(formData, 'optionLabel');
+  const values = getTrimmedFormStrings(formData, 'optionValue');
   const length = Math.max(labels.length, values.length);
 
   return Array.from({ length }, (_, index) => ({
@@ -42,7 +47,7 @@ function parseOptions(formData: FormData) {
 function hashString(value: string): string {
   let hash = 0;
   for (let i = 0; i < value.length; i += 1) {
-    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+    hash = (hash * 31 + (value.codePointAt(i) ?? 0)) >>> 0;
   }
   return hash.toString(36).toUpperCase();
 }
@@ -51,31 +56,30 @@ function generateDimensionKey(indexName: string): string {
   const normalized = indexName
     .trim()
     .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .replace(/_+/g, '_');
+    .replaceAll(/[^A-Z0-9]+/g, '_')
+    .replaceAll(/^_+|_+$/g, '')
+    .replaceAll(/_+/g, '_');
 
   if (normalized) return normalized.slice(0, 50);
   return `DIM_${hashString(indexName || 'DIMENSION')}`.slice(0, 50);
 }
 
 function parseDimensionForm(formData: FormData) {
-  const indexName = formData.get('indexName')?.toString().trim() ?? '';
-  const indexNotesRaw = formData.get('indexNotes')?.toString().trim() ?? '';
-  const categoryId = parseInt(
-    formData.get('categoryId')?.toString() ?? '0',
+  const indexName = getTrimmedFormString(formData, 'indexName');
+  const indexNotesRaw = getTrimmedFormString(formData, 'indexNotes');
+  const categoryId = Number.parseInt(
+    getFormEntryString(formData.get('categoryId')) || '0',
     10
   );
-  const dataType = formData.get('dataType')?.toString().trim() ?? '';
-  const hardFilter =
-    formData.get('hardFilter')?.toString() === 'on' ||
-    formData.get('hardFilter')?.toString() === 'true';
-  const scaleMinRaw = formData.get('scaleMin')?.toString().trim() ?? '';
-  const scaleMaxRaw = formData.get('scaleMax')?.toString().trim() ?? '';
+  const dataType = getTrimmedFormString(formData, 'dataType');
+  const hardFilterValue = getFormEntryString(formData.get('hardFilter'));
+  const hardFilter = hardFilterValue === 'on' || hardFilterValue === 'true';
+  const scaleMinRaw = getTrimmedFormString(formData, 'scaleMin');
+  const scaleMaxRaw = getTrimmedFormString(formData, 'scaleMax');
   const options = parseOptions(formData);
   const formNames = formData
     .getAll('formName')
-    .map(value => value.toString())
+    .map(getFormEntryString)
     .filter(
       (value): value is IntakeForm =>
         value === 'REQUEST' ||
@@ -162,8 +166,8 @@ export async function deleteDimensionAction(id: number): Promise<void> {
 }
 
 function parseCategoryForm(formData: FormData) {
-  const name = formData.get('name')?.toString().trim() ?? '';
-  const description = formData.get('description')?.toString().trim() ?? '';
+  const name = getTrimmedFormString(formData, 'name');
+  const description = getTrimmedFormString(formData, 'description');
   return {
     name,
     description,

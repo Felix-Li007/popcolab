@@ -19,7 +19,7 @@ export default function DimensionCategoryFilterBar({
   totalCount,
   hardOnly,
   onHardOnlyChange,
-}: Props) {
+}: Readonly<Props>) {
   const categoryOptions = categories.map(category => ({
     value: category.id,
     label: category.name,

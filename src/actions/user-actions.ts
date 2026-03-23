@@ -14,6 +14,7 @@ import {
   validateUserEditableUpdateInput,
 } from '@/services/user-service';
 import type { CompanyInfo } from '@/types/company-type';
+import { getTrimmedFormString } from '@/utils/form-data';
 import type {
   AdminUserEditableUpdateErrors,
   AdminUserEditableUpdateInput,
@@ -49,6 +50,17 @@ const COMPANY_NAME_MAX_LENGTH = 255;
 const DEPARTMENT_MAX_LENGTH = 100;
 const ROLE_TITLE_MAX_LENGTH = 50;
 const COMPANY_WEBSITE_MAX_LENGTH = 255;
+
+type NormalizedCompanyUpdateInput = {
+  companyName: string | null;
+  departmentName: string | null;
+  roleTitle: string | null;
+  workMode: WorkMode | null;
+  companySize: number | null;
+  companyWebsite: string | null;
+  rawCompanySize: string;
+};
+
 function revalidateAdminPaths() {
   ADMIN_PATHS.forEach(path => revalidatePath(path));
 }
@@ -73,6 +85,131 @@ function toNullableTrimmed(value: string): string | null {
 function deriveUserNameFromEmail(email: string): string {
   const localPart = email.split('@')[0]?.trim().toLowerCase() || 'user';
   return localPart.slice(0, 50) || 'user';
+}
+
+function normalizeCompanyUpdateInput(
+  input: SignedInCompanyUpdateInput
+): NormalizedCompanyUpdateInput {
+  const rawCompanySize = input.companySize.trim();
+
+  return {
+    companyName: toNullableTrimmed(input.companyName),
+    departmentName: toNullableTrimmed(input.departmentName),
+    roleTitle: toNullableTrimmed(input.roleTitle),
+    workMode: normalizeWorkMode(input.workMode),
+    companySize:
+      rawCompanySize.length === 0 ? null : Number.parseInt(rawCompanySize, 10),
+    companyWebsite: toNullableTrimmed(input.companyWebsite),
+    rawCompanySize,
+  };
+}
+
+function validateCompanyUpdateInput(
+  input: SignedInCompanyUpdateInput,
+  normalized: NormalizedCompanyUpdateInput
+): string | null {
+  if (
+    normalized.companyName &&
+    normalized.companyName.length > COMPANY_NAME_MAX_LENGTH
+  ) {
+    return `Company name must be ${COMPANY_NAME_MAX_LENGTH} characters or fewer.`;
+  }
+
+  if (
+    normalized.departmentName &&
+    normalized.departmentName.length > DEPARTMENT_MAX_LENGTH
+  ) {
+    return `Department name must be ${DEPARTMENT_MAX_LENGTH} characters or fewer.`;
+  }
+
+  if (
+    normalized.roleTitle &&
+    normalized.roleTitle.length > ROLE_TITLE_MAX_LENGTH
+  ) {
+    return `Role title must be ${ROLE_TITLE_MAX_LENGTH} characters or fewer.`;
+  }
+
+  if (input.workMode && !normalized.workMode) {
+    return 'Work mode must be remote, hybrid, or onsite.';
+  }
+
+  if (
+    normalized.rawCompanySize.length > 0 &&
+    (normalized.companySize === null ||
+      !Number.isInteger(normalized.companySize) ||
+      normalized.companySize <= 0)
+  ) {
+    return 'Company size must be a positive integer.';
+  }
+
+  if (
+    normalized.companyWebsite &&
+    normalized.companyWebsite.length > COMPANY_WEBSITE_MAX_LENGTH
+  ) {
+    return `Company website must be ${COMPANY_WEBSITE_MAX_LENGTH} characters or fewer.`;
+  }
+
+  return null;
+}
+
+async function ensureCompanyUser(params: {
+  clerkId: string;
+  email: string;
+}): Promise<{ id: number }> {
+  const userName = deriveUserNameFromEmail(params.email);
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ clerk_id: params.clerkId }, { email: params.email }],
+    },
+    select: { id: true },
+  });
+
+  if (existingUser) {
+    return prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        clerk_id: params.clerkId,
+        email: params.email,
+        user_name: userName,
+      },
+      select: { id: true },
+    });
+  }
+
+  return prisma.user.create({
+    data: {
+      clerk_id: params.clerkId,
+      email: params.email,
+      user_name: userName,
+    },
+    select: { id: true },
+  });
+}
+
+function toCompanyInfo(company: {
+  id: number;
+  user_id: number;
+  company_name: string | null;
+  department_name: string | null;
+  role_title: string | null;
+  work_mode: string | null;
+  company_size: number | null;
+  company_website: string | null;
+  created_at: Date;
+  updated_at: Date;
+}): CompanyInfo {
+  return {
+    id: company.id,
+    userId: company.user_id,
+    companyName: company.company_name,
+    departmentName: company.department_name,
+    roleTitle: company.role_title,
+    workMode: normalizeWorkMode(company.work_mode),
+    companySize: company.company_size,
+    companyWebsite: company.company_website,
+    createdAt: company.created_at,
+    updatedAt: company.updated_at,
+  };
 }
 
 export async function getSignedInUserSummaryAction(): Promise<SignedInUserSummary | null> {
@@ -162,109 +299,37 @@ export async function updateCompanyAction(
     };
   }
   const clerkId = authContext.user.id;
+  const normalized = normalizeCompanyUpdateInput(input);
+  const validationError = validateCompanyUpdateInput(input, normalized);
 
-  const companyName = toNullableTrimmed(input.companyName);
-  const departmentName = toNullableTrimmed(input.departmentName);
-  const roleTitle = toNullableTrimmed(input.roleTitle);
-  const workMode = normalizeWorkMode(input.workMode);
-  const companyWebsite = toNullableTrimmed(input.companyWebsite);
-  const rawCompanySize = input.companySize.trim();
-  const companySize =
-    rawCompanySize.length === 0 ? null : Number.parseInt(rawCompanySize, 10);
-
-  if (companyName && companyName.length > COMPANY_NAME_MAX_LENGTH) {
+  if (validationError) {
     return {
       success: false,
-      error: `Company name must be ${COMPANY_NAME_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-
-  if (departmentName && departmentName.length > DEPARTMENT_MAX_LENGTH) {
-    return {
-      success: false,
-      error: `Department name must be ${DEPARTMENT_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-
-  if (roleTitle && roleTitle.length > ROLE_TITLE_MAX_LENGTH) {
-    return {
-      success: false,
-      error: `Role title must be ${ROLE_TITLE_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-
-  if (input.workMode && !workMode) {
-    return {
-      success: false,
-      error: 'Work mode must be remote, hybrid, or onsite.',
-    };
-  }
-
-  if (
-    rawCompanySize.length > 0 &&
-    (companySize === null || !Number.isInteger(companySize) || companySize <= 0)
-  ) {
-    return {
-      success: false,
-      error: 'Company size must be a positive integer.',
-    };
-  }
-
-  if (companyWebsite && companyWebsite.length > COMPANY_WEBSITE_MAX_LENGTH) {
-    return {
-      success: false,
-      error: `Company website must be ${COMPANY_WEBSITE_MAX_LENGTH} characters or fewer.`,
+      error: validationError,
     };
   }
 
   try {
-    const userName = deriveUserNameFromEmail(email);
-    // Dashboard users may exist in Clerk before we have a local user row, so
-    // ensure the relational owner record exists before saving company details.
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [{ clerk_id: clerkId }, { email }],
-      },
-      select: { id: true },
-    });
-
-    const user = existingUser
-      ? await prisma.user.update({
-          where: { id: existingUser.id },
-          data: {
-            clerk_id: clerkId,
-            email,
-            user_name: userName,
-          },
-          select: { id: true },
-        })
-      : await prisma.user.create({
-          data: {
-            clerk_id: clerkId,
-            email,
-            user_name: userName,
-          },
-          select: { id: true },
-        });
+    const user = await ensureCompanyUser({ clerkId, email });
 
     const company = await prisma.company.upsert({
       where: { user_id: user.id },
       update: {
-        company_name: companyName,
-        department_name: departmentName,
-        role_title: roleTitle,
-        work_mode: workMode,
-        company_size: companySize,
-        company_website: companyWebsite,
+        company_name: normalized.companyName,
+        department_name: normalized.departmentName,
+        role_title: normalized.roleTitle,
+        work_mode: normalized.workMode,
+        company_size: normalized.companySize,
+        company_website: normalized.companyWebsite,
       },
       create: {
         user_id: user.id,
-        company_name: companyName,
-        department_name: departmentName,
-        role_title: roleTitle,
-        work_mode: workMode,
-        company_size: companySize,
-        company_website: companyWebsite,
+        company_name: normalized.companyName,
+        department_name: normalized.departmentName,
+        role_title: normalized.roleTitle,
+        work_mode: normalized.workMode,
+        company_size: normalized.companySize,
+        company_website: normalized.companyWebsite,
       },
       select: {
         id: true,
@@ -282,18 +347,7 @@ export async function updateCompanyAction(
 
     return {
       success: true,
-      data: {
-        id: company.id,
-        userId: company.user_id,
-        companyName: company.company_name,
-        departmentName: company.department_name,
-        roleTitle: company.role_title,
-        workMode: normalizeWorkMode(company.work_mode),
-        companySize: company.company_size,
-        companyWebsite: company.company_website,
-        createdAt: company.created_at,
-        updatedAt: company.updated_at,
-      },
+      data: toCompanyInfo(company),
     };
   } catch {
     return {
@@ -307,15 +361,13 @@ export async function saveCompanyAction(
   prevState: SaveCompanyFormState,
   formData: FormData
 ): Promise<SaveCompanyFormState> {
-  const companyName = String(formData.get('companyName') ?? '');
-  const departmentName = String(formData.get('departmentName') ?? '');
-  const roleTitle = String(formData.get('roleTitle') ?? '');
-  const rawWorkMode = String(formData.get('workMode') ?? '')
-    .trim()
-    .toLowerCase();
+  const companyName = getTrimmedFormString(formData, 'companyName');
+  const departmentName = getTrimmedFormString(formData, 'departmentName');
+  const roleTitle = getTrimmedFormString(formData, 'roleTitle');
+  const rawWorkMode = getTrimmedFormString(formData, 'workMode').toLowerCase();
   const workMode: WorkMode | '' = isWorkMode(rawWorkMode) ? rawWorkMode : '';
-  const companySize = String(formData.get('companySize') ?? '');
-  const companyWebsite = String(formData.get('companyWebsite') ?? '');
+  const companySize = getTrimmedFormString(formData, 'companySize');
+  const companyWebsite = getTrimmedFormString(formData, 'companyWebsite');
 
   const result = await updateCompanyAction({
     companyName,

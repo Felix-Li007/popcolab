@@ -23,10 +23,10 @@ const INITIAL_SAVE_STATE: SaveCompanyFormState = {
 export default function CompanyProfile({
   initialCompany,
   embedded = false,
-}: {
+}: Readonly<{
   initialCompany?: CompanyInfo | null;
   embedded?: boolean;
-}) {
+}>) {
   const router = useRouter();
   const initialState: SaveCompanyFormState = {
     ...INITIAL_SAVE_STATE,
@@ -57,10 +57,13 @@ export default function CompanyProfile({
       {isPending ? 'Saving...' : 'Save'}
     </Button>
   );
+  const title = embedded ? null : (
+    <h2 className={styles.title}>Company details</h2>
+  );
 
   return (
     <div className={styles.container}>
-      {!embedded ? <h2 className={styles.title}>Company details</h2> : null}
+      {title}
 
       <div className={embedded ? '' : styles.panel}>
         {embedded ? (

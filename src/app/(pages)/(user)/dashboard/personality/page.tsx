@@ -47,7 +47,7 @@ export default async function PersonalityPage() {
 
   // Compute all personality matches from the saved score
   const allMatchRaw =
-    totalScore !== null ? await computeAllPersonalityMatches(totalScore) : [];
+    totalScore === null ? [] : await computeAllPersonalityMatches(totalScore);
 
   const allMatches = (
     await Promise.all(

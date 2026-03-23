@@ -8,7 +8,9 @@ type PageProps = {
   params: Promise<{ requestId: string }>;
 };
 
-export default async function RequestInvitePage({ params }: PageProps) {
+export default async function RequestInvitePage({
+  params,
+}: Readonly<PageProps>) {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated || !authContext.user) {
     redirect('/sign-in');

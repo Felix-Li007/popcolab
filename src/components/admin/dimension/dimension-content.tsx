@@ -36,7 +36,10 @@ type Props = {
 
 type CategoryFilter = 'all' | number;
 
-export default function DimensionContent({ initialData, categories }: Props) {
+export default function DimensionContent({
+  initialData,
+  categories,
+}: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
@@ -117,10 +120,10 @@ export default function DimensionContent({ initialData, categories }: Props) {
 
   function setSelection(id: number | null) {
     setSelectedId(id);
-    if (id !== null) {
-      router.replace(`/admin/dimensions?id=${id}`, { scroll: false });
-    } else {
+    if (id === null) {
       router.replace('/admin/dimensions', { scroll: false });
+    } else {
+      router.replace(`/admin/dimensions?id=${id}`, { scroll: false });
     }
   }
 
@@ -158,7 +161,7 @@ export default function DimensionContent({ initialData, categories }: Props) {
 
   function handleDelete(id: number, name: string) {
     if (
-      !window.confirm(
+      !globalThis.confirm(
         `Delete this dimension?\n\n"${name}"\n\nRelated mappings will also be removed.`
       )
     )
@@ -186,7 +189,7 @@ export default function DimensionContent({ initialData, categories }: Props) {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     if (
-      !window.confirm(
+      !globalThis.confirm(
         `Delete ${ids.length} selected dimension(s)?\n\nRelated mappings will also be removed.`
       )
     )
@@ -212,10 +215,9 @@ export default function DimensionContent({ initialData, categories }: Props) {
     prevState: DimensionFormState,
     formData: FormData
   ) => Promise<DimensionFormState> =
-    selectedId !== null
-      ? updateDimensionAction.bind(null, selectedId)
-      : createDimensionAction;
-
+    selectedId === null
+      ? createDimensionAction
+      : updateDimensionAction.bind(null, selectedId);
   return (
     <>
       <div className={styles.root}>

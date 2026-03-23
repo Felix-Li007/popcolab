@@ -17,10 +17,10 @@ type Props = {
 function ActionIcon({
   children,
   className,
-}: {
+}: Readonly<{
   children: ReactNode;
   className?: string;
-}) {
+}>) {
   return (
     <span
       className={`inline-flex h-4 w-4 items-center justify-center ${className ?? ''}`}
@@ -53,7 +53,7 @@ export default function ExperienceCard({
   onSelect,
   onView,
   onDelete,
-}: Props) {
+}: Readonly<Props>) {
   const isNew = isNewExperience(experience.createdAt);
   const statusBadge = getStatusBadge(experience.experienceStatus);
   const pricingSummary = getExperiencePricingSummary(experience);
@@ -61,14 +61,20 @@ export default function ExperienceCard({
   return (
     <article
       data-testid="experience-card"
-      onClick={onSelect}
-      className={`flex h-full min-h-[312px] w-full cursor-pointer flex-col overflow-hidden rounded-xl border bg-white p-3 shadow-sm transition ${
+      className={`relative flex h-full min-h-[312px] w-full flex-col overflow-hidden rounded-xl border bg-white p-3 shadow-sm transition ${
         isEditingSelected
           ? 'border-magenta shadow-[0_0_0_2px_rgba(233,30,99,0.14),0_4px_16px_rgba(0,0,0,0.08)]'
           : 'border-gray-200 hover:-translate-y-0.5 hover:border-magenta/20 hover:shadow-[0_0_0_1.5px_rgba(233,30,99,0.12),0_0_20px_6px_rgba(233,30,99,0.10)]'
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <button
+        type="button"
+        aria-label={`Edit experience ${experience.experienceTitle}`}
+        className="absolute inset-0 z-10 cursor-pointer rounded-xl bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-magenta/40"
+        onClick={onSelect}
+      />
+
+      <div className="relative z-0 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400">
@@ -102,7 +108,7 @@ export default function ExperienceCard({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="relative z-0 mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-lg bg-gray-50 px-2 py-1.5">
           <p className="text-[10px] text-gray-400">Duration</p>
           <p className="text-xs font-bold text-gray-700">
@@ -129,7 +135,7 @@ export default function ExperienceCard({
         </div>
       </div>
 
-      <div className="mt-3 flex-1 space-y-2 text-xs text-gray-500">
+      <div className="relative z-0 mt-3 flex-1 space-y-2 text-xs text-gray-500">
         <div className="rounded-lg border border-magenta/15 bg-magenta/5 px-2.5 py-2">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-magenta/80">
             Pricing
@@ -155,7 +161,7 @@ export default function ExperienceCard({
         </div>
       </div>
 
-      <div className="mt-3 flex shrink-0 items-center justify-between gap-1.5 border-t border-gray-100 pt-2">
+      <div className="relative z-20 mt-3 flex shrink-0 items-center justify-between gap-1.5 border-t border-gray-100 pt-2">
         <Button
           variant="text"
           size="xs"

@@ -2,8 +2,6 @@ import { prisma } from '@/libs/prisma-client';
 import { MAX_CATEGORY_DEPTH, MAX_CATEGORY_LEVEL } from '@/constants/category';
 import type { ExperienceCategory } from '@/types/category-type';
 
-export type { ExperienceCategory as ExperienceCategoryData };
-
 type CategoryRow = Awaited<ReturnType<typeof prisma.category.findMany>>[number];
 
 type CategoryWithRelations = CategoryRow & {
@@ -19,6 +17,11 @@ type UpsertExperienceCategoryInput = {
   notes: string | null;
   status: string;
   parentId: number | null;
+};
+
+type CategoryParentRow = {
+  id: number;
+  parent_id: number | null;
 };
 
 export function mapExperienceCategoryRow(
@@ -38,6 +41,109 @@ export function mapExperienceCategoryRow(
   };
 }
 
+function getParentDepth(
+  parentById: Map<number, number | null>,
+  parentId: number
+): number {
+  let depth = 0;
+  let cursor: number | null | undefined = parentById.get(parentId);
+
+  while (cursor !== null && cursor !== undefined) {
+    depth += 1;
+    cursor = parentById.get(cursor);
+  }
+
+  return depth;
+}
+
+function assertCategoryIsNotOwnParent(
+  categoryId: number | null,
+  parentId: number | null
+) {
+  if (categoryId !== null && categoryId === parentId) {
+    throw new Error('Category cannot be its own parent.');
+  }
+}
+
+function assertParentCategoryExists(
+  parentById: Map<number, number | null>,
+  parentId: number
+) {
+  if (!parentById.has(parentId)) {
+    throw new Error('Selected parent category no longer exists.');
+  }
+}
+
+function assertCategoryIsNotMovedIntoDescendant(
+  parentById: Map<number, number | null>,
+  categoryId: number | null,
+  parentId: number
+) {
+  if (categoryId === null) {
+    return;
+  }
+
+  let cursor: number | null | undefined = parentId;
+  while (cursor !== null && cursor !== undefined) {
+    if (cursor === categoryId) {
+      throw new Error(
+        'Category cannot be moved under itself or one of its descendants.'
+      );
+    }
+    cursor = parentById.get(cursor);
+  }
+}
+
+function buildChildrenByParentId(rows: CategoryParentRow[]) {
+  const childrenByParentId = new Map<number | null, number[]>();
+
+  for (const row of rows) {
+    const siblings = childrenByParentId.get(row.parent_id) ?? [];
+    siblings.push(row.id);
+    childrenByParentId.set(row.parent_id, siblings);
+  }
+
+  return childrenByParentId;
+}
+
+function getSubtreeHeight(
+  childrenByParentId: Map<number | null, number[]>,
+  categoryId: number
+): number {
+  const childIds = childrenByParentId.get(categoryId) ?? [];
+  if (childIds.length === 0) {
+    return 0;
+  }
+
+  return (
+    1 +
+    Math.max(
+      ...childIds.map(childId => getSubtreeHeight(childrenByParentId, childId))
+    )
+  );
+}
+
+function assertCategoryDepthWithinLimit(params: {
+  categoryId: number | null;
+  parentId: number;
+  parentById: Map<number, number | null>;
+  rows: CategoryParentRow[];
+}) {
+  const parentDepth = getParentDepth(params.parentById, params.parentId);
+  const childrenByParentId = buildChildrenByParentId(params.rows);
+  const subtreeHeight =
+    params.categoryId === null
+      ? 0
+      : getSubtreeHeight(childrenByParentId, params.categoryId);
+  const deepestDepth = parentDepth + 1 + subtreeHeight;
+
+  if (deepestDepth > MAX_CATEGORY_DEPTH) {
+    throw new Error(
+      `Categories support up to ${MAX_CATEGORY_LEVEL} levels only.`
+    );
+  }
+}
+
 async function assertValidParentAssignment(
   categoryId: number | null,
   parentId: number | null
@@ -50,57 +156,19 @@ async function assertValidParentAssignment(
   });
   const parentById = new Map(rows.map(row => [row.id, row.parent_id]));
 
-  if (parentId === null) return;
-
-  if (categoryId !== null && categoryId === parentId) {
-    throw new Error('Category cannot be its own parent.');
+  if (parentId === null) {
+    return;
   }
 
-  if (!parentById.has(parentId)) {
-    throw new Error('Selected parent category no longer exists.');
-  }
-
-  let parentDepth = 0;
-  let cursor: number | null | undefined = parentById.get(parentId);
-
-  while (cursor !== null && cursor !== undefined) {
-    parentDepth += 1;
-    cursor = parentById.get(cursor);
-  }
-
-  if (categoryId !== null) {
-    cursor = parentId;
-    while (cursor !== null && cursor !== undefined) {
-      if (cursor === categoryId) {
-        throw new Error(
-          'Category cannot be moved under itself or one of its descendants.'
-        );
-      }
-      cursor = parentById.get(cursor);
-    }
-  }
-
-  const childrenByParentId = new Map<number | null, number[]>();
-  for (const row of rows) {
-    const siblings = childrenByParentId.get(row.parent_id) ?? [];
-    siblings.push(row.id);
-    childrenByParentId.set(row.parent_id, siblings);
-  }
-
-  const getSubtreeHeight = (id: number): number => {
-    const childIds = childrenByParentId.get(id) ?? [];
-    if (childIds.length === 0) return 0;
-    return 1 + Math.max(...childIds.map(getSubtreeHeight));
-  };
-
-  const subtreeHeight = categoryId !== null ? getSubtreeHeight(categoryId) : 0;
-  const deepestDepth = parentDepth + 1 + subtreeHeight;
-
-  if (deepestDepth > MAX_CATEGORY_DEPTH) {
-    throw new Error(
-      `Categories support up to ${MAX_CATEGORY_LEVEL} levels only.`
-    );
-  }
+  assertCategoryIsNotOwnParent(categoryId, parentId);
+  assertParentCategoryExists(parentById, parentId);
+  assertCategoryIsNotMovedIntoDescendant(parentById, categoryId, parentId);
+  assertCategoryDepthWithinLimit({
+    categoryId,
+    parentId,
+    parentById,
+    rows,
+  });
 }
 
 export async function getExperienceCategories(): Promise<ExperienceCategory[]> {
@@ -185,3 +253,5 @@ export async function deleteExperienceCategory(id: number): Promise<void> {
 
   await prisma.category.delete({ where: { id } });
 }
+
+export { type ExperienceCategory as ExperienceCategoryData } from '@/types/category-type';

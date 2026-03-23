@@ -92,8 +92,8 @@ export default function About() {
         <section className={styles['about-values']}>
           <h2 className={styles['values-title']}>Our Values</h2>
           <div className={styles['values-grid']}>
-            {values.map((value, index) => (
-              <div key={index} className={styles['value-card']}>
+            {values.map(value => (
+              <div key={value.title} className={styles['value-card']}>
                 <div className={styles['value-icon']}>{value.icon}</div>
                 <h3 className={styles['value-name']}>{value.title}</h3>
                 <p className={styles['value-description']}>
@@ -108,8 +108,8 @@ export default function About() {
         <section className={styles['about-team']}>
           <h2 className={styles['team-title']}>Meet the Team</h2>
           <div className={styles['team-grid']}>
-            {team.map((member, index) => (
-              <div key={index} className={styles['team-card']}>
+            {team.map(member => (
+              <div key={member.name} className={styles['team-card']}>
                 <div className={styles['team-avatar']}>👤</div>
                 <h3 className={styles['team-name']}>{member.name}</h3>
                 <p className={styles['team-role']}>{member.role}</p>

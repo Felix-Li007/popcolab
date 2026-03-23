@@ -50,12 +50,14 @@ export function usePersonality(
   }
 
   function handleDelete(id: number, name: string, onSuccess?: () => void) {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete "${name}"?\n\nThis action cannot be undone.`
-      )
-    )
+    const shouldDelete = globalThis.confirm(
+      `Are you sure you want to delete "${name}"?\n\nThis action cannot be undone.`
+    );
+
+    if (!shouldDelete) {
       return;
+    }
+
     startDeleteTransition(async () => {
       try {
         await deletePersonalityAction(id);
@@ -67,20 +69,20 @@ export function usePersonality(
     });
   }
 
-  const formAction: PersonalityFormAction =
-    formModal.id !== undefined
-      ? updatePersonalityAction.bind(null, formModal.id)
-      : createPersonalityAction;
+  let formAction: PersonalityFormAction = createPersonalityAction;
+  if (formModal.id !== undefined) {
+    formAction = updatePersonalityAction.bind(null, formModal.id);
+  }
 
-  const selectedPersonality =
-    formModal.id !== undefined
-      ? personalities.find(p => p.id === formModal.id)
-      : undefined;
+  let selectedPersonality: Personality | undefined;
+  if (formModal.id !== undefined) {
+    selectedPersonality = personalities.find(p => p.id === formModal.id);
+  }
 
-  const viewedPersonality =
-    viewModal.id !== undefined
-      ? personalities.find(p => p.id === viewModal.id)
-      : undefined;
+  let viewedPersonality: Personality | undefined;
+  if (viewModal.id !== undefined) {
+    viewedPersonality = personalities.find(p => p.id === viewModal.id);
+  }
 
   return {
     formModal,

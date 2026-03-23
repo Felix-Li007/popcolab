@@ -11,6 +11,11 @@ import {
   updateExperience,
   validateExperienceFields,
 } from '@/services/experience-service';
+import {
+  getNullableTrimmedFormString,
+  getTrimmedFormEntryString,
+  getTrimmedFormString,
+} from '@/utils/form-data';
 
 const ADMIN_PATHS = ['/admin', '/admin/experiences'];
 
@@ -19,7 +24,7 @@ function revalidateAdminPaths() {
 }
 
 function parseIntegerField(value: FormDataEntryValue | null): number | null {
-  const text = value?.toString().trim() ?? '';
+  const text = getTrimmedFormEntryString(value);
   if (!text) return null;
   const parsed = Number.parseInt(text, 10);
   return Number.isFinite(parsed) ? parsed : null;
@@ -28,14 +33,14 @@ function parseIntegerField(value: FormDataEntryValue | null): number | null {
 function parseExperienceForm(formData: FormData) {
   const dimensionKeys = Array.from(new Set(Array.from(formData.keys())))
     .filter(key => key.startsWith('dimension_'))
-    .sort();
+    .sort(undefined);
 
   const dimensionValues = dimensionKeys
     .map(key => {
       const dimensionId = Number.parseInt(key.replace('dimension_', ''), 10);
       const expectedValue = formData
         .getAll(key)
-        .map(value => value.toString().trim())
+        .map(getTrimmedFormEntryString)
         .filter(Boolean)
         .join(';');
 
@@ -52,8 +57,8 @@ function parseExperienceForm(formData: FormData) {
     );
 
   return {
-    experienceTitle: formData.get('experienceTitle')?.toString().trim() ?? '',
-    experienceStatus: (formData.get('experienceStatus')?.toString().trim() ??
+    experienceTitle: getTrimmedFormString(formData, 'experienceTitle'),
+    experienceStatus: (getTrimmedFormString(formData, 'experienceStatus') ||
       'active') as ExperienceStatus,
     providerId: parseIntegerField(formData.get('providerId')) ?? 0,
     categoryId: parseIntegerField(formData.get('categoryId')) ?? 0,
@@ -63,12 +68,14 @@ function parseExperienceForm(formData: FormData) {
     startingPrice: parseIntegerField(formData.get('startingPrice')) ?? -1,
     addingPrice: parseIntegerField(formData.get('addingPrice')) ?? -1,
     startingHour: parseIntegerField(formData.get('startingHour')),
-    pricingModel: formData.get('pricingModel')?.toString().trim() || null,
-    pricingNotes: formData.get('pricingNotes')?.toString().trim() || null,
-    leadType: formData.get('leadType')?.toString().trim() ?? '',
-    deliveryMethods: formData.get('deliveryMethods')?.toString().trim() ?? '',
-    dietaryConsiderations:
-      formData.get('dietaryConsiderations')?.toString().trim() || null,
+    pricingModel: getNullableTrimmedFormString(formData, 'pricingModel'),
+    pricingNotes: getNullableTrimmedFormString(formData, 'pricingNotes'),
+    leadType: getTrimmedFormString(formData, 'leadType'),
+    deliveryMethods: getTrimmedFormString(formData, 'deliveryMethods'),
+    dietaryConsiderations: getNullableTrimmedFormString(
+      formData,
+      'dietaryConsiderations'
+    ),
     takeItem: parseIntegerField(formData.get('takeItem')),
     travelFlying: parseIntegerField(formData.get('travelFlying')),
     dimensionValues,

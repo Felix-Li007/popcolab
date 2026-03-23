@@ -17,6 +17,7 @@ import {
   getAppBaseUrlFromHeaders,
   DASHBOARD_PATH,
 } from '@/utils/url-helper';
+import { getFormEntryString } from '@/utils/form-data';
 
 export type SendInvitationsActionState = {
   status: 'idle' | 'success' | 'error';
@@ -46,12 +47,12 @@ function parseInvitations(rawValue: FormDataEntryValue | null) {
   }>;
 
   if (!Array.isArray(parsed)) {
-    throw new Error('Invalid invitations payload.');
+    throw new TypeError('Invalid invitations payload.');
   }
 
   return parsed.map(item => ({
-    userName: String(item.userName ?? ''),
-    userEmail: String(item.userEmail ?? ''),
+    userName: typeof item.userName === 'string' ? item.userName : '',
+    userEmail: typeof item.userEmail === 'string' ? item.userEmail : '',
   }));
 }
 
@@ -142,7 +143,7 @@ export async function respondToInvitationAction(
   token: string,
   formData: FormData
 ): Promise<never> {
-  const action = String(formData.get('action') ?? '').toLowerCase();
+  const action = getFormEntryString(formData.get('action')).toLowerCase();
 
   if (action !== 'accept' && action !== 'reject') {
     redirect(buildInvitationPath(token, { error: 1 }));

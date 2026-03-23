@@ -16,7 +16,7 @@ const STATUS_COLOR_MAP: Record<OverviewRequestStatusPoint['id'], string> = {
   unknown: '#9ca3af',
 };
 
-export default function RequestStatusChart({ data }: Props) {
+export default function RequestStatusChart({ data }: Readonly<Props>) {
   return (
     <div className="h-[300px] w-full rounded-[22px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
       <ResponsivePie

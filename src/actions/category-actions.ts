@@ -7,6 +7,7 @@ import {
   deleteExperienceCategory,
   updateExperienceCategory,
 } from '@/services/category-service';
+import { getTrimmedFormString } from '@/utils/form-data';
 import { validateExperienceCategoryFields } from '@/utils/experience-category-helper';
 
 const ADMIN_PATHS = [
@@ -20,10 +21,10 @@ function revalidateAdminPaths() {
 }
 
 function parseCategoryForm(formData: FormData) {
-  const title = formData.get('title')?.toString().trim() ?? '';
-  const notes = formData.get('notes')?.toString().trim() ?? '';
-  const status = formData.get('status')?.toString().trim() ?? '';
-  const parentRaw = formData.get('parentId')?.toString().trim() ?? '';
+  const title = getTrimmedFormString(formData, 'title');
+  const notes = getTrimmedFormString(formData, 'notes');
+  const status = getTrimmedFormString(formData, 'status');
+  const parentRaw = getTrimmedFormString(formData, 'parentId');
   const parsedParentId = parentRaw ? Number.parseInt(parentRaw, 10) : null;
 
   return {

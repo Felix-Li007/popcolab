@@ -106,6 +106,65 @@ function isSingleSelectDimension(value: ExperienceDimensionValue) {
   );
 }
 
+function renderDimensionValueContent(value: ExperienceDimensionValue) {
+  const options = getDimensionOptions(value);
+  const selectedValues = parseTagValues(value.expectedValue);
+  const usesCircleStyle =
+    value.dataType === 'scale' || value.dataType === 'numeric';
+  const shouldUseTags =
+    selectedValues.length > 1 ||
+    (selectedValues.length > 0 &&
+      TAG_VALUE_KEYS.has(normalizeKey(value.indexKey)));
+
+  if (options.length > 0) {
+    return (
+      <div className={styles.optionGroup}>
+        {options.map(option => {
+          const isSelected = selectedValues.includes(option.value);
+          const optionLabelClassName = usesCircleStyle
+            ? undefined
+            : styles.optionLabel;
+
+          return (
+            <div
+              key={`${value.dimensionId}-${option.value}`}
+              className={joinClasses(
+                styles.optionChip,
+                usesCircleStyle ? styles.circleOption : styles.pillOption,
+                isSelected && styles.optionChipSelected
+              )}
+              title={option.label}
+            >
+              <span className={optionLabelClassName}>{option.label}</span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (shouldUseTags) {
+    return (
+      <div className={styles.tagGroup}>
+        {selectedValues.map(tag => (
+          <Badge
+            key={`${value.dimensionId}-${tag}`}
+            variant="secondary"
+            size="sm"
+            className={styles.tagBadge}
+          >
+            {tag}
+          </Badge>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <p className={styles.plainValue}>{value.expectedValue?.trim() || '-'}</p>
+  );
+}
+
 function joinClasses(...classNames: Array<string | false | null | undefined>) {
   return classNames.filter(Boolean).join(' ');
 }
@@ -115,7 +174,7 @@ export default function ExperienceView({
   experience,
   onClose,
   onEdit,
-}: Props) {
+}: Readonly<Props>) {
   const [selectedCategoryName, setSelectedCategoryName] = useState('');
   const [activeTopTab, setActiveTopTab] = useState<TopSectionTab>('basic');
   const categoryTabsRef = useRef<HTMLDivElement | null>(null);
@@ -144,7 +203,7 @@ export default function ExperienceView({
         ([categoryName, values]) =>
           [
             categoryName,
-            values.sort((a, b) => a.indexName.localeCompare(b.indexName)),
+            values.toSorted((a, b) => a.indexName.localeCompare(b.indexName)),
           ] as const
       );
   }, [experience]);
@@ -460,17 +519,6 @@ export default function ExperienceView({
                 <div className={styles.dimensionPanel}>
                   <div className={styles.dimensionGrid}>
                     {selectedDimensions.map(value => {
-                      const options = getDimensionOptions(value);
-                      const selectedValues = parseTagValues(
-                        value.expectedValue
-                      );
-                      const usesCircleStyle =
-                        value.dataType === 'scale' ||
-                        value.dataType === 'numeric';
-                      const shouldUseTags =
-                        selectedValues.length > 1 ||
-                        (selectedValues.length > 0 &&
-                          TAG_VALUE_KEYS.has(normalizeKey(value.indexKey)));
                       const singleSelect = isSingleSelectDimension(value);
 
                       return (
@@ -487,56 +535,7 @@ export default function ExperienceView({
                             </span>
                           </div>
 
-                          {options.length > 0 ? (
-                            <div className={styles.optionGroup}>
-                              {options.map(option => {
-                                const isSelected = selectedValues.includes(
-                                  option.value
-                                );
-
-                                return (
-                                  <div
-                                    key={`${value.dimensionId}-${option.value}`}
-                                    className={joinClasses(
-                                      styles.optionChip,
-                                      usesCircleStyle
-                                        ? styles.circleOption
-                                        : styles.pillOption,
-                                      isSelected && styles.optionChipSelected
-                                    )}
-                                    title={option.label}
-                                  >
-                                    <span
-                                      className={
-                                        usesCircleStyle
-                                          ? undefined
-                                          : styles.optionLabel
-                                      }
-                                    >
-                                      {option.label}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : shouldUseTags ? (
-                            <div className={styles.tagGroup}>
-                              {selectedValues.map(tag => (
-                                <Badge
-                                  key={`${value.dimensionId}-${tag}`}
-                                  variant="secondary"
-                                  size="sm"
-                                  className={styles.tagBadge}
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className={styles.plainValue}>
-                              {value.expectedValue?.trim() || '-'}
-                            </p>
-                          )}
+                          {renderDimensionValueContent(value)}
                         </section>
                       );
                     })}

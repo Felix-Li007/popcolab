@@ -17,7 +17,7 @@ export default function PersonalityView({
   onClose,
   onEdit,
   personality,
-}: PersonalityViewProps) {
+}: Readonly<PersonalityViewProps>) {
   if (!isOpen) return null;
 
   return (

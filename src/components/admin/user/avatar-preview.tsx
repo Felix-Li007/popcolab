@@ -19,7 +19,7 @@ function getAvatarText(value: string): string {
   return normalized.slice(0, 1).toUpperCase();
 }
 
-export default function UserAvatarPreview({ user }: Props) {
+export default function UserAvatarPreview({ user }: Readonly<Props>) {
   const userName = getUserName(user);
   const avatarText = getAvatarText(userName);
   const showAvatarImage = hasText(user.avatarImage);

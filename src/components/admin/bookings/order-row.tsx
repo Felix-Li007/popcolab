@@ -78,14 +78,16 @@ function getPaymentStatusClass(status: string | null | undefined) {
   }
 }
 
-export default function OrderRow({ order }: Props) {
+export default function OrderRow({ order }: Readonly<Props>) {
   const primaryItem = order.order_items[0] ?? null;
   const additionalItemCount = Math.max(0, order.order_items.length - 1);
-  const totalAmount = order.payment?.grand_total
-    ? Number(order.payment.grand_total.toString())
-    : primaryItem
-      ? Number(primaryItem.item_price.toString())
-      : null;
+  let totalAmount = null;
+
+  if (order.payment?.grand_total) {
+    totalAmount = Number(order.payment.grand_total.toString());
+  } else if (primaryItem) {
+    totalAmount = Number(primaryItem.item_price.toString());
+  }
 
   return (
     <section className={styles.row}>

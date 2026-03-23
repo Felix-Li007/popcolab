@@ -10,7 +10,7 @@ type Props = {
   onEdit?: (user: AdminUserListItem) => void;
 };
 
-function EditIcon({ className }: { className: string }) {
+function EditIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -29,7 +29,7 @@ function EditIcon({ className }: { className: string }) {
   );
 }
 
-function ViewIcon({ className }: { className: string }) {
+function ViewIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -54,7 +54,7 @@ function ViewIcon({ className }: { className: string }) {
   );
 }
 
-function MailIcon({ className }: { className: string }) {
+function MailIcon({ className }: Readonly<{ className: string }>) {
   return (
     <svg
       className={className}
@@ -91,7 +91,11 @@ function buildTeamsHref(ownerEmail: string): string {
   return `/admin/users/teams?${searchParams.toString()}`;
 }
 
-export default function UserCard({ user, onViewDetails, onEdit }: Props) {
+export default function UserCard({
+  user,
+  onViewDetails,
+  onEdit,
+}: Readonly<Props>) {
   const status = getStatusBadge(user.status);
   const avatarText = user.userName.slice(0, 1).toUpperCase() || '?';
   const showAvatarImage = hasText(user.avatarImage);

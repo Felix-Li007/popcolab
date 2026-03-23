@@ -49,13 +49,15 @@ export async function createFittedProposal(job: RequestQueueJob) {
     };
   }
 
+  const experienceWhere =
+    request.duration_max === null
+      ? {}
+      : {
+          duration_max: { lte: request.duration_max },
+        };
+
   const candidate = await prisma.experience.findFirst({
-    where: {
-      duration_max:
-        request.duration_max !== null
-          ? { lte: request.duration_max }
-          : undefined,
-    },
+    where: experienceWhere,
     orderBy: [
       { popularity_index: 'desc' },
       { duration_max: 'asc' },

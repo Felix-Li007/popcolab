@@ -20,7 +20,7 @@ export default function ProviderView({
   provider,
   onClose,
   onEdit,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen || !provider) return null;
 
   return (

@@ -1,12 +1,9 @@
 import { prisma } from '@/libs/prisma-client';
 import type {
-  IntakeForm,
   QuestionType,
   QuestionOption,
-  QuestionDimension,
   DimensionIndex,
   Question,
-  QuestionFormState,
 } from '@/types/question-type';
 
 export type {
@@ -17,7 +14,7 @@ export type {
   DimensionIndex as DimensionIndexData,
   Question as QuestionData,
   QuestionFormState,
-};
+} from '@/types/question-type';
 
 type CreateQuestionInput = {
   text: string;
@@ -61,7 +58,7 @@ export function mapQuestionRow(
       id: o.id,
       label: o.option_label,
       value: o.option_value ?? '',
-      score: o.option_score !== null ? Number(o.option_score) : null,
+      score: o.option_score == null ? null : Number(o.option_score),
     })),
     dimensions,
     createdAt: q.created_at,
@@ -130,7 +127,7 @@ async function loadQuestionDimensions(
       dimensionName: row.dimension.index_name,
       categoryName: row.dimension.category.category_name,
       indexKey: row.dimension.index_key,
-      weight: row.weight_rate !== null ? Number(row.weight_rate) : null,
+      weight: row.weight_rate == null ? null : Number(row.weight_rate),
     });
     dimensionsByQuestionId.set(row.question_id, dimensions);
   }

@@ -1,9 +1,5 @@
 @reference "../../../app/globals.css";
 
-.container {
-  /* color: #111827; */
-}
-
 .title {
   @apply text-[16px] font-bold;
 }
@@ -35,7 +31,6 @@
 
 .label {
   font-weight: 500;
-  /* color: #374151; */
 }
 
 .input {
@@ -44,7 +39,6 @@
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   padding: 0 0.75rem;
-  /* color: #111827; */
   outline: none;
 }
 
@@ -63,7 +57,6 @@
 
 .statusText {
   font-size: 0.75rem;
-  /* color: #6b7280; */
 }
 
 .errorText {

@@ -15,7 +15,7 @@ export default function ProfileCard({
   titleIcon,
   description,
   children,
-}: ProfileCardProps) {
+}: Readonly<ProfileCardProps>) {
   const sectionToneClass =
     tone === 'personal' ? styles.cardPersonal : styles.cardWork;
   const iconToneClass =

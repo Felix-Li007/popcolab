@@ -4,10 +4,6 @@ import { getExperienceCategories } from '@/services/category-service';
 import { getDimensions } from '@/services/dimension-service';
 import { getExperiences } from '@/services/experience-service';
 import { getProviders } from '@/services/provider-service';
-import type { ExperienceCategory } from '@/types/category-type';
-import type { Experience } from '@/types/experience-type';
-import type { Provider } from '@/types/provider-type';
-import type { Dimension } from '@/types/dimension-type';
 
 export default async function ExperiencesPage() {
   const [experiences, providers, dimensions, categories] = await Promise.all([
@@ -20,10 +16,10 @@ export default async function ExperiencesPage() {
   return (
     <Suspense fallback={null}>
       <ExperienceContent
-        initialData={experiences as Experience[]}
-        providers={providers as Provider[]}
-        dimensions={dimensions as Dimension[]}
-        categories={categories as ExperienceCategory[]}
+        initialData={experiences}
+        providers={providers}
+        dimensions={dimensions}
+        categories={categories}
       />
     </Suspense>
   );

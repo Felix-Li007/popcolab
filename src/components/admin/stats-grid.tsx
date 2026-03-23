@@ -8,17 +8,19 @@ type Props = {
 export default function StatsGrid({
   personalitiesCount,
   personalitiesActiveCount,
-}: Props) {
+}: Readonly<Props>) {
+  const activeTrendLabel =
+    personalitiesActiveCount === undefined
+      ? ''
+      : `${personalitiesActiveCount} active`;
+
   const stats = [
     {
       icon: <span className="text-xl leading-none">🎭</span>,
       value: String(personalitiesCount ?? 0),
       label: 'Personalities',
       trend: undefined,
-      trendLabel:
-        personalitiesActiveCount !== undefined
-          ? `${personalitiesActiveCount} active`
-          : '',
+      trendLabel: activeTrendLabel,
       bgColor: 'bg-lavender',
       glowColor: 'rgba(196, 181, 253, 0.45)',
     },
@@ -86,8 +88,8 @@ export default function StatsGrid({
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {stats.map((stat, i) => (
-        <StatsCard key={i} {...stat} />
+      {stats.map(stat => (
+        <StatsCard key={stat.label} {...stat} />
       ))}
     </div>
   );

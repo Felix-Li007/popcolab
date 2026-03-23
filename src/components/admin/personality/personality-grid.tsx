@@ -14,7 +14,7 @@ export default function PersonalityGrid({
   onEdit,
   onView,
   onDelete,
-}: PersonalityGridProps) {
+}: Readonly<PersonalityGridProps>) {
   return (
     <div className={styles.cardGrid}>
       {personalities.map(p => (

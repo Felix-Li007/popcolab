@@ -10,7 +10,7 @@ export default function ContentHeader({
   title,
   subtitle,
   actions,
-}: ContentHeaderProps) {
+}: Readonly<ContentHeaderProps>) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-lavender via-white to-coral-light rounded-2xl p-4 border border-pink-light/50 shadow-sm">
       <div>

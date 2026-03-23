@@ -46,6 +46,30 @@ type ExperienceRow = Awaited<
   ReturnType<typeof prisma.experience.findMany>
 >[number];
 
+type ExperienceValidationFields = {
+  experienceTitle: string;
+  experienceStatus: ExperienceStatus;
+  providerId: number;
+  categoryId: number;
+  durationMin: number;
+  durationMax: number;
+  capacityMax: number;
+  startingPrice: number;
+  addingPrice: number;
+  startingHour: number | null;
+  pricingModel: string | null;
+  pricingNotes: string | null;
+  leadType: string;
+  deliveryMethods: string;
+  dietaryConsiderations: string | null;
+  takeItem: number | null;
+  travelFlying: number | null;
+  dimensionValues: Array<{
+    dimensionId: number;
+    expectedValue: string;
+  }>;
+};
+
 type ExperienceWithRelations = ExperienceRow & {
   provider: {
     provider_label: string;
@@ -243,9 +267,8 @@ export function buildExperiencePurchaseQuote(
   const normalizedRequestedHours: number = Number.isInteger(requestedHours)
     ? Number(requestedHours)
     : getDefaultRequestedHours(experience);
-  const minHours = includedHours !== null ? includedHours : 1;
-  const safeRequestedHours =
-    normalizedRequestedHours >= minHours ? normalizedRequestedHours : minHours;
+  const minHours = includedHours ?? 1;
+  const safeRequestedHours = Math.max(normalizedRequestedHours, minHours);
   const extraHours =
     includedHours === null
       ? 0
@@ -270,48 +293,44 @@ export function buildExperiencePurchaseQuote(
   };
 }
 
-export function validateExperienceFields(fields: {
-  experienceTitle: string;
-  experienceStatus: ExperienceStatus;
-  providerId: number;
-  categoryId: number;
-  durationMin: number;
-  durationMax: number;
-  capacityMax: number;
-  startingPrice: number;
-  addingPrice: number;
-  startingHour: number | null;
-  pricingModel: string | null;
-  pricingNotes: string | null;
-  leadType: string;
-  deliveryMethods: string;
-  dietaryConsiderations: string | null;
-  takeItem: number | null;
-  travelFlying: number | null;
-  dimensionValues: Array<{
-    dimensionId: number;
-    expectedValue: string;
-  }>;
-}): ExperienceFormState['errors'] {
-  const errors: ExperienceFormState['errors'] = {};
-
-  if (!fields.experienceTitle) {
-    errors.experienceTitle = 'Experience title is required';
-  } else if (fields.experienceTitle.length > 100) {
-    errors.experienceTitle = 'Experience title must be 100 characters or less';
+function getExperienceTitleError(experienceTitle: string): string | undefined {
+  if (!experienceTitle) {
+    return 'Experience title is required';
   }
 
-  if (!['draft', 'inactive', 'active'].includes(fields.experienceStatus)) {
-    errors.experienceStatus = 'Please select a valid status';
+  if (experienceTitle.length > 100) {
+    return 'Experience title must be 100 characters or less';
   }
 
-  if (!Number.isInteger(fields.providerId) || fields.providerId <= 0) {
-    errors.providerId = 'Please select a provider';
+  return undefined;
+}
+
+function getExperienceStatusError(
+  experienceStatus: ExperienceStatus
+): string | undefined {
+  if (!['draft', 'inactive', 'active'].includes(experienceStatus)) {
+    return 'Please select a valid status';
   }
 
-  if (!Number.isInteger(fields.categoryId) || fields.categoryId <= 0) {
-    errors.categoryId = 'Please select a category';
+  return undefined;
+}
+
+function getRequiredRelationError(
+  value: number,
+  emptyMessage: string
+): string | undefined {
+  if (!Number.isInteger(value) || value <= 0) {
+    return emptyMessage;
   }
+
+  return undefined;
+}
+
+function getDurationErrors(fields: ExperienceValidationFields) {
+  const errors: Pick<
+    ExperienceFormState['errors'],
+    'durationMin' | 'durationMax'
+  > = {};
 
   if (!Number.isInteger(fields.durationMin) || fields.durationMin < 0) {
     errors.durationMin = 'Minimum duration must be a non-negative integer';
@@ -324,9 +343,26 @@ export function validateExperienceFields(fields: {
       'Maximum duration must be greater than or equal to minimum duration';
   }
 
-  if (!Number.isInteger(fields.capacityMax) || fields.capacityMax < 0) {
-    errors.capacityMax = 'Capacity must be a non-negative integer';
+  return errors;
+}
+
+function getCapacityError(capacityMax: number): string | undefined {
+  if (!Number.isInteger(capacityMax) || capacityMax < 0) {
+    return 'Capacity must be a non-negative integer';
   }
+
+  return undefined;
+}
+
+function getPricingErrors(fields: ExperienceValidationFields) {
+  const errors: Pick<
+    ExperienceFormState['errors'],
+    | 'startingPrice'
+    | 'addingPrice'
+    | 'startingHour'
+    | 'pricingModel'
+    | 'pricingNotes'
+  > = {};
 
   if (!Number.isInteger(fields.startingPrice) || fields.startingPrice <= 0) {
     errors.startingPrice = 'Starting price must be a positive integer';
@@ -350,36 +386,90 @@ export function validateExperienceFields(fields: {
     errors.pricingNotes = 'Pricing notes must be 255 characters or less';
   }
 
-  if (!fields.leadType) {
-    errors.leadType = 'Lead type is required';
-  } else if (fields.leadType.length > 50) {
-    errors.leadType = 'Lead type must be 50 characters or less';
-  }
-
-  if (!fields.deliveryMethods) {
-    errors.deliveryMethods = 'Delivery methods are required';
-  } else if (fields.deliveryMethods.length > 255) {
-    errors.deliveryMethods = 'Delivery methods must be 255 characters or less';
-  }
-
-  if ((fields.dietaryConsiderations ?? '').length > 255) {
-    errors.dietaryConsiderations =
-      'Dietary considerations must be 255 characters or less';
-  }
-
-  if (fields.takeItem !== null && !Number.isInteger(fields.takeItem)) {
-    errors.takeItem = 'Take item must be blank, 0, or 1';
-  }
-
-  if (fields.travelFlying !== null && !Number.isInteger(fields.travelFlying)) {
-    errors.travelFlying = 'Travel flying must be blank, 0, or 1';
-  }
-
-  if (fields.dimensionValues.some(value => value.expectedValue.length > 255)) {
-    errors.dimensions = 'Dimension values must be 255 characters or less';
-  }
-
   return errors;
+}
+
+function getLeadTypeError(leadType: string): string | undefined {
+  if (!leadType) {
+    return 'Lead type is required';
+  }
+
+  if (leadType.length > 50) {
+    return 'Lead type must be 50 characters or less';
+  }
+
+  return undefined;
+}
+
+function getDeliveryMethodsError(deliveryMethods: string): string | undefined {
+  if (!deliveryMethods) {
+    return 'Delivery methods are required';
+  }
+
+  if (deliveryMethods.length > 255) {
+    return 'Delivery methods must be 255 characters or less';
+  }
+
+  return undefined;
+}
+
+function getDietaryConsiderationsError(
+  dietaryConsiderations: string | null
+): string | undefined {
+  if ((dietaryConsiderations ?? '').length > 255) {
+    return 'Dietary considerations must be 255 characters or less';
+  }
+
+  return undefined;
+}
+
+function getBinaryFieldError(
+  value: number | null,
+  fieldLabel: string
+): string | undefined {
+  if (value !== null && !Number.isInteger(value)) {
+    return `${fieldLabel} must be blank, 0, or 1`;
+  }
+
+  return undefined;
+}
+
+function getDimensionValuesError(
+  dimensionValues: ExperienceValidationFields['dimensionValues']
+): string | undefined {
+  if (dimensionValues.some(value => value.expectedValue.length > 255)) {
+    return 'Dimension values must be 255 characters or less';
+  }
+
+  return undefined;
+}
+
+export function validateExperienceFields(
+  fields: ExperienceValidationFields
+): ExperienceFormState['errors'] {
+  return {
+    experienceTitle: getExperienceTitleError(fields.experienceTitle),
+    experienceStatus: getExperienceStatusError(fields.experienceStatus),
+    providerId: getRequiredRelationError(
+      fields.providerId,
+      'Please select a provider'
+    ),
+    categoryId: getRequiredRelationError(
+      fields.categoryId,
+      'Please select a category'
+    ),
+    ...getDurationErrors(fields),
+    capacityMax: getCapacityError(fields.capacityMax),
+    ...getPricingErrors(fields),
+    leadType: getLeadTypeError(fields.leadType),
+    deliveryMethods: getDeliveryMethodsError(fields.deliveryMethods),
+    dietaryConsiderations: getDietaryConsiderationsError(
+      fields.dietaryConsiderations
+    ),
+    takeItem: getBinaryFieldError(fields.takeItem, 'Take item'),
+    travelFlying: getBinaryFieldError(fields.travelFlying, 'Travel flying'),
+    dimensions: getDimensionValuesError(fields.dimensionValues),
+  };
 }
 
 async function getDefaultCreatedById(): Promise<number> {

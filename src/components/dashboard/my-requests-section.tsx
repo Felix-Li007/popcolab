@@ -36,7 +36,7 @@ type Props = {
   requests: UserRequestSummary[];
 };
 
-export default function MyRequestsSection({ requests }: Props) {
+export default function MyRequestsSection({ requests }: Readonly<Props>) {
   return (
     <section data-testid="my-requests-section">
       <div className="flex items-center gap-2 mb-3">
@@ -67,7 +67,7 @@ export default function MyRequestsSection({ requests }: Props) {
                 key={req.id}
                 className={
                   'flex items-center justify-between gap-4 px-4 py-3' +
-                  (i !== requests.length - 1 ? ' border-b border-gray-100' : '')
+                  (i === requests.length - 1 ? '' : ' border-b border-gray-100')
                 }
               >
                 <div>

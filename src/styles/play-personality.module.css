@@ -30,8 +30,8 @@
   font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
-  color: white;
-  background: rgba(255, 255, 255, 0.25);
+  color: var(--palette-teal-deep);
+  background: rgba(255, 255, 255, 0.92);
   border-radius: 9999px;
   padding: 0.2rem 0.6rem;
 }
@@ -94,9 +94,9 @@
 .experienceLockBadge {
   font-size: 0.6875rem;
   font-weight: 700;
-  color: white;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--palette-teal-deep);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 9999px;
   padding: 0.35rem 0.9rem;
   pointer-events: none;

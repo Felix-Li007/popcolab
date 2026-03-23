@@ -70,13 +70,13 @@ const footerStyle: CSSProperties = {
   color: '#6b7280',
 };
 
-type Props = RequestInvitationTemplateProps;
-
-export function RequestInvitationEmail(props: Props) {
+export function RequestInvitationEmail(
+  props: Readonly<RequestInvitationTemplateProps>
+) {
   const safeName = props.inviteeName || 'there';
 
   return (
-    <html>
+    <html lang="en">
       <body style={pageStyle}>
         <div style={cardStyle}>
           <p style={eyebrowStyle}>Request Invitation</p>

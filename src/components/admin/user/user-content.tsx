@@ -44,7 +44,7 @@ function buildUsersHref(params: {
   return queryString ? `/admin/users?${queryString}` : '/admin/users';
 }
 
-export default function UserContent({ pageData, query }: Props) {
+export default function UserContent({ pageData, query }: Readonly<Props>) {
   const searchParams = useSearchParams();
   const statusParam = searchParams.get('status');
   const normalizedStatusParam = statusParam?.toLowerCase();
@@ -84,6 +84,10 @@ export default function UserContent({ pageData, query }: Props) {
           page: pageData.currentPage + 1,
         })
       : undefined;
+  const hiddenFields =
+    query.status === 'all'
+      ? undefined
+      : [{ name: 'status', value: query.status }];
 
   return (
     <div className={styles.root}>
@@ -97,11 +101,7 @@ export default function UserContent({ pageData, query }: Props) {
             defaultSearchValue={query.search}
             searchPlaceholder="Search by email, name, company, team..."
             searchTestId="user-search"
-            hiddenFields={
-              query.status !== 'all'
-                ? [{ name: 'status', value: query.status }]
-                : undefined
-            }
+            hiddenFields={hiddenFields}
             clearHref={
               query.search.trim().length > 0
                 ? buildUsersHref({

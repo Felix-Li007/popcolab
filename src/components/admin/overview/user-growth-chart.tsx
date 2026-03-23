@@ -57,7 +57,7 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
           )
           .join(' ');
 
-        const latestPoint = points[points.length - 1];
+        const latestPoint = points.at(-1);
 
         return (
           <g key={id}>
@@ -111,7 +111,7 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
   );
 };
 
-export default function PlatformGrowthChart({ data }: Props) {
+export default function PlatformGrowthChart({ data }: Readonly<Props>) {
   const chartData: GrowthChartDatum[] = data.map(point => ({
     period: point.periodLabel,
     Users: point.users,

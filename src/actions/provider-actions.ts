@@ -9,6 +9,10 @@ import {
   updateProvider,
   validateProviderFields,
 } from '@/services/provider-service';
+import {
+  getNullableTrimmedFormString,
+  getTrimmedFormString,
+} from '@/utils/form-data';
 
 const ADMIN_PATHS = [
   '/admin',
@@ -21,17 +25,22 @@ function revalidateAdminPaths() {
 }
 
 function parseProviderForm(formData: FormData) {
-  const providerLabel = formData.get('providerLabel')?.toString().trim() ?? '';
-  const providerTypeRaw = formData.get('providerType')?.toString().trim() ?? '';
-  const providerNotesRaw =
-    formData.get('providerNotes')?.toString().trim() ?? '';
-  const pricingNotesRaw = formData.get('pricingNotes')?.toString().trim() ?? '';
+  const providerLabel = getTrimmedFormString(formData, 'providerLabel');
+  const providerTypeRaw = getTrimmedFormString(formData, 'providerType');
+  const providerNotesRaw = getNullableTrimmedFormString(
+    formData,
+    'providerNotes'
+  );
+  const pricingNotesRaw = getNullableTrimmedFormString(
+    formData,
+    'pricingNotes'
+  );
 
   return {
     providerLabel,
     providerType: normalizeProviderType(providerTypeRaw),
-    providerNotes: providerNotesRaw === '' ? null : providerNotesRaw,
-    pricingNotes: pricingNotesRaw === '' ? null : pricingNotesRaw,
+    providerNotes: providerNotesRaw,
+    pricingNotes: pricingNotesRaw,
   };
 }
 

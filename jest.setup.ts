@@ -1,18 +1,14 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { TextDecoder, TextEncoder } from 'util';
+import { TextDecoder, TextEncoder } from 'node:util';
 
 jest.mock('server-only', () => ({}));
 
-if (typeof global.TextEncoder === 'undefined') {
-  global.TextEncoder = TextEncoder as typeof global.TextEncoder;
-}
+globalThis.TextEncoder ??= TextEncoder as typeof globalThis.TextEncoder;
 
-if (typeof global.TextDecoder === 'undefined') {
-  global.TextDecoder = TextDecoder as typeof global.TextDecoder;
-}
+globalThis.TextDecoder ??= TextDecoder as typeof globalThis.TextDecoder;
 
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(globalThis.window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation((query: string) => ({
     matches: false,

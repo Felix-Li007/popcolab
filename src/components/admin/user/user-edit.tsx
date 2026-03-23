@@ -151,7 +151,11 @@ function toUpdatePayload(form: EditFormState): AdminUserEditableUpdateInput {
   };
 }
 
-function UserEditFormContent({ user, onCancel, onSaved }: UserEditFormProps) {
+function UserEditFormContent({
+  user,
+  onCancel,
+  onSaved,
+}: Readonly<UserEditFormProps>) {
   const [isPending, startTransition] = useTransition();
   const [form, setForm] = useState<EditFormState>(() => buildForm(user));
   const [fieldErrors, setFieldErrors] = useState<AdminUserEditableUpdateErrors>(
@@ -424,7 +428,7 @@ export default function UserEditModal({
   isOpen,
   onClose,
   onUserUpdated,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen || !user) return null;
 
   const statusBadge = USER_STATUS_BADGE[user.status];

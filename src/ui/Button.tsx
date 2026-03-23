@@ -69,7 +69,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const baseStyles =
       'inline-flex items-center justify-center whitespace-nowrap transition-all';
-    const roundedStyle = isIconOnly ? 'rounded-full' : 'rounded-full';
+    const roundedStyle = 'rounded-full';
     const disabledStyle = disabled
       ? 'opacity-50 cursor-not-allowed pointer-events-none'
       : '';

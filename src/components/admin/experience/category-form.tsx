@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useId } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
 import type {
@@ -55,19 +55,24 @@ function ExperienceCategoryFormBody({
   maxLevel,
   onSuccess,
   onClose,
-}: FormBodyProps) {
+}: Readonly<FormBodyProps>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const formFieldId = useId();
+  const parentId = `${formFieldId}-parent`;
+  const statusId = `${formFieldId}-status`;
+  const submitButtonLabel = isPending ? 'Saving…' : submitLabel;
 
   useEffect(() => {
     if (state.success) onSuccess();
   }, [state.success, onSuccess]);
 
-  const parentValue =
-    initial?.parentId !== null && initial?.parentId !== undefined
-      ? String(initial.parentId)
-      : defaultParentId
-        ? String(defaultParentId)
-        : '';
+  let parentValue = '';
+
+  if (initial?.parentId !== null && initial?.parentId !== undefined) {
+    parentValue = String(initial.parentId);
+  } else if (defaultParentId) {
+    parentValue = String(defaultParentId);
+  }
 
   return (
     <form action={formAction} className={styles.form}>
@@ -87,10 +92,14 @@ function ExperienceCategoryFormBody({
         />
 
         <div>
-          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+          <label
+            htmlFor={parentId}
+            className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500"
+          >
             Parent Category
           </label>
           <select
+            id={parentId}
             name="parentId"
             defaultValue={parentValue}
             className={`w-full rounded-2xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-800 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30 ${
@@ -116,11 +125,15 @@ function ExperienceCategoryFormBody({
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+          <label
+            htmlFor={statusId}
+            className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500"
+          >
             Status
           </label>
           <div className="relative">
             <select
+              id={statusId}
               name="status"
               defaultValue={initial?.status ?? 'active'}
               title="Status"
@@ -192,7 +205,7 @@ function ExperienceCategoryFormBody({
           Cancel
         </Button>
         <Button type="submit" variant="primary" size="md" disabled={isPending}>
-          {isPending ? 'Saving…' : submitLabel}
+          {submitButtonLabel}
         </Button>
       </div>
     </form>
@@ -210,7 +223,7 @@ export default function ExperienceCategoryForm({
   submitLabel,
   maxLevel,
   onSuccess,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen) return null;
 
   const formKey = `${initial?.id ?? 'new'}-${defaultParentId ?? 'root'}`;

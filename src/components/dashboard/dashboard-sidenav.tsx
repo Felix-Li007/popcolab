@@ -124,10 +124,10 @@ const navGroups = [
 export default function DashboardSidenav({
   onNavigate,
   className = '',
-}: {
+}: Readonly<{
   onNavigate?: () => void;
   className?: string;
-}) {
+}>) {
   return (
     <AppSidenav
       testId="dashboard-sidenav"

@@ -37,6 +37,17 @@ const sizeStyles: Record<BadgeSize, string> = {
   md: 'text-xs px-2.5 py-1',
 };
 
+function isRawColorValue(value: string) {
+  const normalizedValue = value.trim().toLowerCase();
+
+  return (
+    normalizedValue.startsWith('#') ||
+    normalizedValue.startsWith('rgb') ||
+    normalizedValue.startsWith('hsl') ||
+    normalizedValue.includes('(')
+  );
+}
+
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
   (
     {
@@ -57,12 +68,12 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     // Support both Tailwind classes and raw color values for bgColor/textColor
     const styleObj: React.CSSProperties = {};
     let customColorClass = '';
-    if (bgColor && /^#|rgb|hsl|^([a-zA-Z]+\()/i.test(bgColor)) {
+    if (bgColor && isRawColorValue(bgColor)) {
       styleObj.background = bgColor;
     } else if (bgColor) {
       customColorClass += ` ${bgColor}`;
     }
-    if (textColor && /^#|rgb|hsl|^([a-zA-Z]+\()/i.test(textColor)) {
+    if (textColor && isRawColorValue(textColor)) {
       styleObj.color = textColor;
     } else if (textColor) {
       customColorClass += ` ${textColor}`;

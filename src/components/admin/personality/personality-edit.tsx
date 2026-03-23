@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useEffect, useState, useActionState } from 'react';
+import { useActionState, useEffect, useId, useState } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import styles from '@/styles/admin/personalities/personality-form.module.css';
 import { Button, Input, TextArea } from '@/ui';
@@ -50,8 +50,9 @@ function PersonalityFormBody({
   isEdit,
   initial,
   onClose,
-}: FormBodyProps) {
+}: Readonly<FormBodyProps>) {
   const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const formFieldId = useId();
   const [emoji, setEmoji] = useState(initial?.emoji ?? '');
   const [accentColor, setAccentColor] = useState(
     initial?.accentColor ?? ACCENT_COLORS[0]
@@ -59,6 +60,15 @@ function PersonalityFormBody({
   const [status, setStatus] = useState<'active' | 'draft'>(
     initial?.status ?? 'active'
   );
+  const emojiInputId = `${formFieldId}-emoji`;
+  const statusInputId = `${formFieldId}-status`;
+  let submitLabel = 'Create';
+
+  if (isPending) {
+    submitLabel = 'Saving';
+  } else if (isEdit) {
+    submitLabel = 'Save Changes';
+  }
 
   useEffect(() => {
     if (state.success) onClose();
@@ -120,7 +130,10 @@ function PersonalityFormBody({
         {/* EMOJI  +  STATUS */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+            <label
+              htmlFor={emojiInputId}
+              className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
+            >
               Emoji
             </label>
             <div className="flex items-center gap-2">
@@ -128,6 +141,7 @@ function PersonalityFormBody({
                 {emoji || '?'}
               </span>
               <input
+                id={emojiInputId}
                 type="text"
                 name="emoji"
                 value={emoji}
@@ -144,11 +158,15 @@ function PersonalityFormBody({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor={statusInputId}
+              className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5"
+            >
               Status
             </label>
             <div className="relative">
               <select
+                id={statusInputId}
                 name="status"
                 value={status}
                 onChange={e => setStatus(e.target.value as 'active' | 'draft')}
@@ -181,9 +199,9 @@ function PersonalityFormBody({
         {/* ACCENT COLOUR */}
         <div>
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+            <p className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
               Accent Colour
-            </label>
+            </p>
             <div className="flex items-center gap-2">
               {ACCENT_COLORS.map(color => (
                 <button
@@ -213,7 +231,7 @@ function PersonalityFormBody({
           className={styles.btnCreate}
           disabled={isPending}
         >
-          {isPending ? 'Saving' : isEdit ? 'Save Changes' : 'Create'}
+          {submitLabel}
         </Button>
         <Button
           type="button"
@@ -236,7 +254,7 @@ export default function PersonalityForm({
   action,
   isEdit = false,
   initial,
-}: Props) {
+}: Readonly<Props>) {
   if (!isOpen) return null;
 
   const formKey = `${isEdit ? (initial?.type ?? 'edit') : 'new'}-${initial?.name ?? ''}`;

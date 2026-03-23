@@ -18,7 +18,7 @@ export default function StatsCard({
   trendLabel,
   bgColor = 'bg-pink-50',
   glowColor = 'rgba(196, 181, 253, 0.4)',
-}: StatsCardProps) {
+}: Readonly<StatsCardProps>) {
   const isPositive = trend && !trend.startsWith('-');
 
   return (

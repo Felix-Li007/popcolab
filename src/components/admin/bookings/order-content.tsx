@@ -112,7 +112,7 @@ function buildOrderWhere(params: {
   };
 }
 
-export default async function OrderContent({ searchParams }: Props) {
+export default async function OrderContent({ searchParams }: Readonly<Props>) {
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const search = getFirstValue(resolvedSearchParams.q)?.trim() ?? '';
   const status = getFirstValue(resolvedSearchParams.status)?.trim() ?? '';
