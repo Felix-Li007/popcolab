@@ -1,0 +1,36 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Follow the conventional commit message format. Use emojis to indicate the type of change, such as '🎨' for any changes or additions to CSS files, '✨' for new features, '🐛' for bug fixes,for  '📄' for documentation updates. Use multiple emojis for changes to different things. Ensure the message is concise and descriptive and always includes a list of key changes."
+    }
+  ],
+  "prisma.pinToPrisma6": false,
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "aws-1-ca-central-1.pooler.supabase.com",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "username": "postgres.qmxwfnumrczerijyuwfy",
+      "database": "postgres",
+      "password": "eshkibqofgxfivabazrc",
+      "name": "Supabase (Dev)"
+    },
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "aws-1-ca-central-1.pooler.supabase.com",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "username": "postgres.ixjcclvxxbbguklnieka",
+      "database": "postgres",
+      "password": "eshkibqofgxfivabazrc",
+      "name": "Supabase (Prod)"
+    }
+  ],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "popcolab2026",
+    "projectKey": "popcolab2026_pop"
+  }
+}

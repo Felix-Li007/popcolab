@@ -12,15 +12,21 @@ export default async function TeamsPage() {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated) redirect('/sign-in');
 
+  const clerkUser = authContext.user!;
+  const email =
+    clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)
+      ?.emailAddress ?? '';
+
+  const { userId } = await upsertClerkUser(clerkUser.id, email);
+
   const dbUser = await prisma.user.findUnique({
-    where: { clerk_id: authContext.user!.id },
-    select: { id: true, email: true, user_name: true },
+    where: { id: userId },
+    select: { email: true, user_name: true },
   });
-  if (!dbUser) redirect('/sign-in');
 
   const [teams, pendingInvites] = await Promise.all([
-    getUserTeams(dbUser.id),
-    getPendingTeamInvites(dbUser.email, dbUser.user_name),
+    getUserTeams(userId),
+    getPendingTeamInvites(dbUser?.email ?? email, dbUser?.user_name ?? null),
   ]);
 
   return (

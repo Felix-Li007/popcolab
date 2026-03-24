@@ -7,9 +7,10 @@ import type { UserTeamItem } from '@/services/user-team-service';
 type Props = {
   team: UserTeamItem;
   onInvite: (teamId: number, teamName: string) => void;
+  onManage: (team: UserTeamItem) => void;
 };
 
-export default function TeamCard({ team, onInvite }: Props) {
+export default function TeamCard({ team, onInvite, onManage }: Props) {
   const [pending, startTransition] = useTransition();
 
   function handleDelete() {
@@ -109,12 +110,17 @@ export default function TeamCard({ team, onInvite }: Props) {
 
       {/* Actions */}
       <div className="flex gap-1.5">
-        <button className="rounded-md border border-[#E91E8C] px-3 py-1 text-[11px] font-semibold text-[#E91E8C]">
-          ✎ Manage
-        </button>
+        {team.isLead && (
+          <button
+            onClick={() => onManage(team)}
+            className="rounded-md border border-[#E91E8C] px-3 py-1 text-[11px] font-semibold text-[#E91E8C] hover:bg-pink-50"
+          >
+            ✎ Manage
+          </button>
+        )}
         <button
           onClick={() => onInvite(team.id, team.name)}
-          className="rounded-md border border-gray-200 px-3 py-1 text-[11px] font-semibold text-gray-600"
+          className="rounded-md border border-gray-200 px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
         >
           ✉ Invite
         </button>

@@ -7,6 +7,9 @@ import {
   createTeamWithInvites,
   deleteTeam,
   respondToTeamInvite,
+  updateTeam,
+  removeTeamMember,
+  addInviteesToTeam,
 } from '@/services/user-team-service';
 
 const TEAMS_PATH = '/dashboard/teams';
@@ -70,4 +73,65 @@ export async function respondToTeamInviteAction(
   const user = await getAuthUser();
   await respondToTeamInvite(inviteId, user.id, user.email, action);
   revalidatePath(TEAMS_PATH);
+}
+
+export type UpdateTeamState = {
+  error?: string;
+  fieldErrors?: { name?: string };
+};
+
+export async function updateTeamAction(
+  _prev: UpdateTeamState,
+  formData: FormData
+): Promise<UpdateTeamState> {
+  const user = await getAuthUser();
+
+  const teamId = Number(formData.get('teamId'));
+  const name = (formData.get('name') as string)?.trim() ?? '';
+  const department = (formData.get('department') as string)?.trim() || null;
+  const description = (formData.get('description') as string)?.trim() || null;
+
+  if (!name) return { fieldErrors: { name: 'Team name is required.' } };
+
+  await updateTeam(teamId, user.id, { name, department, description });
+  revalidatePath(TEAMS_PATH);
+  return {};
+}
+
+export async function removeTeamMemberAction(
+  teamMateId: number
+): Promise<void> {
+  const user = await getAuthUser();
+  await removeTeamMember(teamMateId, user.id);
+  revalidatePath(TEAMS_PATH);
+}
+
+export type InviteToTeamState = {
+  error?: string;
+};
+
+export async function addInviteesToTeamAction(
+  _prev: InviteToTeamState,
+  formData: FormData
+): Promise<InviteToTeamState> {
+  const user = await getAuthUser();
+
+  const teamId = Number(formData.get('teamId'));
+  const teamName = (formData.get('teamName') as string)?.trim() ?? '';
+  const rawInvitees = formData.get('invitees') as string;
+  const invitees: { value: string }[] = rawInvitees
+    ? JSON.parse(rawInvitees)
+    : [];
+
+  if (invitees.length === 0) return { error: 'Add at least one person.' };
+
+  await addInviteesToTeam({
+    teamId,
+    inviterId: user.id,
+    teamName,
+    invitees,
+  });
+
+  revalidatePath(TEAMS_PATH);
+  return {};
 }

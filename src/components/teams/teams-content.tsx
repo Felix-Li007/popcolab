@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import type {
   UserTeamItem,
   PendingTeamInvite,
 } from '@/services/user-team-service';
 import TeamCard from './team-card';
 import CreateTeamModal from './create-team-modal';
+import InviteTeamModal from './invite-team-modal';
+import ManageTeamModal from './manage-team-modal';
 import { respondToTeamInviteAction } from '@/actions/team-actions';
-import { useTransition } from 'react';
 
 type Tab = 'my-teams' | 'pending';
 
@@ -23,6 +24,12 @@ export default function TeamsContent({ teams, pendingInvites }: Props) {
   const [createOpen, setCreateOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const [responding, startRespond] = useTransition();
+
+  const [inviteTeam, setInviteTeam] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [manageTeam, setManageTeam] = useState<UserTeamItem | null>(null);
 
   function handleModalClose() {
     setModalKey(k => k + 1);
@@ -114,7 +121,12 @@ export default function TeamsContent({ teams, pendingInvites }: Props) {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map(team => (
-                <TeamCard key={team.id} team={team} onInvite={() => {}} />
+                <TeamCard
+                  key={team.id}
+                  team={team}
+                  onInvite={(id, name) => setInviteTeam({ id, name })}
+                  onManage={t => setManageTeam(t)}
+                />
               ))}
             </div>
           )}
@@ -200,6 +212,25 @@ export default function TeamsContent({ teams, pendingInvites }: Props) {
         open={createOpen}
         onClose={handleModalClose}
       />
+
+      {inviteTeam && (
+        <InviteTeamModal
+          key={`invite-${inviteTeam.id}`}
+          open
+          onClose={() => setInviteTeam(null)}
+          teamId={inviteTeam.id}
+          teamName={inviteTeam.name}
+        />
+      )}
+
+      {manageTeam && (
+        <ManageTeamModal
+          key={`manage-${manageTeam.id}`}
+          open
+          onClose={() => setManageTeam(null)}
+          team={manageTeam}
+        />
+      )}
     </>
   );
 }

@@ -11,8 +11,11 @@ import {
 } from '@/utils/url-helper';
 
 export type UserTeamMember = {
+  teamMateId: number;
   initials: string;
   color: string;
+  name: string;
+  email: string;
 };
 
 export type UserTeamItem = {
@@ -70,6 +73,7 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
           created_by: true,
           team_mates: {
             select: {
+              id: true,
               user: {
                 select: {
                   profile: { select: { first_name: true, last_name: true } },
@@ -93,6 +97,7 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
               created_by: true,
               team_mates: {
                 select: {
+                  id: true,
                   user: {
                     select: {
                       profile: {
@@ -125,6 +130,7 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
       team_notes: string | null;
       created_by: number;
       team_mates: {
+        id: number;
         user: {
           email: string;
           profile: {
@@ -141,14 +147,19 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
     department: team.team_department,
     description: team.team_notes,
     isLead,
-    members: team.team_mates.map((tm, i) => ({
-      initials: getInitials(
-        tm.user.profile?.first_name ?? null,
-        tm.user.profile?.last_name ?? null,
-        tm.user.email
-      ),
-      color: getColor(i),
-    })),
+    members: team.team_mates.map((tm, i) => {
+      const firstName = tm.user.profile?.first_name ?? null;
+      const lastName = tm.user.profile?.last_name ?? null;
+      const displayName =
+        [firstName, lastName].filter(Boolean).join(' ').trim() || tm.user.email;
+      return {
+        teamMateId: tm.id,
+        initials: getInitials(firstName, lastName, tm.user.email),
+        color: getColor(i),
+        name: displayName,
+        email: tm.user.email,
+      };
+    }),
   });
 
   for (const team of user.created_teams) {
@@ -309,6 +320,122 @@ export async function createTeamWithInvites(params: {
   }
 
   return team.id;
+}
+
+export async function updateTeam(
+  teamId: number,
+  requesterId: number,
+  data: { name: string; department: string | null; description: string | null }
+): Promise<void> {
+  const team = await prisma.team.findUnique({
+    where: { id: teamId },
+    select: { created_by: true },
+  });
+  if (!team || team.created_by !== requesterId) {
+    throw new Error('Not authorised to update this team.');
+  }
+  await prisma.team.update({
+    where: { id: teamId },
+    data: {
+      team_name: data.name,
+      team_department: data.department,
+      team_notes: data.description,
+    },
+  });
+}
+
+export async function removeTeamMember(
+  teamMateId: number,
+  requesterId: number
+): Promise<void> {
+  const teamMate = await prisma.teamMate.findUnique({
+    where: { id: teamMateId },
+    select: { team: { select: { created_by: true } } },
+  });
+  if (!teamMate || teamMate.team.created_by !== requesterId) {
+    throw new Error('Not authorised to remove this member.');
+  }
+  await prisma.teamMate.delete({ where: { id: teamMateId } });
+}
+
+export async function addInviteesToTeam(params: {
+  teamId: number;
+  inviterId: number;
+  teamName: string;
+  invitees: { value: string }[];
+}): Promise<void> {
+  const team = await prisma.team.findUnique({
+    where: { id: params.teamId },
+    select: { created_by: true },
+  });
+  if (!team || team.created_by !== params.inviterId) {
+    throw new Error('Not authorised to invite to this team.');
+  }
+
+  const inviteData = params.invitees.map(inv => {
+    const isEmail = inv.value.includes('@') && !inv.value.startsWith('@');
+    return {
+      team_id: params.teamId,
+      invited_by: params.inviterId,
+      email: isEmail ? inv.value : '',
+      username: isEmail ? null : inv.value.replace(/^@/, ''),
+      token: randomBytes(24).toString('hex'),
+      status: TeamInviteStatus.pending,
+    };
+  });
+
+  await prisma.teamInvite.createMany({
+    data: inviteData,
+    skipDuplicates: true,
+  });
+
+  const appBaseUrl = getFallbackAppBaseUrl();
+  if (!appBaseUrl) return;
+
+  const inviter = await prisma.user.findUnique({
+    where: { id: params.inviterId },
+    select: {
+      user_name: true,
+      profile: { select: { first_name: true, last_name: true } },
+    },
+  });
+
+  const inviterName =
+    [inviter?.profile?.first_name, inviter?.profile?.last_name]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    inviter?.user_name ||
+    'A teammate';
+
+  const from = process.env.RESEND_FROM_EMAIL ?? '';
+
+  await Promise.allSettled(
+    inviteData.map(async inv => {
+      let recipientEmail = inv.email;
+      if (!recipientEmail && inv.username) {
+        const user = await prisma.user.findFirst({
+          where: { user_name: inv.username },
+          select: { email: true },
+        });
+        recipientEmail = user?.email ?? '';
+      }
+      if (!recipientEmail) return;
+
+      const joinUrl = buildTeamInviteAbsoluteUrl(appBaseUrl, inv.token);
+      await sendResendEmail({
+        to: recipientEmail,
+        from,
+        subject: `You've been invited to join ${params.teamName} on Pop CoLab`,
+        react: TeamInviteEmail({
+          inviteeName: recipientEmail,
+          teamName: params.teamName,
+          inviterName,
+          joinUrl,
+        }),
+      });
+    })
+  );
 }
 
 export async function deleteTeam(
