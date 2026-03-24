@@ -6,8 +6,6 @@ import {
 } from '@/libs/stripe-server';
 import { syncExperienceOrderPaymentByWebhook } from '@/services/order-service';
 
-export const runtime = 'nodejs';
-
 function isHandledStripeEvent(eventType: Stripe.Event.Type): boolean {
   return [
     'payment_intent.succeeded',

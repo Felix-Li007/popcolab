@@ -57,7 +57,8 @@ const GrowthTrendLayer: BarCustomLayer<GrowthChartDatum> = ({ bars }) => {
           )
           .join(' ');
 
-        const latestPoint = points.at(-1);
+        const latestPoint = points[points.length - 1];
+        if (!latestPoint) return null;
 
         return (
           <g key={id}>

@@ -7,8 +7,6 @@ import {
 import { handleQStashTask } from '@/services/qstash-service';
 import { isQStashTaskPayload } from '@/types/qstash-task';
 
-export const runtime = 'nodejs';
-
 /**
  * Receives QStash webhooks and handles scheduled tasks.
  * @param req

@@ -34,7 +34,7 @@ type DimensionValidationFields = {
   indexKey: string;
   indexName: string;
   categoryId: number;
-  dataType: DimensionDataType;
+  dataType: string;
   scaleMin: number | null;
   scaleMax: number | null;
   options: DimensionOption[];
@@ -167,13 +167,11 @@ function getOptionsError(options: DimensionOption[]): string | undefined {
 export function validateDimensionFields(
   fields: DimensionValidationFields
 ): DimensionFormState['errors'] {
-  const normalizedType = fields.dataType as DimensionDataType;
-
   return {
     indexName: getIndexNameError(fields.indexName),
     indexKey: getIndexKeyError(fields.indexKey),
     categoryId: getCategoryIdError(fields.categoryId),
-    dataType: getDataTypeError(normalizedType),
+    dataType: getDataTypeError(fields.dataType),
     ...getScaleErrors(fields),
     options: getOptionsError(fields.options),
   };

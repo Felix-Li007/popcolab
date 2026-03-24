@@ -10,7 +10,10 @@ import {
   type RefObject,
 } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
-import type { ExperienceCategory } from '@/types/category-type';
+import type {
+  ExperienceCategory,
+  ExperienceCategoryOption,
+} from '@/types/category-type';
 import { Button, Input, TextArea } from '@/ui';
 import type { Dimension } from '@/types/dimension-type';
 import type { Provider } from '@/types/provider-type';
@@ -337,7 +340,7 @@ function ExperienceBasicInfoSection({
         styles.topPanelSection,
         visibleTopTab !== 'basic' && styles.topPanelSectionHidden
       )}
-      aria-hidden={visibleTopTab !== 'basic'}
+      hidden={visibleTopTab !== 'basic'}
     >
       <div className={styles.topGrid}>
         <div className="xl:col-span-4">
@@ -611,7 +614,7 @@ function ExperiencePricingSection({
         styles.topPanelSection,
         visibleTopTab !== 'pricing' && styles.topPanelSectionHidden
       )}
-      aria-hidden={visibleTopTab !== 'pricing'}
+      hidden={visibleTopTab !== 'pricing'}
     >
       <div className={styles.topGrid}>
         <div className="xl:col-span-3">
@@ -824,7 +827,6 @@ function ExperienceDimensionsSection({
                                 isSelected && styles.optionButtonSelected
                               )}
                               title={option.label}
-                              aria-pressed={isSelected}
                             >
                               <span
                                 className={
@@ -933,7 +935,7 @@ function ExperienceFormBody({
   const visibleTopTab = forcedTopTab ?? activeTopTab;
   const { categoryTabsRef, categoryTabScrollState } =
     useCategoryTabScrollState(groupedDimensions);
-  const submitLabel = getExperienceSubmitLabel(isPending, isEdit);
+  const submitLabel = getExperienceSubmitLabel(isPending, isEdit ?? false);
 
   function toggleDimensionValue(dimension: Dimension, optionValue: string) {
     setDimensionSelections(current =>

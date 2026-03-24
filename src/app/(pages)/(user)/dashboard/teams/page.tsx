@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { upsertClerkUser } from '@/services/user-service';
 import { prisma } from '@/libs/prisma-client';
@@ -10,7 +9,6 @@ import TeamsContent from '@/components/teams/teams-content';
 
 export default async function TeamsPage() {
   const authContext = await getCurrentAuthContext();
-  if (!authContext.isAuthenticated) redirect('/sign-in');
 
   const clerkUser = authContext.user!;
   const email =
