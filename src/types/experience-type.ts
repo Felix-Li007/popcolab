@@ -48,6 +48,11 @@ export type Experience = {
   dimensionValues: ExperienceDimensionValue[];
   createdAt?: Date;
   updatedAt?: Date;
+  imageUrl?: string;
+  description?: string;
+  location?: string;
+  is_online?: boolean;
+  timing?: string;
 };
 
 export type ExperienceFormState = {

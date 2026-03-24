@@ -172,13 +172,26 @@ async function assertExperienceRelations(
     throw new Error('One or more selected dimensions no longer exist.');
   }
 }
-
+type RawDimension = {
+  dimension_id: number;
+  dimension_index: {
+    index_key: string | null;
+    index_name: string;
+    category: {
+      category_name: string;
+    };
+    data_type: string;
+    scale_min: number | null;
+    scale_max: number | null;
+  };
+  expected_value: string | null;
+};
 function mapExperienceRow(
   row: ExperienceWithRelations,
   dimensionOptionsById: Map<number, DimensionOption[]>
 ): Experience {
   const dimensionValues: ExperienceDimensionValue[] = row.experience_dimensions
-    .map(value => ({
+    .map((value: RawDimension) => ({
       dimensionId: value.dimension_id,
       indexKey: value.dimension_index.index_key,
       indexName: value.dimension_index.index_name,
@@ -606,7 +619,9 @@ export async function getExperiences(): Promise<Experience[]> {
     }),
   ]);
 
-  return rows.map(row => mapExperienceRow(row, dimensionOptionsById));
+  return rows.map((row: ExperienceWithRelations) =>
+    mapExperienceRow(row, dimensionOptionsById)
+  );
 }
 
 export async function getDashboardExperiences(
@@ -668,7 +683,9 @@ export async function getDashboardExperiences(
     }),
   ]);
 
-  return rows.map(row => mapExperienceRow(row, dimensionOptionsById));
+  return rows.map((row: ExperienceWithRelations) =>
+    mapExperienceRow(row, dimensionOptionsById)
+  );
 }
 
 export async function getPurchasableExperiences(): Promise<Experience[]> {
@@ -729,11 +746,10 @@ export async function getPurchasableExperiences(): Promise<Experience[]> {
     }),
   ]);
 
-  return rows
-    .map(row => mapExperienceRow(row, dimensionOptionsById))
-    .filter(isExperiencePurchasable);
+  return rows.map((row: unknown) =>
+    mapExperienceRow(row as ExperienceWithRelations, dimensionOptionsById)
+  );
 }
-
 export async function getPurchasableExperienceById(
   id: number
 ): Promise<Experience | null> {
@@ -804,7 +820,7 @@ export async function createExperience(
   );
 
   const createdBy = await getDefaultCreatedById();
-  await prisma.$transaction(async tx => {
+  await prisma.$transaction(async (tx: ExperienceWriteClient) => {
     const experience = await tx.experience.create({
       data: {
         provider_id: input.providerId,
@@ -855,7 +871,7 @@ export async function updateExperience(
     input.dimensionValues
   );
 
-  await prisma.$transaction(async tx => {
+  await prisma.$transaction(async (tx: ExperienceWriteClient) => {
     await tx.experience.update({
       where: { id },
       data: {
