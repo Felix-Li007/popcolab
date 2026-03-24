@@ -7,6 +7,7 @@ import {
   readMetaRole,
   readClaimRole,
 } from '@/utils/clerk-helper';
+import { upsertClerkUser } from '@/services/user-service';
 
 const ADMIN_ROLE = 'admin';
 const SIGN_IN_PATH = '/sign-in';
@@ -27,6 +28,15 @@ export type CurrentAuthContext = {
   isAuthenticated: boolean;
   isAdmin: boolean;
 };
+
+function getPrimaryEmail(user: ClerkUser | null): string {
+  if (!user) return '';
+
+  return (
+    user.emailAddresses.find(e => e.id === user.primaryEmailAddressId)
+      ?.emailAddress ?? ''
+  );
+}
 
 function readUserRole(user: ClerkUser | null): string | null {
   if (!user) return null;
@@ -120,6 +130,19 @@ export async function getCurrentAuthContext(): Promise<CurrentAuthContext> {
     isAuthenticated: true,
     isAdmin: role === ADMIN_ROLE,
   };
+}
+
+export async function getCurrentDbUserId(): Promise<number | null> {
+  const authContext = await getCurrentAuthContext();
+  const user = authContext.user;
+
+  if (!user || !user.id) {
+    return null;
+  }
+
+  const email = getPrimaryEmail(user);
+  const { userId } = await upsertClerkUser(user.id, email);
+  return userId;
 }
 
 export async function isAdminUser(): Promise<boolean> {

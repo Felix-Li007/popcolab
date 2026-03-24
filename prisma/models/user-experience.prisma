@@ -1,0 +1,22 @@
+enum ProcessStatus {
+    COMPLETED
+    PROGRESS
+    FEEDBACK
+}
+
+model UserExperience {
+    id             Int           @id @default(autoincrement())
+    user_id        Int
+    proposal_id    Int
+    experience_id  Int
+    schedule_date  DateTime      @db.Timestamp(6)
+    complete_date  DateTime?     @db.Timestamp(6)
+    process_status ProcessStatus
+    created_at     DateTime      @default(now()) @db.Timestamp(6)
+    updated_at     DateTime      @updatedAt @db.Timestamp(6)
+    user           User          @relation(fields: [user_id], references: [id])
+    proposal       Proposal      @relation(fields: [proposal_id], references: [id])
+    experience     Experience    @relation(fields: [experience_id], references: [id])
+
+    @@map("user_experience")
+}

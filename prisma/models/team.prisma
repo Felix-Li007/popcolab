@@ -6,7 +6,6 @@ model Team {
   created_by      Int
   created_at      DateTime        @default(now()) @db.Timestamp(6)
   updated_at      DateTime        @updatedAt @db.Timestamp(6)
-  team_department String?         @db.VarChar(100)
   creator         User            @relation("TeamCreator", fields: [created_by], references: [id])
   team_aggregates TeamAggregate[]
   team_invites    TeamInvite[]

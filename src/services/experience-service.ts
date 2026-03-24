@@ -497,14 +497,26 @@ async function replaceExperienceDimensions(
   experienceId: number,
   values: Array<{ dimensionId: number; expectedValue: string }>
 ) {
-  await db.experienceDimension.deleteMany({
-    where: { experience_id: experienceId },
-  });
+  // Get existing dimension IDs from the submitted values
+  const submittedDimensionIds = new Set(values.map(v => v.dimensionId));
 
-  if (values.length === 0) return;
+  // Delete only the dimensions that were submitted (to update them)
+  if (submittedDimensionIds.size > 0) {
+    await db.experienceDimension.deleteMany({
+      where: {
+        experience_id: experienceId,
+        dimension_id: { in: Array.from(submittedDimensionIds) },
+      },
+    });
+  }
+
+  // Only create dimensions that have non-empty values
+  const valuesToCreate = values.filter(value => value.expectedValue !== '');
+
+  if (valuesToCreate.length === 0) return;
 
   await db.experienceDimension.createMany({
-    data: values.map(value => ({
+    data: valuesToCreate.map(value => ({
       experience_id: experienceId,
       dimension_id: value.dimensionId,
       expected_value: value.expectedValue,

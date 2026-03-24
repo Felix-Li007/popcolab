@@ -1,6 +1,13 @@
 import type { IntakeForm } from '@/types/question-type';
 
-export type DimensionDataType = 'numeric' | 'scale' | 'text';
+export const DIMENSION_DATA_TYPES = {
+  NUMERIC: 'numeric',
+  SCALE: 'scale',
+  TEXT: 'text',
+} as const;
+
+export type DimensionDataType =
+  (typeof DIMENSION_DATA_TYPES)[keyof typeof DIMENSION_DATA_TYPES];
 
 export type DimensionCategory = {
   id: number;

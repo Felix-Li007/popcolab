@@ -849,6 +849,14 @@ function ExperienceDimensionsSection({
                         value={value}
                       />
                     ))}
+                    {selectedValues.length === 0 && (
+                      <input
+                        key={`${dimensionId}-input-empty`}
+                        type="hidden"
+                        name={`dimension_${dimensionId}`}
+                        value=""
+                      />
+                    )}
                   </section>
                 );
               })}

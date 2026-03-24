@@ -17,7 +17,7 @@ const initial: RejectProposalState = {};
 
 const REASONS = [
   "Date doesn't work for our team",
-  "Events don't match what we need",
+  "Experience doesn't match what we need",
   'Participant count is off',
   'Budget concerns',
   'Other',

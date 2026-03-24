@@ -23,6 +23,7 @@ model Experience {
   experience_pricing     ExperiencePricing?
   order_items            OrderItem[]
   proposals              Proposal[]
+  user_experiences       UserExperience[]
 
   @@map("experience")
 }

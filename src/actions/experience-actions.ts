@@ -50,10 +50,7 @@ function parseExperienceForm(formData: FormData) {
       };
     })
     .filter(
-      value =>
-        Number.isInteger(value.dimensionId) &&
-        value.dimensionId > 0 &&
-        value.expectedValue
+      value => Number.isInteger(value.dimensionId) && value.dimensionId > 0
     );
 
   return {
@@ -93,7 +90,8 @@ export async function createExperienceAction(
 ): Promise<ExperienceFormState> {
   const parsed = parseExperienceForm(formData);
   const errors = validateExperienceFields(parsed);
-  if (Object.keys(errors).length > 0) return { errors };
+  if (Object.values(errors).some(error => error !== undefined))
+    return { errors };
 
   try {
     await createExperience(parsed);
@@ -111,7 +109,8 @@ export async function updateExperienceAction(
 ): Promise<ExperienceFormState> {
   const parsed = parseExperienceForm(formData);
   const errors = validateExperienceFields(parsed);
-  if (Object.keys(errors).length > 0) return { errors };
+  if (Object.values(errors).some(error => error !== undefined))
+    return { errors };
 
   try {
     await updateExperience(id, parsed);

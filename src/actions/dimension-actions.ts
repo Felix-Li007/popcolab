@@ -5,6 +5,7 @@ import type {
   DimensionFormState,
   DimensionCategoryFormState,
 } from '@/types/dimension-type';
+import { DIMENSION_DATA_TYPES } from '@/types/dimension-type';
 import type { IntakeForm } from '@/types/question-type';
 import {
   createDimension,
@@ -113,8 +114,10 @@ export async function createDimensionAction(
   const errors = validateDimensionFields(parsed);
   if (Object.keys(errors).length > 0) return { errors };
 
-  const scaleMin = parsed.dataType === 'scale' ? parsed.scaleMin : null;
-  const scaleMax = parsed.dataType === 'scale' ? parsed.scaleMax : null;
+  const scaleMin =
+    parsed.dataType === DIMENSION_DATA_TYPES.SCALE ? parsed.scaleMin : null;
+  const scaleMax =
+    parsed.dataType === DIMENSION_DATA_TYPES.SCALE ? parsed.scaleMax : null;
 
   try {
     await createDimension({
@@ -141,8 +144,10 @@ export async function updateDimensionAction(
   const errors = validateDimensionFields(parsed);
   if (Object.keys(errors).length > 0) return { errors };
 
-  const scaleMin = parsed.dataType === 'scale' ? parsed.scaleMin : null;
-  const scaleMax = parsed.dataType === 'scale' ? parsed.scaleMax : null;
+  const scaleMin =
+    parsed.dataType === DIMENSION_DATA_TYPES.SCALE ? parsed.scaleMin : null;
+  const scaleMax =
+    parsed.dataType === DIMENSION_DATA_TYPES.SCALE ? parsed.scaleMax : null;
 
   try {
     await updateDimension(id, {

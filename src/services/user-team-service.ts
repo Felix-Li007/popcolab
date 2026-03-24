@@ -220,7 +220,6 @@ export async function createTeamWithInvites(params: {
       team_name: params.name,
       team_department: params.department,
       team_notes: params.description,
-      team_owner: params.userId,
       created_by: params.userId,
     },
     select: { id: true },

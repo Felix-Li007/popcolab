@@ -1,4 +1,5 @@
 import { prisma } from '@/libs/prisma-client';
+import { DIMENSION_DATA_TYPES } from '@/types/dimension-type';
 import type {
   Dimension,
   DimensionCategory,
@@ -14,7 +15,7 @@ type UpsertDimensionInput = {
   indexName: string;
   indexNotes: string | null;
   categoryId: number;
-  dataType: string;
+  dataType: DimensionDataType;
   hardFilter: boolean;
   scaleMin: number | null;
   scaleMax: number | null;
@@ -33,7 +34,7 @@ type DimensionValidationFields = {
   indexKey: string;
   indexName: string;
   categoryId: number;
-  dataType: string;
+  dataType: DimensionDataType;
   scaleMin: number | null;
   scaleMax: number | null;
   options: DimensionOption[];
@@ -109,7 +110,13 @@ function getCategoryIdError(categoryId: number): string | undefined {
 }
 
 function getDataTypeError(dataType: string): string | undefined {
-  if (!['numeric', 'scale', 'text'].includes(dataType)) {
+  if (
+    ![
+      DIMENSION_DATA_TYPES.NUMERIC,
+      DIMENSION_DATA_TYPES.SCALE,
+      DIMENSION_DATA_TYPES.TEXT,
+    ].includes(dataType as DimensionDataType)
+  ) {
     return 'Data type must be numeric, scale, or text';
   }
 
@@ -120,7 +127,7 @@ function getScaleErrors(fields: DimensionValidationFields) {
   const errors: Pick<DimensionFormState['errors'], 'scaleMin' | 'scaleMax'> =
     {};
 
-  if (fields.dataType !== 'scale') {
+  if (fields.dataType !== DIMENSION_DATA_TYPES.SCALE) {
     return errors;
   }
 
