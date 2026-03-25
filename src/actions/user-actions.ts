@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { prisma } from '@/libs/prisma-client';
+import { resolveRoleBranding } from '@/constants/role-branding';
 import {
   isWorkMode,
   normalizeWorkMode,
@@ -222,10 +223,12 @@ export async function getSignedInUserSummaryAction(): Promise<SignedInUserSummar
   const firstName = authContext.user.firstName?.trim() ?? '';
   const lastName = authContext.user.lastName?.trim() ?? '';
   const fullName = `${firstName} ${lastName}`.trim();
+  const company = await getCompanyAction();
+  const branding = resolveRoleBranding(authContext.role, company);
 
   return {
     displayName: fullName || authContext.user.username || 'User',
-    roleLabel: authContext.role ?? 'User',
+    roleLabel: branding.displayLabel,
   };
 }
 
@@ -277,6 +280,60 @@ export async function getCompanyAction(): Promise<SignedInCompany | null> {
     createdAt: company.created_at,
     updatedAt: company.updated_at,
   };
+}
+
+export async function deleteCompanyAction(): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const authContext = await getCurrentAuthContext();
+
+  if (!authContext.isAuthenticated || !authContext.user) {
+    return {
+      success: false,
+      error: 'Authentication required.',
+    };
+  }
+
+  const email = readSignedInEmail(authContext.user);
+  if (!email) {
+    return {
+      success: false,
+      error: 'No email found for current user.',
+    };
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ clerk_id: authContext.user.id }, { email }],
+      },
+      select: { id: true },
+    });
+
+    if (!user) {
+      revalidatePath('/dashboard');
+      revalidatePath('/dashboard/profile');
+
+      return { success: true };
+    }
+
+    await prisma.company.deleteMany({
+      where: {
+        user_id: user.id,
+      },
+    });
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/profile');
+
+    return { success: true };
+  } catch {
+    return {
+      success: false,
+      error: 'Failed to delete company information. Please try again.',
+    };
+  }
 }
 
 export async function updateCompanyAction(

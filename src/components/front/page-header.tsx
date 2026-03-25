@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
@@ -10,15 +9,19 @@ import styles from '@/styles/page-header.module.css';
 import UserAvatar from '@/components/shared/user-avatar';
 import type { CompanyInfo } from '@/types/company-type';
 import { Button } from '@/ui';
+import type { RoleBranding } from '@/constants/role-branding';
+import RoleLogo from '@/components/branding/role-logo';
 
 export default function Header({
   userDisplayName,
   userRoleLabel,
   initialCompany,
+  branding,
 }: Readonly<{
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
+  branding?: RoleBranding;
 }>) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -35,21 +38,23 @@ export default function Header({
     return null;
   }
 
+  const logoBranding = branding ?? {
+    role: 'role_user',
+    dataRole: 'role_user',
+    displayLabel: 'User',
+    logoSrc: '/logo/logo-icon.png',
+    logoAlt: 'Pop CoLab logo',
+    footerLogoSrc: '/logo/user/logo-full-v.png',
+    footerLogoAlt: 'Pop CoLab user footer logo',
+  };
+
   return (
     <header className={styles.headerContainer}>
       <div className={styles.headerWrapper}>
         <Link href="/" className={styles.logo}>
-          <Image
-            src="/logo/logo-icon.png"
-            alt="Pop CoLab"
-            width={32}
-            height={32}
-            className="rounded-full"
-          />
-          <span>PopColab</span>
+          <RoleLogo branding={logoBranding} size={48} />
         </Link>
 
-        {/* Desktop Navigation */}
         <nav className={styles.navDesktop}>
           <Link
             href="/"
@@ -57,7 +62,6 @@ export default function Header({
           >
             Home
           </Link>
-
           <Link
             href="/services"
             className={`${styles.navLink} ${isActive('/services') ? styles.navLinkActive : ''}`}
@@ -78,7 +82,6 @@ export default function Header({
           </Link>
         </nav>
 
-        {/* Auth Buttons */}
         <div className={styles.authButtons}>
           <SignedOut>
             <SignInButton>
@@ -107,7 +110,6 @@ export default function Header({
           />
         </div>
 
-        {/* Mobile Menu Toggle */}
         <Button
           type="button"
           variant="text"
@@ -125,7 +127,6 @@ export default function Header({
           )}
         </Button>
 
-        {/* Mobile Navigation */}
         <nav
           id="mobile-nav"
           className={`${styles.navMobile} ${isOpen ? styles.open : ''}`}

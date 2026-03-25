@@ -1,13 +1,28 @@
 import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
+import localFont from 'next/font/local';
+import { Nunito } from 'next/font/google';
+import { resolveRoleBranding } from '@/constants/role-branding';
+import { getCompanyAction } from '@/actions/user-actions';
+import { getCurrentAuthContext } from '@/services/clerk-service';
 import './globals.css';
 import { ThemeProvider } from 'next-themes';
 import { ThemedClerk } from './theme';
 
-const poppins = Poppins({
-  variable: '--font-poppins',
+const museo = localFont({
+  src: [
+    {
+      path: '../../public/fonts/museo/Museo-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-museo',
+});
+
+const nunito = Nunito({
+  variable: '--font-nunito',
   subsets: ['latin'],
-  weight: ['600', '700'],
+  weight: ['400', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -15,15 +30,21 @@ export const metadata: Metadata = {
   description: 'Rediscover the Power of Play.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [authContext, companyInfo] = await Promise.all([
+    getCurrentAuthContext(),
+    getCompanyAction(),
+  ]);
+  const branding = resolveRoleBranding(authContext.role, companyInfo);
+
   return (
-    <html lang="en">
-      <body className={`${poppins.variable} antialiased`}>
-        <ThemeProvider>
+    <html lang="en" data-role={branding.dataRole}>
+      <body className={`${museo.variable} ${nunito.variable} antialiased`}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemedClerk>{children}</ThemedClerk>
         </ThemeProvider>
       </body>

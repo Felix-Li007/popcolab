@@ -48,7 +48,7 @@ function createExperience(
 }
 
 describe('experience-service pricing validation', () => {
-  test('validateExperienceFields rejects a zero starting price', () => {
+  test('validateExperienceFields allows a zero starting price', () => {
     const errors = validateExperienceFields({
       experienceTitle: 'Facilitated Workshop',
       experienceStatus: 'active',
@@ -70,9 +70,7 @@ describe('experience-service pricing validation', () => {
       dimensionValues: [],
     });
 
-    expect(errors.startingPrice).toBe(
-      'Starting price must be a positive integer'
-    );
+    expect(errors.startingPrice).toBeUndefined();
     expect(errors.addingPrice).toBeUndefined();
   });
 

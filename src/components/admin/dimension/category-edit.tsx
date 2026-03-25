@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
+import { saveDimensionCategoryAction } from '@/actions/dimension-actions';
 import type {
   DimensionCategory,
   DimensionCategoryFormState,
@@ -19,7 +20,6 @@ const EMPTY_STATE: DimensionCategoryFormState = { errors: {} };
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  action: FormAction;
   isEdit?: boolean;
   initial?: DimensionCategory;
   usageCount?: number;
@@ -27,7 +27,6 @@ type Props = {
 };
 
 type FormBodyProps = {
-  action: FormAction;
   isEdit: boolean;
   initial?: DimensionCategory;
   usageCount: number;
@@ -36,14 +35,16 @@ type FormBodyProps = {
 };
 
 function CategoryFormBody({
-  action,
   isEdit,
   initial,
   usageCount,
   onSuccess,
   onClose,
 }: Readonly<FormBodyProps>) {
-  const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const [state, formAction, isPending] = useActionState(
+    saveDimensionCategoryAction,
+    EMPTY_STATE
+  );
   let submitLabel = 'Create Category';
 
   if (isPending) {
@@ -56,9 +57,33 @@ function CategoryFormBody({
     if (state.success) onSuccess();
   }, [state.success, onSuccess]);
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const formData = new FormData(event.currentTarget);
+    console.log('[dimension-category-form] submit clicked', {
+      mode: isEdit ? 'edit' : 'create',
+      categoryId: initial?.id ?? null,
+      name: String(formData.get('name') ?? ''),
+      description: String(formData.get('description') ?? ''),
+      usageCount,
+    });
+  }
+
   return (
-    <form action={formAction} className={styles.form}>
+    <form
+      action={formAction}
+      onSubmit={handleSubmit}
+      noValidate
+      className={styles.form}
+    >
       <div className={styles.content}>
+        {isEdit && initial?.id ? (
+          <input
+            type="hidden"
+            name="dimensionCategoryId"
+            value={String(initial.id)}
+          />
+        ) : null}
+
         {state.errors._form && (
           <div className={styles.formError}>{state.errors._form}</div>
         )}
@@ -115,7 +140,6 @@ function CategoryFormBody({
 export default function DimensionCategoryForm({
   isOpen,
   onClose,
-  action,
   isEdit = false,
   initial,
   usageCount = 0,
@@ -145,7 +169,6 @@ export default function DimensionCategoryForm({
     >
       <CategoryFormBody
         key={formKey}
-        action={action}
         isEdit={isEdit}
         initial={initial}
         usageCount={usageCount}

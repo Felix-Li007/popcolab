@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
 import UserAvatar from '@/components/shared/user-avatar';
 import type { CompanyInfo } from '@/types/company-type';
 
@@ -11,23 +9,26 @@ export default function DashboardTopnav({
   userDisplayName,
   userRoleLabel,
   initialCompany,
+  className = '',
 }: Readonly<{
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
+  className?: string;
 }>) {
   return (
-    <header className="bg-teal-deep text-white">
-      <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-14 border-b border-white/10 gap-2">
+    <header
+      className={`bg-(--palette-shell-background) text-(--palette-shell-foreground) ${className}`}
+    >
+      <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-16 sm:h-[4.5rem] border-b border-[rgba(1,43,48,0.10)] gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={onToggleSidebar}
             aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isSidebarOpen}
-            className="sm:hidden w-9 h-9 rounded-md border border-white/20 hover:bg-white/10 flex items-center justify-center shrink-0 transition-colors"
+            className="sm:hidden w-9 h-9 rounded-md border border-[rgba(1,43,48,0.18)] hover:bg-[rgba(1,43,48,0.06)] flex items-center justify-center shrink-0 transition-colors"
           >
             <svg
               className="w-5 h-5"
@@ -52,24 +53,9 @@ export default function DashboardTopnav({
               )}
             </svg>
           </button>
-          <Link
-            href="/dashboard"
-            aria-label="Go to dashboard"
-            className="sm:hidden w-8 h-8 rounded-full overflow-hidden shrink-0"
-          >
-            <Image
-              src="/logo/logo-icon.png"
-              alt="Pop CoLab"
-              width={32}
-              height={32}
-            />
-          </Link>
-          <span className="text-sm font-semibold text-white/80 hidden sm:block">
-            My Dashboard
-          </span>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
+          <div className="hidden sm:block w-px h-6 bg-[rgba(1,43,48,0.15)] mx-1" />
           <UserAvatar
             displayName={userDisplayName}
             roleLabel={userRoleLabel}

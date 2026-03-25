@@ -2,6 +2,7 @@ import DashboardShell from '@/components/dashboard/dashboard-shell';
 import PendingResultSaver from '@/components/dashboard/pending-result-saver';
 import { getCompanyAction } from '@/actions/user-actions';
 import { getCurrentAuthContext } from '@/services/clerk-service';
+import { resolveRoleBranding } from '@/constants/role-branding';
 
 export default async function DashboardLayout({
   children,
@@ -17,13 +18,14 @@ export default async function DashboardLayout({
   const lastName = authContext.user?.lastName?.trim() ?? '';
   const fullName = (firstName + ' ' + lastName).trim();
   const userDisplayName = fullName || authContext.user?.username || 'User';
-  const userRoleLabel = authContext.role ?? 'User';
+  const branding = resolveRoleBranding(authContext.role, companyInfo);
 
   return (
     <DashboardShell
       userDisplayName={userDisplayName}
-      userRoleLabel={userRoleLabel}
+      userRoleLabel={branding.displayLabel}
       initialCompany={companyInfo}
+      branding={branding}
     >
       <PendingResultSaver />
       {children}

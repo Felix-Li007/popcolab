@@ -11,16 +11,8 @@ import DimensionForm from '@/components/admin/dimension/dimension-edit';
 import DimensionView from '@/components/admin/dimension/dimension-view';
 import DimensionCategoryFilterBar from '@/components/admin/dimension/category-filter';
 import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
-import type {
-  Dimension,
-  DimensionCategory,
-  DimensionFormState,
-} from '@/types/dimension-type';
-import {
-  createDimensionAction,
-  deleteDimensionAction,
-  updateDimensionAction,
-} from '@/actions/dimension-actions';
+import type { Dimension, DimensionCategory } from '@/types/dimension-type';
+import { deleteDimensionAction } from '@/actions/dimension-actions';
 import styles from '@/styles/admin/dimensions/dimension-content.module.css';
 
 type Props = {
@@ -211,13 +203,6 @@ export default function DimensionContent({
     });
   }
 
-  const panelAction: (
-    prevState: DimensionFormState,
-    formData: FormData
-  ) => Promise<DimensionFormState> =
-    selectedId === null
-      ? createDimensionAction
-      : updateDimensionAction.bind(null, selectedId);
   return (
     <>
       <div className={styles.root}>
@@ -321,7 +306,6 @@ export default function DimensionContent({
       <DimensionForm
         isOpen={showFormModal}
         onClose={handleCloseForm}
-        action={panelAction}
         isEdit={!isCreating && selectedId !== null}
         initial={isCreating ? undefined : (selectedDimension ?? undefined)}
         categories={categories}

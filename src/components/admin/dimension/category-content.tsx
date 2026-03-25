@@ -9,15 +9,8 @@ import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
 import DimensionCategoryForm from '@/components/admin/dimension/category-edit';
 import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
-import type {
-  DimensionCategory,
-  DimensionCategoryFormState,
-} from '@/types/dimension-type';
-import {
-  createDimensionCategoryAction,
-  deleteDimensionCategoryAction,
-  updateDimensionCategoryAction,
-} from '@/actions/dimension-actions';
+import type { DimensionCategory } from '@/types/dimension-type';
+import { deleteDimensionCategoryAction } from '@/actions/dimension-actions';
 import styles from '@/styles/admin/dimensions/category-content.module.css';
 
 type CategoryWithUsage = DimensionCategory & { usageCount: number };
@@ -213,14 +206,6 @@ export default function CategoryContent({ initialData }: Readonly<Props>) {
     });
   }
 
-  const panelAction: (
-    prevState: DimensionCategoryFormState,
-    formData: FormData
-  ) => Promise<DimensionCategoryFormState> =
-    selectedId === null
-      ? createDimensionCategoryAction
-      : updateDimensionCategoryAction.bind(null, selectedId);
-
   return (
     <>
       <div className={styles.root}>
@@ -307,7 +292,6 @@ export default function CategoryContent({ initialData }: Readonly<Props>) {
       <DimensionCategoryForm
         isOpen={showFormModal}
         onClose={handleCloseForm}
-        action={panelAction}
         isEdit={!isCreating && selectedId !== null}
         initial={isCreating ? undefined : (selectedCategory ?? undefined)}
         usageCount={isCreating ? 0 : (selectedCategory?.usageCount ?? 0)}

@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { prisma } from '@/libs/prisma-client';
+import { createModuleLogger } from '@/utils/logging-util';
 import type {
   DimensionFormState,
   DimensionCategoryFormState,
@@ -30,6 +32,25 @@ const ADMIN_PATHS = [
   '/admin/dimensions/categories',
   '/admin/questions',
 ];
+
+const logger = createModuleLogger(import.meta.url);
+
+async function logDimensionReadback(id: number, label: string) {
+  const row = await prisma.dimensionIndex.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      index_name: true,
+      index_notes: true,
+      category_id: true,
+      data_type: true,
+      hard_filter: true,
+      updated_at: true,
+    },
+  });
+
+  logger.debug({ row }, label);
+}
 
 function revalidateAdminPaths() {
   ADMIN_PATHS.forEach(path => revalidatePath(path));
@@ -111,7 +132,20 @@ export async function createDimensionAction(
   _prevState: DimensionFormState,
   formData: FormData
 ): Promise<DimensionFormState> {
+  logger.debug('[dimension-action] createDimensionAction: entered');
   const parsed = parseDimensionForm(formData);
+  logger.debug(
+    {
+      indexName: parsed.indexName,
+      indexNotes: parsed.indexNotes,
+      categoryId: parsed.categoryId,
+      dataType: parsed.dataType,
+      hardFilter: parsed.hardFilter,
+      formNames: parsed.formNames,
+      optionCount: parsed.options.length,
+    },
+    '[dimension-action] createDimensionAction: parsed'
+  );
   const errors = validateDimensionFields(parsed);
   if (Object.keys(errors).length > 0) return { errors };
 
@@ -123,16 +157,23 @@ export async function createDimensionAction(
     dataType === DIMENSION_DATA_TYPES.SCALE ? parsed.scaleMax : null;
 
   try {
-    await createDimension({
+    const createdId = await createDimension({
       ...parsed,
       dataType,
       indexKey: parsed.indexKey || null,
       scaleMin,
       scaleMax,
     });
+    logger.info('[dimension-action] createDimensionAction: persisted');
+    await logDimensionReadback(
+      createdId,
+      '[dimension-action] createDimensionAction: readback'
+    );
     revalidateAdminPaths();
+    logger.debug('[dimension-action] createDimensionAction: revalidated');
     return { errors: {}, success: true };
-  } catch {
+  } catch (error) {
+    logger.error({ error }, '[dimension-action] createDimensionAction: failed');
     return {
       errors: { _form: 'Failed to create dimension. Please try again.' },
     };
@@ -144,7 +185,21 @@ export async function updateDimensionAction(
   _prevState: DimensionFormState,
   formData: FormData
 ): Promise<DimensionFormState> {
+  logger.debug({ id }, '[dimension-action] updateDimensionAction: entered');
   const parsed = parseDimensionForm(formData);
+  logger.debug(
+    {
+      id,
+      indexName: parsed.indexName,
+      indexNotes: parsed.indexNotes,
+      categoryId: parsed.categoryId,
+      dataType: parsed.dataType,
+      hardFilter: parsed.hardFilter,
+      formNames: parsed.formNames,
+      optionCount: parsed.options.length,
+    },
+    '[dimension-action] updateDimensionAction: parsed'
+  );
   const errors = validateDimensionFields(parsed);
   if (Object.keys(errors).length > 0) return { errors };
 
@@ -163,13 +218,67 @@ export async function updateDimensionAction(
       scaleMin,
       scaleMax,
     });
+    logger.info({ id }, '[dimension-action] updateDimensionAction: persisted');
+    await logDimensionReadback(
+      id,
+      '[dimension-action] updateDimensionAction: readback'
+    );
     revalidateAdminPaths();
+    logger.debug(
+      { id },
+      '[dimension-action] updateDimensionAction: revalidated'
+    );
     return { errors: {}, success: true };
-  } catch {
+  } catch (error) {
+    logger.error(
+      { id, error },
+      '[dimension-action] updateDimensionAction: failed'
+    );
     return {
       errors: { _form: 'Failed to update dimension. Please try again.' },
     };
   }
+}
+
+export async function saveDimensionAction(
+  prevState: DimensionFormState,
+  formData: FormData
+): Promise<DimensionFormState> {
+  const dimensionIdValue = getFormEntryString(formData.get('dimensionId'));
+  const dimensionId = Number.parseInt(dimensionIdValue || '0', 10);
+  const rawIndexNotes = getFormEntryString(formData.get('indexNotes'));
+
+  logger.debug(
+    { dimensionIdValue, dimensionId, rawIndexNotes },
+    '[dimension-action] saveDimensionAction: route'
+  );
+
+  if (Number.isInteger(dimensionId) && dimensionId > 0) {
+    return updateDimensionAction(dimensionId, prevState, formData);
+  }
+
+  return createDimensionAction(prevState, formData);
+}
+
+export async function saveDimensionCategoryAction(
+  prevState: DimensionCategoryFormState,
+  formData: FormData
+): Promise<DimensionCategoryFormState> {
+  const categoryIdValue = getFormEntryString(
+    formData.get('dimensionCategoryId')
+  );
+  const categoryId = Number.parseInt(categoryIdValue || '0', 10);
+
+  logger.debug(
+    { categoryIdValue, categoryId },
+    '[dimension-action] saveDimensionCategoryAction: route'
+  );
+
+  if (Number.isInteger(categoryId) && categoryId > 0) {
+    return updateDimensionCategoryAction(categoryId, prevState, formData);
+  }
+
+  return createDimensionCategoryAction(prevState, formData);
 }
 
 export async function deleteDimensionAction(id: number): Promise<void> {
@@ -190,7 +299,12 @@ export async function createDimensionCategoryAction(
   _prevState: DimensionCategoryFormState,
   formData: FormData
 ): Promise<DimensionCategoryFormState> {
+  logger.debug('[dimension-action] createDimensionCategoryAction: entered');
   const parsed = parseCategoryForm(formData);
+  logger.debug(
+    parsed,
+    '[dimension-action] createDimensionCategoryAction: parsed'
+  );
   const errors = validateDimensionCategoryFields(parsed);
   if (Object.keys(errors).length > 0) return { errors };
 
@@ -199,9 +313,17 @@ export async function createDimensionCategoryAction(
       name: parsed.name,
       description: parsed.description || null,
     });
+    logger.info('[dimension-action] createDimensionCategoryAction: persisted');
     revalidateAdminPaths();
+    logger.debug(
+      '[dimension-action] createDimensionCategoryAction: revalidated'
+    );
     return { errors: {}, success: true };
-  } catch {
+  } catch (error) {
+    logger.error(
+      { error },
+      '[dimension-action] createDimensionCategoryAction: failed'
+    );
     return {
       errors: { _form: 'Failed to create category. Please try again.' },
     };
@@ -213,7 +335,15 @@ export async function updateDimensionCategoryAction(
   _prevState: DimensionCategoryFormState,
   formData: FormData
 ): Promise<DimensionCategoryFormState> {
+  logger.debug(
+    { id },
+    '[dimension-action] updateDimensionCategoryAction: entered'
+  );
   const parsed = parseCategoryForm(formData);
+  logger.debug(
+    { id, ...parsed },
+    '[dimension-action] updateDimensionCategoryAction: parsed'
+  );
   const errors = validateDimensionCategoryFields(parsed);
   if (Object.keys(errors).length > 0) return { errors };
 
@@ -222,9 +352,21 @@ export async function updateDimensionCategoryAction(
       name: parsed.name,
       description: parsed.description || null,
     });
+    logger.info(
+      { id },
+      '[dimension-action] updateDimensionCategoryAction: persisted'
+    );
     revalidateAdminPaths();
+    logger.debug(
+      { id },
+      '[dimension-action] updateDimensionCategoryAction: revalidated'
+    );
     return { errors: {}, success: true };
-  } catch {
+  } catch (error) {
+    logger.error(
+      { id, error },
+      '[dimension-action] updateDimensionCategoryAction: failed'
+    );
     return {
       errors: { _form: 'Failed to update category. Please try again.' },
     };

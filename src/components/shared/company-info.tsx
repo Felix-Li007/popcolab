@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { useRouter } from 'next/navigation';
 import { WORK_MODE_OPTIONS } from '@/constants/work-mode';
 import {
+  deleteCompanyAction,
   saveCompanyAction,
   type SaveCompanyFormState,
 } from '@/actions/user-actions';
@@ -18,6 +19,16 @@ const INITIAL_SAVE_STATE: SaveCompanyFormState = {
   error: null,
   values: null,
   version: 0,
+};
+
+type DeleteCompanyFormState = {
+  success: boolean;
+  error: string | null;
+};
+
+const INITIAL_DELETE_STATE: DeleteCompanyFormState = {
+  success: false,
+  error: null,
 };
 
 export default function CompanyProfile({
@@ -46,6 +57,24 @@ export default function CompanyProfile({
     submitCompanyAction,
     initialState
   );
+  const submitDeleteAction = async (
+    _prevState: DeleteCompanyFormState
+  ): Promise<DeleteCompanyFormState> => {
+    const nextState = await deleteCompanyAction();
+
+    if (nextState.success) {
+      router.refresh();
+    }
+
+    return {
+      success: nextState.success,
+      error: nextState.error ?? null,
+    };
+  };
+  const [deleteState, deleteFormAction, isDeletePending] = useActionState(
+    submitDeleteAction,
+    INITIAL_DELETE_STATE
+  );
   const resolvedValues = saveState.values ?? initialCompany ?? null;
   const actionButton = (
     <Button
@@ -67,135 +96,167 @@ export default function CompanyProfile({
 
       <div className={embedded ? '' : styles.panel}>
         {embedded ? (
-          <form
-            // Force uncontrolled inputs to re-read the latest saved values after
-            // a successful server action returns updated company data.
-            key={saveState.version}
-            className={dashboardFormStyles.form}
-            action={formAction}
-          >
-            <div className={dashboardFormStyles.field}>
-              <label
-                htmlFor="company-name"
-                className={dashboardFormStyles.label}
-              >
-                Company Name
-              </label>
-              <input
-                id="company-name"
-                name="companyName"
-                type="text"
-                defaultValue={resolvedValues?.companyName ?? ''}
-                placeholder="Enter company name"
-                className={dashboardFormStyles.input}
-              />
-            </div>
+          <>
+            <form
+              // Force uncontrolled inputs to re-read the latest saved values after
+              // a successful server action returns updated company data.
+              key={saveState.version}
+              className={dashboardFormStyles.form}
+              action={formAction}
+            >
+              <div className={dashboardFormStyles.field}>
+                <label
+                  htmlFor="company-name"
+                  className={dashboardFormStyles.label}
+                >
+                  Company Name
+                </label>
+                <input
+                  id="company-name"
+                  name="companyName"
+                  type="text"
+                  defaultValue={resolvedValues?.companyName ?? ''}
+                  placeholder="Enter company name"
+                  className={dashboardFormStyles.input}
+                />
+              </div>
 
-            <div className={dashboardFormStyles.field}>
-              <label
-                htmlFor="company-department-name"
-                className={dashboardFormStyles.label}
-              >
-                Department Name
-              </label>
-              <input
-                id="company-department-name"
-                name="departmentName"
-                type="text"
-                defaultValue={resolvedValues?.departmentName ?? ''}
-                placeholder="Enter department"
-                className={dashboardFormStyles.input}
-              />
-            </div>
+              <div className={dashboardFormStyles.field}>
+                <label
+                  htmlFor="company-department-name"
+                  className={dashboardFormStyles.label}
+                >
+                  Department Name
+                </label>
+                <input
+                  id="company-department-name"
+                  name="departmentName"
+                  type="text"
+                  defaultValue={resolvedValues?.departmentName ?? ''}
+                  placeholder="Enter department"
+                  className={dashboardFormStyles.input}
+                />
+              </div>
 
-            <div className={dashboardFormStyles.field}>
-              <label
-                htmlFor="company-role-title"
-                className={dashboardFormStyles.label}
-              >
-                Role Title
-              </label>
-              <input
-                id="company-role-title"
-                name="roleTitle"
-                type="text"
-                defaultValue={resolvedValues?.roleTitle ?? ''}
-                placeholder="Enter role title"
-                className={dashboardFormStyles.input}
-              />
-            </div>
+              <div className={dashboardFormStyles.field}>
+                <label
+                  htmlFor="company-role-title"
+                  className={dashboardFormStyles.label}
+                >
+                  Role Title
+                </label>
+                <input
+                  id="company-role-title"
+                  name="roleTitle"
+                  type="text"
+                  defaultValue={resolvedValues?.roleTitle ?? ''}
+                  placeholder="Enter role title"
+                  className={dashboardFormStyles.input}
+                />
+              </div>
 
-            <div className={dashboardFormStyles.field}>
-              <label
-                htmlFor="company-size"
-                className={dashboardFormStyles.label}
-              >
-                Company Size
-              </label>
-              <input
-                id="company-size"
-                name="companySize"
-                type="number"
-                min="1"
-                step="1"
-                defaultValue={resolvedValues?.companySize ?? ''}
-                placeholder="Enter company size"
-                className={dashboardFormStyles.input}
-              />
-            </div>
+              <div className={dashboardFormStyles.field}>
+                <label
+                  htmlFor="company-size"
+                  className={dashboardFormStyles.label}
+                >
+                  Company Size
+                </label>
+                <input
+                  id="company-size"
+                  name="companySize"
+                  type="number"
+                  min="1"
+                  step="1"
+                  defaultValue={resolvedValues?.companySize ?? ''}
+                  placeholder="Enter company size"
+                  className={dashboardFormStyles.input}
+                />
+              </div>
 
-            <div className={dashboardFormStyles.field}>
-              <label
-                htmlFor="company-work-mode"
-                className={dashboardFormStyles.label}
-              >
-                Work Mode
-              </label>
-              <select
-                id="company-work-mode"
-                name="workMode"
-                defaultValue={resolvedValues?.workMode ?? ''}
-                className={dashboardFormStyles.input}
-              >
-                <option value="">Select work mode</option>
-                {WORK_MODE_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className={dashboardFormStyles.field}>
+                <label
+                  htmlFor="company-work-mode"
+                  className={dashboardFormStyles.label}
+                >
+                  Work Mode
+                </label>
+                <select
+                  id="company-work-mode"
+                  name="workMode"
+                  defaultValue={resolvedValues?.workMode ?? ''}
+                  className={dashboardFormStyles.input}
+                >
+                  <option value="">Select work mode</option>
+                  {WORK_MODE_OPTIONS.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div className={dashboardFormStyles.field}>
-              <label
-                htmlFor="company-website"
-                className={dashboardFormStyles.label}
-              >
-                Company Website
-              </label>
-              <input
-                id="company-website"
-                name="companyWebsite"
-                type="url"
-                defaultValue={resolvedValues?.companyWebsite ?? ''}
-                placeholder="https://example.com"
-                className={dashboardFormStyles.input}
-              />
-            </div>
+              <div className={dashboardFormStyles.field}>
+                <label
+                  htmlFor="company-website"
+                  className={dashboardFormStyles.label}
+                >
+                  Company Website
+                </label>
+                <input
+                  id="company-website"
+                  name="companyWebsite"
+                  type="url"
+                  defaultValue={resolvedValues?.companyWebsite ?? ''}
+                  placeholder="https://example.com"
+                  className={dashboardFormStyles.input}
+                />
+              </div>
 
-            {saveState.message ? (
-              <p className={dashboardFormStyles.statusSuccess}>
-                {saveState.message}
-              </p>
-            ) : null}
-            {saveState.error ? (
-              <p className={dashboardFormStyles.statusError}>
-                {saveState.error}
-              </p>
-            ) : null}
+              {saveState.message ? (
+                <p className={dashboardFormStyles.statusSuccess}>
+                  {saveState.message}
+                </p>
+              ) : null}
+              {saveState.error ? (
+                <p className={dashboardFormStyles.statusError}>
+                  {saveState.error}
+                </p>
+              ) : null}
 
-            <div className={dashboardFormStyles.actions}>{actionButton}</div>
-          </form>
+              <div className="flex items-center justify-end gap-2 pt-1">
+                {initialCompany ? (
+                  <Button
+                    type="submit"
+                    formAction={deleteFormAction}
+                    disabled={isDeletePending}
+                    size="sm"
+                    variant="secondary"
+                    onClick={event => {
+                      if (
+                        !window.confirm(
+                          'Delete this company information? This cannot be undone.'
+                        )
+                      ) {
+                        event.preventDefault();
+                      }
+                    }}
+                    className="border-red-200! text-red-600! hover:bg-red-50!"
+                  >
+                    {isDeletePending ? 'Deleting...' : 'Delete'}
+                  </Button>
+                ) : null}
+                <div className={dashboardFormStyles.actions}>
+                  {actionButton}
+                </div>
+              </div>
+              {deleteState.error ? (
+                <p className={dashboardFormStyles.statusError}>
+                  {deleteState.error}
+                </p>
+              ) : null}
+            </form>
+          </>
         ) : (
           <form
             // Keep the standalone admin form in sync with the latest saved state

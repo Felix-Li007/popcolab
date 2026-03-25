@@ -6,15 +6,18 @@ import AppSidenav, {
 import { getBadge } from '@/utils/menu-helper';
 import { menuSection, BadgeCounts } from '@/types/menu-item';
 import { menuIcons } from '@/constants/menu-icons';
+import type { RoleBranding } from '@/constants/role-branding';
 
 export default function Sidebar({
   badgeCounts,
   onNavigate,
   className = '',
+  branding,
 }: Readonly<{
   badgeCounts?: BadgeCounts;
   onNavigate?: () => void;
   className?: string;
+  branding?: RoleBranding;
 }>) {
   const groups = menuSection.map(section => ({
     title: section.title,
@@ -33,6 +36,7 @@ export default function Sidebar({
       onNavigate={onNavigate}
       className={className}
       appearance={adminStandardSidenavAppearance}
+      branding={branding}
     />
   );
 }

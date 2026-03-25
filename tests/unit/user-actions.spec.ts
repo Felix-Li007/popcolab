@@ -21,6 +21,7 @@ jest.mock('@/libs/prisma-client', () => ({
     },
     company: {
       findFirst: jest.fn(),
+      deleteMany: jest.fn(),
       upsert: jest.fn(),
     },
   },
@@ -28,7 +29,11 @@ jest.mock('@/libs/prisma-client', () => ({
 
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { prisma } from '@/libs/prisma-client';
-import { getCompanyAction, updateCompanyAction } from '@/actions/user-actions';
+import {
+  deleteCompanyAction,
+  getCompanyAction,
+  updateCompanyAction,
+} from '@/actions/user-actions';
 
 const getCurrentAuthContextMock = getCurrentAuthContext as jest.MockedFunction<
   typeof getCurrentAuthContext
@@ -42,6 +47,7 @@ type MockedPrisma = {
   };
   company: {
     findFirst: jest.Mock;
+    deleteMany: jest.Mock;
     upsert: jest.Mock;
   };
 };
@@ -163,6 +169,23 @@ describe('user-actions company fields', () => {
           company_size: 25,
           company_website: 'https://popcolab.com',
         }),
+      })
+    );
+  });
+
+  test('deleteCompanyAction deletes the signed in user company record', async () => {
+    prismaMock.user.findFirst.mockResolvedValue({ id: 42 });
+    prismaMock.company.deleteMany.mockResolvedValue({ count: 1 });
+
+    await expect(deleteCompanyAction()).resolves.toEqual({
+      success: true,
+    });
+
+    expect(prismaMock.company.deleteMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          user_id: 42,
+        },
       })
     );
   });

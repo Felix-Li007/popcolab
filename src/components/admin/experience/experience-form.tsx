@@ -622,8 +622,8 @@ function ExperiencePricingSection({
             name="startingPrice"
             label="Starting Price (CAD)"
             type="number"
-            min={1}
-            defaultValue={initial?.pricing.startingPrice ?? ''}
+            min={0}
+            defaultValue={initial?.pricing.startingPrice ?? 0}
             error={errors.startingPrice}
             inputSize="sm"
             required
@@ -636,7 +636,7 @@ function ExperiencePricingSection({
             label="Adding Price (CAD)"
             type="number"
             min={0}
-            defaultValue={initial?.pricing.addingPrice ?? ''}
+            defaultValue={initial?.pricing.addingPrice ?? 0}
             error={errors.addingPrice}
             inputSize="sm"
             required
@@ -944,7 +944,7 @@ function ExperienceFormBody({
   }
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} className={styles.form} noValidate>
       <div className={styles.body}>
         {state.errors._form ? (
           <div className={styles.formError}>{state.errors._form}</div>

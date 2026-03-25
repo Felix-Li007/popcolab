@@ -23,7 +23,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
   const authState = await auth();
   const userRole = normalizeRole(readClaimRole(authState.sessionClaims));
-  const isAdmin = userRole === 'admin';
+  const isAdmin = userRole === 'role_admin';
   await auth.protect();
   if (isRedirectRoute && authState.userId) {
     const targetUrl = isAdmin ? '/admin' : '/dashboard';

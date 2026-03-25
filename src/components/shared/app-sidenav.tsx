@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import styles from '@/styles/admin/sidenav-menu.module.css';
+import type { RoleBranding } from '@/constants/role-branding';
+import RoleLogo from '@/components/branding/role-logo';
 
 export type AppSidenavItem = {
   label: string;
@@ -28,6 +29,7 @@ type AppSidenavAppearance = {
   itemInactiveClassName?: string;
   badgeClassName?: string;
   badgeLiveClassName?: string;
+  badgeCountClassName?: string;
 };
 
 export const adminStandardSidenavAppearance: AppSidenavAppearance = {
@@ -37,16 +39,17 @@ export const adminStandardSidenavAppearance: AppSidenavAppearance = {
   titleClassName:
     'text-white/40 font-bold px-2 mb-1 tracking-wider text-[10px]',
   itemClassName:
-    'flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs mb-0.5 transition-colors',
+    'flex items-center gap-2 px-2 py-1.5 rounded-lg text-heading font-bold mb-0.5 transition-colors',
   itemActiveClassName: 'bg-white/15 text-white',
   itemInactiveClassName: 'text-white/70 hover:bg-white/10 hover:text-white',
   badgeClassName: 'text-[10px] px-1.5 py-0.5 rounded-full font-bold',
   badgeLiveClassName: 'bg-magenta text-white',
+  badgeCountClassName: 'bg-white/20 text-white',
 };
 
 function NavIcon({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <span className="flex h-5 w-5 shrink-0 items-center justify-center text-white/90">
+    <span className="flex h-5 w-5 shrink-0 items-center justify-center text-current">
       {children}
     </span>
   );
@@ -58,12 +61,20 @@ export default function AppSidenav({
   className = '',
   testId,
   appearance,
+  branding,
+  surfaceClassName = 'bg-teal-deep',
+  surfaceTextClassName = 'text-white',
+  surfaceBorderClassName = 'border-white/10',
 }: Readonly<{
   groups: AppSidenavGroup[];
   onNavigate?: () => void;
   className?: string;
   testId?: string;
   appearance?: AppSidenavAppearance;
+  branding?: RoleBranding;
+  surfaceClassName?: string;
+  surfaceTextClassName?: string;
+  surfaceBorderClassName?: string;
 }>) {
   const pathname = usePathname();
 
@@ -84,31 +95,40 @@ export default function AppSidenav({
       ].join(' ');
     }
 
-    return [baseClassName, 'bg-white/20 text-white'].join(' ');
+    return [
+      baseClassName,
+      appearance?.badgeCountClassName ?? 'bg-white/20 text-white',
+    ].join(' ');
   }
+
+  const logoBranding = branding ?? {
+    role: 'role_user',
+    dataRole: 'role_user',
+    displayLabel: 'User',
+    logoSrc: '/logo/logo-icon.png',
+    logoAlt: 'Pop CoLab logo',
+    footerLogoSrc: '/logo/user/logo-full-v.png',
+    footerLogoAlt: 'Pop CoLab user footer logo',
+  };
 
   return (
     <aside
       data-testid={testId}
-      className={`flex min-h-screen w-56 shrink-0 flex-col bg-teal-deep text-white ${className}`}
+      className={`flex min-h-screen w-56 shrink-0 flex-col ${surfaceTextClassName} ${surfaceClassName} ${className}`}
     >
-      <div className="flex h-14 items-center border-b border-white/10 px-4">
-        <Link href="/" onClick={onNavigate} className="flex items-center gap-2">
-          <Image
-            src="/logo/logo-icon.png"
-            alt="Pop CoLab"
-            width={32}
-            height={32}
-            className="rounded-full"
+      <div
+        className={`flex h-16 items-center border-b px-4 sm:h-[4.5rem] ${surfaceBorderClassName}`}
+      >
+        <Link
+          href="/"
+          onClick={onNavigate}
+          className="flex h-full items-center gap-2"
+        >
+          <RoleLogo
+            branding={logoBranding}
+            size={48}
+            className="h-full w-auto object-contain"
           />
-          <div>
-            <div className="text-heading font-bold leading-tight">
-              Pop CoLab
-            </div>
-            <div className="text-[10px] leading-tight text-white/60">
-              Rediscover the Power of Play
-            </div>
-          </div>
         </Link>
       </div>
 
@@ -141,7 +161,7 @@ export default function AppSidenav({
                       onClick={onNavigate}
                       className={[
                         appearance?.itemClassName ??
-                          'flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-colors',
+                          'flex items-center gap-2 px-2 py-1.5 rounded-lg text-heading font-bold transition-colors',
                         active
                           ? (appearance?.itemActiveClassName ??
                             'bg-white/15 text-white')

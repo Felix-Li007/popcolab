@@ -1,8 +1,8 @@
 model ExperiencePricing {
   id             Int        @id @default(autoincrement())
   experience_id  Int        @unique
-  adding_price   Decimal    @db.Decimal(19, 0)
-  starting_price Decimal    @db.Decimal(19, 0)
+  adding_price   Decimal    @default(0) @db.Decimal(19, 0)
+  starting_price Decimal    @default(0) @db.Decimal(19, 0)
   starting_hour  Int?
   pricing_model  String?    @db.VarChar(255)
   pricing_notes  String?    @db.VarChar(255)

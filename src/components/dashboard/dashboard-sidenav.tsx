@@ -3,6 +3,7 @@
 import AppSidenav, {
   adminStandardSidenavAppearance,
 } from '@/components/shared/app-sidenav';
+import type { RoleBranding } from '@/constants/role-branding';
 
 const navGroups = [
   {
@@ -143,17 +144,48 @@ const navGroups = [
 export default function DashboardSidenav({
   onNavigate,
   className = '',
+  branding,
 }: Readonly<{
   onNavigate?: () => void;
   className?: string;
+  branding?: RoleBranding;
 }>) {
+  const isAdminTheme = branding?.dataRole === 'role_admin';
+
+  const dashboardSidenavAppearance = isAdminTheme
+    ? adminStandardSidenavAppearance
+    : {
+        ...adminStandardSidenavAppearance,
+        itemClassName:
+          'flex items-center gap-2 px-2 py-1.5 rounded-lg text-heading font-bold mb-0.5 transition-colors',
+        titleClassName:
+          'text-[var(--palette-foreground)]/55 font-bold px-2 mb-1 tracking-wider text-[10px]',
+        itemActiveClassName:
+          'bg-[rgba(1,43,48,0.08)] text-[var(--palette-foreground)]',
+        itemInactiveClassName:
+          'text-[var(--palette-foreground)]/75 hover:bg-[rgba(1,43,48,0.05)] hover:text-[var(--palette-foreground)]',
+        badgeLiveClassName: 'bg-[var(--palette-foreground)] text-white',
+        badgeCountClassName:
+          'bg-[rgba(1,43,48,0.12)] text-[var(--palette-foreground)]',
+      };
+
   return (
     <AppSidenav
       testId="dashboard-sidenav"
       groups={navGroups}
       onNavigate={onNavigate}
       className={className}
-      appearance={adminStandardSidenavAppearance}
+      surfaceClassName="bg-(--palette-shell-background)"
+      surfaceTextClassName={
+        isAdminTheme
+          ? 'text-(--palette-shell-foreground)'
+          : 'text-[var(--palette-foreground)]'
+      }
+      surfaceBorderClassName={
+        isAdminTheme ? 'border-white/10' : 'border-[rgba(1,43,48,0.10)]'
+      }
+      appearance={dashboardSidenavAppearance}
+      branding={branding}
     />
   );
 }

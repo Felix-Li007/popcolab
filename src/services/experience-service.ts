@@ -377,8 +377,8 @@ function getPricingErrors(fields: ExperienceValidationFields) {
     | 'pricingNotes'
   > = {};
 
-  if (!Number.isInteger(fields.startingPrice) || fields.startingPrice <= 0) {
-    errors.startingPrice = 'Starting price must be a positive integer';
+  if (!Number.isInteger(fields.startingPrice) || fields.startingPrice < 0) {
+    errors.startingPrice = 'Starting price must be a non-negative integer';
   }
 
   if (!Number.isInteger(fields.addingPrice) || fields.addingPrice < 0) {

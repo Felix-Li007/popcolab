@@ -26,15 +26,15 @@ export default function UserDashboardContent({
   requests,
 }: Readonly<Props>) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-[linear-gradient(180deg,rgba(255,250,247,0.92)_0%,rgba(255,245,251,0.78)_100%)]">
       <div className="flex flex-1 gap-0">
         {/* Main content */}
         <div className="flex-1 min-w-0 p-4 space-y-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-900">
+            <h1 className="text-xl font-bold text-slate-900">
               Welcome back, {displayName}
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-slate-600 mt-0.5">
               Here&apos;s a summary of your Pop CoLab profile.
             </p>
           </div>
@@ -50,7 +50,7 @@ export default function UserDashboardContent({
         </div>
 
         {/* Right sidebar — mirrors admin overview */}
-        <aside className="w-56 shrink-0 p-4 space-y-4 border-l border-gray-100 hidden lg:block">
+        <aside className="w-56 shrink-0 p-4 space-y-4 border-l border-[rgba(1,43,48,0.08)] hidden lg:block">
           <UserQuickActions hasPersonality={personality !== null} />
         </aside>
       </div>

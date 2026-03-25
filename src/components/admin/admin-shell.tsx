@@ -6,6 +6,7 @@ import TopnavMenu from '@/components/admin/topnav-menu';
 import PageFooter from '@/components/shared/page-footer';
 import type { BadgeCounts } from '@/types/menu-item';
 import type { CompanyInfo } from '@/types/company-type';
+import type { RoleBranding } from '@/constants/role-branding';
 
 export default function AdminShell({
   children,
@@ -13,12 +14,14 @@ export default function AdminShell({
   userDisplayName,
   userRoleLabel,
   initialCompany,
+  branding,
 }: Readonly<{
   children: React.ReactNode;
   badgeCounts?: BadgeCounts;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
+  branding?: RoleBranding;
 }>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -47,7 +50,11 @@ export default function AdminShell({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <SidenavMenu badgeCounts={badgeCounts} className="hidden sm:flex" />
+      <SidenavMenu
+        badgeCounts={badgeCounts}
+        className="hidden sm:flex"
+        branding={branding}
+      />
 
       <div
         className={`fixed inset-0 z-30 bg-black/45 transition-opacity sm:hidden ${
@@ -65,6 +72,7 @@ export default function AdminShell({
         className={`fixed inset-y-0 left-0 z-40 transition-transform duration-200 sm:hidden ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        branding={branding}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -75,10 +83,11 @@ export default function AdminShell({
           userDisplayName={userDisplayName}
           userRoleLabel={userRoleLabel}
           initialCompany={initialCompany}
+          branding={branding}
         />
         <main className="flex-1 overflow-auto">
           {children}
-          <PageFooter />
+          <PageFooter branding={branding} />
         </main>
       </div>
     </div>

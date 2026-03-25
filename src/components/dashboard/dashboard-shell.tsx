@@ -5,17 +5,20 @@ import DashboardSidenav from '@/components/dashboard/dashboard-sidenav';
 import DashboardTopnav from '@/components/dashboard/dashboard-topnav';
 import PageFooter from '@/components/shared/page-footer';
 import type { CompanyInfo } from '@/types/company-type';
+import type { RoleBranding } from '@/constants/role-branding';
 
 export default function DashboardShell({
   children,
   userDisplayName,
   userRoleLabel,
   initialCompany,
+  branding,
 }: Readonly<{
   children: React.ReactNode;
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
+  branding?: RoleBranding;
 }>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -38,7 +41,7 @@ export default function DashboardShell({
 
   return (
     <div className="flex min-h-screen bg-background">
-      <DashboardSidenav className="hidden sm:flex" />
+      <DashboardSidenav className="hidden sm:flex" branding={branding} />
 
       <div
         className={
@@ -57,6 +60,7 @@ export default function DashboardShell({
           'fixed inset-y-0 left-0 z-40 transition-transform duration-200 sm:hidden ' +
           (isSidebarOpen ? 'translate-x-0' : '-translate-x-full')
         }
+        branding={branding}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -69,7 +73,7 @@ export default function DashboardShell({
         />
         <main className="flex-1 overflow-auto flex flex-col">
           <div className="flex-1">{children}</div>
-          <PageFooter />
+          <PageFooter branding={branding} />
         </main>
       </div>
     </div>

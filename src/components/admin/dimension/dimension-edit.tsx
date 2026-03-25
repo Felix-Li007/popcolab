@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useId, useState } from 'react';
 import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input, TextArea } from '@/ui';
+import { saveDimensionAction } from '@/actions/dimension-actions';
 import type {
   Dimension,
   DimensionCategory,
@@ -29,7 +30,6 @@ const FORM_OPTIONS: Array<{ value: IntakeForm; label: string }> = [
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  action: FormAction;
   isEdit?: boolean;
   initial?: Dimension;
   categories: DimensionCategory[];
@@ -37,7 +37,6 @@ type Props = {
 };
 
 type FormBodyProps = {
-  action: FormAction;
   isEdit: boolean;
   initial?: Dimension;
   categories: DimensionCategory[];
@@ -60,14 +59,16 @@ function createOptionDraft(label = '', value = ''): OptionDraft {
 }
 
 function DimensionFormBody({
-  action,
   isEdit,
   initial,
   categories,
   onSuccess,
   onClose,
 }: Readonly<FormBodyProps>) {
-  const [state, formAction, isPending] = useActionState(action, EMPTY_STATE);
+  const [state, formAction, isPending] = useActionState(
+    saveDimensionAction,
+    EMPTY_STATE
+  );
   const formFieldId = useId();
   let submitLabel = 'Create Dimension';
   const [dataType, setDataType] = useState<DimensionDataType>(
@@ -134,9 +135,34 @@ function DimensionFormBody({
     );
   }
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    const formData = new FormData(event.currentTarget);
+    console.log('[dimension-form] submit clicked', {
+      mode: isEdit ? 'edit' : 'create',
+      dimensionId: initial?.id ?? null,
+      indexName: String(formData.get('indexName') ?? ''),
+      indexNotes: String(formData.get('indexNotes') ?? ''),
+      categoryId: String(formData.get('categoryId') ?? ''),
+      dataType,
+      hardFilter,
+      selectedForms,
+      optionCount: options.length,
+      formNameValues: formData.getAll('formName'),
+    });
+  }
+
   return (
-    <form action={formAction} className="flex h-full flex-col">
+    <form
+      action={formAction}
+      onSubmit={handleSubmit}
+      noValidate
+      className="flex h-full flex-col"
+    >
       <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+        {isEdit && initial?.id ? (
+          <input type="hidden" name="dimensionId" value={String(initial.id)} />
+        ) : null}
+
         {state.errors._form && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-body px-4 py-2 rounded-xl">
             {state.errors._form}
@@ -398,7 +424,6 @@ function DimensionFormBody({
 export default function DimensionForm({
   isOpen,
   onClose,
-  action,
   isEdit = false,
   initial,
   categories,
@@ -428,7 +453,6 @@ export default function DimensionForm({
     >
       <DimensionFormBody
         key={formKey}
-        action={action}
         isEdit={isEdit}
         initial={initial}
         categories={categories}

@@ -9,7 +9,7 @@ import {
 } from '@/utils/clerk-helper';
 import { upsertClerkUser } from '@/services/user-service';
 
-const ADMIN_ROLE = 'admin';
+const ADMIN_ROLE = 'role_admin';
 const SIGN_IN_PATH = '/sign-in';
 const UNAUTHORIZED_PATH = '/';
 

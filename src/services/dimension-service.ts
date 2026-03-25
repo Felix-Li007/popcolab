@@ -42,7 +42,6 @@ type DimensionValidationFields = {
 
 export function mapDimensionRow(
   row: DimensionRow & { category: { category_name: string } },
-  indexNotes?: string | null,
   options?: DimensionOption[],
   formNames?: IntakeForm[]
 ): Dimension {
@@ -50,8 +49,7 @@ export function mapDimensionRow(
     id: row.id,
     indexKey: row.index_key,
     indexName: row.index_name,
-    // Optional until all environments run migration for this new column.
-    indexNotes: indexNotes ?? null,
+    indexNotes: row.index_notes,
     categoryId: row.category_id,
     categoryName: row.category.category_name,
     dataType: row.data_type,
@@ -167,14 +165,28 @@ function getOptionsError(options: DimensionOption[]): string | undefined {
 export function validateDimensionFields(
   fields: DimensionValidationFields
 ): DimensionFormState['errors'] {
-  return {
-    indexName: getIndexNameError(fields.indexName),
-    indexKey: getIndexKeyError(fields.indexKey),
-    categoryId: getCategoryIdError(fields.categoryId),
-    dataType: getDataTypeError(fields.dataType),
-    ...getScaleErrors(fields),
-    options: getOptionsError(fields.options),
-  };
+  const errors: DimensionFormState['errors'] = {};
+
+  const indexNameError = getIndexNameError(fields.indexName);
+  if (indexNameError) errors.indexName = indexNameError;
+
+  const indexKeyError = getIndexKeyError(fields.indexKey);
+  if (indexKeyError) errors.indexKey = indexKeyError;
+
+  const categoryIdError = getCategoryIdError(fields.categoryId);
+  if (categoryIdError) errors.categoryId = categoryIdError;
+
+  const dataTypeError = getDataTypeError(fields.dataType);
+  if (dataTypeError) errors.dataType = dataTypeError;
+
+  const scaleErrors = getScaleErrors(fields);
+  if (scaleErrors.scaleMin) errors.scaleMin = scaleErrors.scaleMin;
+  if (scaleErrors.scaleMax) errors.scaleMax = scaleErrors.scaleMax;
+
+  const optionsError = getOptionsError(fields.options);
+  if (optionsError) errors.options = optionsError;
+
+  return errors;
 }
 
 export function validateDimensionCategoryFields(fields: {
@@ -192,17 +204,6 @@ export function validateDimensionCategoryFields(fields: {
   }
 
   return errors;
-}
-
-async function getIndexNotesById(): Promise<Map<number, string | null>> {
-  try {
-    const noteRows = await prisma.$queryRaw<
-      { id: number; index_notes: string | null }[]
-    >`SELECT "id", "index_notes" FROM "dimension_index"`;
-    return new Map(noteRows.map(r => [r.id, r.index_notes]));
-  } catch {
-    return new Map<number, string | null>();
-  }
 }
 
 async function getOptionsByDimensionId(): Promise<
@@ -269,12 +270,23 @@ async function replaceDimensionOptions(
   options: DimensionOption[]
 ): Promise<void> {
   try {
-    await prisma.$executeRaw`DELETE FROM "dimension_option" WHERE "dimension_id" = ${dimensionId}`;
-    for (const option of options) {
-      await prisma.$executeRaw`INSERT INTO "dimension_option" ("dimension_id", "option_label", "option_value", "created_at", "updated_at") VALUES (${dimensionId}, ${option.label}, ${option.value}, NOW(), NOW())`;
+    await prisma.dimensionOption.deleteMany({
+      where: { dimension_id: dimensionId },
+    });
+
+    if (options.length === 0) {
+      return;
     }
+
+    await prisma.dimensionOption.createMany({
+      data: options.map(option => ({
+        dimension_id: dimensionId,
+        option_label: option.label,
+        option_value: option.value,
+      })),
+    });
   } catch {
-    // Ignore when table/column isn't migrated yet.
+    // Keep core dimension fields editable even when option storage is not migrated.
   }
 }
 
@@ -303,9 +315,8 @@ async function replaceDimensionFormNames(
 }
 
 export async function getDimensions(): Promise<Dimension[]> {
-  const [indexNotesById, optionsByDimensionId, formNamesByDimensionId, rows] =
+  const [optionsByDimensionId, formNamesByDimensionId, rows] =
     await Promise.all([
-      getIndexNotesById(),
       getOptionsByDimensionId(),
       getFormNamesByDimensionId(),
       prisma.dimensionIndex.findMany({
@@ -317,7 +328,6 @@ export async function getDimensions(): Promise<Dimension[]> {
   return rows.map(row =>
     mapDimensionRow(
       row,
-      indexNotesById.get(row.id),
       optionsByDimensionId.get(row.id),
       formNamesByDimensionId.get(row.id)
     )
@@ -351,11 +361,12 @@ export async function getDimensionSummary(): Promise<{
 
 export async function createDimension(
   input: UpsertDimensionInput
-): Promise<void> {
+): Promise<number> {
   const created = await prisma.dimensionIndex.create({
     data: {
       index_key: input.indexKey,
       index_name: input.indexName,
+      index_notes: input.indexNotes,
       category_id: input.categoryId,
       data_type: input.dataType,
       hard_filter: input.hardFilter,
@@ -364,14 +375,10 @@ export async function createDimension(
     },
   });
 
-  try {
-    await prisma.$executeRaw`UPDATE "dimension_index" SET "index_notes" = ${input.indexNotes} WHERE "id" = ${created.id}`;
-  } catch {
-    // Ignore when index_notes column is not yet migrated.
-  }
-
   await replaceDimensionOptions(created.id, input.options);
   await replaceDimensionFormNames(created.id, input.formNames);
+
+  return created.id;
 }
 
 export async function updateDimension(
@@ -383,6 +390,7 @@ export async function updateDimension(
     data: {
       index_key: input.indexKey,
       index_name: input.indexName,
+      index_notes: input.indexNotes,
       category_id: input.categoryId,
       data_type: input.dataType,
       hard_filter: input.hardFilter,
@@ -390,12 +398,6 @@ export async function updateDimension(
       scale_max: input.scaleMax,
     },
   });
-
-  try {
-    await prisma.$executeRaw`UPDATE "dimension_index" SET "index_notes" = ${input.indexNotes} WHERE "id" = ${id}`;
-  } catch {
-    // Ignore when index_notes column is not yet migrated.
-  }
 
   await replaceDimensionOptions(id, input.options);
   await replaceDimensionFormNames(id, input.formNames);

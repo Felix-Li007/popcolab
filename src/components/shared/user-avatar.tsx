@@ -49,6 +49,7 @@ export default function UserAvatar({
                 userButtonBox: 'w-full h-full',
                 userButtonAvatarBox: 'opacity-0 pointer-events-none',
                 userButtonOuterIdentifier: 'hidden',
+                userButtonPopoverActionButton: 'text-heading font-bold',
               },
             }}
           >

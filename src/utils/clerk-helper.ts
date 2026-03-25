@@ -26,11 +26,33 @@ export const normalizeRole = (role: string | null): string | null => {
   if (!role) return null;
 
   const normalized = role.trim().toLowerCase();
-  if (normalized.startsWith('org:')) {
-    return normalized.slice(4);
-  }
+  const withoutPrefix = normalized.startsWith('org:')
+    ? normalized.slice(4)
+    : normalized;
+  const canonical = withoutPrefix
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_|_$/g, '');
 
-  return normalized;
+  const aliases: Record<string, string> = {
+    admin: 'role_admin',
+    admin_corporate: 'role_admin',
+    admincorporate: 'role_admin',
+
+    corporate_admin: 'role_admin',
+    corp_admin: 'role_admin',
+    user: 'role_user',
+    user_normal: 'role_user',
+    normal_user: 'role_user',
+    user_corporate: 'role_user',
+    corporate_user: 'role_user',
+    corp_user: 'role_user',
+    user_facilitator: 'role_facilitator',
+    facilitator: 'role_facilitator',
+    facilitator_user: 'role_facilitator',
+  };
+
+  return aliases[canonical] ?? canonical;
 };
 
 export const readClaimRole = (sessionClaims: unknown): string | null => {

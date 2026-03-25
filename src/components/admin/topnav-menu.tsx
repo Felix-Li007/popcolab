@@ -2,12 +2,13 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import styles from '@/styles/admin/topnav-menu.module.css';
 import { getBadge } from '@/utils/menu-helper';
 import { getMenuItem, topTabs, BadgeCounts } from '@/types/menu-item';
 import UserAvatar from '@/components/shared/user-avatar';
 import type { CompanyInfo } from '@/types/company-type';
+import type { RoleBranding } from '@/constants/role-branding';
+import RoleLogo from '@/components/branding/role-logo';
 
 export default function TopnavMenu({
   badgeCounts,
@@ -16,6 +17,7 @@ export default function TopnavMenu({
   userDisplayName,
   userRoleLabel,
   initialCompany,
+  branding,
 }: Readonly<{
   badgeCounts?: BadgeCounts;
   isSidebarOpen?: boolean;
@@ -23,6 +25,7 @@ export default function TopnavMenu({
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
+  branding?: RoleBranding;
 }>) {
   const pathname = usePathname();
 
@@ -42,15 +45,13 @@ export default function TopnavMenu({
       .find(href => isActive(href)) ?? '';
 
   return (
-    <header className="bg-teal-deep  text-white">
-      {/* Top bar */}
-      <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-14 border-b border-white/10 gap-2">
+    <header className="bg-teal-deep text-white">
+      <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-16 sm:h-[4.5rem] border-b border-white/10 gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={onToggleSidebar}
             aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={isSidebarOpen}
             className="sm:hidden w-9 h-9 rounded-md border border-white/20 hover:bg-white/10 flex items-center justify-center shrink-0 transition-colors"
           >
             <svg
@@ -79,13 +80,23 @@ export default function TopnavMenu({
           <Link
             href="/admin"
             aria-label="Go to dashboard"
-            className="sm:hidden w-8 h-8 rounded-full overflow-hidden shrink-0"
+            className="sm:hidden inline-flex shrink-0 items-center justify-center py-1 leading-none"
           >
-            <Image
-              src="/logo/logo-icon.png"
-              alt="Pop CoLab"
-              width={32}
-              height={32}
+            <RoleLogo
+              branding={
+                branding ?? {
+                  role: 'role_user',
+                  dataRole: 'role_user',
+                  displayLabel: 'User',
+                  logoSrc: '/logo/logo-icon.png',
+                  logoAlt: 'Pop CoLab logo',
+                  footerLogoSrc: '/logo/user/logo-full-v.png',
+                  footerLogoAlt: 'Pop CoLab user footer logo',
+                }
+              }
+              width={36}
+              height={18}
+              className="block h-[18px] w-[36px] object-contain"
             />
           </Link>
           <nav className="hidden md:flex items-center gap-4">
@@ -93,7 +104,7 @@ export default function TopnavMenu({
               <a
                 key={t.label}
                 href={t.href}
-                className="text-white hover:text-pink-medium transition-colors whitespace-nowrap"
+                className="text-heading font-bold text-white hover:text-pink-medium transition-colors whitespace-nowrap"
               >
                 {t.label}
               </a>
@@ -101,7 +112,6 @@ export default function TopnavMenu({
           </nav>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* Search */}
           <div className="relative hidden sm:block">
             <input
               type="text"
@@ -122,7 +132,6 @@ export default function TopnavMenu({
               />
             </svg>
           </div>
-          {/* Notifications */}
           <button
             type="button"
             aria-label="View notifications"
@@ -136,9 +145,7 @@ export default function TopnavMenu({
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z" />
             </svg>
           </button>
-          {/* Divider */}
           <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
-          {/* User avatar */}
           <UserAvatar
             displayName={userDisplayName}
             roleLabel={userRoleLabel}
@@ -147,7 +154,6 @@ export default function TopnavMenu({
         </div>
       </div>
 
-      {/* Tab bar */}
       {resolvedItems.length > 0 && (
         <div
           className={`flex items-center gap-1 px-4 overflow-x-auto ${styles.tabBar}`}
@@ -156,7 +162,7 @@ export default function TopnavMenu({
             <Link
               key={tab.label}
               href={tab.href}
-              className={`flex items-center gap-1.5 px-3 py-2.5 text-xs whitespace-nowrap transition-colors border-b-2 ${
+              className={`flex items-center gap-1.5 px-3 py-2.5 whitespace-nowrap transition-colors border-b-2 text-heading font-bold ${
                 activeHref === tab.href
                   ? 'border-gray-800 text-gray-800 font-bold'
                   : 'border-transparent text-gray-600 hover:text-gray-900'

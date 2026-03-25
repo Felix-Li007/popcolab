@@ -7,19 +7,19 @@ import { buildDashboardRequestInvitePath } from '@/utils/url-helper';
 const STATUS_STYLES: Record<string, { label: string; className: string }> = {
   opened: {
     label: 'Opened',
-    className: 'bg-teal-50 text-teal-deep border-teal-100',
+    className: 'bg-slate-50 text-slate-700 border-slate-200',
   },
   pending: {
     label: 'Pending',
-    className: 'bg-amber-50 text-amber-700 border-amber-100',
+    className: 'bg-rose-100 text-rose-700 border-rose-200',
   },
   matched: {
     label: 'Matched',
-    className: 'bg-blue-50 text-blue-700 border-blue-100',
+    className: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200',
   },
   closed: {
     label: 'Closed',
-    className: 'bg-gray-100 text-gray-500 border-gray-200',
+    className: 'bg-slate-100 text-slate-500 border-slate-200',
   },
 };
 
@@ -41,47 +41,51 @@ export default function MyRequestsSection({ requests }: Readonly<Props>) {
     <section data-testid="my-requests-section">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg">📋</span>
-        <h2 className="text-sm font-bold text-gray-800">Experience Requests</h2>
+        <h2 className="text-sm font-bold text-slate-900">
+          Experience Requests
+        </h2>
       </div>
 
       {requests.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-[24px] border border-dashed border-gray-200 bg-gray-50 py-10 text-center">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-[24px] border border-dashed border-[rgba(1,43,48,0.10)] bg-[rgba(255,255,255,0.72)] py-10 text-center">
           <span className="text-3xl">📋</span>
-          <p className="text-sm font-medium text-gray-500">
+          <p className="text-sm font-medium text-slate-600">
             No experience requests yet.
           </p>
-          <p className="text-xs text-gray-400">
+          <p className="text-xs text-slate-400">
             Complete your Play Personality assessment to get matched with
             experiences.
           </p>
         </div>
       ) : (
-        <div className="rounded-[24px] border border-gray-200 bg-white overflow-hidden shadow-sm">
+        <div className="rounded-[24px] border border-[rgba(1,43,48,0.08)] bg-[rgba(255,255,255,0.80)] overflow-hidden shadow-sm">
           {requests.map((req, i) => {
             const style = STATUS_STYLES[req.status] ?? {
               label: req.status,
-              className: 'bg-gray-100 text-gray-500 border-gray-200',
+              className: 'bg-slate-100 text-slate-500 border-slate-200',
             };
             return (
               <div
                 key={req.id}
                 className={
                   'flex items-center justify-between gap-4 px-4 py-3' +
-                  (i === requests.length - 1 ? '' : ' border-b border-gray-100')
+                  (i === requests.length - 1
+                    ? ''
+                    : ' border-b border-[rgba(1,43,48,0.06)]')
                 }
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-800">
+                  <p className="text-sm font-medium text-slate-900">
                     Request #{req.id}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-slate-400">
                     {formatDate(req.createdAt)}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <Link
                     href={buildDashboardRequestInvitePath(req.id)}
-                    className="text-xs font-semibold text-teal-700 hover:text-teal-800"
+                    className="text-xs font-semibold text-fuchsia-600 hover:opacity-80"
                   >
                     Invite
                   </Link>

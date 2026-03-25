@@ -2,6 +2,7 @@ import Header from '@/components/front/page-header';
 import PageFooter from '@/components/shared/page-footer';
 import { getCompanyAction } from '@/actions/user-actions';
 import { getCurrentAuthContext } from '@/services/clerk-service';
+import { resolveRoleBranding } from '@/constants/role-branding';
 
 export default async function FrontLayout({
   children,
@@ -16,16 +17,17 @@ export default async function FrontLayout({
   const lastName = authContext.user?.lastName?.trim() ?? '';
   const fullName = `${firstName} ${lastName}`.trim();
   const userDisplayName = fullName || authContext.user?.username || 'User';
-  const userRoleLabel = authContext.role ?? 'User';
+  const branding = resolveRoleBranding(authContext.role, company);
   return (
     <>
       <Header
         userDisplayName={userDisplayName}
-        userRoleLabel={userRoleLabel}
+        userRoleLabel={branding.displayLabel}
         initialCompany={company}
+        branding={branding}
       />
       {children}
-      <PageFooter />
+      <PageFooter branding={branding} />
     </>
   );
 }
