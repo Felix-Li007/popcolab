@@ -8,7 +8,7 @@ type Props = {
   onPageChange?: (page: number) => void;
   prevHref?: string;
   nextHref?: string;
-  variant?: 'default' | 'circle';
+  variant?: 'default' | 'circle' | 'dashboard';
 };
 
 const VARIANT_STYLES = {
@@ -25,6 +25,13 @@ const VARIANT_STYLES = {
       'w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors',
     icon: 'w-5 h-5',
     label: 'text-badge font-semibold text-foreground/65',
+  },
+  dashboard: {
+    wrap: 'flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-[rgba(1,43,48,0.08)] bg-white/80 px-4 py-3 shadow-sm',
+    button:
+      'inline-flex h-10 w-10 items-center justify-center rounded-full border border-pink-light bg-white text-pink-600 shadow-sm transition-colors hover:border-pink-500 hover:bg-pink-bright hover:text-pink-700 disabled:opacity-30 disabled:cursor-not-allowed',
+    icon: 'w-5 h-5',
+    label: 'text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500',
   },
 } as const;
 

@@ -810,6 +810,65 @@ export async function getPurchasableExperienceById(
   return isExperiencePurchasable(experience) ? experience : null;
 }
 
+export async function getExperienceById(
+  id: number
+): Promise<Experience | null> {
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  const [dimensionOptionsById, row] = await Promise.all([
+    getOptionsByDimensionId(),
+    prisma.experience.findUnique({
+      where: { id },
+      include: {
+        provider: {
+          select: {
+            provider_label: true,
+            provider_type: true,
+          },
+        },
+        category: {
+          select: {
+            category_title: true,
+          },
+        },
+        experience_pricing: {
+          select: {
+            adding_price: true,
+            starting_price: true,
+            starting_hour: true,
+            pricing_model: true,
+            pricing_notes: true,
+          },
+        },
+        experience_dimensions: {
+          include: {
+            dimension_index: {
+              include: {
+                category: {
+                  select: {
+                    category_name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            experience_dimensions: true,
+            proposals: true,
+            experience_calendars: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  if (!row) return null;
+
+  return mapExperienceRow(row, dimensionOptionsById);
+}
+
 export async function createExperience(
   input: UpsertExperienceInput
 ): Promise<void> {

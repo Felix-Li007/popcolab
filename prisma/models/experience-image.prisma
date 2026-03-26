@@ -1,0 +1,13 @@
+model ExperienceImage {
+    id            Int        @id @default(autoincrement())
+    experience_id Int
+    image_url     String     @db.VarChar(255)
+    is_cover      Boolean    @default(false)
+    image_alt     String?    @db.VarChar(50)
+    image_notes   String?    @db.VarChar(255)
+    created_at    DateTime   @default(now()) @db.Timestamp(6)
+    updated_at    DateTime   @updatedAt @db.Timestamp(6)
+    experience    Experience @relation(fields: [experience_id], references: [id])
+
+    @@map("experience_image")
+}

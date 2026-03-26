@@ -42,7 +42,7 @@ export default async function RootLayout({
   const branding = resolveRoleBranding(authContext.role, companyInfo);
 
   return (
-    <html lang="en" data-role={branding.dataRole}>
+    <html lang="en" data-role={branding.dataRole} suppressHydrationWarning>
       <body className={`${museo.variable} ${nunito.variable} antialiased`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemedClerk>{children}</ThemedClerk>

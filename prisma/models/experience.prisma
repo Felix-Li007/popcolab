@@ -20,6 +20,7 @@ model Experience {
   provider               Provider              @relation(fields: [provider_id], references: [id])
   experience_calendars   ExperienceCalendar[]
   experience_dimensions  ExperienceDimension[]
+  experience_images      ExperienceImage[]
   experience_pricing     ExperiencePricing?
   order_items            OrderItem[]
   proposals              Proposal[]

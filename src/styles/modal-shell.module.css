@@ -1,7 +1,7 @@
 @reference "../app/globals.css";
 
 .root {
-  @apply fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto;
+  @apply fixed inset-0 z-50 grid place-items-center p-4 overflow-y-auto;
 }
 
 .backdrop {
@@ -16,13 +16,7 @@
 }
 
 .header {
-  @apply flex items-center justify-between border-b border-gray-100 px-5 py-4;
-  background: linear-gradient(
-    120deg,
-    color-mix(in srgb, var(--color-teal-accent) 34%, white 66%) 0%,
-    color-mix(in srgb, var(--color-lavender) 30%, white 70%) 52%,
-    color-mix(in srgb, var(--color-magenta) 26%, white 74%) 100%
-  );
+  @apply flex items-center justify-between border-b border-gray-100 bg-linear-to-r from-teal-accent/15 via-lavender/25 to-magenta/15 px-5 py-4;
 }
 
 .headerIdentity {
@@ -48,6 +42,10 @@
 
 .closeButton:hover {
   @apply bg-gray-100;
+}
+
+.floatingCloseButton {
+  @apply absolute right-4 top-4 z-20;
 }
 
 .body {

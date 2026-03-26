@@ -1,6 +1,7 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import styles from '@/styles/modal-shell.module.css';
 
 type Props = {
@@ -15,8 +16,8 @@ type Props = {
   bodyTestId?: string;
   panelClassName?: string;
   bodyClassName?: string;
-  panelStyle?: CSSProperties;
   showCloseButton?: boolean;
+  showHeader?: boolean;
 };
 
 function buildClassName(
@@ -38,40 +39,64 @@ export default function ModalShell({
   bodyTestId,
   panelClassName,
   bodyClassName,
-  panelStyle,
   showCloseButton = true,
+  showHeader = true,
 }: Readonly<Props>) {
-  if (!isOpen) return null;
+  const [isMounted, setIsMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    const rafId = window.requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  if (!isMounted || !isOpen) return null;
+
+  return createPortal(
     <div className={styles.root} data-testid={rootTestId}>
       <div className={styles.backdrop} onClick={onClose} aria-hidden="true" />
 
       <div
         className={buildClassName(styles.panel, panelClassName)}
         data-testid={panelTestId}
-        style={panelStyle}
       >
-        <div className={styles.header}>
-          <div className={styles.headerIdentity}>
-            <div className={styles.titleRow}>
-              <h3 className={styles.title}>{title}</h3>
-              {headerMeta}
+        {showHeader ? (
+          <div className={styles.header}>
+            <div className={styles.headerIdentity}>
+              <div className={styles.titleRow}>
+                <h3 className={styles.title}>{title}</h3>
+                {headerMeta}
+              </div>
+              {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
             </div>
-            {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
-          </div>
 
-          {showCloseButton ? (
-            <button
-              type="button"
-              onClick={onClose}
-              className={styles.closeButton}
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          ) : null}
-        </div>
+            {showCloseButton ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className={styles.closeButton}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
+        {!showHeader && showCloseButton ? (
+          <button
+            type="button"
+            onClick={onClose}
+            className={`${styles.closeButton} ${styles.floatingCloseButton}`}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        ) : null}
 
         <div
           className={buildClassName(styles.body, bodyClassName)}
@@ -80,6 +105,7 @@ export default function ModalShell({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

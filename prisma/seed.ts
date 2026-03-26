@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/libs/prisma/client';
 import { seedDimensions } from './seeds/dimension.seed';
 import { seedExperienceCategories } from './seeds/experience-categories.seed';
+import { seedTemporaryExperienceImages } from './seeds/experience-images.seed';
 import { seedExperiencesFromWorkbook } from './seeds/experiences.seed';
 import { seedPersonalities } from './seeds/personalities.seed';
 import { seedProviders } from './seeds/provider.seed';
@@ -35,6 +36,7 @@ async function main() {
     dimensionIdByKey
   );
   await seedExperiencesFromWorkbook(prisma);
+  await seedTemporaryExperienceImages(prisma);
   await seedRequests(prisma);
 
   console.log('✅ Core seed data created');

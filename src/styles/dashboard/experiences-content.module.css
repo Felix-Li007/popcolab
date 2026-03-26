@@ -1,0 +1,188 @@
+@reference "../../app/globals.css";
+
+.root {
+  @apply relative m-4 overflow-hidden rounded-xl sm:m-6 lg:m-4;
+  border: 1px solid rgba(1, 43, 48, 0.08);
+  /* background: linear-gradient(180deg,
+            rgba(255, 250, 247, 0.96) 0%,
+            rgba(255, 246, 251, 0.82) 42%,
+            rgba(247, 251, 252, 0.96) 100%); */
+  box-shadow: 0 24px 70px rgba(1, 43, 48, 0.08);
+}
+
+.backdrop {
+  @apply absolute inset-x-0 top-0 h-28;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 180, 223, 0.35),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(153, 219, 214, 0.28),
+      transparent 32%
+    );
+}
+
+.contentWrapper {
+  @apply relative space-y-6 px-4 pt-4 pb-0 sm:px-6 sm:pt-6 sm:pb-0 lg:px-4 lg:pt-4 lg:pb-0;
+}
+
+.recommendedSection {
+  @apply rounded-xl p-4 shadow-sm backdrop-blur-sm sm:p-5;
+  border: 1px solid rgba(1, 43, 48, 0.08);
+  background-color: rgba(255, 255, 255, 0.72);
+}
+
+.sectionHeader {
+  @apply flex flex-wrap items-center justify-between gap-3;
+}
+
+/* .sectionTitle {
+  @apply text-body font-extrabold uppercase tracking-[0.24em];
+} */
+
+.recommendedTitleSize {
+  @apply text-heading font-extrabold uppercase tracking-[0.24em];
+}
+
+.recommendedSubtitleSize {
+  @apply text-heading text-black/40;
+}
+
+.recommendedTitleColor {
+  @apply text-teal-medium;
+}
+
+.recommendedSubtitleSpacing {
+  @apply mt-1 mb-3;
+}
+
+.filterTitleColor {
+  @apply text-slate-400;
+}
+
+.recommendedSubtitleColor {
+  @apply text-slate-900;
+}
+
+.sectionSubtitle {
+  @apply text-lg font-bold text-slate-900;
+}
+
+.expandButton {
+  @apply inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50;
+}
+
+.expandIcon {
+  @apply h-4 w-4 transition-transform;
+}
+
+.cardsGrid {
+  @apply grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3;
+}
+
+.experiencesPanel {
+  @apply overflow-hidden rounded-[28px] border border-white/70 shadow-sm backdrop-blur-sm;
+  background-color: rgba(255, 255, 255, 0.78);
+}
+
+.filterSection {
+  @apply space-y-4 px-4 pt-4 pb-4 sm:px-5 sm:pt-5 sm:pb-4;
+}
+
+.filterRow {
+  @apply flex flex-col gap-3 xl:flex-row xl:flex-wrap xl:items-center;
+}
+
+.filterSelect {
+  @apply min-h-[48px] appearance-none rounded-full px-4 py-3 pr-10 text-sm text-slate-700 shadow-sm outline-none xl:min-w-[180px];
+  border: 1px solid rgba(1, 43, 48, 0.08);
+  background-color: white;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.875rem 0.875rem;
+}
+
+.searchContainer {
+  @apply flex h-[48px] min-w-0 flex-1 items-center gap-2.5 rounded-full px-4 shadow-sm xl:min-w-[280px];
+  border: 1px solid rgba(1, 43, 48, 0.08);
+  background-color: white;
+}
+
+.searchIcon {
+  @apply h-4 w-4 shrink-0 text-slate-400;
+}
+
+.searchInput {
+  @apply h-full min-w-0 flex-1 border-0 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400;
+}
+
+.searchButton {
+  @apply h-9 shrink-0 rounded-full px-4 text-[11px] font-bold text-white shadow-sm transition-transform hover:-translate-y-px;
+  background: linear-gradient(
+    90deg,
+    var(--color-pink-medium) 0%,
+    var(--color-magenta) 100%
+  );
+}
+
+.filterCheckbox {
+  @apply flex h-[48px] items-center justify-between gap-3 rounded-full px-4 shadow-sm xl:shrink-0 xl:min-w-[220px];
+  border: 1px solid rgba(1, 43, 48, 0.08);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.86) 0%,
+    rgba(255, 247, 252, 0.86) 100%
+  );
+}
+
+.checkboxLabel {
+  @apply flex h-full items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500;
+}
+
+.checkboxInput {
+  @apply h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500;
+}
+
+.clearButton {
+  @apply h-9 rounded-full border border-pink-medium bg-white px-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-pink-600 transition-colors hover:bg-pink-bright;
+}
+
+.resultsSection {
+  @apply space-y-4 px-4 pb-4 pt-4 sm:px-5 sm:pb-5 sm:pt-5;
+  border-top: 1px solid rgba(1, 43, 48, 0.06);
+}
+
+.emptyState {
+  @apply rounded-[28px] border border-dashed border-pink-medium/60 bg-white/75 px-6 py-12 text-center shadow-sm;
+}
+
+.emptyStateLabel {
+  @apply text-[11px] font-bold uppercase tracking-[0.28em] text-slate-400;
+}
+
+.emptyStateTitle {
+  @apply mt-3 text-lg font-bold text-slate-900;
+}
+
+.emptyStateButton {
+  @apply mt-5 rounded-full bg-magenta px-5 py-2.5 text-sm font-bold text-white shadow-sm;
+}
+
+.loadingOverlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm;
+}
+
+.loadingDialog {
+  @apply rounded-[28px] border border-white/20 bg-white px-6 py-5 text-sm font-semibold text-slate-700;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.loadingMessage {
+  @apply flex min-h-[40vh] items-center justify-center rounded-[28px] p-8 text-slate-500 shadow-sm;
+  border: 1px solid rgba(1, 43, 48, 0.08);
+  background-color: rgba(255, 255, 255, 0.7);
+}

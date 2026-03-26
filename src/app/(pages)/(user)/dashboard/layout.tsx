@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import DashboardShell from '@/components/dashboard/dashboard-shell';
 import PendingResultSaver from '@/components/dashboard/pending-result-saver';
 import { getCompanyAction } from '@/actions/user-actions';
@@ -6,8 +7,10 @@ import { resolveRoleBranding } from '@/constants/role-branding';
 
 export default async function DashboardLayout({
   children,
+  modal,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
+  modal: ReactNode;
 }>) {
   const [authContext, companyInfo] = await Promise.all([
     getCurrentAuthContext(),
@@ -27,6 +30,7 @@ export default async function DashboardLayout({
       initialCompany={companyInfo}
       branding={branding}
     >
+      {modal}
       <PendingResultSaver />
       {children}
     </DashboardShell>

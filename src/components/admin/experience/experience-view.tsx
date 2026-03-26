@@ -17,7 +17,8 @@ type Props = {
   isOpen: boolean;
   experience: Experience | null;
   onClose: () => void;
-  onEdit: (id: number) => void;
+  onEdit?: (id: number) => void;
+  showEditButton?: boolean;
 };
 
 function formatDate(value?: Date) {
@@ -174,6 +175,7 @@ export default function ExperienceView({
   experience,
   onClose,
   onEdit,
+  showEditButton = true,
 }: Readonly<Props>) {
   const [selectedCategoryName, setSelectedCategoryName] = useState('');
   const [activeTopTab, setActiveTopTab] = useState<TopSectionTab>('basic');
@@ -308,6 +310,19 @@ export default function ExperienceView({
                   );
                 })}
               </div>
+
+              {showEditButton ? (
+                <div className="mt-3 flex justify-end">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="md"
+                    onClick={() => onEdit?.(experience.id)}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              ) : null}
             </div>
 
             <div className={styles.topPanelBody}>
@@ -561,14 +576,16 @@ export default function ExperienceView({
             >
               Close
             </Button>
-            <Button
-              type="button"
-              variant="primary"
-              size="md"
-              onClick={() => onEdit(experience.id)}
-            >
-              Edit
-            </Button>
+            {showEditButton && (
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={() => onEdit?.(experience.id)}
+              >
+                Edit
+              </Button>
+            )}
           </div>
         </div>
       </div>
