@@ -7,12 +7,14 @@ type Props = {
   firstName: string;
   personality: Personality;
   assessedAt: string | null;
+  redirectTo?: string;
 };
 
 export default function PersonalityChoice({
   firstName,
   personality,
   assessedAt,
+  redirectTo = '/dashboard',
 }: Props) {
   const router = useRouter();
 
@@ -57,7 +59,7 @@ export default function PersonalityChoice({
       {/* Choice buttons */}
       <div className="mb-5 flex gap-3">
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push(redirectTo)}
           className="flex-1 rounded-lg border-2 border-[#E91E8C] bg-[#fff5f9] py-3 text-xs font-semibold text-[#E91E8C]"
         >
           ✓ Keep current personality
@@ -71,7 +73,7 @@ export default function PersonalityChoice({
       </div>
 
       <button
-        onClick={() => router.push('/dashboard')}
+        onClick={() => router.push(redirectTo)}
         className="w-full rounded-lg bg-[#E91E8C] py-3 text-sm font-semibold text-white hover:bg-[#c7177a]"
       >
         Continue to dashboard →

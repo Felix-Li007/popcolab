@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/libs/prisma-client';
 import { getTestResult } from '@/services/response-service';
+import { sanitizeRedirectPath } from '@/utils/auth-redirect';
 import PersonalityChoice from '@/components/onboarding/personality-choice';
 
 async function getAssessedAt(userId: number): Promise<string | null> {
@@ -13,9 +14,18 @@ async function getAssessedAt(userId: number): Promise<string | null> {
   return response?.completed_at?.toISOString() ?? null;
 }
 
-export default async function PersonalityChoicePage() {
+type PageProps = {
+  searchParams: Promise<{ redirect?: string }>;
+};
+
+export default async function PersonalityChoicePage({
+  searchParams,
+}: PageProps) {
   const { userId: clerkId } = await auth();
   if (!clerkId) redirect('/sign-in');
+
+  const params = await searchParams;
+  const redirectTo = sanitizeRedirectPath(params.redirect, '/dashboard');
 
   const user = await prisma.user.findUnique({
     where: { clerk_id: clerkId },
@@ -54,6 +64,7 @@ export default async function PersonalityChoicePage() {
           firstName={user.profile?.first_name ?? ''}
           personality={testResult.personality}
           assessedAt={assessedAt}
+          redirectTo={redirectTo}
         />
       </div>
     </main>

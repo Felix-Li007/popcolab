@@ -21,15 +21,6 @@ export type UserRequestItem = {
   proposal: UserRequestProposal | null;
 };
 
-export type RequestFormCategory = {
-  id: number;
-  title: string;
-};
-
-export type RequestFormData = {
-  categories: RequestFormCategory[];
-};
-
 export type RequestStats = {
   total: number;
   submitted: number;
@@ -108,35 +99,25 @@ export async function getRequestStats(userId: number): Promise<RequestStats> {
   };
 }
 
-export async function getRequestFormData(
-  userId: number
-): Promise<RequestFormData> {
-  const categories = await prisma.category.findMany({
-    where: { category_status: { not: 'inactive' } },
-    select: { id: true, category_title: true },
-    orderBy: { category_title: 'asc' },
-  });
-
-  return {
-    categories: categories.map(c => ({ id: c.id, title: c.category_title })),
-  };
-}
-
 export async function createRequest(params: {
   userId: number;
-  objectiveCategory: string;
-  preferredDate: Date | null;
-  participantCount: number | null;
+  eventTypes: string[];
+  durationMax: number | null;
   budgetMin: number | null;
   budgetMax: number | null;
+  preferredDate: Date | null;
+  participantCount: number;
   notesForAdmin: string | null;
 }): Promise<number> {
+  const objectiveCategory = params.eventTypes.join(', ').slice(0, 100);
+
   const request = await prisma.request.create({
     data: {
       user_id: params.userId,
-      objective_category: params.objectiveCategory,
+      objective_category: objectiveCategory,
       request_status: 'opened',
       delivery_method: 'in_person',
+      duration_max: params.durationMax,
       preferred_date: params.preferredDate,
       participant_count: params.participantCount,
       budget_min: params.budgetMin,

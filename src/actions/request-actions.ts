@@ -22,11 +22,46 @@ async function getAuthUser() {
 export type CreateRequestState = {
   error?: string;
   fieldErrors?: {
-    objectiveCategory?: string;
-    preferredDate?: string;
-    participantCount?: string;
+    eventTypes?: string;
+    objectives?: string;
+    budget?: string;
+    startDate?: string;
+    groupSize?: string;
+    eventDate?: string;
   };
 };
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function parseList(raw: string): string[] {
+  return raw
+    ? raw
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+    : [];
+}
+
+function buildPreferredDate(date: string, time: string | null): Date {
+  return time ? new Date(`${date}T${time}`) : new Date(date);
+}
+
+function parseBudget(raw: string): { min: number | null; max: number | null } {
+  const parts = raw.replaceAll(/[$,]/g, '').split(/[-–]/);
+  const min = Number(parts[0]?.trim() ?? '');
+  const max = Number(parts[1]?.trim() ?? '');
+  return {
+    min: Number.isNaN(min) ? null : min,
+    max: Number.isNaN(max) ? null : max,
+  };
+}
+
+function buildNotes(parts: (string | null)[]): string | null {
+  const joined = parts.filter(Boolean).join('\n');
+  return joined || null;
+}
+
+// ── Action ───────────────────────────────────────────────────────────────────
 
 export async function createRequestAction(
   _prev: CreateRequestState,
@@ -34,49 +69,78 @@ export async function createRequestAction(
 ): Promise<CreateRequestState> {
   const user = await getAuthUser();
 
-  const objectiveCategory =
-    (formData.get('objectiveCategory') as string)?.trim() ?? '';
-  const preferredDateRaw = (formData.get('preferredDate') as string)?.trim();
-  const participantCountRaw = formData.get('participantCount') as string;
+  const eventTypes = parseList((formData.get('eventTypes') as string) ?? '');
+  const objectives = parseList((formData.get('objectives') as string) ?? '');
+  const anythingElse = (formData.get('anythingElse') as string)?.trim() || null;
   const budgetRaw = (formData.get('budget') as string)?.trim() || null;
-  const notesForAdmin =
-    (formData.get('notesForAdmin') as string)?.trim() || null;
+  const startDateRaw = (formData.get('startDate') as string)?.trim() || null;
+  const startTimeRaw = (formData.get('startTime') as string)?.trim() || null;
+  const endTimeRaw = (formData.get('endTime') as string)?.trim() || null;
+  const durationRaw = (formData.get('duration') as string)?.trim() || null;
+  const location = (formData.get('location') as string)?.trim() || null;
+  const groupSizeRaw = (formData.get('groupSize') as string)?.trim() || null;
+  const eventDateRaw = (formData.get('eventDate') as string)?.trim() || null;
+  const proposalTimeRaw =
+    (formData.get('proposalTime') as string)?.trim() || null;
+
   const fieldErrors: CreateRequestState['fieldErrors'] = {};
-  if (!objectiveCategory)
-    fieldErrors.objectiveCategory = 'Please select a category.';
-  if (!preferredDateRaw)
-    fieldErrors.preferredDate = 'Preferred date is required.';
-  if (!participantCountRaw || Number(participantCountRaw) < 1)
-    fieldErrors.participantCount = 'Participant count is required.';
+
+  if (eventTypes.length === 0)
+    fieldErrors.eventTypes = 'Please select at least one event type.';
+  if (objectives.length === 0)
+    fieldErrors.objectives = 'Please select at least one objective.';
+  if (!budgetRaw)
+    fieldErrors.budget = 'Please provide an estimated budget range.';
+  if (!startDateRaw) fieldErrors.startDate = 'Please select a start date.';
+  if (!groupSizeRaw || Number(groupSizeRaw) < 1)
+    fieldErrors.groupSize = 'Please enter the group size.';
+  if (!eventDateRaw)
+    fieldErrors.eventDate = 'Please select a proposal deadline date.';
 
   if (Object.keys(fieldErrors).length > 0) return { fieldErrors };
 
-  const preferredDate = preferredDateRaw ? new Date(preferredDateRaw) : null;
-  const participantCount = participantCountRaw
-    ? Number(participantCountRaw)
+  const preferredDate = buildPreferredDate(startDateRaw!, startTimeRaw);
+  const durationMax = durationRaw ? Math.round(Number(durationRaw)) : null;
+  const groupSize = Number(groupSizeRaw);
+
+  const { min: budgetMin, max: budgetMax } = budgetRaw
+    ? parseBudget(budgetRaw)
+    : { min: null, max: null };
+
+  const objectivesNote =
+    objectives.length > 0 ? `Objectives: ${objectives.join(', ')}` : null;
+  const endNote = endTimeRaw
+    ? `Event end: ${startDateRaw} at ${endTimeRaw}`
+    : null;
+  const locationNote = location ? `Location: ${location}` : null;
+  const deadlineNote = eventDateRaw
+    ? `Proposal deadline: ${eventDateRaw}${proposalTimeRaw ? ` at ${proposalTimeRaw}` : ''}`
     : null;
 
-  let budgetMin: number | null = null;
-  let budgetMax: number | null = null;
-  if (budgetRaw) {
-    const parts = budgetRaw.replace(/\$|,/g, '').split(/[-–]/);
-    budgetMin = parts[0] ? Number(parts[0].trim()) : null;
-    budgetMax = parts[1] ? Number(parts[1].trim()) : budgetMin;
-  }
+  const notesForAdmin = buildNotes([
+    objectivesNote,
+    locationNote,
+    endNote,
+    deadlineNote,
+    anythingElse,
+  ]);
 
   await createRequest({
     userId: user.id,
-    objectiveCategory,
-    preferredDate,
-    participantCount,
+    eventTypes,
+    durationMax,
     budgetMin,
     budgetMax,
+    preferredDate,
+    participantCount: groupSize,
     notesForAdmin,
   });
 
   revalidatePath(REQUESTS_PATH);
   return {};
 }
+
+// ── Proposal actions ─────────────────────────────────────────────────────────
 
 export async function acceptProposalAction(proposalId: number): Promise<void> {
   const user = await getAuthUser();
@@ -86,7 +150,7 @@ export async function acceptProposalAction(proposalId: number): Promise<void> {
     select: { request: { select: { user_id: true, id: true } } },
   });
 
-  if (!proposal || proposal.request.user_id !== user.id) {
+  if (proposal?.request.user_id !== user.id) {
     throw new Error('Not authorised.');
   }
 
@@ -119,7 +183,7 @@ export async function rejectProposalAction(
     select: { request: { select: { user_id: true } } },
   });
 
-  if (!proposal || proposal.request.user_id !== user.id) {
+  if (proposal?.request.user_id !== user.id) {
     throw new Error('Not authorised.');
   }
 

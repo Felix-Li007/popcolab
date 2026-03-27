@@ -4,7 +4,6 @@ import { useState } from 'react';
 import type {
   UserRequestItem,
   RequestStats,
-  RequestFormData,
 } from '@/services/user-request-service';
 import RequestCard from './request-card';
 import NewRequestModal from './new-request-modal';
@@ -24,13 +23,12 @@ const TABS: {
   { key: 'closed', label: 'Rejected', statKey: 'rejected' },
 ];
 
-type Props = {
+type Props = Readonly<{
   requests: UserRequestItem[];
   stats: RequestStats;
-  formData: RequestFormData;
-};
+}>;
 
-export default function RequestsContent({ requests, stats, formData }: Props) {
+export default function RequestsContent({ requests, stats }: Props) {
   const [tab, setTab] = useState<Tab>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
@@ -157,7 +155,6 @@ export default function RequestsContent({ requests, stats, formData }: Props) {
         key={modalKey}
         open={modalOpen}
         onClose={handleModalClose}
-        formData={formData}
       />
 
       <RejectProposalModal

@@ -11,6 +11,7 @@ export type TeamInviteLookupResult = {
   status: string;
   expiresAt: Date | null;
   isExpired: boolean;
+  isExistingUser: boolean;
 };
 
 export async function getTeamInviteByToken(
@@ -21,6 +22,7 @@ export async function getTeamInviteByToken(
     select: {
       id: true,
       email: true,
+      username: true,
       status: true,
       expires_at: true,
       team: {
@@ -46,14 +48,36 @@ export async function getTeamInviteByToken(
     invite.inviter.user_name ||
     'A teammate';
 
+  // Determine whether the invitee already has an account
+  let isExistingUser = false;
+  let email = invite.email;
+
+  if (email) {
+    const existing = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true },
+    });
+    isExistingUser = !!existing;
+  } else if (invite.username) {
+    const existing = await prisma.user.findFirst({
+      where: { user_name: invite.username },
+      select: { id: true, email: true },
+    });
+    if (existing) {
+      isExistingUser = true;
+      email = existing.email;
+    }
+  }
+
   return {
     id: invite.id,
     teamId: invite.team.id,
     teamName: invite.team.team_name,
     inviterName,
-    email: invite.email,
+    email,
     status: invite.status,
     expiresAt: invite.expires_at,
     isExpired,
+    isExistingUser,
   };
 }

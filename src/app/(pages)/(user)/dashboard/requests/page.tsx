@@ -4,7 +4,6 @@ import { upsertClerkUser } from '@/services/user-service';
 import {
   getUserRequests,
   getRequestStats,
-  getRequestFormData,
 } from '@/services/user-request-service';
 import RequestsContent from '@/components/requests/requests-content';
 
@@ -19,15 +18,14 @@ export default async function RequestsPage() {
 
   const { userId } = await upsertClerkUser(clerkUser.id, email);
 
-  const [requests, stats, formData] = await Promise.all([
+  const [requests, stats] = await Promise.all([
     getUserRequests(userId),
     getRequestStats(userId),
-    getRequestFormData(userId),
   ]);
 
   return (
     <div className="p-8">
-      <RequestsContent requests={requests} stats={stats} formData={formData} />
+      <RequestsContent requests={requests} stats={stats} />
     </div>
   );
 }
