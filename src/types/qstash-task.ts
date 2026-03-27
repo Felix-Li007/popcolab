@@ -7,6 +7,7 @@ export const QSTASH_TASK_TYPE = {
   REQUEST_ENQUEUE_READY: 'request.proposal.enqueue-if-ready',
   REQUEST_QUEUE_PROCESS: 'request.queue.process',
   EXPERIENCE_ORDER_EXPIRE: 'experience.order.expire',
+  EXPERIENCE_COMPLETED: 'user.experience.completed',
 } as const;
 
 export type RequestEnqueuePayload = {
@@ -25,10 +26,16 @@ export type ExperienceOrderExpirePayload = {
   orderId: number;
 };
 
+export type ExperienceCompletedPayload = {
+  type: typeof QSTASH_TASK_TYPE.EXPERIENCE_COMPLETED;
+  userExperienceId: number;
+};
+
 export type QStashTaskPayload =
   | RequestEnqueuePayload
   | RequestProcessPayload
-  | ExperienceOrderExpirePayload;
+  | ExperienceOrderExpirePayload
+  | ExperienceCompletedPayload;
 
 export function isQStashTaskPayload(
   payload: unknown
@@ -56,6 +63,12 @@ export function isQStashTaskPayload(
         typeof taskPayload.orderId === 'number' &&
         Number.isInteger(taskPayload.orderId) &&
         taskPayload.orderId > 0
+      );
+    case QSTASH_TASK_TYPE.EXPERIENCE_COMPLETED:
+      return (
+        typeof taskPayload.userExperienceId === 'number' &&
+        Number.isInteger(taskPayload.userExperienceId) &&
+        taskPayload.userExperienceId > 0
       );
     default:
       return false;

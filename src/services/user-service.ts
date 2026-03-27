@@ -1,5 +1,5 @@
 import 'server-only';
-import { Prisma } from '@/libs/prisma/client';
+import { Prisma, ProcessStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import {
   USER_STATUS,
@@ -7,6 +7,8 @@ import {
   isUserStatus,
 } from '@/constants/user-status';
 import { normalizeWorkMode } from '@/constants/work-mode';
+import { publishQStashTask } from '@/services/qstash-service';
+import { QSTASH_TASK_TYPE } from '@/types/qstash-task';
 import type {
   AdminUserEditableUpdateErrors,
   AdminUserEditableUpdateInput,
@@ -762,4 +764,55 @@ export async function deactivateUserByClerkId(clerkId: string): Promise<void> {
     where: { clerk_id: clerkId },
     data: { status: 'inactive' },
   });
+}
+
+export async function completeExperience(userExperienceId: number): Promise<{
+  userExperienceId: number;
+  userId: number;
+  completed: boolean;
+}> {
+  const userExperience = await prisma.userExperience.findUnique({
+    where: { id: userExperienceId },
+    select: {
+      id: true,
+      user_id: true,
+      process_status: true,
+      complete_date: true,
+    },
+  });
+
+  if (!userExperience) {
+    throw new Error(`User experience ${userExperienceId} not found.`);
+  }
+
+  const wasCompleted =
+    userExperience.process_status === ProcessStatus.COMPLETED;
+  const completeDate = userExperience.complete_date ?? new Date();
+
+  if (!wasCompleted) {
+    await prisma.userExperience.update({
+      where: { id: userExperience.id },
+      data: {
+        process_status: ProcessStatus.COMPLETED,
+        complete_date: completeDate,
+      },
+    });
+  }
+
+  await publishQStashTask(
+    {
+      type: QSTASH_TASK_TYPE.EXPERIENCE_COMPLETED,
+      userExperienceId: userExperience.id,
+    },
+    {
+      deduplicationId: `experience-completed:${userExperience.id}`,
+      retries: 3,
+    }
+  );
+
+  return {
+    userExperienceId: userExperience.id,
+    userId: userExperience.user_id,
+    completed: true,
+  };
 }

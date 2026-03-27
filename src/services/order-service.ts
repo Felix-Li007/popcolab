@@ -1,7 +1,7 @@
 import 'server-only';
 
 import type Stripe from 'stripe';
-import { CalendarStatus, Prisma } from '@/libs/prisma/client';
+import { CalendarStatus, Prisma, ProcessStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import {
@@ -315,6 +315,38 @@ async function syncExperienceCalendarForOrderStatus(
   }
 }
 
+async function syncUserExperiencesForPaidOrder(
+  tx: Prisma.TransactionClient,
+  order: {
+    id: number;
+    user_id: number;
+    proposal_id: number | null;
+    order_items: OrderCalendarItem[];
+  }
+): Promise<void> {
+  for (const item of order.order_items) {
+    await tx.userExperience.upsert({
+      where: {
+        order_id_experience_id_schedule_date: {
+          order_id: order.id,
+          experience_id: item.experience_id,
+          schedule_date: item.schedule_date,
+        },
+      },
+      create: {
+        order_id: order.id,
+        user_id: order.user_id,
+        proposal_id: order.proposal_id,
+        experience_id: item.experience_id,
+        schedule_date: item.schedule_date,
+        complete_date: null,
+        process_status: ProcessStatus.PROGRESS,
+      },
+      update: {},
+    });
+  }
+}
+
 function getRequestedHoursFromQuote(quote: ExperienceCheckoutQuote): number {
   return quote.requestedHours;
 }
@@ -603,6 +635,18 @@ async function applyStripePaymentIntentSync(
         },
       });
 
+      if (mapped.orderStatus === 'paid') {
+        await syncUserExperiencesForPaidOrder(tx, {
+          id: existingOrder.id,
+          user_id: existingOrder.user_id,
+          proposal_id: existingOrder.proposal_id,
+          order_items: existingOrder.order_items.map(item => ({
+            experience_id: item.experience_id,
+            schedule_date: item.schedule_date,
+          })),
+        });
+      }
+
       await syncExperienceCalendarForOrderStatus(
         tx,
         existingOrder.order_items.map(item => ({
@@ -625,6 +669,18 @@ async function applyStripePaymentIntentSync(
           mapped.orderStatus === 'paid' ? null : existingOrder.expired_at,
       },
     });
+
+    if (mapped.orderStatus === 'paid') {
+      await syncUserExperiencesForPaidOrder(tx, {
+        id: existingOrder.id,
+        user_id: existingOrder.user_id,
+        proposal_id: existingOrder.proposal_id,
+        order_items: existingOrder.order_items.map(item => ({
+          experience_id: item.experience_id,
+          schedule_date: item.schedule_date,
+        })),
+      });
+    }
 
     await syncExperienceCalendarForOrderStatus(
       tx,

@@ -25,12 +25,24 @@
   @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-coral-red/20 bg-coral-red px-3 py-1.5 text-white shadow-sm;
 }
 
+.matchBadge {
+  @apply inline-flex shrink-0 items-center gap-1.5 rounded-full border border-cyan-300 bg-cyan-100 px-3 py-1.5 text-cyan-600 shadow-sm;
+}
+
 .popLabel {
   @apply text-[10px] font-bold uppercase tracking-[0.18em] text-white/90;
 }
 
+.matchLabel {
+  @apply text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-600/90;
+}
+
 .popValue {
   @apply text-sm font-extrabold leading-none text-white;
+}
+
+.matchValue {
+  @apply text-sm font-extrabold leading-none text-cyan-600;
 }
 
 .titleWrap {

@@ -63,6 +63,11 @@ Testing and tooling:
 - `Cucumber`
 - `Husky`
 
+SonarQube analysis:
+
+- `sonarqube-scanner` for local analysis runs
+- `sonar-project.properties` at the repo root for scanner configuration
+
 ## Environment Variables by Service
 
 Database and Prisma:
@@ -122,6 +127,53 @@ Key service entry points:
 - Resend mailer: `src/services/resend-service.ts`
 - QStash webhook: `src/app/api/qstash/route.ts`
 - Queue helpers: `src/services/qstash-service.ts`, `src/services/queue-service.ts`
+
+## SonarQube Scanner
+
+This repository uses the `sonarqube-scanner` npm package to run SonarQube or SonarCloud analysis from the project root. The package installs the `sonar-scanner` binary, which is what the `npm run sonar` script calls.
+
+### Install
+
+The dependency is already listed in `devDependencies`, so a normal install is enough:
+
+```bash
+npm install
+```
+
+If you need to add it to another project, install it with:
+
+```bash
+npm install --save-dev sonarqube-scanner
+```
+
+### Configure
+
+The scanner reads settings from the root-level `sonar-project.properties` file. Update the project key, organization, host URL, and token for your own SonarQube or SonarCloud project before running a scan.
+
+Important files:
+
+- `sonar-project.properties`
+- `package.json` script: `npm run sonar`
+
+### Run
+
+Run the analysis from the repository root:
+
+```bash
+npm run sonar
+```
+
+You can also invoke the binary directly if needed:
+
+```bash
+npx sonar-scanner
+```
+
+### Notes
+
+- Keep the Sonar token out of source control when possible.
+- The default exclusions in `sonar-project.properties` skip `node_modules`, `.next`, and `coverage`.
+- If the scan fails, verify that the Sonar project key and host URL match your SonarQube or SonarCloud setup.
 
 ## Deploy on Vercel
 

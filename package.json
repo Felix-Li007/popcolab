@@ -22,7 +22,8 @@
     "prepare": "husky",
     "prisma:seed": "tsx prisma/seed.ts",
     "qstash:setup": "tsx scripts/setup-qstash.ts",
-    "qstash:delete": "tsx scripts/delete-qstash.ts"
+    "qstash:delete": "tsx scripts/delete-qstash.ts",
+    "sonar": "sonar-scanner"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",
@@ -71,6 +72,7 @@
     "next": "^16.1.6",
     "prettier": "^3.8.1",
     "prisma": "^7.4.2",
+    "sonarqube-scanner": "^4.3.5",
     "supabase": "^2.76.7",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.6",

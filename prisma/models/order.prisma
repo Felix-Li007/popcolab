@@ -1,16 +1,17 @@
 model Order {
-  id           Int         @id @default(autoincrement())
-  proposal_id  Int?
-  user_id      Int
-  order_status String      @db.VarChar(20)
-  payment_id   Int?
-  expired_at   DateTime?   @db.Timestamp(6)
-  created_at   DateTime    @default(now()) @db.Timestamp(6)
-  updated_at   DateTime    @updatedAt @db.Timestamp(6)
-  payment      Payment?    @relation(fields: [payment_id], references: [id])
-  proposal     Proposal?   @relation(fields: [proposal_id], references: [id])
-  user         User        @relation(fields: [user_id], references: [id])
-  order_items  OrderItem[]
+  id               Int              @id @default(autoincrement())
+  proposal_id      Int?
+  user_id          Int
+  order_status     String           @db.VarChar(20)
+  payment_id       Int?
+  expired_at       DateTime?        @db.Timestamp(6)
+  created_at       DateTime         @default(now()) @db.Timestamp(6)
+  updated_at       DateTime         @updatedAt @db.Timestamp(6)
+  payment          Payment?         @relation(fields: [payment_id], references: [id])
+  proposal         Proposal?        @relation(fields: [proposal_id], references: [id])
+  user             User             @relation(fields: [user_id], references: [id])
+  order_items      OrderItem[]
+  user_experiences UserExperience[]
 
   @@index([proposal_id])
   @@index([user_id])

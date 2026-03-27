@@ -72,9 +72,21 @@ export default function ExperienceCard({
           <span className={styles.categoryPill}>{exp.categoryTitle}</span>
         </div>
 
-        <div className={styles.popBadge}>
-          <p className={styles.popLabel}>POP</p>
-          <p className={styles.popValue}>{exp.popularityIndex}</p>
+        <div className="flex items-center gap-2">
+          {exp.recommendationSource === 'history' &&
+          exp.recommendationScore !== undefined ? (
+            <div className={styles.matchBadge}>
+              <p className={styles.matchLabel}>MATCH</p>
+              <p className={styles.matchValue}>
+                {Math.round(exp.recommendationScore * 100)}%
+              </p>
+            </div>
+          ) : null}
+
+          <div className={styles.popBadge}>
+            <p className={styles.popLabel}>POP</p>
+            <p className={styles.popValue}>{exp.popularityIndex}</p>
+          </div>
         </div>
       </div>
 

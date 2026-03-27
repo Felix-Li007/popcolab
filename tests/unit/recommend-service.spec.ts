@@ -10,6 +10,7 @@ const prismaMock = {
 
 const createExperienceVectorMock = jest.fn();
 const extractPreferenceVectorMock = jest.fn();
+const getLatestUserPreferenceVectorMock = jest.fn();
 const calculateMultiFactorSimilarityMock = jest.fn();
 
 function calculateCosineSimilarity(
@@ -52,6 +53,10 @@ async function loadRecommendService() {
     calculateMultiFactorSimilarity: calculateMultiFactorSimilarityMock,
   }));
 
+  jest.doMock('@/services/preference-service', () => ({
+    getLatestUserPreferenceVector: getLatestUserPreferenceVectorMock,
+  }));
+
   return import('@/services/recommend-service');
 }
 
@@ -64,6 +69,7 @@ describe('recommend-service', () => {
     prismaMock.experience.findUnique.mockResolvedValue(null);
 
     extractPreferenceVectorMock.mockResolvedValue([1, 0]);
+    getLatestUserPreferenceVectorMock.mockResolvedValue(null);
     createExperienceVectorMock.mockImplementation(
       (experience: { id: number }) => (experience.id === 2 ? [1, 0] : [0, 1])
     );
@@ -94,6 +100,7 @@ describe('recommend-service', () => {
         },
         score: Math.min(Math.log(10) / 10, 1),
         reason: 'Popular experience',
+        recommendationSource: 'popular',
       },
     ]);
 
@@ -151,6 +158,7 @@ describe('recommend-service', () => {
         },
         score: 0.85,
         reason: 'Very similar to experiences you like',
+        recommendationSource: 'history',
       },
       {
         experience: {
@@ -160,6 +168,7 @@ describe('recommend-service', () => {
         },
         score: 0.425,
         reason: 'Recommended based on your interests',
+        recommendationSource: 'history',
       },
     ]);
   });
@@ -200,6 +209,7 @@ describe('recommend-service', () => {
         },
         score: 0.9,
         reason: 'Similar experience',
+        recommendationSource: 'history',
       },
       {
         experience: {
@@ -209,6 +219,7 @@ describe('recommend-service', () => {
         },
         score: 0.4,
         reason: 'Similar experience',
+        recommendationSource: 'history',
       },
     ]);
 

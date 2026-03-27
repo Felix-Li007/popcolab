@@ -18,6 +18,7 @@ model User {
   team_mates           TeamMate[]
   team_invites_sent    TeamInvite[]     @relation("TeamInviter")
   user_vector          UserVector?
+  user_preferences     UserPreference[]
   user_experiences     UserExperience[]
 
   @@map("user")

@@ -4,6 +4,8 @@ import type {
   ExperienceDimension,
   UserExperience,
 } from '@/libs/prisma/client';
+import { getLatestUserPreferenceVector } from '@/services/preference-service';
+import { logger } from '@/utils/logging-util';
 import {
   calculateCosineSimilarity,
   createExperienceVector,
@@ -26,7 +28,10 @@ export interface RecommendationResult {
   experience: Experience;
   score: number;
   reason: string;
+  recommendationSource: 'popular' | 'history';
 }
+
+type RecommendationSource = RecommendationResult['recommendationSource'];
 
 /**
  * Load the user's experience history.
@@ -66,19 +71,39 @@ export async function getRecommendedExperiences(
   limit: number = 10,
   excludeExperienced: boolean = true
 ): Promise<RecommendationResult[]> {
+  logger.info(
+    { userId, limit, excludeExperienced },
+    '[recommend-service] getRecommendedExperiences started'
+  );
+
   // Load the user's history first. If there is no history, fall back to
   // popular experiences as a cold-start strategy.
   const historicalExperiences = await getHistoricalExperiences(userId);
+  logger.debug(
+    { userId, historicalCount: historicalExperiences.length },
+    '[recommend-service] history loaded'
+  );
 
   // Cold start: no history means we do not have enough signal to build a
   // preference vector, so return the popular list instead.
   if (historicalExperiences.length === 0) {
+    logger.info(
+      { userId, limit },
+      '[recommend-service] cold start fallback to popular experiences'
+    );
     return getPopularExperiences(limit);
   }
 
   // Load all candidate experiences. They will be filtered and ranked below.
+  // Include dimension_index so createExperienceVector can normalize dimension
+  // features accurately (without it, normalizeDimensionValue returns 0 for
+  // every dimension and similarity scoring ignores dimension signals entirely).
   const allExperiences = await prisma.experience.findMany({
-    include: { experience_dimensions: true },
+    include: {
+      experience_dimensions: {
+        include: { dimension_index: true },
+      },
+    },
   });
 
   // Optionally remove experiences the user has already interacted with so
@@ -96,21 +121,49 @@ export async function getRecommendedExperiences(
       experience => !experiencedIds.has(experience.id)
     );
   }
+  logger.debug(
+    {
+      userId,
+      candidateCount: candidateExperiences.length,
+      excludedCount: allExperiences.length - candidateExperiences.length,
+    },
+    '[recommend-service] candidate experiences prepared'
+  );
 
   // Build a preference vector from the user's history.
-  const userPreferenceVector = await extractPreferenceVector(userId);
+  const persistedPreferenceVector = await getLatestUserPreferenceVector(userId);
+  const userPreferenceVector =
+    persistedPreferenceVector ?? (await extractPreferenceVector(userId));
+
+  logger.debug(
+    {
+      userId,
+      preferenceSource: persistedPreferenceVector ? 'persisted' : 'extracted',
+      preferenceVectorLength: userPreferenceVector.length,
+    },
+    '[recommend-service] preference vector ready'
+  );
+
+  if (userPreferenceVector.length === 0) {
+    logger.info(
+      { userId, limit },
+      '[recommend-service] empty preference vector fallback to popular experiences'
+    );
+    return getPopularExperiences(limit);
+  }
 
   // Score each candidate experience using similarity plus popularity.
   const scoredExperiences: Array<{
     experience: Experience;
     score: number;
     reason: string;
+    recommendationSource: RecommendationSource;
   }> = [];
 
   for (const experience of candidateExperiences) {
     // Convert the candidate experience into the same feature space as the
     // user preference vector.
-    const experienceVector = createExperienceVector(experience);
+    const experienceVector = await createExperienceVector(experience);
 
     // Cosine similarity measures how close the candidate is to the user's
     // learned preference profile.
@@ -142,11 +195,30 @@ export async function getRecommendedExperiences(
       experience: experience,
       score: finalScore,
       reason,
+      recommendationSource: 'history',
     });
   }
 
   // Sort by score in descending order and return only the requested page.
-  return scoredExperiences.sort((a, b) => b.score - a.score).slice(0, limit);
+  const rankedExperiences = scoredExperiences
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+
+  logger.info(
+    {
+      userId,
+      limit,
+      topMatches: rankedExperiences.map(item => ({
+        experienceId: item.experience.id,
+        experienceTitle: item.experience.experience_title,
+        score: Number(item.score.toFixed(4)),
+        reason: item.reason,
+      })),
+    },
+    '[recommend-service] getRecommendedExperiences completed'
+  );
+
+  return rankedExperiences;
 }
 
 /**
@@ -165,6 +237,7 @@ export async function getPopularExperiences(
     experience: exp,
     score: Math.min(Math.log(exp.popularity_index + 1) / 10, 1),
     reason: POPULAR_EXPERIENCES_REASON,
+    recommendationSource: 'popular',
   }));
 }
 
@@ -216,6 +289,7 @@ export async function getSimilarExperiences(
         experience: experience,
         score: similarity,
         reason: SIMILAR_EXPERIENCE_REASON,
+        recommendationSource: 'history' as const,
       };
     })
     .sort((a, b) => b.score - a.score)

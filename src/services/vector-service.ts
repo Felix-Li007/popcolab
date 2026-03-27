@@ -40,6 +40,21 @@ export type ExperienceWithDimensions = Experience & {
   experience_dimensions?: ExtendedExperienceDimension[];
 };
 
+let orderedDimensionIdsPromise: Promise<number[]> | null = null;
+
+async function getOrderedDimensionIds(): Promise<number[]> {
+  if (!orderedDimensionIdsPromise) {
+    orderedDimensionIdsPromise = prisma.dimensionIndex
+      .findMany({
+        orderBy: { id: 'asc' },
+        select: { id: true },
+      })
+      .then(rows => rows.map(row => row.id));
+  }
+
+  return orderedDimensionIdsPromise;
+}
+
 function normalizeDimensionValue(
   experienceDimension: ExtendedExperienceDimension
 ): number {
@@ -65,9 +80,12 @@ function normalizeDimensionValue(
   return Math.min(selectedCount / 5, 1);
 }
 
-export function createExperienceVector(
-  experience: ExperienceWithDimensions
-): number[] {
+export async function createExperienceVector(
+  experience: ExperienceWithDimensions,
+  orderedDimensionIds?: number[]
+): Promise<number[]> {
+  const resolvedOrderedDimensionIds =
+    orderedDimensionIds ?? (await getOrderedDimensionIds());
   const vector: number[] = [];
 
   // Normalize core experience attributes into a compact base feature block.
@@ -85,10 +103,27 @@ export function createExperienceVector(
   // Capacity is also normalized so large values do not dominate the vector.
   vector.push(Math.min(experience.capacity_max / 100, 1));
 
-  // Append one dimension feature per related experience_dimension row.
-  // If the dimension metadata is missing, fall back to 0 for that slot.
+  const dimensionValueMap = new Map<number, number[]>();
+
   for (const experienceDimension of experience.experience_dimensions || []) {
-    vector.push(normalizeDimensionValue(experienceDimension));
+    const current =
+      dimensionValueMap.get(experienceDimension.dimension_id) ?? [];
+    current.push(normalizeDimensionValue(experienceDimension));
+    dimensionValueMap.set(experienceDimension.dimension_id, current);
+  }
+
+  // Append one slot per global dimension id so the vector lives in a stable
+  // feature space across every experience.
+  for (const dimensionId of resolvedOrderedDimensionIds) {
+    const values = dimensionValueMap.get(dimensionId);
+    if (!values || values.length === 0) {
+      vector.push(0);
+      continue;
+    }
+
+    const average =
+      values.reduce((sum, value) => sum + value, 0) / values.length;
+    vector.push(average);
   }
 
   // Apply L2 normalization so cosine similarity becomes a stable comparison.
@@ -138,13 +173,17 @@ export async function extractPreferenceVector(
     return [];
   }
 
+  const orderedDimensionIds = await getOrderedDimensionIds();
+
   // Convert each historical experience into a normalized vector.
   // Null checks are kept here because `userExperiences` may contain rows
   // without a loaded `experience` relation in edge cases.
   const vectors = await Promise.all(
     userExperiences
       .filter(userExperience => userExperience.experience)
-      .map(userExperience => createExperienceVector(userExperience.experience))
+      .map(userExperience =>
+        createExperienceVector(userExperience.experience, orderedDimensionIds)
+      )
   );
 
   // If no usable vectors were produced, preserve the empty result.
@@ -276,31 +315,36 @@ export interface RecommendationResult {
 export function recommendExperiencesByUser(
   preferenceVector: UserPreferenceVector,
   candidateExperiences: Array<ExperienceWithDimensions>
-): RecommendationResult[] {
+): Promise<RecommendationResult[]> {
   const recommendations: RecommendationResult[] = [];
 
-  // Calculate similarity between user preference and each candidate experience
-  candidateExperiences.forEach(experience => {
-    // Extract feature vector from the candidate experience
-    const experienceVector = createExperienceVector(experience);
+  return getOrderedDimensionIds().then(async orderedDimensionIds => {
+    // Calculate similarity between user preference and each candidate experience
+    for (const experience of candidateExperiences) {
+      // Extract feature vector from the candidate experience
+      const experienceVector = await createExperienceVector(
+        experience,
+        orderedDimensionIds
+      );
 
-    // Calculate cosine similarity between user preference and experience
-    const similarityScore = calculateCosineSimilarity(
-      preferenceVector.vector,
-      experienceVector
-    );
+      // Calculate cosine similarity between user preference and experience
+      const similarityScore = calculateCosineSimilarity(
+        preferenceVector.vector,
+        experienceVector
+      );
 
-    recommendations.push({
-      experienceId: experience.id,
-      experience,
-      similarityScore,
-    });
+      recommendations.push({
+        experienceId: experience.id,
+        experience,
+        similarityScore,
+      });
+    }
+
+    // Sort by similarity score in descending order
+    recommendations.sort((a, b) => b.similarityScore - a.similarityScore);
+
+    return recommendations;
   });
-
-  // Sort by similarity score in descending order
-  recommendations.sort((a, b) => b.similarityScore - a.similarityScore);
-
-  return recommendations;
 }
 
 /**

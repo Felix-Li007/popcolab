@@ -6,17 +6,21 @@ enum ProcessStatus {
 
 model UserExperience {
     id             Int           @id @default(autoincrement())
+    order_id       Int
     user_id        Int
-    proposal_id    Int
+    proposal_id    Int?
     experience_id  Int
     schedule_date  DateTime      @db.Timestamp(6)
     complete_date  DateTime?     @db.Timestamp(6)
     process_status ProcessStatus
     created_at     DateTime      @default(now()) @db.Timestamp(6)
     updated_at     DateTime      @updatedAt @db.Timestamp(6)
+    order          Order         @relation(fields: [order_id], references: [id])
     user           User          @relation(fields: [user_id], references: [id])
-    proposal       Proposal      @relation(fields: [proposal_id], references: [id])
+    proposal       Proposal?     @relation(fields: [proposal_id], references: [id])
     experience     Experience    @relation(fields: [experience_id], references: [id])
 
+    @@unique([order_id, experience_id, schedule_date])
+    @@index([order_id])
     @@map("user_experience")
 }

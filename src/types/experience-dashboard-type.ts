@@ -11,6 +11,8 @@ export type DashboardExperienceCardData = {
   providerLabel: string;
   providerType: string;
   popularityIndex: number;
+  recommendationScore?: number;
+  recommendationSource?: 'popular' | 'history';
   leadType: string;
   deliveryMethods: string;
   capacityMax: number;

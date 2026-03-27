@@ -2,6 +2,11 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/libs/prisma-client';
+import { getCurrentDbUserId } from '@/services/clerk-service';
+import {
+  getPopularExperiences,
+  getRecommendedExperiences,
+} from '@/services/recommend-service';
 import type {
   ExperienceFormState,
   ExperienceStatus,
@@ -201,29 +206,85 @@ export async function deleteExperienceAction(id: number): Promise<void> {
 }
 
 export async function getDashboardExperiencesAction(): Promise<DashboardExperiencesResponse> {
-  const allExperiences = await prisma.experience.findMany({
-    where: {
-      provider_id: 1,
-    },
-    include: {
-      category: true,
-      provider: true,
-      experience_images: {
-        orderBy: [{ is_cover: 'desc' }, { created_at: 'asc' }],
-      },
-      experience_pricing: true,
-    },
-    orderBy: {
-      id: 'desc',
-    },
-  });
+  const userId = await getCurrentDbUserId();
 
-  const formatted = allExperiences.map(mapDashboardExperience);
+  const [allExperiences, recommendedResult] = await Promise.all([
+    prisma.experience.findMany({
+      where: {
+        provider_id: 1,
+      },
+      include: {
+        category: true,
+        provider: true,
+        experience_images: {
+          orderBy: [{ is_cover: 'desc' }, { created_at: 'asc' }],
+        },
+        experience_pricing: true,
+      },
+      orderBy: {
+        id: 'desc',
+      },
+    }),
+    userId
+      ? getRecommendedExperiences(userId, 5, true)
+      : getPopularExperiences(5),
+  ]);
+
+  const formattedExperiences = allExperiences.map(mapDashboardExperience);
+  const recommendedIds = recommendedResult.map(result => result.experience.id);
+  const recommendedScoreById = new Map(
+    recommendedResult.map(result => [result.experience.id, result.score])
+  );
+  const recommendedExperienceRows = recommendedIds.length
+    ? await prisma.experience.findMany({
+        where: {
+          id: { in: recommendedIds },
+        },
+        include: {
+          category: true,
+          provider: true,
+          experience_images: {
+            orderBy: [{ is_cover: 'desc' }, { created_at: 'asc' }],
+          },
+          experience_pricing: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+      })
+    : [];
+  const recommendedExperienceMap = new Map(
+    recommendedExperienceRows.map(experience => [
+      experience.id,
+      mapDashboardExperience(experience),
+    ])
+  );
+  const recommendedExperiences = recommendedIds
+    .map(id => {
+      const experience = recommendedExperienceMap.get(id);
+      if (!experience) return null;
+
+      const recommendationScore = recommendedScoreById.get(id);
+      const recommendationSource = recommendedResult.find(
+        result => result.experience.id === id
+      )?.recommendationSource;
+      return recommendationScore === undefined
+        ? experience
+        : {
+            ...experience,
+            recommendationScore,
+            recommendationSource,
+          };
+    })
+    .filter(
+      (experience): experience is DashboardExperienceCardData =>
+        experience !== null
+    );
 
   return {
     personality: null,
-    experiences: formatted.slice(0, 5),
-    allExperiences: formatted.slice(5),
+    experiences: recommendedExperiences,
+    allExperiences: formattedExperiences,
   };
 }
 

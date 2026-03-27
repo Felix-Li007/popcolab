@@ -21,6 +21,9 @@ jest.mock('@/libs/prisma/client', () => ({
     LOCKED: 'locked',
     BLOCKED: 'blocked',
   },
+  ProcessStatus: {
+    PROGRESS: 'PROGRESS',
+  },
   Prisma: {},
 }));
 
@@ -214,6 +217,9 @@ describe('order-service booking slot locking', () => {
       },
       order: {
         update: jest.fn().mockResolvedValue({ id: 9 }),
+      },
+      userExperience: {
+        upsert: jest.fn().mockResolvedValue({ id: 11 }),
       },
       experienceCalendar: {
         updateMany: jest
