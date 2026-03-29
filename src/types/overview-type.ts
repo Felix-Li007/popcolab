@@ -29,6 +29,18 @@ export type OverviewExperienceTrendPoint = {
   value: number;
 };
 
+export type OverviewEventSummaryItem = {
+  id: number;
+  title: string;
+  location: string;
+  dateLabel: string;
+  status: 'live' | 'upcoming';
+};
+
+export type OverviewEventMetrics = {
+  highlightedEvents: OverviewEventSummaryItem[];
+};
+
 export type OverviewQuizTrendPoint = {
   periodKey: string;
   periodLabel: string;
@@ -84,6 +96,7 @@ export type OverviewGrowthMetrics = {
   requestTrend: OverviewRequestTrendPoint[];
   requestMetrics: OverviewRequestMetrics;
   experienceMetrics: OverviewExperienceMetrics;
+  eventMetrics: OverviewEventMetrics;
   quizMetrics: OverviewQuizMetrics;
   questionMetrics: OverviewQuestionMetrics;
 };

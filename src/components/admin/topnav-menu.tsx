@@ -14,6 +14,7 @@ export default function TopnavMenu({
   badgeCounts,
   isSidebarOpen = false,
   onToggleSidebar,
+  variant = 'full',
   userDisplayName,
   userRoleLabel,
   initialCompany,
@@ -22,6 +23,7 @@ export default function TopnavMenu({
   badgeCounts?: BadgeCounts;
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
+  variant?: 'full' | 'primary' | 'tabs';
   userDisplayName?: string;
   userRoleLabel?: string;
   initialCompany?: CompanyInfo | null;
@@ -44,119 +46,148 @@ export default function TopnavMenu({
       .sort((a, b) => b.length - a.length)
       .find(href => isActive(href)) ?? '';
 
-  return (
-    <header className="bg-teal-deep text-white">
-      <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-16 sm:h-[4.5rem] border-b border-white/10 gap-2">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            onClick={onToggleSidebar}
-            aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-            className="sm:hidden w-9 h-9 rounded-md border border-white/20 hover:bg-white/10 flex items-center justify-center shrink-0 transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isSidebarOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
-          <Link
-            href="/admin"
-            aria-label="Go to dashboard"
-            className="sm:hidden inline-flex shrink-0 items-center justify-center py-1 leading-none"
-          >
-            <RoleLogo
-              branding={
-                branding ?? {
-                  role: 'role_user',
-                  dataRole: 'role_user',
-                  displayLabel: 'User',
-                  logoSrc: '/logo/logo-icon.png',
-                  logoAlt: 'Pop CoLab logo',
-                  footerLogoSrc: '/logo/user/logo-full-v.png',
-                  footerLogoAlt: 'Pop CoLab user footer logo',
-                }
-              }
-              width={36}
-              height={18}
-              className="block h-[18px] w-[36px] object-contain"
-            />
-          </Link>
-          <nav className="hidden md:flex items-center gap-4">
-            {topTabs.map(t => (
-              <a
-                key={t.label}
-                href={t.href}
-                className="text-heading font-bold text-white hover:text-pink-medium transition-colors whitespace-nowrap"
-              >
-                {t.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="relative hidden sm:block">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="bg-white/10 text-white placeholder-white/50 text-xs px-3 py-1.5 rounded-full w-32 md:w-36 focus:outline-none focus:ring-1 focus:ring-white/30"
-            />
-            <svg
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-          <button
-            type="button"
-            aria-label="View notifications"
-            className="relative w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z" />
-            </svg>
-          </button>
-          <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
-          <UserAvatar
-            displayName={userDisplayName}
-            roleLabel={userRoleLabel}
-            initialCompany={initialCompany}
-          />
-        </div>
-      </div>
+  const showPrimary = variant === 'full' || variant === 'primary';
+  const showTabs = variant === 'full' || variant === 'tabs';
 
-      {resolvedItems.length > 0 && (
+  return (
+    <>
+      {showPrimary ? (
+        <header className="bg-teal-deep text-white">
+          <div className="flex text-heading font-bold items-center justify-between px-3 sm:px-4 h-16 sm:h-[4.5rem] border-b border-white/10 gap-2">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                type="button"
+                onClick={onToggleSidebar}
+                aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+                className="sm:hidden w-9 h-9 rounded-md border border-white/20 hover:bg-white/10 flex items-center justify-center shrink-0 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  {isSidebarOpen ? (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  ) : (
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  )}
+                </svg>
+              </button>
+              <Link
+                href="/admin"
+                aria-label="Go to dashboard"
+                className="hidden sm:inline-flex shrink-0 items-center justify-center py-1 leading-none"
+              >
+                <RoleLogo
+                  branding={
+                    branding ?? {
+                      role: 'role_user',
+                      dataRole: 'role_user',
+                      displayLabel: 'User',
+                      logoSrc: '/logo/logo-icon.png',
+                      logoAlt: 'Pop CoLab logo',
+                      footerLogoSrc: '/logo/user/logo-full-v.png',
+                      footerLogoAlt: 'Pop CoLab user footer logo',
+                    }
+                  }
+                  width={156}
+                  height={52}
+                  className="block h-[52px] w-auto object-contain"
+                />
+              </Link>
+              <Link
+                href="/admin"
+                aria-label="Go to dashboard"
+                className="sm:hidden inline-flex shrink-0 items-center justify-center py-1 leading-none"
+              >
+                <RoleLogo
+                  branding={
+                    branding ?? {
+                      role: 'role_user',
+                      dataRole: 'role_user',
+                      displayLabel: 'User',
+                      logoSrc: '/logo/logo-icon.png',
+                      logoAlt: 'Pop CoLab logo',
+                      footerLogoSrc: '/logo/user/logo-full-v.png',
+                      footerLogoAlt: 'Pop CoLab user footer logo',
+                    }
+                  }
+                  width={36}
+                  height={18}
+                  className="block h-[18px] w-[36px] object-contain"
+                />
+              </Link>
+              <nav className="hidden md:flex items-center gap-4">
+                {topTabs.map(t => (
+                  <a
+                    key={t.label}
+                    href={t.href}
+                    className="text-heading font-bold text-white hover:text-pink-medium transition-colors whitespace-nowrap"
+                  >
+                    {t.label}
+                  </a>
+                ))}
+              </nav>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div className="relative hidden sm:block">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="bg-white/10 text-white placeholder-white/50 text-xs px-3 py-1.5 rounded-full w-32 md:w-36 focus:outline-none focus:ring-1 focus:ring-white/30"
+                />
+                <svg
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/50"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <button
+                type="button"
+                aria-label="View notifications"
+                className="relative w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z" />
+                </svg>
+              </button>
+              <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
+              <UserAvatar
+                displayName={userDisplayName}
+                roleLabel={userRoleLabel}
+                initialCompany={initialCompany}
+              />
+            </div>
+          </div>
+        </header>
+      ) : null}
+
+      {showTabs && resolvedItems.length > 0 ? (
         <div
-          className={`flex items-center gap-1 px-4 overflow-x-auto ${styles.tabBar}`}
+          className={`flex items-center gap-1 px-4 overflow-x-auto border-b border-black/10 ${styles.tabBar}`}
         >
           {resolvedItems.map(tab => (
             <Link
@@ -175,7 +206,7 @@ export default function TopnavMenu({
             </Link>
           ))}
         </div>
-      )}
-    </header>
+      ) : null}
+    </>
   );
 }

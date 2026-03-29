@@ -3,8 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from '@/styles/admin/sidenav-menu.module.css';
-import type { RoleBranding } from '@/constants/role-branding';
-import RoleLogo from '@/components/branding/role-logo';
 
 export type AppSidenavItem = {
   label: string;
@@ -61,20 +59,18 @@ export default function AppSidenav({
   className = '',
   testId,
   appearance,
-  branding,
+  collapsed = false,
   surfaceClassName = 'bg-teal-deep',
   surfaceTextClassName = 'text-white',
-  surfaceBorderClassName = 'border-white/10',
 }: Readonly<{
   groups: AppSidenavGroup[];
   onNavigate?: () => void;
   className?: string;
   testId?: string;
   appearance?: AppSidenavAppearance;
-  branding?: RoleBranding;
+  collapsed?: boolean;
   surfaceClassName?: string;
   surfaceTextClassName?: string;
-  surfaceBorderClassName?: string;
 }>) {
   const pathname = usePathname();
 
@@ -101,37 +97,13 @@ export default function AppSidenav({
     ].join(' ');
   }
 
-  const logoBranding = branding ?? {
-    role: 'role_user',
-    dataRole: 'role_user',
-    displayLabel: 'User',
-    logoSrc: '/logo/logo-icon.png',
-    logoAlt: 'Pop CoLab logo',
-    footerLogoSrc: '/logo/user/logo-full-v.png',
-    footerLogoAlt: 'Pop CoLab user footer logo',
-  };
-
   return (
     <aside
       data-testid={testId}
-      className={`flex min-h-screen w-56 shrink-0 flex-col ${surfaceTextClassName} ${surfaceClassName} ${className}`}
+      className={`flex min-h-screen shrink-0 flex-col transition-[width] duration-200 ${
+        collapsed ? 'w-20' : 'w-56'
+      } ${surfaceTextClassName} ${surfaceClassName} ${className}`}
     >
-      <div
-        className={`flex h-16 items-center border-b px-4 sm:h-[4.5rem] ${surfaceBorderClassName}`}
-      >
-        <Link
-          href="/"
-          onClick={onNavigate}
-          className="flex h-full items-center gap-2"
-        >
-          <RoleLogo
-            branding={logoBranding}
-            size={48}
-            className="h-full w-auto object-contain"
-          />
-        </Link>
-      </div>
-
       <nav
         className={`flex-1 overflow-y-auto px-2 py-3 ${styles.nav} ${appearance?.navClassName ?? ''}`}
       >
@@ -141,14 +113,16 @@ export default function AppSidenav({
               key={group.title}
               className={appearance?.groupClassName ?? 'mb-4'}
             >
-              <p
-                className={
-                  appearance?.titleClassName ??
-                  'px-2 mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40'
-                }
-              >
-                {group.title}
-              </p>
+              {collapsed ? null : (
+                <p
+                  className={
+                    appearance?.titleClassName ??
+                    'px-2 mb-1 text-[10px] font-bold uppercase tracking-wider text-white/40'
+                  }
+                >
+                  {group.title}
+                </p>
+              )}
 
               <div className="space-y-0.5">
                 {group.items.map(item => {
@@ -159,9 +133,12 @@ export default function AppSidenav({
                       key={item.href}
                       href={item.href}
                       onClick={onNavigate}
+                      title={collapsed ? item.label : undefined}
+                      aria-label={item.label}
                       className={[
                         appearance?.itemClassName ??
                           'flex items-center gap-2 px-2 py-1.5 rounded-lg text-heading font-bold transition-colors',
+                        collapsed ? 'justify-center px-0' : '',
                         active
                           ? (appearance?.itemActiveClassName ??
                             'bg-white/15 text-white')
@@ -170,14 +147,16 @@ export default function AppSidenav({
                       ].join(' ')}
                     >
                       {item.icon ? <NavIcon>{item.icon}</NavIcon> : null}
-                      <span className="min-w-0 flex-1 truncate">
-                        {item.label}
-                      </span>
-                      {item.badge === undefined ? null : (
+                      {collapsed ? null : (
+                        <span className="min-w-0 flex-1 truncate">
+                          {item.label}
+                        </span>
+                      )}
+                      {!collapsed && item.badge !== undefined ? (
                         <span className={getBadgeClassName(item)}>
                           {item.badge}
                         </span>
-                      )}
+                      ) : null}
                     </Link>
                   );
                 })}

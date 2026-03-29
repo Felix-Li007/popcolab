@@ -20,12 +20,22 @@
   @apply relative;
 }
 
+.searchWrapRight {
+  @apply ml-auto;
+  width: min(100%, 280px);
+}
+
 .searchIcon {
   @apply w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none;
 }
 
 .searchInput {
   @apply w-full pl-8 pr-3 py-1.5 text-xs bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white placeholder-gray-400 transition;
+}
+
+.searchInputCompact {
+  @apply py-1.5;
+  font-size: 0.72rem;
 }
 
 .searchForm {

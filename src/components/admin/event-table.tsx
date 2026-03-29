@@ -1,94 +1,91 @@
-export type EventStatus = 'live' | 'upcoming' | 'draft';
+'use client';
 
-export type Event = {
-  name: string;
-  date: string;
-  location: string;
-  status: EventStatus;
+import Link from 'next/link';
+import type { OverviewEventSummaryItem } from '@/types/overview-type';
+import styles from '@/styles/admin/event-table.module.css';
+
+const statusConfig: Record<
+  OverviewEventSummaryItem['status'],
+  { label: string; className: string }
+> = {
+  live: {
+    label: 'Live',
+    className: styles.statusLive,
+  },
+  upcoming: {
+    label: 'Upcoming',
+    className: styles.statusUpcoming,
+  },
 };
 
-const events: Event[] = [
-  {
-    name: 'LinkedIn + Cocktail Night',
-    date: 'Feb 18',
-    location: 'Richardson Centre',
-    status: 'live',
-  },
-  {
-    name: 'Co-op Mode – Video Game',
-    date: 'Feb 26',
-    location: 'Pop CoLab HQ',
-    status: 'upcoming',
-  },
-  {
-    name: 'Biz Moms Club',
-    date: 'Feb 27',
-    location: 'Richardson Centre',
-    status: 'upcoming',
-  },
-  {
-    name: 'Retro Pixels Exhibition',
-    date: 'Feb 27',
-    location: 'Pop CoLab HQ',
-    status: 'draft',
-  },
-];
-
-const statusConfig: Record<EventStatus, { label: string; className: string }> =
-  {
-    live: { label: '● Live Today', className: 'bg-green-100 text-green-700' },
-    upcoming: {
-      label: 'Upcoming',
-      className: 'bg-brand-yellow/40 text-teal-deep',
-    },
-    draft: { label: 'Draft', className: 'bg-grey-light/60 text-gray-500' },
-  };
-
-export default function EventTable() {
+export default function EventTable({
+  events,
+  onView,
+}: Readonly<{
+  events: OverviewEventSummaryItem[];
+  onView: (id: number) => void;
+}>) {
   return (
-    <section>
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">📅</span>
-        <h2 className="text-sm font-bold text-gray-800">Upcoming Events</h2>
+    <section className={styles.section}>
+      <div className={styles.header}>
+        <div className={styles.titleGroup}>
+          <span className={styles.emoji}>📅</span>
+          <h2 className={styles.title}>Current Events</h2>
+        </div>
+        <Link href="/admin/events" className={styles.viewAllLink}>
+          View all →
+        </Link>
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+
+      <div className={styles.tableShell}>
+        <div className={styles.tableScroll}>
+          <table className={styles.table}>
             <thead>
-              <tr className="bg-teal-deep text-white">
-                <th className="text-left px-4 py-2.5 font-semibold">Event</th>
-                <th className="text-left px-4 py-2.5 font-semibold">Date</th>
-                <th className="text-left px-4 py-2.5 font-semibold">
-                  Location
-                </th>
-                <th className="text-left px-4 py-2.5 font-semibold">Status</th>
+              <tr className={styles.tableHeadRow}>
+                <th className={styles.tableHeadCell}>Title</th>
+                <th className={styles.tableHeadCell}>Date</th>
+                <th className={styles.tableHeadCell}>Location</th>
+                <th className={styles.tableHeadCell}>Status</th>
               </tr>
             </thead>
             <tbody>
-              {events.map(event => {
-                const status = statusConfig[event.status];
-                return (
-                  <tr
-                    key={`${event.name}-${event.date}`}
-                    className="border-t border-gray-50 hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-4 py-3 text-gray-800 font-semibold">
-                      {event.name}
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{event.date}</td>
-                    <td className="px-4 py-3 text-gray-600">
-                      {event.location}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${status.className}`}
-                      >
-                        {status.label}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+              {events.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className={styles.emptyCell}>
+                    No active or upcoming events right now.
+                  </td>
+                </tr>
+              ) : (
+                events.map(event => {
+                  const status = statusConfig[event.status];
+
+                  return (
+                    <tr
+                      key={`${event.id}-${event.dateLabel}`}
+                      className={styles.tableRow}
+                    >
+                      <td className={styles.titleCell}>
+                        <button
+                          type="button"
+                          onClick={() => onView(event.id)}
+                          className={styles.titleButton}
+                        >
+                          {event.title}
+                        </button>
+                      </td>
+                      <td className={styles.bodyCell}>{event.dateLabel}</td>
+                      <td className={styles.bodyCell}>{event.location}</td>
+                      <td className={styles.bodyCell}>
+                        <span
+                          className={`${styles.statusBadge} ${status.className}`}
+                        >
+                          {status.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

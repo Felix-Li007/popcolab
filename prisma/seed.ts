@@ -5,6 +5,7 @@ import { seedDimensions } from './seeds/dimension.seed';
 import { seedExperienceCategories } from './seeds/experience-categories.seed';
 import { seedTemporaryExperienceImages } from './seeds/experience-images.seed';
 import { seedExperiencesFromWorkbook } from './seeds/experiences.seed';
+import { seedEvents } from './seeds/event.seed';
 import { seedPersonalities } from './seeds/personalities.seed';
 import { seedProviders } from './seeds/provider.seed';
 import {
@@ -26,6 +27,7 @@ async function main() {
   await seedPersonalities(prisma);
   await seedProviders(prisma);
   await seedExperienceCategories(prisma);
+  await seedEvents(prisma);
 
   const questionIdByOrder = await seedQuestions(prisma, schemaState);
   const dimensionIdByKey = await seedDimensions(prisma);

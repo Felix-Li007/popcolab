@@ -1,0 +1,111 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) 5.8rem;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.previewPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.previewFrame {
+  position: relative;
+  min-height: 31rem;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  border-radius: 0;
+  background: linear-gradient(180deg, #f4f4f5 0%, #ffffff 100%);
+}
+
+.previewEmpty {
+  display: flex;
+  width: 100%;
+  min-height: 31rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.previewImage {
+  object-fit: contain;
+  padding: 0.75rem;
+}
+
+.slotsPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  justify-content: start;
+  gap: 0.4rem;
+  width: 100%;
+  height: 100%;
+}
+
+.slotButton {
+  position: relative;
+  display: flex;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #d4d4d8;
+  border-radius: 0.2rem;
+  color: #18181b;
+  background: linear-gradient(180deg, #ffffff 0%, #fafafa 100%);
+  transition:
+    transform 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.slotButton:hover {
+  transform: translateY(-1px);
+  border-color: #a1a1aa;
+  box-shadow: 0 8px 18px rgba(17, 17, 17, 0.08);
+}
+
+.slotButtonActive {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.2);
+}
+
+.slotImage {
+  object-fit: cover;
+}
+
+.slotPlus {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d4d4d8;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1;
+  color: #18181b;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .previewFrame,
+  .previewEmpty {
+    min-height: 20rem;
+  }
+
+  .slotsPanel {
+    height: auto;
+  }
+}

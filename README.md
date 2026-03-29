@@ -48,6 +48,12 @@ Charts and UI helpers:
 - `@nivo/pie`
 - `lucide-react`
 
+Rich text editor:
+
+- `@tiptap/core` — Headless rich text editor
+- `@tiptap/react` — React integration for Tiptap
+- `@tiptap/starter-kit` — Pre-configured extensions (bold, italic, headings, lists, etc.)
+
 Infra and deployment:
 
 - `Vercel`
@@ -127,6 +133,77 @@ Key service entry points:
 - Resend mailer: `src/services/resend-service.ts`
 - QStash webhook: `src/app/api/qstash/route.ts`
 - Queue helpers: `src/services/qstash-service.ts`, `src/services/queue-service.ts`
+- Tiptap rich text editor: `src/components/shared/tiptap-editor.tsx`
+
+## Tiptap Rich Text Editor
+
+The application uses Tiptap for rich text editing. This is used in the Event creation form for the event description/content (`contentHtml` field).
+
+### Component Usage
+
+The `TiptapEditor` component is located at `src/components/shared/tiptap-editor.tsx`.
+
+#### Basic Example
+
+```tsx
+'use client';
+
+import TiptapEditor from '@/components/shared/tiptap-editor';
+import { useState } from 'react';
+
+export default function EventForm() {
+  const [content, setContent] = useState('');
+
+  return (
+    <form>
+      <label htmlFor="description">Event Description</label>
+      <TiptapEditor value={content} onChange={setContent} className="mt-2" />
+    </form>
+  );
+}
+```
+
+#### Props
+
+- `value` (string, optional): Initial HTML content
+- `onChange` (function, optional): Callback when content changes, receives HTML string
+- `className` (string, optional): Additional CSS classes for the editor container
+- `bodyClassName` (string, optional): Additional CSS classes for the editable content area
+
+#### Features
+
+The editor toolbar includes:
+
+- **Bold** (B) — Make text bold
+- **Italic** (I) — Make text italic
+- **Heading 1** (H1) — Create h1 heading
+- **Heading 2** (H2) — Create h2 heading
+- **Bullet List** (• List) — Create unordered list
+- **Undo** (↶) — Undo last action
+- **Redo** (↷) — Redo last action
+
+#### Setting Content Programmatically
+
+The editor supports controlled input via the `value` prop. When the content changes, the `onChange` callback receives the HTML string that can be stored in the database.
+
+Example with Event:
+
+```tsx
+const [eventData, setEventData] = useState({ contentHtml: '' });
+
+const handleSave = async () => {
+  // eventData.contentHtml contains the HTML from the editor
+  const response = await fetch('/api/events', {
+    method: 'POST',
+    body: JSON.stringify(eventData),
+  });
+};
+
+<TiptapEditor
+  value={eventData.contentHtml}
+  onChange={html => setEventData({ ...eventData, contentHtml: html })}
+/>;
+```
 
 ## SonarQube Scanner
 

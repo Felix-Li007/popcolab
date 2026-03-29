@@ -1,0 +1,23 @@
+model Event {
+    id              Int             @id @default(autoincrement())
+    eventTitle      String          @db.VarChar(255)
+    eventLocation   String          @db.VarChar(255)
+    eventNotes      String?         @db.VarChar(255)
+    contentHtml     String?         @db.Text
+    eventStatus     EventStatus     @default(INACTIVE)
+    createdBy       Int
+    capacity_max    Int             @default(-1)
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
+    event_galleries EventGallery[]
+    event_calendars EventCalendar[]
+    event_pricing   EventPricing[]
+
+    @@map("event")
+}
+
+enum EventStatus {
+    INACTIVE
+    ACTIVE
+    DRAFT
+}

@@ -1,0 +1,18 @@
+model EventPricing {
+    id          Int        @id @default(autoincrement())
+    event_id    Int
+    price_level PriceLevel
+    event_price Decimal    @default(0.00) @db.Decimal(19, 2)
+    created_at  DateTime   @default(now()) @db.Timestamp(6)
+    updated_at  DateTime   @updatedAt @db.Timestamp(6)
+    event       Event      @relation(fields: [event_id], references: [id])
+
+    @@map("event_pricing")
+}
+
+enum PriceLevel {
+    ADULT
+    SENIOR
+    YOUTH
+    CHILD
+}

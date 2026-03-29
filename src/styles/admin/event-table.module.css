@@ -1,0 +1,89 @@
+@reference "../../app/globals.css";
+
+.section {
+  @apply block;
+}
+
+.header {
+  @apply mb-3 flex items-center justify-between gap-3;
+}
+
+.titleGroup {
+  @apply flex items-center gap-2;
+}
+
+.emoji {
+  @apply text-lg leading-none;
+}
+
+.title {
+  @apply text-sm font-bold text-gray-800;
+}
+
+.viewAllLink {
+  @apply text-xs font-semibold transition-colors hover:underline;
+  color: var(--color-magenta);
+}
+
+.viewAllLink:hover {
+  color: var(--color-teal-deep);
+}
+
+.tableShell {
+  @apply overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm;
+}
+
+.tableScroll {
+  @apply overflow-x-auto;
+}
+
+.table {
+  @apply w-full border-collapse text-xs;
+}
+
+.tableHeadRow {
+  @apply text-white;
+  background: var(--color-teal-deep);
+}
+
+.tableHeadCell {
+  @apply px-4 py-2.5 text-left font-bold;
+}
+
+.emptyCell {
+  @apply px-4 py-6 text-center text-sm text-gray-400;
+}
+
+.tableRow {
+  @apply border-t border-gray-50 transition-colors hover:bg-gray-50;
+}
+
+.titleCell {
+  @apply px-4 py-3 text-sm font-bold leading-5 text-gray-900;
+}
+
+.bodyCell {
+  @apply px-4 py-3 text-gray-600;
+}
+
+.titleButton {
+  @apply cursor-pointer border-0 bg-transparent p-0 text-left transition-colors hover:underline;
+  color: inherit;
+}
+
+.titleButton:hover {
+  color: var(--color-teal-deep);
+}
+
+.statusBadge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold;
+}
+
+.statusLive {
+  @apply bg-emerald-100 text-emerald-700;
+}
+
+.statusUpcoming {
+  color: var(--color-teal-deep);
+  background: rgba(255, 214, 10, 0.4);
+}

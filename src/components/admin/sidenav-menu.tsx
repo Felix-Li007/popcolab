@@ -13,11 +13,13 @@ export default function Sidebar({
   onNavigate,
   className = '',
   branding,
+  collapsed = false,
 }: Readonly<{
   badgeCounts?: BadgeCounts;
   onNavigate?: () => void;
   className?: string;
   branding?: RoleBranding;
+  collapsed?: boolean;
 }>) {
   const groups = menuSection.map(section => ({
     title: section.title,
@@ -37,6 +39,7 @@ export default function Sidebar({
       className={className}
       appearance={adminStandardSidenavAppearance}
       branding={branding}
+      collapsed={collapsed}
     />
   );
 }

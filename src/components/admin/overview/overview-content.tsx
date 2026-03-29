@@ -1,15 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import EventsTable from '@/components/admin/event-table';
 import RequestStatusChart from '@/components/admin/overview/request-status-chart';
 import RequestStatusTrendChart from '@/components/admin/overview/request-trend-chart';
 import QuickActions from '@/components/admin/quick-actions';
 import QuizChart from '@/components/admin/quiz-chart';
+import EventView from '@/components/admin/event/event-view';
 import PersonalityGrid from '@/components/admin/personality/personality-grid';
 import PersonalityForm from '@/components/admin/personality/personality-edit';
 import PersonalityView from '@/components/admin/personality/personality-view';
+import { getOverviewEventByIdAction } from '@/actions/overview-actions';
+import type { Event } from '@/types/event-type';
 import type { OverviewGrowthMetrics } from '@/types/overview-type';
 import type {
   Personality,
@@ -259,6 +262,14 @@ export default function OverviewContent({
 }: Readonly<OverviewContentProps>) {
   const [personalities, setPersonalities] =
     useState<Personality[]>(initialPersonalities);
+  const [selectedOverviewEvent, setSelectedOverviewEvent] = useState<
+    Event | undefined
+  >(undefined);
+  const [selectedOverviewEventId, setSelectedOverviewEventId] = useState<
+    number | null
+  >(null);
+  const [, startEventTransition] = useTransition();
+  const latestOverviewEventRequestIdRef = useRef(0);
 
   const {
     formModal,
@@ -277,6 +288,12 @@ export default function OverviewContent({
     setPersonalities(initialPersonalities);
   }, [initialPersonalities]);
 
+  useEffect(() => {
+    if (selectedOverviewEventId === null) {
+      setSelectedOverviewEvent(undefined);
+    }
+  }, [selectedOverviewEventId]);
+
   const statusDonut = buildStatusDonut(
     growthMetrics.experienceMetrics.statusBreakdown
   );
@@ -286,6 +303,22 @@ export default function OverviewContent({
       <div className="flex flex-col">
         <div className="flex flex-1 gap-0">
           <div className="flex-1 min-w-0 p-4 space-y-5">
+            <EventsTable
+              events={growthMetrics.eventMetrics.highlightedEvents}
+              onView={id => {
+                setSelectedOverviewEventId(id);
+                const requestId = latestOverviewEventRequestIdRef.current + 1;
+                latestOverviewEventRequestIdRef.current = requestId;
+                startEventTransition(async () => {
+                  const event = await getOverviewEventByIdAction(id);
+                  if (latestOverviewEventRequestIdRef.current !== requestId) {
+                    return;
+                  }
+                  setSelectedOverviewEvent(event ?? undefined);
+                });
+              }}
+            />
+
             <section className="rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm">
               <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
@@ -748,8 +781,6 @@ export default function OverviewContent({
                 onDelete={handleDelete}
               />
             </section>
-
-            <EventsTable />
           </div>
 
           <aside className="w-56 shrink-0 p-4 space-y-4 border-l border-gray-100 hidden lg:block">
@@ -776,6 +807,16 @@ export default function OverviewContent({
           personality={viewedPersonality}
         />
       )}
+
+      <EventView
+        isOpen={Boolean(selectedOverviewEvent)}
+        onClose={() => {
+          latestOverviewEventRequestIdRef.current += 1;
+          setSelectedOverviewEventId(null);
+          setSelectedOverviewEvent(undefined);
+        }}
+        event={selectedOverviewEvent}
+      />
     </>
   );
 }

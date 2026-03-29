@@ -7,8 +7,16 @@ import {
 } from '@/constants/request-status';
 import { Prisma } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
+import {
+  formatScheduleTimeValue,
+  mergeDateAndTime,
+  parseCalendarDateValue,
+} from '@/utils/event-schedule';
+import { EventStatus } from '@/libs/prisma/enums';
 import type {
   OverviewBreakdownItem,
+  OverviewEventMetrics,
+  OverviewEventSummaryItem,
   OverviewGrowthMetrics,
   OverviewGrowthPoint,
   OverviewExperienceMetrics,
@@ -122,6 +130,17 @@ function toWeekdayLabel(value: Date | string): string {
   return new Date(value).toLocaleString('en-US', {
     weekday: 'narrow',
     timeZone: 'UTC',
+  });
+}
+
+function formatEventDateLabel(value: Date): string {
+  return value.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
   });
 }
 
@@ -628,6 +647,80 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
     })),
   };
 
+  const now = new Date();
+  const activeEvents = await prisma.event.findMany({
+    where: {
+      eventStatus: EventStatus.ACTIVE,
+    },
+    select: {
+      id: true,
+      eventTitle: true,
+      eventLocation: true,
+      event_calendars: {
+        select: {
+          event_date: true,
+          start_time: true,
+          end_time: true,
+        },
+        orderBy: [{ event_date: 'asc' }, { start_time: 'asc' }],
+      },
+    },
+  });
+
+  const eventMetrics: OverviewEventMetrics = {
+    highlightedEvents: activeEvents
+      .flatMap(event => {
+        const nextCalendar = event.event_calendars.find(calendar => {
+          const eventDate = parseCalendarDateValue(calendar.event_date);
+          const endTime = formatScheduleTimeValue(calendar.end_time);
+          if (!eventDate || !endTime) {
+            return false;
+          }
+
+          const endAt = mergeDateAndTime(eventDate, endTime);
+
+          return endAt >= now;
+        });
+
+        if (!nextCalendar) {
+          return [];
+        }
+
+        const eventDate = parseCalendarDateValue(nextCalendar.event_date);
+        const startTime = formatScheduleTimeValue(nextCalendar.start_time);
+        const endTime = formatScheduleTimeValue(nextCalendar.end_time);
+
+        if (!eventDate || !startTime || !endTime) {
+          return [];
+        }
+
+        const startAt = mergeDateAndTime(eventDate, startTime);
+        const endAt = mergeDateAndTime(eventDate, endTime);
+
+        return [
+          {
+            item: {
+              id: event.id,
+              title: event.eventTitle,
+              location: event.eventLocation,
+              dateLabel: formatEventDateLabel(startAt),
+              status: startAt <= now && endAt >= now ? 'live' : 'upcoming',
+            } satisfies OverviewEventSummaryItem,
+            sortTime: startAt.getTime(),
+          },
+        ];
+      })
+      .sort((left, right) => {
+        if (left.item.status !== right.item.status) {
+          return left.item.status === 'live' ? -1 : 1;
+        }
+
+        return left.sortTime - right.sortTime;
+      })
+      .slice(0, 6)
+      .map(entry => entry.item),
+  };
+
   return {
     totalUsers: toNumber(counts?.total_users ?? 0),
     totalTeams: toNumber(counts?.total_teams ?? 0),
@@ -639,6 +732,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
     requestTrend,
     requestMetrics,
     experienceMetrics,
+    eventMetrics,
     quizMetrics,
     questionMetrics,
   };

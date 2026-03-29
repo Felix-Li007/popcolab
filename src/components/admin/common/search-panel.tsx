@@ -30,6 +30,8 @@ type Props = {
   searchPlaceholder: string;
   searchTestId?: string;
   actions?: React.ReactNode;
+  searchWrapClassName?: string;
+  searchInputClassName?: string;
 } & (InstantProps | SubmitProps);
 
 export default function SearchPanel({
@@ -37,6 +39,8 @@ export default function SearchPanel({
   searchPlaceholder,
   searchTestId,
   actions,
+  searchWrapClassName,
+  searchInputClassName,
   ...searchMode
 }: Props) {
   const isSubmitMode = searchMode.mode === 'submit';
@@ -80,7 +84,7 @@ export default function SearchPanel({
           ) : null}
         </form>
       ) : (
-        <div className={styles.searchWrap}>
+        <div className={`${styles.searchWrap} ${searchWrapClassName ?? ''}`}>
           <svg
             viewBox="0 0 20 20"
             fill="currentColor"
@@ -98,7 +102,7 @@ export default function SearchPanel({
             onChange={event => searchMode.onSearchChange(event.target.value)}
             placeholder={searchPlaceholder}
             data-testid={searchTestId}
-            className={styles.searchInput}
+            className={`${styles.searchInput} ${searchInputClassName ?? ''}`}
           />
         </div>
       )}
