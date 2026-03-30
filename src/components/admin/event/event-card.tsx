@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { EventStatus } from '@/libs/prisma/enums';
+import { DateStatus, EventStatus } from '@/libs/prisma/enums';
 import {
   parseCalendarDateValue,
   formatScheduleTimeValue,
@@ -50,6 +50,7 @@ function getStatusVariant(status: Event['eventStatus']) {
 
 function getUpcomingLabel(event: Event) {
   const earliestEndTime = (event.event_calendars ?? [])
+    .filter(calendar => calendar.date_status !== DateStatus.CANCELLED)
     .flatMap(calendar => {
       const eventDate = parseCalendarDateValue(calendar.event_date);
       const endTime = formatScheduleTimeValue(calendar.end_time);
@@ -233,7 +234,9 @@ export default function EventCard({
   const scheduleRowRef = useRef<HTMLDivElement | null>(null);
   const coverImage = getCoverImage(event);
   const displayNotes = event.eventNotes?.trim() ?? '';
-  const slots = event.event_calendars ?? [];
+  const slots = (event.event_calendars ?? []).filter(
+    calendar => calendar.date_status !== DateStatus.CANCELLED
+  );
   const [visibleSlotCount, setVisibleSlotCount] = useState(() =>
     getVisibleSlotCount(0, slots.length)
   );

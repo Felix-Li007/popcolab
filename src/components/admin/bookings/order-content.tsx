@@ -73,12 +73,24 @@ function buildOrderWhere(params: {
         {
           order_items: {
             some: {
-              experience: {
-                experience_title: {
-                  contains: trimmedSearch,
-                  mode: 'insensitive',
+              OR: [
+                {
+                  experience: {
+                    experience_title: {
+                      contains: trimmedSearch,
+                      mode: 'insensitive',
+                    },
+                  },
                 },
-              },
+                {
+                  event: {
+                    eventTitle: {
+                      contains: trimmedSearch,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              ],
             },
           },
         },
@@ -147,7 +159,12 @@ export default async function OrderContent({ searchParams }: Readonly<Props>) {
         },
       },
       order_items: {
-        orderBy: [{ schedule_date: 'asc' }, { id: 'asc' }],
+        orderBy: [
+          { schedule_date: 'asc' },
+          { start_time: 'asc' },
+          { end_time: 'asc' },
+          { id: 'asc' },
+        ],
         include: {
           experience: {
             select: {
@@ -157,6 +174,12 @@ export default async function OrderContent({ searchParams }: Readonly<Props>) {
                   provider_label: true,
                 },
               },
+            },
+          },
+          event: {
+            select: {
+              eventTitle: true,
+              eventLocation: true,
             },
           },
         },
@@ -196,7 +219,7 @@ export default async function OrderContent({ searchParams }: Readonly<Props>) {
                   type="search"
                   name="q"
                   defaultValue={query.search}
-                  placeholder="Search by experience, order status, or customer email..."
+                  placeholder="Search by experience, event, order status, or customer email..."
                   className={styles.searchInput}
                 />
               </div>
@@ -241,7 +264,7 @@ export default async function OrderContent({ searchParams }: Readonly<Props>) {
           <div className={styles.tableHeader}>
             <div>Order</div>
             <div>Customer</div>
-            <div>Experience</div>
+            <div>Item</div>
             <div>Schedule</div>
             <div>Status</div>
             <div>Total</div>

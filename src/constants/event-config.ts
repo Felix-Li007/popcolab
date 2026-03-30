@@ -1,0 +1,1 @@
+export const EVENT_CANCEL_MIN_LEAD_DAYS = 2;

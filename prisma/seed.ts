@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/libs/prisma/client';
 import { seedDimensions } from './seeds/dimension.seed';
+import { seedEventCancellationOrders } from './seeds/event-cancellation-orders.seed';
 import { seedExperienceCategories } from './seeds/experience-categories.seed';
 import { seedTemporaryExperienceImages } from './seeds/experience-images.seed';
 import { seedExperiencesFromWorkbook } from './seeds/experiences.seed';
@@ -13,6 +14,7 @@ import {
   seedQuestions,
 } from './seeds/questions.seed';
 import { seedRequests } from './seeds/request.seed';
+import { seedTestUsers } from './seeds/test-users.seed';
 import { getSeedSchemaState } from './seeds/schema-state';
 
 const connectionString = process.env.DATABASE_URL!;
@@ -24,6 +26,7 @@ async function main() {
 
   const schemaState = await getSeedSchemaState(prisma);
 
+  await seedTestUsers(prisma);
   await seedPersonalities(prisma);
   await seedProviders(prisma);
   await seedExperienceCategories(prisma);
@@ -39,6 +42,7 @@ async function main() {
   );
   await seedExperiencesFromWorkbook(prisma);
   await seedTemporaryExperienceImages(prisma);
+  await seedEventCancellationOrders(prisma);
   await seedRequests(prisma);
 
   console.log('✅ Core seed data created');

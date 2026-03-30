@@ -37,6 +37,7 @@ type TimeSectionPanelProps = {
   onSelectDraftSchedule: (scheduleId: string) => void;
   onAddDraftSchedule: () => void;
   onDeleteDraftSchedule: () => void;
+  usePageLayout?: boolean;
 };
 
 type CalendarCell = {
@@ -247,6 +248,7 @@ export default function TimeSectionPanel({
   onSelectDraftSchedule,
   onAddDraftSchedule,
   onDeleteDraftSchedule,
+  usePageLayout = false,
 }: Readonly<TimeSectionPanelProps>) {
   const selectedCalendar =
     calendars.find(calendar => calendar.id === selectedCalendarId) ??
@@ -267,40 +269,42 @@ export default function TimeSectionPanel({
     isEditable || allowScheduleSelectionWhenReadOnly;
 
   return (
-    <div className={`${styles.sectionPanel} ${styles.timeSectionPanel}`}>
+    <div
+      className={`${styles.sectionPanel} ${styles.timeSectionPanel} ${usePageLayout ? styles.timeSectionPanelPage : ''}`}
+    >
       {useEditableLayout ? (
-        <div className={styles.timeLayout}>
-          <div className={styles.timeListPanel}>
+        <>
+          <div
+            className={`${styles.timeListPanel} ${usePageLayout ? styles.timeListPanelPage : ''}`}
+          >
             {draftSchedules.length > 0 ? (
-              <div className={styles.timeListGrid}>
-                {draftSchedules.map(schedule => {
-                  const isSelected = schedule.id === selectedDraftScheduleId;
+              draftSchedules.map(schedule => {
+                const isSelected = schedule.id === selectedDraftScheduleId;
 
-                  return (
-                    <button
-                      key={schedule.id}
-                      type="button"
-                      disabled={!canSelectDraftSchedule}
-                      className={`${styles.timeListCard} ${isSelected ? styles.timeListCardActive : ''}`}
-                      onClick={() => {
-                        if (!canSelectDraftSchedule) return;
-                        onSelectDraftSchedule(schedule.id);
-                      }}
-                    >
-                      <p className={styles.timeListCardTitle}>
-                        {schedule.eventDate.toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                      <p className={styles.timeListCardMeta}>
-                        {schedule.startTime} - {schedule.endTime}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+                return (
+                  <button
+                    key={schedule.id}
+                    type="button"
+                    disabled={!canSelectDraftSchedule}
+                    className={`${styles.timeListCard} ${usePageLayout ? styles.timeListCardPage : ''} ${isSelected ? styles.timeListCardActive : ''}`}
+                    onClick={() => {
+                      if (!canSelectDraftSchedule) return;
+                      onSelectDraftSchedule(schedule.id);
+                    }}
+                  >
+                    <p className={styles.timeListCardTitle}>
+                      {schedule.eventDate.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    <p className={styles.timeListCardMeta}>
+                      {schedule.startTime} - {schedule.endTime}
+                    </p>
+                  </button>
+                );
+              })
             ) : (
               <div className={styles.timeListEmptyNotice}>
                 No dates added yet
@@ -308,7 +312,9 @@ export default function TimeSectionPanel({
             )}
           </div>
 
-          <div className={styles.timeCalendarPanel}>
+          <div
+            className={`${styles.timeCalendarPanel} ${usePageLayout ? styles.timeCalendarPanelPage : ''}`}
+          >
             <CalendarViewport
               key={activeDateValue}
               activeDate={activeDate}
@@ -363,40 +369,40 @@ export default function TimeSectionPanel({
               </div>
             ) : null}
           </div>
-        </div>
+        </>
       ) : (
-        <div className={styles.timeLayout}>
-          <div className={styles.timeListPanel}>
+        <>
+          <div
+            className={`${styles.timeListPanel} ${usePageLayout ? styles.timeListPanelPage : ''}`}
+          >
             {calendars.length > 0 ? (
-              <div className={styles.timeListGrid}>
-                {calendars.map(calendar => {
-                  const isSelected = calendar.id === selectedCalendar?.id;
+              calendars.map(calendar => {
+                const isSelected = calendar.id === selectedCalendar?.id;
 
-                  return (
-                    <button
-                      key={calendar.id}
-                      type="button"
-                      className={`${styles.timeListCard} ${isSelected ? styles.timeListCardActive : ''}`}
-                      onClick={() => onSelectCalendar(calendar.id)}
-                    >
-                      <p className={styles.timeListCardTitle}>
-                        {(
-                          parseCalendarDateValue(calendar.event_date) ??
-                          new Date()
-                        ).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </p>
-                      <p className={styles.timeListCardMeta}>
-                        {formatCalendarTime(calendar.start_time)} -{' '}
-                        {formatCalendarTime(calendar.end_time)}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+                return (
+                  <button
+                    key={calendar.id}
+                    type="button"
+                    className={`${styles.timeListCard} ${usePageLayout ? styles.timeListCardPage : ''} ${isSelected ? styles.timeListCardActive : ''}`}
+                    onClick={() => onSelectCalendar(calendar.id)}
+                  >
+                    <p className={styles.timeListCardTitle}>
+                      {(
+                        parseCalendarDateValue(calendar.event_date) ??
+                        new Date()
+                      ).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </p>
+                    <p className={styles.timeListCardMeta}>
+                      {formatCalendarTime(calendar.start_time)} -{' '}
+                      {formatCalendarTime(calendar.end_time)}
+                    </p>
+                  </button>
+                );
+              })
             ) : (
               <div className={styles.timeListEmptyNotice}>
                 No dates added yet
@@ -404,7 +410,9 @@ export default function TimeSectionPanel({
             )}
           </div>
 
-          <div className={styles.timeCalendarPanel}>
+          <div
+            className={`${styles.timeCalendarPanel} ${usePageLayout ? styles.timeCalendarPanelPage : ''}`}
+          >
             <CalendarViewport key={activeDateValue} activeDate={activeDate} />
 
             <div className={styles.timeCalendarPicker}>
@@ -478,7 +486,7 @@ export default function TimeSectionPanel({
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

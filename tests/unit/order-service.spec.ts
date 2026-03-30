@@ -244,7 +244,9 @@ describe('order-service booking slot locking', () => {
       order_items: [
         {
           experience_id: 7,
-          schedule_date: new Date('2026-03-20T15:00:00.000Z'),
+          schedule_date: new Date('2026-03-20T12:00:00.000Z'),
+          start_time: new Date('1970-01-01T12:00:00.000Z'),
+          end_time: new Date('1970-01-01T17:00:00.000Z'),
         },
       ],
     });
@@ -269,7 +271,7 @@ describe('order-service booking slot locking', () => {
     expect(tx.experienceCalendar.updateMany).toHaveBeenNthCalledWith(2, {
       where: {
         experience_id: 7,
-        schedule_date: new Date('2026-03-20T15:00:00.000Z'),
+        schedule_date: new Date('2026-03-20T11:00:00.000Z'),
       },
       data: {
         calendar_status: 'blocked',

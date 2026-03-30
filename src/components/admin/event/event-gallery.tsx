@@ -18,6 +18,7 @@ type Props = {
   value?: EventGalleryDraft[];
   onChange?: (galleries: EventGalleryDraft[]) => void;
   readOnly?: boolean;
+  layout?: 'stacked' | 'split';
 };
 
 const MAX_GALLERY_SLOTS = 5;
@@ -104,6 +105,7 @@ export default function EventGalleryPanel({
   value,
   onChange,
   readOnly = false,
+  layout = 'stacked',
 }: Readonly<Props>) {
   const [internalSlots, setInternalSlots] = useState<GallerySlot[]>(() =>
     buildInitialSlots(galleries)
@@ -187,7 +189,9 @@ export default function EventGalleryPanel({
   }
 
   return (
-    <div className={styles.layout}>
+    <div
+      className={`${styles.layout} ${layout === 'split' ? styles.layoutSplit : ''}`}
+    >
       <div className={styles.previewPanel}>
         <div className={styles.previewFrame}>
           {getSlotSrc(selectedSlot) ? (
@@ -207,7 +211,9 @@ export default function EventGalleryPanel({
         </div>
       </div>
 
-      <div className={styles.slotsPanel}>
+      <div
+        className={`${styles.slotsPanel} ${layout === 'split' ? styles.slotsPanelSplit : ''}`}
+      >
         {slots.map((slot, index) => {
           const isActive = index === selectedSlotIndex;
           const slotSrc = getSlotSrc(slot);

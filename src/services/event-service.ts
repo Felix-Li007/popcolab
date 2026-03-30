@@ -66,16 +66,19 @@ async function getEventIdsByDateRange(
 
   if (startDateTime && endDateTime) {
     calendarDateFilter = Prisma.sql`
-            WHERE (ec.event_date::date + ec.end_time::time) >= ${startDateTime}
+            WHERE ec.date_status = 'VALID'
+              AND (ec.event_date::date + ec.end_time::time) >= ${startDateTime}
               AND (ec.event_date::date + ec.start_time::time) <= ${endDateTime}
         `;
   } else if (startDateTime) {
     calendarDateFilter = Prisma.sql`
-            WHERE (ec.event_date::date + ec.end_time::time) >= ${startDateTime}
+            WHERE ec.date_status = 'VALID'
+              AND (ec.event_date::date + ec.end_time::time) >= ${startDateTime}
         `;
   } else if (endDateTime) {
     calendarDateFilter = Prisma.sql`
-            WHERE (ec.event_date::date + ec.start_time::time) <= ${endDateTime}
+            WHERE ec.date_status = 'VALID'
+              AND (ec.event_date::date + ec.start_time::time) <= ${endDateTime}
         `;
   }
 
@@ -176,9 +179,15 @@ export async function getEventById(id: number): Promise<Event | null> {
         event_pricing: true,
       },
     });
-    return event ? serializeEvent(event) : null;
+
+    if (!event) {
+      console.warn(`Event not found: id=${id}`);
+      return null;
+    }
+
+    return serializeEvent(event);
   } catch (error) {
-    console.error('Error fetching event:', error);
+    console.error(`Error fetching event (id=${id}):`, error);
     throw error;
   }
 }

@@ -73,10 +73,38 @@ function buildPaymentWhere(params: {
         {
           orders: {
             some: {
-              order_status: {
-                contains: trimmedSearch,
-                mode: 'insensitive',
-              },
+              OR: [
+                {
+                  order_status: {
+                    contains: trimmedSearch,
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  order_items: {
+                    some: {
+                      OR: [
+                        {
+                          experience: {
+                            experience_title: {
+                              contains: trimmedSearch,
+                              mode: 'insensitive',
+                            },
+                          },
+                        },
+                        {
+                          event: {
+                            eventTitle: {
+                              contains: trimmedSearch,
+                              mode: 'insensitive',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
             },
           },
         },
@@ -130,7 +158,12 @@ export default async function PaymentContent({
         orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
         include: {
           order_items: {
-            orderBy: [{ schedule_date: 'asc' }, { id: 'asc' }],
+            orderBy: [
+              { schedule_date: 'asc' },
+              { start_time: 'asc' },
+              { end_time: 'asc' },
+              { id: 'asc' },
+            ],
             include: {
               experience: {
                 select: {
@@ -140,6 +173,12 @@ export default async function PaymentContent({
                       provider_label: true,
                     },
                   },
+                },
+              },
+              event: {
+                select: {
+                  eventTitle: true,
+                  eventLocation: true,
                 },
               },
             },
@@ -189,7 +228,7 @@ export default async function PaymentContent({
                   type="search"
                   name="q"
                   defaultValue={query.search}
-                  placeholder="Search by customer email, payment status, or method..."
+                  placeholder="Search by customer email, payment status, method, experience, or event..."
                   className={styles.searchInput}
                 />
               </div>

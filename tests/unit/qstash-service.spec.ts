@@ -6,6 +6,8 @@ jest.mock('@/libs/qstash-client', () => ({
 jest.mock('@/services/queue-service', () => ({
   readRequestQueueJobs: jest.fn(),
   deleteRequestQueueJob: jest.fn(),
+  readNotificationQueueJobs: jest.fn(),
+  deleteNotificationQueueJob: jest.fn(),
 }));
 
 jest.mock('@/services/proposal-service', () => ({
@@ -14,6 +16,10 @@ jest.mock('@/services/proposal-service', () => ({
 
 jest.mock('@/services/request-service', () => ({
   enqueueRequestReady: jest.fn(),
+}));
+
+jest.mock('@/services/delivery-service', () => ({
+  processNotificationQueueJob: jest.fn(),
 }));
 
 jest.mock('@/utils/logging-util', () => ({
@@ -26,8 +32,11 @@ import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import { createFittedProposal } from '@/services/proposal-service';
 import {
   deleteRequestQueueJob,
+  deleteNotificationQueueJob,
+  readNotificationQueueJobs,
   readRequestQueueJobs,
 } from '@/services/queue-service';
+import { processNotificationQueueJob } from '@/services/delivery-service';
 import { enqueueRequestReady } from '@/services/request-service';
 import {
   handleQStashTask,
@@ -49,9 +58,21 @@ const readRequestQueueJobsMock = readRequestQueueJobs as jest.MockedFunction<
 const deleteRequestQueueJobMock = deleteRequestQueueJob as jest.MockedFunction<
   typeof deleteRequestQueueJob
 >;
+const readNotificationQueueJobsMock =
+  readNotificationQueueJobs as jest.MockedFunction<
+    typeof readNotificationQueueJobs
+  >;
+const deleteNotificationQueueJobMock =
+  deleteNotificationQueueJob as jest.MockedFunction<
+    typeof deleteNotificationQueueJob
+  >;
 const createFittedProposalMock = createFittedProposal as jest.MockedFunction<
   typeof createFittedProposal
 >;
+const processNotificationQueueJobMock =
+  processNotificationQueueJob as jest.MockedFunction<
+    typeof processNotificationQueueJob
+  >;
 const enqueueRequestReadyMock = enqueueRequestReady as jest.MockedFunction<
   typeof enqueueRequestReady
 >;
@@ -61,6 +82,7 @@ const loggerMock = logger as unknown as {
 
 describe('qstash-service', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     getQStashEndpointUrlMock.mockReturnValue('https://example.com/api/qstash');
   });
 
@@ -209,6 +231,80 @@ describe('qstash-service', () => {
           messageId: 2,
           status: 'failed',
           detail: 'proposal generation failed',
+        },
+      ],
+    });
+  });
+
+  test('processes notification queue messages and deletes only successful ones', async () => {
+    readNotificationQueueJobsMock.mockResolvedValue([
+      {
+        messageId: 11,
+        readCount: 0,
+        enqueuedAt: '2026-03-30T12:00:00.000Z',
+        visibilityTimeoutAt: '2026-03-30T12:05:00.000Z',
+        job: {
+          type: 'event_canceled_email',
+          recipientEmail: 'member@example.com',
+          recipientName: 'Member One',
+          eventTitle: 'Spring Gala',
+          eventLocation: 'Main Hall',
+          queuedAt: '2026-03-30T12:00:00.000Z',
+        },
+      },
+      {
+        messageId: 12,
+        readCount: 0,
+        enqueuedAt: '2026-03-30T12:01:00.000Z',
+        visibilityTimeoutAt: '2026-03-30T12:06:00.000Z',
+        job: {
+          type: 'event_date_canceled_email',
+          recipientEmail: 'member2@example.com',
+          recipientName: 'Member Two',
+          eventTitle: 'Spring Gala',
+          eventLocation: 'Main Hall',
+          canceledDateLabel: 'Apr 5, 2026',
+          canceledTimeLabel: '18:00 - 20:00',
+          queuedAt: '2026-03-30T12:01:00.000Z',
+        },
+      },
+    ] as never);
+    processNotificationQueueJobMock
+      .mockResolvedValueOnce({ id: 'email_1' } as never)
+      .mockRejectedValueOnce(new Error('email send failed'));
+
+    const result = await handleQStashTask({
+      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
+      batchSize: 10,
+    });
+
+    expect(readNotificationQueueJobsMock).toHaveBeenCalledWith(10);
+    expect(processNotificationQueueJobMock).toHaveBeenCalledTimes(2);
+    expect(deleteNotificationQueueJobMock).toHaveBeenCalledTimes(1);
+    expect(deleteNotificationQueueJobMock).toHaveBeenCalledWith(11);
+    expect(loggerMock.error).toHaveBeenCalledWith(
+      {
+        error: expect.any(Error),
+        messageId: 12,
+        notificationType: 'event_date_canceled_email',
+        recipientEmail: 'member2@example.com',
+      },
+      'QStash notification queue message failed'
+    );
+    expect(result).toEqual({
+      ok: true,
+      handled: true,
+      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
+      processed: [
+        {
+          messageId: 11,
+          status: 'completed',
+          detail: 'event_canceled_email',
+        },
+        {
+          messageId: 12,
+          status: 'failed',
+          detail: 'email send failed',
         },
       ],
     });

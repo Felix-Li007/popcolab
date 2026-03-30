@@ -1,6 +1,9 @@
 import 'server-only';
 import { Resend } from 'resend';
 import type { ReactElement } from 'react';
+import { createModuleLogger } from '@/utils/logging-util';
+
+const logger = createModuleLogger(import.meta.url);
 
 export type ResendEmailPayload = {
   to: string;
@@ -19,6 +22,16 @@ export async function sendResendEmail(
   }
 
   const resend = new Resend(apiKey);
+
+  logger.info(
+    {
+      to: payload.to,
+      from: payload.from,
+      subject: payload.subject,
+    },
+    'Sending email through Resend'
+  );
+
   const { data, error } = await resend.emails.send({
     from: payload.from,
     to: payload.to,
@@ -33,6 +46,15 @@ export async function sendResendEmail(
   //       html: "<p>It works!</p>",
 
   if (error) {
+    logger.error(
+      {
+        to: payload.to,
+        from: payload.from,
+        subject: payload.subject,
+        error,
+      },
+      'Resend email send failed'
+    );
     throw new Error(
       `Failed to send email with Resend: ${error.name ?? 'ResendError'} ${error.message ?? 'Unknown error.'}`
     );
@@ -41,6 +63,16 @@ export async function sendResendEmail(
   if (typeof data?.id !== 'string' || data.id.length === 0) {
     throw new Error('Resend accepted the request but returned no message id.');
   }
+
+  logger.info(
+    {
+      to: payload.to,
+      from: payload.from,
+      subject: payload.subject,
+      resendMessageId: data.id,
+    },
+    'Resend email send completed'
+  );
 
   return {
     id: data.id,

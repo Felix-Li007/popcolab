@@ -140,3 +140,8 @@ export function mergeDateAndTime(date: Date, timeValue: string) {
   mergedDate.setHours(Number(hourText) || 0, Number(minuteText) || 0, 0, 0);
   return mergedDate;
 }
+
+export function isAtLeastDaysAway(dateTime: Date, days: number) {
+  const minimumLeadMs = days * 24 * 60 * 60 * 1000;
+  return dateTime.getTime() - Date.now() >= minimumLeadMs;
+}

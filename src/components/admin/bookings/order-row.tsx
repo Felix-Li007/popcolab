@@ -28,15 +28,23 @@ export type AdminOrderListItem = {
   } | null;
   order_items: Array<{
     id: number;
-    experience_id: number;
+    item_type: 'EXPERIENCE' | 'EVENT';
+    experience_id: number | null;
+    event_id: number | null;
     item_price: DecimalLike;
     schedule_date: Date;
+    start_time: Date;
+    end_time: Date;
     experience: {
       experience_title: string;
       provider: {
         provider_label: string;
       };
-    };
+    } | null;
+    event: {
+      eventTitle: string;
+      eventLocation: string;
+    } | null;
   }>;
 };
 
@@ -46,7 +54,24 @@ type Props = {
 
 function formatDate(value: Date | null) {
   if (!value) return 'Not set';
-  return new Date(value).toLocaleString('en-CA');
+  return new Date(value).toLocaleDateString('en-CA');
+}
+
+function formatTime(value: Date | null) {
+  if (!value) return 'Not set';
+  return new Date(value).toLocaleTimeString('en-CA', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+function formatScheduleSlot(item: {
+  schedule_date: Date;
+  start_time: Date;
+  end_time: Date;
+}) {
+  return `${formatDate(item.schedule_date)} ${formatTime(item.start_time)} - ${formatTime(item.end_time)}`;
 }
 
 function getOrderStatusClass(status: string) {
@@ -78,9 +103,55 @@ function getPaymentStatusClass(status: string | null | undefined) {
   }
 }
 
+function getPrimaryItemLabel(
+  item: AdminOrderListItem['order_items'][number] | null
+) {
+  if (!item) return null;
+
+  if (item.item_type === 'EVENT') {
+    return item.event?.eventTitle ?? `Event #${item.event_id ?? '-'}`;
+  }
+
+  return (
+    item.experience?.experience_title ??
+    `Experience #${item.experience_id ?? '-'}`
+  );
+}
+
+function getPrimaryItemMeta(
+  item: AdminOrderListItem['order_items'][number] | null
+) {
+  if (!item) return null;
+
+  if (item.item_type === 'EVENT') {
+    return item.event?.eventLocation ?? 'Event';
+  }
+
+  return item.experience?.provider.provider_label ?? 'Experience';
+}
+
+function getPrimaryItemHref(
+  item: AdminOrderListItem['order_items'][number] | null
+) {
+  if (!item) return null;
+
+  if (item.item_type === 'EVENT' && item.event_id) {
+    return `/admin/events?view=${item.event_id}`;
+  }
+
+  if (item.item_type === 'EXPERIENCE' && item.experience_id) {
+    return `/admin/experiences?view=${item.experience_id}`;
+  }
+
+  return null;
+}
+
 export default function OrderRow({ order }: Readonly<Props>) {
   const primaryItem = order.order_items[0] ?? null;
   const additionalItemCount = Math.max(0, order.order_items.length - 1);
+  const primaryItemHref = getPrimaryItemHref(primaryItem);
+  const primaryItemLabel = getPrimaryItemLabel(primaryItem);
+  const primaryItemMeta = getPrimaryItemMeta(primaryItem);
   let totalAmount = null;
 
   if (order.payment?.grand_total) {
@@ -109,20 +180,22 @@ export default function OrderRow({ order }: Readonly<Props>) {
         </div>
 
         <div>
-          <p className={styles.mobileLabel}>Experience</p>
+          <p className={styles.mobileLabel}>Item</p>
           {primaryItem ? (
             <>
               <p className={styles.primaryText}>
-                <Link
-                  href={`/admin/experiences?view=${primaryItem.experience_id}`}
-                  className={styles.experienceLink}
-                >
-                  {primaryItem.experience.experience_title}
-                </Link>
+                {primaryItemHref && primaryItemLabel ? (
+                  <Link
+                    href={primaryItemHref}
+                    className={styles.experienceLink}
+                  >
+                    {primaryItemLabel}
+                  </Link>
+                ) : (
+                  (primaryItemLabel ?? 'Untitled item')
+                )}
               </p>
-              <p className={styles.secondaryText}>
-                {primaryItem.experience.provider.provider_label}
-              </p>
+              <p className={styles.secondaryText}>{primaryItemMeta}</p>
               {additionalItemCount > 0 ? (
                 <p className={styles.secondarySmall}>
                   + {additionalItemCount} more item
@@ -138,7 +211,7 @@ export default function OrderRow({ order }: Readonly<Props>) {
         <div>
           <p className={styles.mobileLabel}>Schedule</p>
           <p className={styles.primaryText}>
-            {primaryItem ? formatDate(primaryItem.schedule_date) : 'Not set'}
+            {primaryItem ? formatScheduleSlot(primaryItem) : 'Not set'}
           </p>
           <p className={styles.secondaryText}>
             Expires {formatDate(order.expired_at)}

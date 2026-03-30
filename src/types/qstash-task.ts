@@ -6,6 +6,7 @@ import {
 export const QSTASH_TASK_TYPE = {
   REQUEST_ENQUEUE_READY: 'request.proposal.enqueue-if-ready',
   REQUEST_QUEUE_PROCESS: 'request.queue.process',
+  NOTIFICATION_QUEUE_PROCESS: 'notification.queue.process',
   EXPERIENCE_ORDER_EXPIRE: 'experience.order.expire',
   EXPERIENCE_COMPLETED: 'user.experience.completed',
 } as const;
@@ -18,6 +19,11 @@ export type RequestEnqueuePayload = {
 
 export type RequestProcessPayload = {
   type: typeof QSTASH_TASK_TYPE.REQUEST_QUEUE_PROCESS;
+  batchSize: number;
+};
+
+export type NotificationProcessPayload = {
+  type: typeof QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS;
   batchSize: number;
 };
 
@@ -34,6 +40,7 @@ export type ExperienceCompletedPayload = {
 export type QStashTaskPayload =
   | RequestEnqueuePayload
   | RequestProcessPayload
+  | NotificationProcessPayload
   | ExperienceOrderExpirePayload
   | ExperienceCompletedPayload;
 
@@ -53,6 +60,7 @@ export function isQStashTaskPayload(
         )
       );
     case QSTASH_TASK_TYPE.REQUEST_QUEUE_PROCESS:
+    case QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS:
       return (
         typeof taskPayload.batchSize === 'number' &&
         Number.isInteger(taskPayload.batchSize) &&

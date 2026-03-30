@@ -26,7 +26,7 @@ test.describe('Events page', () => {
     await page.goto('/admin/events');
   });
 
-  test('create, publish, view, edit, and delete flow works end-to-end', async ({
+  test('create, view, edit, and delete flow works end-to-end', async ({
     page,
   }, testInfo) => {
     const eventTitle = makeUniqueEventTitle(testInfo);
@@ -42,34 +42,36 @@ test.describe('Events page', () => {
     ).toBeVisible();
 
     await page.getByRole('button', { name: /new event/i }).click();
-
-    const formModal = page.getByTestId('event-form-modal');
-    await expect(formModal).toBeVisible();
+    await expect(page).toHaveURL(/\/admin\/events\/create$/);
     await expect(
       page.getByRole('heading', { name: /create event/i })
     ).toBeVisible();
 
-    await formModal.locator('#eventTitle').fill(eventTitle);
-    await formModal.locator('#eventLocation').fill(location);
-    await formModal
+    await page.locator('#eventTitle').fill(eventTitle);
+    await page.locator('#eventLocation').fill(location);
+    await page
       .locator('#eventNotes')
       .fill('E2E notes for the event management flow.');
-    await formModal.locator('#capacity_max').fill('24');
-    await formModal.locator('#eventStatus').selectOption('ACTIVE');
+    await page.locator('#capacity_max').fill('24');
+    await page.locator('#eventStatus').selectOption('ACTIVE');
 
-    await formModal.getByRole('button', { name: /^about$/i }).click();
-    const editor = formModal.locator('.ProseMirror').first();
+    await page.getByRole('button', { name: /^about$/i }).click();
+    const editor = page.locator('.ProseMirror').first();
     await editor.click();
     await editor.fill('E2E description for the created event.');
 
-    await formModal.getByRole('button', { name: /^time$/i }).click();
-    await formModal.getByLabel('Event date').fill(tomorrowValue);
-    await formModal.getByLabel('Start time').first().fill('09:00');
-    await formModal.getByLabel('End time').first().fill('11:30');
-    await formModal.getByRole('button', { name: /^add$/i }).click();
+    await page.getByRole('button', { name: /^time$/i }).click();
+    await page.getByLabel('Event date').fill(tomorrowValue);
+    await page.getByLabel('Start time').first().fill('09:00');
+    await page.getByLabel('End time').first().fill('11:30');
+    await page.getByRole('button', { name: /^create event$/i }).click();
 
-    await formModal.getByRole('button', { name: /^create event$/i }).click();
-    await expect(page.getByTestId('event-form-modal-root')).toHaveCount(0);
+    await expect(page).toHaveURL(/\/admin\/events\/\d+$/);
+    await expect(page.locator('#eventTitleView')).toHaveValue(eventTitle);
+    await expect(page.locator('#eventLocationView')).toHaveValue(location);
+
+    await page.getByRole('button', { name: /^back to events$/i }).click();
+    await expect(page).toHaveURL(/\/admin\/events$/);
 
     await searchForEvent(page, eventTitle);
 
@@ -82,24 +84,23 @@ test.describe('Events page', () => {
     await expect(createdCard.getByText(location)).toBeVisible();
 
     await createdCard.getByRole('button', { name: /^view$/i }).click();
-    const viewModal = page.getByTestId('event-view-modal');
-    await expect(viewModal).toBeVisible();
-    await expect(viewModal.locator('#eventTitleView')).toHaveValue(eventTitle);
-    await expect(viewModal.locator('#eventLocationView')).toHaveValue(location);
-    await page.getByRole('button', { name: /^close$/i }).click();
-    await expect(page.getByTestId('event-view-modal-root')).toHaveCount(0);
+    await expect(page).toHaveURL(/\/admin\/events\/\d+$/);
+    await expect(page.locator('#eventTitleView')).toHaveValue(eventTitle);
+    await expect(page.locator('#eventLocationView')).toHaveValue(location);
 
-    await createdCard.getByRole('button', { name: /^edit$/i }).click();
-    await expect(page.getByTestId('event-form-modal')).toBeVisible();
+    await page.getByRole('button', { name: /^edit event$/i }).click();
+    await expect(page).toHaveURL(/\/admin\/events\/\d+\/edit$/);
     await expect(
       page.getByRole('heading', { name: /edit event/i })
     ).toBeVisible();
 
-    const editModal = page.getByTestId('event-form-modal');
-    await editModal.locator('#eventTitle').fill(updatedTitle);
-    await editModal.locator('#eventLocation').fill(updatedLocation);
-    await editModal.getByRole('button', { name: /^update event$/i }).click();
-    await expect(page.getByTestId('event-form-modal-root')).toHaveCount(0);
+    await page.locator('#eventTitle').fill(updatedTitle);
+    await page.locator('#eventLocation').fill(updatedLocation);
+    await page.getByRole('button', { name: /^save changes$/i }).click();
+    await expect(page).toHaveURL(/\/admin\/events\/\d+$/);
+
+    await page.getByRole('button', { name: /^back to events$/i }).click();
+    await expect(page).toHaveURL(/\/admin\/events$/);
 
     await searchForEvent(page, updatedTitle);
 

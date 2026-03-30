@@ -12,6 +12,7 @@ model Event {
     event_galleries EventGallery[]
     event_calendars EventCalendar[]
     event_pricing   EventPricing[]
+    order_items     OrderItem[]
 
     @@map("event")
 }

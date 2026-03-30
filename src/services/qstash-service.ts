@@ -3,8 +3,11 @@ import 'server-only';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import {
   deleteRequestQueueJob,
+  deleteNotificationQueueJob,
+  readNotificationQueueJobs,
   readRequestQueueJobs,
 } from '@/services/queue-service';
+import { processNotificationQueueJob } from '@/services/delivery-service';
 import { expireExperienceOrderIfDue } from '@/services/order-service';
 import { refreshUserPreference } from '@/services/preference-service';
 import { createFittedProposal } from '@/services/proposal-service';
@@ -13,11 +16,24 @@ import {
   type ExperienceOrderExpirePayload,
   QSTASH_TASK_TYPE,
   type ExperienceCompletedPayload,
+  type NotificationProcessPayload,
   type RequestProcessPayload,
   type QStashTaskPayload,
   type RequestEnqueuePayload,
 } from '@/types/qstash-task';
 import { logger } from '@/utils/logging-util';
+
+function logInfo(payload: Record<string, unknown>, message: string) {
+  if (typeof logger.info === 'function') {
+    logger.info(payload, message);
+  }
+}
+
+function logError(payload: Record<string, unknown>, message: string) {
+  if (typeof logger.error === 'function') {
+    logger.error(payload, message);
+  }
+}
 
 type QStashDelay = `${bigint}${'s' | 'm' | 'h' | 'd'}` | number;
 
@@ -80,6 +96,8 @@ export async function handleQStashTask(payload: QStashTaskPayload) {
       return handleRequestReady(payload);
     case QSTASH_TASK_TYPE.REQUEST_QUEUE_PROCESS:
       return handleRequestProcess(payload);
+    case QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS:
+      return handleNotificationProcess(payload);
     case QSTASH_TASK_TYPE.EXPERIENCE_ORDER_EXPIRE:
       return handleExperienceOrderExpiry(payload);
     case QSTASH_TASK_TYPE.EXPERIENCE_COMPLETED:
@@ -111,7 +129,7 @@ async function handleRequestProcess(payload: RequestProcessPayload) {
         detail: result.created ? 'proposal_created' : String(result.reason),
       });
     } catch (error) {
-      logger.error(
+      logError(
         {
           error,
           messageId: message.messageId,
@@ -126,6 +144,91 @@ async function handleRequestProcess(payload: RequestProcessPayload) {
       });
     }
   }
+
+  return {
+    ok: true,
+    handled: true,
+    type: payload.type,
+    processed,
+  };
+}
+
+async function handleNotificationProcess(payload: NotificationProcessPayload) {
+  logInfo(
+    {
+      batchSize: payload.batchSize,
+    },
+    'Notification queue process started'
+  );
+
+  const messages = await readNotificationQueueJobs(payload.batchSize);
+  const processed: Array<{
+    messageId: number;
+    status: 'completed' | 'failed';
+    detail: string;
+  }> = [];
+
+  logInfo(
+    {
+      batchSize: payload.batchSize,
+      messageCount: messages.length,
+    },
+    'Notification queue messages fetched'
+  );
+
+  for (const message of messages) {
+    try {
+      logInfo(
+        {
+          messageId: message.messageId,
+          notificationType: message.job.type,
+          recipientEmail: message.job.recipientEmail,
+        },
+        'Processing notification queue message'
+      );
+
+      await processNotificationQueueJob(message.job);
+      await deleteNotificationQueueJob(message.messageId);
+
+      logInfo(
+        {
+          messageId: message.messageId,
+          notificationType: message.job.type,
+          recipientEmail: message.job.recipientEmail,
+        },
+        'Notification queue message completed'
+      );
+
+      processed.push({
+        messageId: message.messageId,
+        status: 'completed',
+        detail: message.job.type,
+      });
+    } catch (error) {
+      logError(
+        {
+          error,
+          messageId: message.messageId,
+          notificationType: message.job.type,
+          recipientEmail: message.job.recipientEmail,
+        },
+        'QStash notification queue message failed'
+      );
+      processed.push({
+        messageId: message.messageId,
+        status: 'failed',
+        detail: error instanceof Error ? error.message : 'unknown_error',
+      });
+    }
+  }
+
+  logInfo(
+    {
+      batchSize: payload.batchSize,
+      processedCount: processed.length,
+    },
+    'Notification queue process completed'
+  );
 
   return {
     ok: true,

@@ -1,5 +1,6 @@
 'use server';
 
+import { DateStatus, EventStatus } from '@/libs/prisma/enums';
 import { prisma } from '@/libs/prisma-client';
 import { revalidatePath } from 'next/cache';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -14,12 +15,22 @@ import {
   getCurrentDbUserId,
   requireAdminActionAccess,
 } from '@/services/clerk-service';
+import {
+  enqueueEventDateCanceledNotifications,
+  getRemovedEventCalendars,
+} from '@/services/notification-service';
 import { serializeEvent } from '@/services/event-service';
 import { sanitizeRichTextHtml } from '@/utils/html-sanitizer';
+import { createModuleLogger } from '@/utils/logging-util';
+import { EVENT_CANCEL_MIN_LEAD_DAYS } from '@/constants/event-config';
 import {
   parseDateInputValue,
   formatDateForPrismaDateField,
   formatTimeForPrismaTimeField,
+  formatScheduleTimeValue,
+  isAtLeastDaysAway,
+  mergeDateAndTime,
+  parseCalendarDateValue,
 } from '@/utils/event-schedule';
 
 const uploadDirectorySetting =
@@ -31,6 +42,7 @@ const UPLOAD_DIRECTORY = path.resolve(process.cwd(), uploadDirectorySetting);
 const PUBLIC_PATH_PREFIX = publicPathSetting.startsWith('/')
   ? publicPathSetting.replace(/\/+$/, '')
   : `/${publicPathSetting.replace(/\/+$/, '')}`;
+const logger = createModuleLogger(import.meta.url);
 
 function getFileExtension(fileName: string, mimeType: string) {
   const ext = path.extname(fileName).toLowerCase();
@@ -74,6 +86,32 @@ type UpdateEventActionData = Partial<EventFormState> & {
     eventPrice: string;
   }>;
 };
+
+function getActiveEventCalendars<
+  T extends {
+    date_status?: string;
+  },
+>(calendars: T[]) {
+  return calendars.filter(
+    calendar => calendar.date_status !== DateStatus.CANCELLED
+  );
+}
+
+function getCalendarStartDateTime(calendar: {
+  event_date: Date;
+  start_time: Date;
+}) {
+  const eventDate = parseCalendarDateValue(calendar.event_date);
+  const startTime = formatScheduleTimeValue(calendar.start_time);
+  if (!eventDate || !startTime) return null;
+  return mergeDateAndTime(eventDate, startTime);
+}
+
+function canCancelCalendar(calendar: { event_date: Date; start_time: Date }) {
+  const startDateTime = getCalendarStartDateTime(calendar);
+  if (!startDateTime) return false;
+  return isAtLeastDaysAway(startDateTime, EVENT_CANCEL_MIN_LEAD_DAYS);
+}
 
 export async function uploadEventGalleryImageAction(formData: FormData) {
   try {
@@ -141,6 +179,7 @@ export async function createEventAction(
                 event_date: formatDateForPrismaDateField(parsedDate),
                 start_time: startTime,
                 end_time: endTime,
+                date_status: DateStatus.VALID,
               };
             }),
           }
@@ -215,6 +254,29 @@ export async function updateEventAction(
   try {
     await requireAdminActionAccess();
 
+    const existingEvent = await prisma.event.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        eventTitle: true,
+        eventLocation: true,
+        eventStatus: true,
+        event_calendars: {
+          select: {
+            id: true,
+            event_date: true,
+            start_time: true,
+            end_time: true,
+            date_status: true,
+          },
+        },
+      },
+    });
+
+    if (!existingEvent) {
+      return { success: false, error: 'Event not found' };
+    }
+
     const sanitizedContentHtml =
       data.contentHtml !== undefined
         ? sanitizeRichTextHtml(data.contentHtml)
@@ -240,10 +302,40 @@ export async function updateEventAction(
                 event_date: formatDateForPrismaDateField(parsedDate),
                 start_time: startTime,
                 end_time: endTime,
+                date_status: DateStatus.VALID,
               };
             }),
           }
         : undefined;
+
+    const removedCalendars =
+      data.eventCalendars !== undefined
+        ? getRemovedEventCalendars({
+            previousCalendars: getActiveEventCalendars(
+              existingEvent.event_calendars
+            ),
+            nextCalendars: data.eventCalendars,
+          })
+        : [];
+
+    if (
+      data.eventStatus === EventStatus.INACTIVE &&
+      existingEvent.eventStatus !== EventStatus.INACTIVE
+    ) {
+      return {
+        success: false,
+        error:
+          'Use the dedicated cancel event action to cancel all event dates.',
+      };
+    }
+
+    if (removedCalendars.length > 0) {
+      return {
+        success: false,
+        error:
+          'Use the dedicated cancel date action to cancel a specific event date.',
+      };
+    }
 
     const eventGalleryUpdate =
       data.eventGalleries !== undefined
@@ -337,5 +429,337 @@ export async function deleteEventAction(
       return { success: false, error: error.message };
     }
     return { success: false, error: 'Failed to delete event' };
+  }
+}
+
+export async function cancelEventAction(
+  id: number
+): Promise<{ success: boolean; data?: Event; error?: string }> {
+  try {
+    logger.info({ eventId: id }, 'Cancel event request started');
+    await requireAdminActionAccess();
+
+    const existingEvent = await prisma.event.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        eventTitle: true,
+        eventLocation: true,
+        eventStatus: true,
+        event_calendars: {
+          select: {
+            id: true,
+            event_date: true,
+            start_time: true,
+            end_time: true,
+            date_status: true,
+          },
+        },
+      },
+    });
+
+    if (!existingEvent) {
+      logger.warn(
+        { eventId: id },
+        'Cancel event request skipped: event not found'
+      );
+      return { success: false, error: 'Event not found' };
+    }
+
+    const activeCalendars = getActiveEventCalendars(
+      existingEvent.event_calendars
+    );
+    logger.info(
+      {
+        eventId: existingEvent.id,
+        eventTitle: existingEvent.eventTitle,
+        activeCalendarCount: activeCalendars.length,
+      },
+      'Cancel event request validated'
+    );
+
+    if (activeCalendars.length === 0) {
+      logger.warn(
+        { eventId: existingEvent.id, eventTitle: existingEvent.eventTitle },
+        'Cancel event request blocked: no active dates'
+      );
+      return {
+        success: false,
+        error: 'No active event dates are available to cancel.',
+      };
+    }
+
+    const earliestActiveCalendar = [...activeCalendars].sort((left, right) => {
+      const leftStart =
+        getCalendarStartDateTime(left)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const rightStart =
+        getCalendarStartDateTime(right)?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      return leftStart - rightStart;
+    })[0];
+
+    if (!earliestActiveCalendar || !canCancelCalendar(earliestActiveCalendar)) {
+      logger.warn(
+        {
+          eventId: existingEvent.id,
+          eventTitle: existingEvent.eventTitle,
+        },
+        'Cancel event request blocked: minimum lead time not met'
+      );
+      return {
+        success: false,
+        error: `Events can only be canceled at least ${EVENT_CANCEL_MIN_LEAD_DAYS} days before the first scheduled start time.`,
+      };
+    }
+
+    const event = await prisma.event.update({
+      where: { id },
+      data: {
+        eventStatus: EventStatus.INACTIVE,
+        event_calendars: {
+          updateMany: {
+            where: {
+              date_status: DateStatus.VALID,
+            },
+            data: {
+              date_status: DateStatus.CANCELLED,
+            },
+          },
+        },
+      },
+      include: {
+        event_galleries: true,
+        event_calendars: true,
+        event_pricing: true,
+      },
+    });
+
+    logger.info(
+      {
+        eventId: event.id,
+        eventTitle: event.eventTitle,
+        eventStatus: event.eventStatus,
+      },
+      'Event canceled in database'
+    );
+
+    try {
+      const notificationResult = await enqueueEventDateCanceledNotifications({
+        eventId: existingEvent.id,
+        eventTitle: event.eventTitle,
+        eventLocation: event.eventLocation,
+        canceledCalendars: activeCalendars,
+      });
+      logger.info(
+        {
+          eventId: event.id,
+          eventTitle: event.eventTitle,
+          notificationResult,
+        },
+        'Event cancellation notifications queued'
+      );
+    } catch (notificationError) {
+      console.error(
+        'Failed to send event cancellation notifications:',
+        notificationError
+      );
+    }
+
+    revalidatePath('/admin/events');
+    revalidatePath(`/admin/events/${id}`);
+    logger.info(
+      { eventId: event.id, eventTitle: event.eventTitle },
+      'Cancel event request completed'
+    );
+    return { success: true, data: serializeEvent(event) };
+  } catch (error) {
+    console.error('Error canceling event:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Failed to cancel event' };
+  }
+}
+
+export async function cancelEventCalendarAction(
+  eventId: number,
+  calendarId: number
+): Promise<{ success: boolean; data?: Event; error?: string }> {
+  try {
+    logger.info(
+      {
+        eventId,
+        calendarId,
+      },
+      'Cancel event date request started'
+    );
+
+    await requireAdminActionAccess();
+
+    const existingEvent = await prisma.event.findUnique({
+      where: { id: eventId },
+      select: {
+        id: true,
+        eventTitle: true,
+        eventLocation: true,
+        event_calendars: {
+          select: {
+            id: true,
+            event_date: true,
+            start_time: true,
+            end_time: true,
+            date_status: true,
+          },
+        },
+      },
+    });
+
+    if (!existingEvent) {
+      logger.warn(
+        {
+          eventId,
+          calendarId,
+        },
+        'Cancel event date request skipped: event not found'
+      );
+
+      return { success: false, error: 'Event not found' };
+    }
+
+    const targetCalendar = existingEvent.event_calendars.find(
+      calendar => calendar.id === calendarId
+    );
+
+    if (!targetCalendar) {
+      logger.warn(
+        {
+          eventId,
+          calendarId,
+        },
+        'Cancel event date request skipped: schedule not found'
+      );
+
+      return { success: false, error: 'Event schedule not found' };
+    }
+
+    if (targetCalendar.date_status === DateStatus.CANCELLED) {
+      logger.warn(
+        {
+          eventId,
+          calendarId,
+        },
+        'Cancel event date request skipped: already canceled'
+      );
+
+      return {
+        success: false,
+        error: 'This event date has already been canceled.',
+      };
+    }
+
+    if (!canCancelCalendar(targetCalendar)) {
+      logger.warn(
+        {
+          eventId,
+          calendarId,
+        },
+        'Cancel event date request blocked: minimum lead time not met'
+      );
+
+      return {
+        success: false,
+        error: `Event dates can only be canceled at least ${EVENT_CANCEL_MIN_LEAD_DAYS} days before the scheduled start time.`,
+      };
+    }
+
+    await prisma.eventCalendar.update({
+      where: { id: calendarId },
+      data: {
+        date_status: DateStatus.CANCELLED,
+      },
+    });
+
+    logger.info(
+      {
+        eventId,
+        calendarId,
+      },
+      'Event date canceled in database'
+    );
+
+    const remainingActiveCount = await prisma.eventCalendar.count({
+      where: {
+        event_id: eventId,
+        date_status: DateStatus.VALID,
+      },
+    });
+
+    if (remainingActiveCount === 0) {
+      await prisma.event.update({
+        where: { id: eventId },
+        data: {
+          eventStatus: EventStatus.INACTIVE,
+        },
+      });
+
+      logger.info(
+        {
+          eventId,
+          calendarId,
+        },
+        'Event marked inactive because no active dates remain'
+      );
+    }
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        event_galleries: true,
+        event_calendars: true,
+        event_pricing: true,
+      },
+    });
+
+    if (!event) {
+      return { success: false, error: 'Event not found after update' };
+    }
+
+    try {
+      const notificationResult = await enqueueEventDateCanceledNotifications({
+        eventId: existingEvent.id,
+        eventTitle: event.eventTitle,
+        eventLocation: event.eventLocation,
+        canceledCalendars: [targetCalendar],
+      });
+      logger.info(
+        {
+          eventId,
+          calendarId,
+          notificationResult,
+        },
+        'Event date cancellation notifications queued'
+      );
+    } catch (notificationError) {
+      console.error(
+        'Failed to send event date cancellation notifications:',
+        notificationError
+      );
+    }
+
+    revalidatePath('/admin/events');
+    revalidatePath(`/admin/events/${eventId}`);
+    logger.info(
+      {
+        eventId,
+        calendarId,
+      },
+      'Cancel event date request completed'
+    );
+    return { success: true, data: serializeEvent(event) };
+  } catch (error) {
+    console.error('Error canceling event date:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Failed to cancel event date' };
   }
 }

@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState, useTransition, type SyntheticEvent } from 'react';
-import { EventStatus } from '@/libs/prisma/enums';
+import { useRouter } from 'next/navigation';
+import { DateStatus, EventStatus } from '@/libs/prisma/enums';
 import ModalShell from '@/components/shared/modal-shell';
 import { Button, Input } from '@/ui';
 import TiptapEditor from '../../shared/tiptap-editor';
@@ -22,6 +23,7 @@ import EventPricingPanel, {
 } from '@/components/admin/event/event-pricing';
 import TimeSectionPanel from '@/components/admin/event/event-time';
 import styles from '@/styles/admin/events/event-form.module.css';
+import pageStyles from '@/styles/admin/events/event-page.module.css';
 import {
   parseCalendarDateValue,
   formatLocalDateValue,
@@ -39,8 +41,28 @@ type DraftSchedule = {
   endTime: string;
 };
 
+type ModalProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  event?: Event;
+};
+
+type PageProps = {
+  event?: Event;
+};
+
+type EditorProps = {
+  event?: Event;
+  mode: 'modal' | 'page';
+  onCancel: () => void;
+  onSuccess: (event?: Event) => void;
+};
+
 function getInitialDraftSchedule(event?: Event): DraftSchedule {
-  const selectedCalendar = event?.event_calendars?.[0];
+  const selectedCalendar = event?.event_calendars?.find(
+    calendar => calendar.date_status !== DateStatus.CANCELLED
+  );
 
   if (selectedCalendar) {
     const eventDate = parseCalendarDateValue(selectedCalendar.event_date);
@@ -72,19 +94,21 @@ function createDraftScheduleId() {
 }
 
 function getInitialDraftSchedules(event?: Event): DraftSchedule[] {
-  return (event?.event_calendars ?? []).flatMap(calendar => {
-    const eventDate = parseCalendarDateValue(calendar.event_date);
-    if (!eventDate) return [];
+  return (event?.event_calendars ?? [])
+    .filter(calendar => calendar.date_status !== DateStatus.CANCELLED)
+    .flatMap(calendar => {
+      const eventDate = parseCalendarDateValue(calendar.event_date);
+      if (!eventDate) return [];
 
-    return [
-      {
-        id: `calendar-${calendar.id}`,
-        eventDate,
-        startTime: formatScheduleTimeValue(calendar.start_time),
-        endTime: formatScheduleTimeValue(calendar.end_time),
-      },
-    ];
-  });
+      return [
+        {
+          id: `calendar-${calendar.id}`,
+          eventDate,
+          startTime: formatScheduleTimeValue(calendar.start_time),
+          endTime: formatScheduleTimeValue(calendar.end_time),
+        },
+      ];
+    });
 }
 
 function getInitialGalleryInputs(event?: Event): EventGalleryInput[] {
@@ -159,13 +183,6 @@ async function uploadGalleryImages(
   return uploadedGalleries.filter(gallery => gallery.imageUrl.trim() !== '');
 }
 
-type Props = {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  event?: Event;
-};
-
 const STATUS_OPTIONS: Array<{ value: Event['eventStatus']; label: string }> = [
   { value: EventStatus.DRAFT, label: 'Draft' },
   { value: EventStatus.ACTIVE, label: 'Active' },
@@ -173,11 +190,13 @@ const STATUS_OPTIONS: Array<{ value: Event['eventStatus']; label: string }> = [
 ];
 const PRICE_LEVELS = ['ADULT', 'SENIOR', 'YOUTH', 'CHILD'] as const;
 
-function EventFormBody({
+function EventEditor({
   event,
-  onClose,
+  mode,
+  onCancel,
   onSuccess,
-}: Readonly<Omit<Props, 'isOpen'>>) {
+}: Readonly<EditorProps>) {
+  const router = useRouter();
   const [, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(false);
   const [activeSectionTab, setActiveSectionTab] = useState<SectionTab>('ABOUT');
@@ -186,7 +205,9 @@ function EventFormBody({
     [event]
   );
   const [selectedCalendarId, setSelectedCalendarId] = useState<number | null>(
-    event?.event_calendars?.[0]?.id ?? null
+    event?.event_calendars?.find(
+      calendar => calendar.date_status !== DateStatus.CANCELLED
+    )?.id ?? null
   );
   const [draftSchedule, setDraftSchedule] = useState<DraftSchedule>(() =>
     initialDraftSchedules[0]
@@ -223,17 +244,25 @@ function EventFormBody({
 
   const calendars = useMemo(
     (): NonNullable<Event['event_calendars']> =>
-      [...(event?.event_calendars ?? [])].sort((left, right) => {
-        const leftDate = parseCalendarDateValue(left.event_date);
-        const rightDate = parseCalendarDateValue(right.event_date);
-        const leftTime = leftDate?.getTime() ?? 0;
-        const rightTime = rightDate?.getTime() ?? 0;
-        if (leftTime !== rightTime) return leftTime - rightTime;
-        return formatScheduleTimeValue(left.start_time).localeCompare(
-          formatScheduleTimeValue(right.start_time)
-        );
-      }),
+      [...(event?.event_calendars ?? [])]
+        .filter(calendar => calendar.date_status !== DateStatus.CANCELLED)
+        .sort((left, right) => {
+          const leftDate = parseCalendarDateValue(left.event_date);
+          const rightDate = parseCalendarDateValue(right.event_date);
+          const leftTime = leftDate?.getTime() ?? 0;
+          const rightTime = rightDate?.getTime() ?? 0;
+          if (leftTime !== rightTime) return leftTime - rightTime;
+          return formatScheduleTimeValue(left.start_time).localeCompare(
+            formatScheduleTimeValue(right.start_time)
+          );
+        }),
     [event?.event_calendars]
+  );
+
+  const isEdit = Boolean(event);
+  const formId = `event-editor-form-${event?.id ?? 'new'}`;
+  const selectedDraftSchedule = draftSchedules.find(
+    schedule => schedule.id === selectedDraftScheduleId
   );
 
   function syncDraftSchedule(nextDraftSchedule: DraftSchedule) {
@@ -245,6 +274,27 @@ function EventFormBody({
       prev.map(schedule =>
         schedule.id === selectedDraftScheduleId ? nextDraftSchedule : schedule
       )
+    );
+  }
+
+  function removeSelectedDraftSchedule() {
+    if (!selectedDraftScheduleId) return;
+
+    const remainingDraftSchedules = draftSchedules.filter(
+      schedule => schedule.id !== selectedDraftScheduleId
+    );
+
+    setDraftSchedules(remainingDraftSchedules);
+
+    const nextSelectedDraftSchedule = remainingDraftSchedules[0] ?? null;
+    setSelectedDraftScheduleId(nextSelectedDraftSchedule?.id ?? null);
+    setDraftSchedule(
+      nextSelectedDraftSchedule
+        ? {
+            ...nextSelectedDraftSchedule,
+            eventDate: new Date(nextSelectedDraftSchedule.eventDate),
+          }
+        : getInitialDraftSchedule()
     );
   }
 
@@ -299,6 +349,7 @@ function EventFormBody({
           endTime,
         })
       }
+      usePageLayout={mode === 'page'}
       onSelectDraftSchedule={scheduleId => {
         const selectedDraft = draftSchedules.find(
           schedule => schedule.id === scheduleId
@@ -324,26 +375,7 @@ function EventFormBody({
         setDraftSchedules(prev => [...prev, nextDraftSchedule]);
         setSelectedDraftScheduleId(scheduleId);
       }}
-      onDeleteDraftSchedule={() => {
-        if (!selectedDraftScheduleId) return;
-
-        const remainingDraftSchedules = draftSchedules.filter(
-          schedule => schedule.id !== selectedDraftScheduleId
-        );
-
-        setDraftSchedules(remainingDraftSchedules);
-
-        const nextSelectedDraftSchedule = remainingDraftSchedules[0] ?? null;
-        setSelectedDraftScheduleId(nextSelectedDraftSchedule?.id ?? null);
-        setDraftSchedule(
-          nextSelectedDraftSchedule
-            ? {
-                ...nextSelectedDraftSchedule,
-                eventDate: new Date(nextSelectedDraftSchedule.eventDate),
-              }
-            : getInitialDraftSchedule()
-        );
-      }}
+      onDeleteDraftSchedule={removeSelectedDraftSchedule}
     />
   );
 
@@ -409,7 +441,7 @@ function EventFormBody({
             });
 
         if (result.success) {
-          onSuccess();
+          onSuccess(result.data);
         } else {
           alert(result.error || 'Failed to save event');
         }
@@ -440,7 +472,7 @@ function EventFormBody({
       ...prev,
       [name]: nextValue,
     }));
-    // Clear error when user starts typing
+
     if (errors[name as keyof EventFormState]) {
       setErrors(prev => ({
         ...prev,
@@ -449,15 +481,143 @@ function EventFormBody({
     }
   };
 
-  let submitLabel = event ? 'Update Event' : 'Create Event';
+  let submitLabel = event ? 'Save Changes' : 'Create Event';
   if (isLoading) {
     submitLabel = 'Saving...';
   }
 
-  return (
-    <form onSubmit={handleSubmit} className={styles.form}>
-      <div className={styles.formContent}>
-        {/* Title */}
+  const notesField = (
+    <div className={`${styles.formGroup} ${pageStyles.notesField}`}>
+      <textarea
+        id="eventNotes"
+        name="eventNotes"
+        placeholder="Enter additional notes"
+        value={formData.eventNotes ?? ''}
+        onChange={handleInputChange}
+        rows={3}
+        className={`${styles.textarea} ${pageStyles.notesTextarea}`}
+      />
+    </div>
+  );
+
+  const sectionContent =
+    mode === 'page' ? (
+      <div className={pageStyles.sectionStack}>
+        <div className={pageStyles.topSectionGrid}>
+          <section className={pageStyles.sectionCard}>
+            <div className={pageStyles.sectionHeader}>
+              <h2 className={pageStyles.sectionTitle}>Notes</h2>
+              <p className={pageStyles.sectionDescription}>
+                Additional context and internal event notes.
+              </p>
+            </div>
+            <div className={pageStyles.sectionBody}>{notesField}</div>
+          </section>
+
+          <section className={pageStyles.sectionCard}>
+            <div className={pageStyles.sectionHeader}>
+              <h2 className={pageStyles.sectionTitle}>Pricing</h2>
+              <p className={pageStyles.sectionDescription}>
+                Ticket levels and pricing details.
+              </p>
+            </div>
+            <div className={pageStyles.sectionBody}>
+              <EventPricingPanel
+                pricing={pricingInputs}
+                onChange={setPricingInputs}
+              />
+            </div>
+          </section>
+        </div>
+
+        <div className={pageStyles.bottomSectionGrid}>
+          <section className={pageStyles.sectionCard}>
+            <div className={pageStyles.sectionHeader}>
+              <h2 className={pageStyles.sectionTitle}>Gallery</h2>
+              <p className={pageStyles.sectionDescription}>
+                Cover image and additional event photos.
+              </p>
+            </div>
+            <div className={pageStyles.sectionBody}>
+              <EventGalleryPanel
+                galleries={event?.event_galleries ?? []}
+                value={galleryInputs}
+                onChange={setGalleryInputs}
+              />
+            </div>
+          </section>
+
+          <section className={pageStyles.sectionCard}>
+            <div className={pageStyles.sectionHeader}>
+              <h2 className={pageStyles.sectionTitle}>Time</h2>
+              <p className={pageStyles.sectionDescription}>
+                Dates and schedule management for this event.
+              </p>
+            </div>
+            <div className={pageStyles.sectionBody}>{timeSectionContent}</div>
+          </section>
+        </div>
+
+        <section
+          className={`${pageStyles.sectionCard} ${pageStyles.featuredSection}`}
+        >
+          <div className={pageStyles.sectionHeader}>
+            <h2 className={pageStyles.sectionTitle}>About</h2>
+            <p className={pageStyles.sectionDescription}>
+              Main event content and rich text description.
+            </p>
+          </div>
+          <div className={pageStyles.sectionBody}>{aboutSectionContent}</div>
+        </section>
+      </div>
+    ) : (
+      <div className={styles.sectionTabsBlock}>
+        <div className={styles.sectionTabsHeader}>
+          {SECTION_TABS.map(tab => {
+            const isActive = activeSectionTab === tab;
+
+            return (
+              <button
+                key={tab}
+                type="button"
+                className={`${styles.sectionTabButton} ${isActive ? styles.sectionTabButtonActive : ''}`}
+                onClick={() => setActiveSectionTab(tab)}
+              >
+                {tab}
+              </button>
+            );
+          })}
+        </div>
+
+        {activeSectionTab === 'ABOUT' ? aboutSectionContent : null}
+        {activeSectionTab === 'TIME' ? timeSectionContent : null}
+
+        {activeSectionTab === 'GALLERY' ? (
+          <EventGalleryPanel
+            galleries={event?.event_galleries ?? []}
+            value={galleryInputs}
+            onChange={setGalleryInputs}
+          />
+        ) : null}
+
+        {activeSectionTab === 'PRICING' ? (
+          <EventPricingPanel
+            pricing={pricingInputs}
+            onChange={setPricingInputs}
+          />
+        ) : null}
+      </div>
+    );
+
+  const form = (
+    <form
+      id={formId}
+      onSubmit={handleSubmit}
+      className={`${styles.form} ${mode === 'page' ? pageStyles.editorForm : ''}`}
+    >
+      <div
+        className={`${styles.formContent} ${mode === 'page' ? pageStyles.editorFormContent : ''}`}
+      >
         <div className={styles.formGroup}>
           <label htmlFor="eventTitle" className={styles.label}>
             Event Title *
@@ -474,7 +634,6 @@ function EventFormBody({
           />
         </div>
 
-        {/* Location */}
         <div className={styles.formGroup}>
           <label htmlFor="eventLocation" className={styles.label}>
             Event Location *
@@ -491,21 +650,7 @@ function EventFormBody({
           />
         </div>
 
-        {/* Notes */}
-        <div className={styles.formGroup}>
-          <label htmlFor="eventNotes" className={styles.label}>
-            Notes
-          </label>
-          <textarea
-            id="eventNotes"
-            name="eventNotes"
-            placeholder="Enter additional notes"
-            value={formData.eventNotes ?? ''}
-            onChange={handleInputChange}
-            rows={3}
-            className={styles.textarea}
-          />
-        </div>
+        {mode === 'modal' ? notesField : null}
 
         <div className={styles.inlineFieldsRow}>
           <div className={styles.formGroup}>
@@ -543,57 +688,144 @@ function EventFormBody({
           </div>
         </div>
 
-        <div className={styles.sectionTabsBlock}>
-          <div className={styles.sectionTabsHeader}>
-            {SECTION_TABS.map(tab => {
-              const isActive = activeSectionTab === tab;
+        {sectionContent}
+      </div>
 
-              return (
-                <button
-                  key={tab}
-                  type="button"
-                  className={`${styles.sectionTabButton} ${isActive ? styles.sectionTabButtonActive : ''}`}
-                  onClick={() => setActiveSectionTab(tab)}
-                >
-                  {tab}
-                </button>
-              );
-            })}
+      {mode === 'modal' ? (
+        <div className={styles.footer}>
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className={styles.submitButton}
+          >
+            {event ? (isLoading ? 'Saving...' : 'Update Event') : submitLabel}
+          </Button>
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+      ) : null}
+    </form>
+  );
+
+  if (mode === 'modal') {
+    return form;
+  }
+
+  return (
+    <div className={pageStyles.pageGrid}>
+      <section className={pageStyles.mainPanel}>{form}</section>
+
+      <aside className={pageStyles.sidebar}>
+        <div className={pageStyles.actionCard}>
+          <div className={pageStyles.actionStack}>
+            <Button
+              type="submit"
+              form={formId}
+              fullWidth={true}
+              disabled={isLoading}
+            >
+              {submitLabel}
+            </Button>
+
+            {isEdit && event ? (
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth={true}
+                onClick={() => router.push(`/admin/events/${event.id}`)}
+              >
+                View Event
+              </Button>
+            ) : null}
+
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth={true}
+              onClick={onCancel}
+            >
+              Back to Events
+            </Button>
+          </div>
+        </div>
+
+        <div className={pageStyles.actionCard}>
+          <div className={pageStyles.actionHeader}>
+            <p className={pageStyles.actionEyebrow}>Selected Date</p>
+            <h2 className={pageStyles.actionTitle}>
+              {selectedDraftSchedule
+                ? selectedDraftSchedule.eventDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'No date selected'}
+            </h2>
+            <p className={pageStyles.actionText}>
+              {selectedDraftSchedule
+                ? `${selectedDraftSchedule.startTime} - ${selectedDraftSchedule.endTime}`
+                : ''}
+            </p>
           </div>
 
-          {activeSectionTab === 'ABOUT' ? aboutSectionContent : null}
-          {activeSectionTab === 'TIME' ? timeSectionContent : null}
+          <Button
+            type="button"
+            variant="secondary"
+            fullWidth={true}
+            className={pageStyles.floatingDangerButton}
+            disabled={!selectedDraftSchedule || isLoading}
+            onClick={() => {
+              if (!selectedDraftSchedule) return;
 
-          {activeSectionTab === 'GALLERY' ? (
-            <EventGalleryPanel
-              galleries={event?.event_galleries ?? []}
-              value={galleryInputs}
-              onChange={setGalleryInputs}
-            />
-          ) : null}
+              const shouldRemove = globalThis.confirm(
+                `Remove this event date?\n\n${selectedDraftSchedule.eventDate.toLocaleDateString(
+                  'en-US',
+                  {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  }
+                )} ${selectedDraftSchedule.startTime} - ${selectedDraftSchedule.endTime}`
+              );
 
-          {activeSectionTab === 'PRICING' ? (
-            <EventPricingPanel
-              pricing={pricingInputs}
-              onChange={setPricingInputs}
-            />
-          ) : null}
+              if (!shouldRemove) return;
+              removeSelectedDraftSchedule();
+            }}
+          >
+            Cancel Date
+          </Button>
         </div>
-      </div>
+      </aside>
+    </div>
+  );
+}
 
-      <div className={styles.footer}>
-        <Button
-          type="submit"
-          disabled={isLoading}
-          className={styles.submitButton}
-        >
-          {submitLabel}
-        </Button>
-        <Button type="button" variant="secondary" onClick={onClose}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+export function EventEditorPage({ event }: Readonly<PageProps>) {
+  const router = useRouter();
+  const isEdit = Boolean(event);
+
+  return (
+    <div className={pageStyles.pageRoot}>
+      <EventEditor
+        event={event}
+        mode="page"
+        onCancel={() =>
+          router.push(isEdit ? `/admin/events/${event?.id}` : '/admin/events')
+        }
+        onSuccess={savedEvent => {
+          const nextId = savedEvent?.id ?? event?.id;
+          if (!nextId) {
+            router.push('/admin/events');
+            router.refresh();
+            return;
+          }
+
+          router.push(`/admin/events/${nextId}`);
+          router.refresh();
+        }}
+      />
+    </div>
   );
 }
 
@@ -602,7 +834,7 @@ export default function EventForm({
   onClose,
   onSuccess,
   event,
-}: Readonly<Props>) {
+}: Readonly<ModalProps>) {
   if (!isOpen) return null;
 
   const formKey = `${event?.id ?? 'new'}-${event?.updatedAt?.toString() ?? 'draft'}`;
@@ -617,11 +849,12 @@ export default function EventForm({
       rootTestId="event-form-modal-root"
       panelTestId="event-form-modal"
     >
-      <EventFormBody
+      <EventEditor
         key={formKey}
         event={event}
-        onClose={onClose}
-        onSuccess={onSuccess}
+        mode="modal"
+        onCancel={onClose}
+        onSuccess={() => onSuccess()}
       />
     </ModalShell>
   );

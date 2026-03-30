@@ -15,6 +15,13 @@ import {
 import { upsertClerkUser } from '@/services/user-service';
 import { QSTASH_TASK_TYPE } from '@/types/qstash-task';
 import { logger } from '@/utils/logging-util';
+import {
+  formatDateForPrismaDateField,
+  formatLocalTimeValue,
+  formatTimeForPrismaTimeField,
+  mergeDateAndTime,
+  parseCalendarDateValue,
+} from '@/utils/event-schedule';
 
 const ORDER_EXPIRY_HOURS = 24;
 const PAYMENT_METHOD_PLACEHOLDER = 'stripe';
@@ -53,6 +60,8 @@ export type ExperienceOrderResult = {
   experienceTitle: string | null;
   providerLabel: string | null;
   scheduleDate: Date | null;
+  scheduleStartTime: Date | null;
+  scheduleEndTime: Date | null;
   itemPriceCad: number | null;
   totalAmountCad: number | null;
   requestedHours: number | null;
@@ -82,6 +91,8 @@ type PrismaUniqueConstraintError = {
 type OrderCalendarItem = {
   experience_id: number;
   schedule_date: Date;
+  start_time: Date;
+  end_time: Date;
 };
 
 type ExperienceCalendarSyncAction = 'block' | 'release_locked' | 'noop';
@@ -233,14 +244,31 @@ function getExperienceCalendarSyncAction(
   return 'noop';
 }
 
+function getOrderItemStartDateTime(item: OrderCalendarItem) {
+  const parsedDate = parseCalendarDateValue(item.schedule_date);
+  const startTime = formatLocalTimeValue(item.start_time);
+
+  if (!parsedDate || !startTime) {
+    return null;
+  }
+
+  return mergeDateAndTime(parsedDate, startTime);
+}
+
 async function blockExperienceCalendarSlot(
   tx: Prisma.TransactionClient,
   item: OrderCalendarItem
 ): Promise<void> {
+  const scheduleDateTime = getOrderItemStartDateTime(item);
+
+  if (!scheduleDateTime) {
+    throw new Error('Unable to resolve experience schedule start time.');
+  }
+
   const updated = await tx.experienceCalendar.updateMany({
     where: {
       experience_id: item.experience_id,
-      schedule_date: item.schedule_date,
+      schedule_date: scheduleDateTime,
       calendar_status: {
         in: [
           EXPERIENCE_CALENDAR_STATUS.LOCKED,
@@ -261,7 +289,7 @@ async function blockExperienceCalendarSlot(
     await tx.experienceCalendar.create({
       data: {
         experience_id: item.experience_id,
-        schedule_date: item.schedule_date,
+        schedule_date: scheduleDateTime,
         calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
       },
     });
@@ -273,7 +301,7 @@ async function blockExperienceCalendarSlot(
     await tx.experienceCalendar.updateMany({
       where: {
         experience_id: item.experience_id,
-        schedule_date: item.schedule_date,
+        schedule_date: scheduleDateTime,
       },
       data: {
         calendar_status: EXPERIENCE_CALENDAR_STATUS.BLOCKED,
@@ -286,10 +314,16 @@ async function releaseLockedExperienceCalendarSlot(
   tx: Prisma.TransactionClient,
   item: OrderCalendarItem
 ): Promise<void> {
+  const scheduleDateTime = getOrderItemStartDateTime(item);
+
+  if (!scheduleDateTime) {
+    throw new Error('Unable to resolve experience schedule start time.');
+  }
+
   await tx.experienceCalendar.deleteMany({
     where: {
       experience_id: item.experience_id,
-      schedule_date: item.schedule_date,
+      schedule_date: scheduleDateTime,
       calendar_status: EXPERIENCE_CALENDAR_STATUS.LOCKED,
     },
   });
@@ -325,12 +359,18 @@ async function syncUserExperiencesForPaidOrder(
   }
 ): Promise<void> {
   for (const item of order.order_items) {
+    const scheduleDateTime = getOrderItemStartDateTime(item);
+
+    if (!scheduleDateTime) {
+      throw new Error('Unable to resolve experience schedule start time.');
+    }
+
     await tx.userExperience.upsert({
       where: {
         order_id_experience_id_schedule_date: {
           order_id: order.id,
           experience_id: item.experience_id,
-          schedule_date: item.schedule_date,
+          schedule_date: scheduleDateTime,
         },
       },
       create: {
@@ -338,7 +378,7 @@ async function syncUserExperiencesForPaidOrder(
         user_id: order.user_id,
         proposal_id: order.proposal_id,
         experience_id: item.experience_id,
-        schedule_date: item.schedule_date,
+        schedule_date: scheduleDateTime,
         complete_date: null,
         process_status: ProcessStatus.PROGRESS,
       },
@@ -431,6 +471,28 @@ function amountCentsToCad(amount: number | null | undefined): number | null {
   return Math.round((amount ?? 0) / 100);
 }
 
+function isExperienceOrderItem(
+  item: { experience_id: number | null } | null | undefined
+): item is OrderCalendarItem {
+  return Boolean(item && Number.isInteger(item.experience_id));
+}
+
+function getExperienceOrderItems(
+  items: Array<{
+    experience_id: number | null;
+    schedule_date: Date;
+    start_time: Date;
+    end_time: Date;
+  }>
+): OrderCalendarItem[] {
+  return items.filter(isExperienceOrderItem).map(item => ({
+    experience_id: item.experience_id,
+    schedule_date: item.schedule_date,
+    start_time: item.start_time,
+    end_time: item.end_time,
+  }));
+}
+
 function buildOrderResult(order: {
   id: number;
   order_status: string;
@@ -446,6 +508,8 @@ function buildOrderResult(order: {
   } | null;
   order_items: Array<{
     schedule_date: Date;
+    start_time: Date;
+    end_time: Date;
     item_price: { toString(): string };
     experience: {
       id: number;
@@ -456,12 +520,12 @@ function buildOrderResult(order: {
       experience_pricing: {
         starting_hour: number | null;
       } | null;
-    };
+    } | null;
   }>;
 }): ExperienceOrderResult {
   const firstItem = order.order_items[0] ?? null;
   const includedHours =
-    firstItem?.experience.experience_pricing?.starting_hour ?? null;
+    firstItem?.experience?.experience_pricing?.starting_hour ?? null;
   const itemPriceCad = firstItem
     ? Number(firstItem.item_price.toString())
     : null;
@@ -476,10 +540,12 @@ function buildOrderResult(order: {
     paymentStatus: order.payment?.payment_status ?? null,
     paymentMethod: order.payment?.payment_method ?? null,
     customerEmail: order.payment?.customer_email ?? null,
-    experienceId: firstItem?.experience.id ?? null,
-    experienceTitle: firstItem?.experience.experience_title ?? null,
-    providerLabel: firstItem?.experience.provider.provider_label ?? null,
+    experienceId: firstItem?.experience?.id ?? null,
+    experienceTitle: firstItem?.experience?.experience_title ?? null,
+    providerLabel: firstItem?.experience?.provider.provider_label ?? null,
     scheduleDate: firstItem?.schedule_date ?? null,
+    scheduleStartTime: firstItem?.start_time ?? null,
+    scheduleEndTime: firstItem?.end_time ?? null,
     itemPriceCad,
     totalAmountCad,
     requestedHours: null,
@@ -523,6 +589,8 @@ async function getOrderForSync(orderId: number) {
               },
             },
           },
+          start_time: true,
+          end_time: true,
         },
       },
     },
@@ -565,6 +633,8 @@ async function getOwnedOrder(orderId: number, clerkUserId: string) {
               },
             },
           },
+          start_time: true,
+          end_time: true,
         },
       },
     },
@@ -636,23 +706,33 @@ async function applyStripePaymentIntentSync(
       });
 
       if (mapped.orderStatus === 'paid') {
+        const experienceItems = getExperienceOrderItems(
+          existingOrder.order_items.map(item => ({
+            experience_id: item.experience_id,
+            schedule_date: item.schedule_date,
+            start_time: item.start_time,
+            end_time: item.end_time,
+          }))
+        );
+
         await syncUserExperiencesForPaidOrder(tx, {
           id: existingOrder.id,
           user_id: existingOrder.user_id,
           proposal_id: existingOrder.proposal_id,
-          order_items: existingOrder.order_items.map(item => ({
-            experience_id: item.experience_id,
-            schedule_date: item.schedule_date,
-          })),
+          order_items: experienceItems,
         });
       }
 
       await syncExperienceCalendarForOrderStatus(
         tx,
-        existingOrder.order_items.map(item => ({
-          experience_id: item.experience_id,
-          schedule_date: item.schedule_date,
-        })),
+        getExperienceOrderItems(
+          existingOrder.order_items.map(item => ({
+            experience_id: item.experience_id,
+            schedule_date: item.schedule_date,
+            start_time: item.start_time,
+            end_time: item.end_time,
+          }))
+        ),
         mapped.orderStatus
       );
     });
@@ -671,23 +751,33 @@ async function applyStripePaymentIntentSync(
     });
 
     if (mapped.orderStatus === 'paid') {
+      const experienceItems = getExperienceOrderItems(
+        existingOrder.order_items.map(item => ({
+          experience_id: item.experience_id,
+          schedule_date: item.schedule_date,
+          start_time: item.start_time,
+          end_time: item.end_time,
+        }))
+      );
+
       await syncUserExperiencesForPaidOrder(tx, {
         id: existingOrder.id,
         user_id: existingOrder.user_id,
         proposal_id: existingOrder.proposal_id,
-        order_items: existingOrder.order_items.map(item => ({
-          experience_id: item.experience_id,
-          schedule_date: item.schedule_date,
-        })),
+        order_items: experienceItems,
       });
     }
 
     await syncExperienceCalendarForOrderStatus(
       tx,
-      existingOrder.order_items.map(item => ({
-        experience_id: item.experience_id,
-        schedule_date: item.schedule_date,
-      })),
+      getExperienceOrderItems(
+        existingOrder.order_items.map(item => ({
+          experience_id: item.experience_id,
+          schedule_date: item.schedule_date,
+          start_time: item.start_time,
+          end_time: item.end_time,
+        }))
+      ),
       mapped.orderStatus
     );
   });
@@ -746,6 +836,8 @@ export async function expireExperienceOrderIfDue(orderId: number) {
         select: {
           experience_id: true,
           schedule_date: true,
+          start_time: true,
+          end_time: true,
         },
       },
     },
@@ -789,7 +881,7 @@ export async function expireExperienceOrderIfDue(orderId: number) {
 
     await syncExperienceCalendarForOrderStatus(
       tx,
-      order.order_items,
+      getExperienceOrderItems(order.order_items),
       'canceled'
     );
   });
@@ -809,6 +901,21 @@ export async function createExperienceCheckout(
   const scheduleDate = parseScheduleDate(input.scheduleDate);
   const quote = buildExperiencePurchaseQuote(experience, input.requestedHours);
   const normalizedQuote = toSerializableQuote(quote);
+  const scheduleDateOnly = formatDateForPrismaDateField(scheduleDate);
+  const scheduleStartTime = formatTimeForPrismaTimeField(
+    formatLocalTimeValue(scheduleDate)
+  );
+  const scheduleEndTime = formatTimeForPrismaTimeField(
+    formatLocalTimeValue(
+      new Date(
+        scheduleDate.getTime() + normalizedQuote.requestedHours * 60 * 60 * 1000
+      )
+    )
+  );
+
+  if (!scheduleStartTime || !scheduleEndTime) {
+    throw new Error('Unable to normalize schedule time for checkout.');
+  }
   const stripe = getStripeServerClient();
   const stripeCustomer = await stripe.customers.create({
     email: customerEmail,
@@ -858,9 +965,12 @@ export async function createExperienceCheckout(
     await tx.orderItem.create({
       data: {
         order_id: order.id,
+        item_type: 'EXPERIENCE',
         experience_id: experience.id,
         item_price: normalizedQuote.totalAmountCad,
-        schedule_date: scheduleDate,
+        schedule_date: scheduleDateOnly,
+        start_time: scheduleStartTime,
+        end_time: scheduleEndTime,
       },
     });
 

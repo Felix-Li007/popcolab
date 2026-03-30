@@ -116,7 +116,8 @@ Upstash QStash:
 
 Supabase / queue:
 
-- `SUPABASE_QUEUE_NAME`
+- `SUPABASE_REQUEST_QUEUE`
+- `SUPABASE_NOTIFICATION_QUEUE`
 
 Testing:
 
@@ -465,7 +466,8 @@ Required environment variables:
 - `QSTASH_TOKEN`
 - `QSTASH_CURRENT_SIGNING_KEY`
 - `QSTASH_NEXT_SIGNING_KEY`
-- `SUPABASE_QUEUE_NAME` (optional, defaults to `default_queue`)
+- `SUPABASE_REQUEST_QUEUE` (optional, defaults to `default_queue`)
+- `SUPABASE_NOTIFICATION_QUEUE` (optional, defaults to `notification_queue`)
 
 Webhook endpoint:
 

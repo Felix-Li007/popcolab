@@ -1,9 +1,11 @@
 import type {
+  DateStatus as PrismaDateStatus,
   EventStatus as PrismaEventStatus,
   PriceLevel as PrismaPriceLevel,
 } from '@/libs/prisma/enums';
 
 export type EventStatus = PrismaEventStatus;
+export type DateStatus = PrismaDateStatus;
 
 export type Event = {
   id: number;
@@ -50,6 +52,7 @@ export type EventCalendar = {
   event_date: Date;
   start_time: Date;
   end_time: Date;
+  date_status: DateStatus;
   created_at: Date;
   updated_at: Date;
 };

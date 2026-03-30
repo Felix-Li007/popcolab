@@ -2,14 +2,12 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { EventStatus } from '@/libs/prisma/enums';
+import { DateStatus, EventStatus } from '@/libs/prisma/enums';
 import { Button } from '@/ui';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DatePicker from '@/components/shared/date-picker';
 import EventCard from '@/components/admin/event/event-card';
-import EventForm from '@/components/admin/event/event-form';
-import EventView from '@/components/admin/event/event-view';
 import { DEFAULT_PAGE_SIZE } from '@/constants/pagination';
 import { deleteEventAction } from '@/actions/event-actions';
 import type { Event } from '@/types/event-type';
@@ -30,6 +28,7 @@ type StatusFilter = 'all' | Event['eventStatus'];
 
 function getEventStartTimestamp(event: Event) {
   const timestamps = (event.event_calendars ?? [])
+    .filter(calendar => calendar.date_status !== DateStatus.CANCELLED)
     .flatMap(calendar => {
       const eventDate = parseCalendarDateValue(calendar.event_date);
       const startTime = formatScheduleTimeValue(calendar.start_time);
@@ -48,6 +47,7 @@ function getEventStartTimestamp(event: Event) {
 
 function getLastEventEndTimestamp(event: Event) {
   const timestamps = (event.event_calendars ?? [])
+    .filter(calendar => calendar.date_status !== DateStatus.CANCELLED)
     .flatMap(calendar => {
       const eventDate = parseCalendarDateValue(calendar.event_date);
       const endTime = formatScheduleTimeValue(calendar.end_time);
@@ -100,7 +100,6 @@ export default function EventContent({
   initialData,
   initialFilters,
 }: Readonly<Props>) {
-  type PanelMode = 'create' | 'edit' | 'view' | null;
   const router = useRouter();
   const searchParams = useSearchParams();
   const [keywordInput, setKeywordInput] = useState(
@@ -121,19 +120,9 @@ export default function EventContent({
 
   const events = initialData;
   const pageParam = Number(searchParams.get('page') ?? '1');
-  const selectedIdParam = searchParams.get('id');
-  const modeParam = searchParams.get('mode');
   const [page, setPage] = useState(
     Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1
   );
-  const selectedId =
-    selectedIdParam && selectedIdParam !== 'new'
-      ? Number(selectedIdParam)
-      : null;
-  const panelMode: PanelMode =
-    modeParam === 'create' || modeParam === 'edit' || modeParam === 'view'
-      ? modeParam
-      : null;
 
   const orderedEvents = useMemo(
     () =>
@@ -211,9 +200,7 @@ export default function EventContent({
   const deleteEventById = async (id: number) => {
     const result = await deleteEventAction(id);
     if (result.success) {
-      if (selectedId === id) {
-        router.push('/admin/events');
-      }
+      router.refresh();
       return;
     }
 
@@ -229,29 +216,16 @@ export default function EventContent({
   };
 
   const handleViewEvent = (id: number) => {
-    router.replace(`/admin/events?id=${id}&mode=view`, { scroll: false });
+    router.push(`/admin/events/${id}`);
   };
 
   const handleEditEvent = (id: number) => {
-    router.replace(`/admin/events?id=${id}&mode=edit`, { scroll: false });
+    router.push(`/admin/events/${id}/edit`);
   };
 
   const handleCreateNew = () => {
-    router.replace('/admin/events?id=new&mode=create', { scroll: false });
+    router.push('/admin/events/create');
   };
-
-  const handleCloseForm = () => {
-    router.replace('/admin/events', { scroll: false });
-  };
-
-  const handleFormSuccess = () => {
-    router.refresh();
-    handleCloseForm();
-  };
-
-  const selectedEvent = selectedId
-    ? events.find(event => event.id === selectedId)
-    : null;
 
   return (
     <div className={styles.root}>
@@ -387,7 +361,7 @@ export default function EventContent({
                     <EventCard
                       key={event.id}
                       event={event}
-                      isEditingSelected={selectedId === event.id}
+                      isEditingSelected={false}
                       onView={() => handleViewEvent(event.id)}
                       onEdit={() => handleEditEvent(event.id)}
                       onDelete={() => handleDelete(event.id)}
@@ -408,18 +382,6 @@ export default function EventContent({
           </div>
         </div>
       </div>
-
-      <EventForm
-        isOpen={panelMode === 'create' || panelMode === 'edit'}
-        onClose={handleCloseForm}
-        onSuccess={handleFormSuccess}
-        event={panelMode === 'edit' ? (selectedEvent ?? undefined) : undefined}
-      />
-      <EventView
-        isOpen={panelMode === 'view' && Boolean(selectedEvent)}
-        onClose={handleCloseForm}
-        event={selectedEvent ?? undefined}
-      />
     </div>
   );
 }

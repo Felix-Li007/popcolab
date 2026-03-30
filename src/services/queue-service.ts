@@ -1,9 +1,18 @@
 import 'server-only';
 
 import { prisma } from '@/libs/prisma-client';
-import { isRequestQueueJob, type RequestQueueJob } from '@/types/queue-job';
+import {
+  isNotificationQueueJob,
+  isRequestQueueJob,
+  type NotificationQueueJob,
+  type RequestQueueJob,
+} from '@/types/queue-job';
+import { createModuleLogger } from '@/utils/logging-util';
 
-const DEFAULT_QUEUE_NAME = 'default_queue';
+const logger = createModuleLogger(import.meta.url);
+
+const DEFAULT_REQUEST_QUEUE_NAME = 'default_queue';
+const DEFAULT_NOTIFICATION_QUEUE_NAME = 'notification_queue';
 const DEFAULT_VISIBILITY_TIMEOUT_SECONDS = 300;
 const queueInitializationByName = new Map<string, Promise<void>>();
 let pgmqExtensionCheckPromise: Promise<void> | null = null;
@@ -24,12 +33,25 @@ export type RequestQueueMessage = {
   job: RequestQueueJob;
 };
 
-function getQueueName(): string {
-  return process.env.SUPABASE_QUEUE_NAME || DEFAULT_QUEUE_NAME;
+export type NotificationQueueMessage = {
+  messageId: number;
+  readCount: number;
+  enqueuedAt: Date | string;
+  visibilityTimeoutAt: Date | string;
+  job: NotificationQueueJob;
+};
+
+function getRequestQueueName(): string {
+  return process.env.SUPABASE_REQUEST_QUEUE || DEFAULT_REQUEST_QUEUE_NAME;
 }
 
-export async function ensureExistQueue() {
-  const queueName = getQueueName();
+function getNotificationQueueName(): string {
+  return (
+    process.env.SUPABASE_NOTIFICATION_QUEUE || DEFAULT_NOTIFICATION_QUEUE_NAME
+  );
+}
+
+async function ensureQueueExists(queueName: string) {
   const existingInitialization = queueInitializationByName.get(queueName);
 
   if (existingInitialization) {
@@ -47,6 +69,11 @@ export async function ensureExistQueue() {
   }
 }
 
+// Ensures the request queue exists before jobs are sent or read.
+export async function ensureExistQueue() {
+  return ensureQueueExists(getRequestQueueName());
+}
+
 async function initializeQueue(queueName: string) {
   await ensurePgmqExtensionEnabled();
 
@@ -56,7 +83,7 @@ async function initializeQueue(queueName: string) {
   `;
 
   if (!rows[0]?.exists) {
-    await prisma.$queryRaw`SELECT pgmq.create(${queueName})`;
+    await prisma.$executeRaw`SELECT pgmq.create(${queueName})`;
   }
 }
 
@@ -92,7 +119,7 @@ async function ensurePgmqExtensionEnabled() {
 export async function enqueueQueueJob(job: RequestQueueJob) {
   await ensureExistQueue();
 
-  const queueName = getQueueName();
+  const queueName = getRequestQueueName();
   const rows = await prisma.$queryRaw<{ message_id: number }[]>`
     SELECT pgmq.send(${queueName}, CAST(${JSON.stringify(job)} AS jsonb)) AS message_id
   `;
@@ -109,7 +136,7 @@ export async function readRequestQueueJobs(
 ) {
   await ensureExistQueue();
 
-  const queueName = getQueueName();
+  const queueName = getRequestQueueName();
   const rows = await prisma.$queryRaw<QueueReadRow[]>`
     SELECT *
     FROM pgmq.read(${queueName}, ${visibilityTimeoutSeconds}, ${quantity})
@@ -127,7 +154,70 @@ export async function readRequestQueueJobs(
 }
 
 export async function deleteRequestQueueJob(messageId: number) {
-  const queueName = getQueueName();
+  const queueName = getRequestQueueName();
 
-  await prisma.$queryRaw`SELECT pgmq.delete(${queueName}, ${messageId})`;
+  await prisma.$queryRaw`SELECT pgmq.delete(${queueName}::text, ${messageId}::bigint)`;
+}
+
+export async function enqueueNotificationQueueJob(job: NotificationQueueJob) {
+  const queueName = getNotificationQueueName();
+  await ensureQueueExists(queueName);
+
+  logger.info(
+    {
+      queueName,
+      jobType: job.type,
+      recipientEmail: job.recipientEmail,
+    },
+    'Enqueue notification queue job started'
+  );
+
+  const rows = await prisma.$queryRaw<{ message_id: number }[]>`
+    SELECT pgmq.send(${queueName}, CAST(${JSON.stringify(job)} AS jsonb)) AS message_id
+  `;
+
+  const messageId = Number(rows[0]?.message_id ?? 0);
+
+  logger.info(
+    {
+      queueName,
+      messageId,
+      jobType: job.type,
+      recipientEmail: job.recipientEmail,
+    },
+    'Enqueue notification queue job completed'
+  );
+
+  return {
+    messageId,
+    queueName,
+  };
+}
+
+export async function readNotificationQueueJobs(
+  quantity = 25,
+  visibilityTimeoutSeconds = DEFAULT_VISIBILITY_TIMEOUT_SECONDS
+) {
+  const queueName = getNotificationQueueName();
+  await ensureQueueExists(queueName);
+
+  const rows = await prisma.$queryRaw<QueueReadRow[]>`
+    SELECT *
+    FROM pgmq.read(${queueName}, ${visibilityTimeoutSeconds}, ${quantity})
+  `;
+
+  return rows
+    .filter(row => isNotificationQueueJob(row.message))
+    .map<NotificationQueueMessage>(row => ({
+      messageId: row.msg_id,
+      readCount: row.read_ct,
+      enqueuedAt: row.enqueued_at,
+      visibilityTimeoutAt: row.vt,
+      job: row.message as NotificationQueueJob,
+    }));
+}
+
+export async function deleteNotificationQueueJob(messageId: number) {
+  const queueName = getNotificationQueueName();
+  await prisma.$queryRaw`SELECT pgmq.delete(${queueName}::text, ${messageId}::bigint)`;
 }

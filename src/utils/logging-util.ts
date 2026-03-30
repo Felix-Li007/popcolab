@@ -82,17 +82,17 @@ class LevelFileRouter extends Writable {
       const levelName = resolveLogLevelName(record.level ?? 30);
       const logFile = path.basename(LOG_FILES[levelName]);
       const enrichedLine = JSON.stringify({ ...record, logFile });
-      this.streams[levelName].write(`${enrichedLine}\n`);
+      this.streams[levelName].write(`${enrichedLine}\n\n`);
 
       if (process.env.NODE_ENV !== 'production') {
-        process.stdout.write(`${enrichedLine}\n`);
+        process.stdout.write(`${enrichedLine}\n\n`);
       }
     } catch {
       const logFile = path.basename(LOG_FILES.error);
       const enrichedLine = JSON.stringify({ logFile, rawLine: line });
-      this.streams.error.write(`${enrichedLine}\n`);
+      this.streams.error.write(`${enrichedLine}\n\n`);
       if (process.env.NODE_ENV !== 'production') {
-        process.stdout.write(`${enrichedLine}\n`);
+        process.stdout.write(`${enrichedLine}\n\n`);
       }
     }
   }

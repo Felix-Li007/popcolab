@@ -1,7 +1,7 @@
 describe('queue-service', () => {
   const prismaMock = {
     $queryRaw: jest.fn(),
-    $executeRawUnsafe: jest.fn(),
+    $executeRaw: jest.fn(),
   };
 
   async function loadQueueService() {
@@ -14,13 +14,13 @@ describe('queue-service', () => {
   }
 
   beforeEach(() => {
-    process.env.SUPABASE_QUEUE_NAME = 'popcolab_queue';
+    process.env.SUPABASE_REQUEST_QUEUE = 'popcolab_queue';
     prismaMock.$queryRaw.mockReset();
-    prismaMock.$executeRawUnsafe.mockReset();
+    prismaMock.$executeRaw.mockReset();
   });
 
   afterEach(() => {
-    delete process.env.SUPABASE_QUEUE_NAME;
+    delete process.env.SUPABASE_REQUEST_QUEUE;
   });
 
   test('checks the extension and queue only once across repeated operations', async () => {
@@ -39,7 +39,7 @@ describe('queue-service', () => {
     });
     await readRequestQueueJobs(5);
 
-    expect(prismaMock.$executeRawUnsafe).not.toHaveBeenCalled();
+    expect(prismaMock.$executeRaw).not.toHaveBeenCalled();
     expect(prismaMock.$queryRaw).toHaveBeenCalledTimes(4);
   });
 
@@ -47,7 +47,6 @@ describe('queue-service', () => {
     prismaMock.$queryRaw
       .mockResolvedValueOnce([{ exists: true }])
       .mockResolvedValueOnce([{ exists: false }])
-      .mockResolvedValueOnce(undefined)
       .mockResolvedValueOnce([{ message_id: 99 }]);
 
     const { enqueueQueueJob } = await loadQueueService();
@@ -62,7 +61,7 @@ describe('queue-service', () => {
       messageId: 99,
       queueName: 'popcolab_queue',
     });
-    expect(prismaMock.$queryRaw).toHaveBeenCalledTimes(4);
+    expect(prismaMock.$queryRaw).toHaveBeenCalledTimes(3);
   });
 
   test('throws a clear error when the pgmq extension is not installed', async () => {
@@ -80,6 +79,6 @@ describe('queue-service', () => {
       'Missing pgmq extension. Enable it via a database migration or infrastructure setup before using the request queue.'
     );
 
-    expect(prismaMock.$executeRawUnsafe).not.toHaveBeenCalled();
+    expect(prismaMock.$executeRaw).not.toHaveBeenCalled();
   });
 });

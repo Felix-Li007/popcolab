@@ -144,11 +144,11 @@ export default async function ExperienceCheckoutResultPage({
 
             <div className="rounded-2xl bg-gray-50 px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gray-400">
-                Schedule Date
+                Schedule Slot
               </p>
               <p className="mt-2 text-sm font-semibold text-gray-900">
-                {result.scheduleDate
-                  ? new Date(result.scheduleDate).toLocaleString('en-CA')
+                {result.scheduleDate && result.scheduleStartTime
+                  ? `${new Date(result.scheduleDate).toLocaleDateString('en-CA')} ${new Date(result.scheduleStartTime).toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false })} - ${result.scheduleEndTime ? new Date(result.scheduleEndTime).toLocaleTimeString('en-CA', { hour: '2-digit', minute: '2-digit', hour12: false }) : 'Not set'}`
                   : 'Not set'}
               </p>
             </div>

@@ -1,12 +1,18 @@
 model EventCalendar {
-    id         Int      @id @default(autoincrement())
-    event_id   Int
-    event_date DateTime @db.Date
-    start_time DateTime @db.Time
-    end_time   DateTime @db.Time
-    created_at DateTime @default(now()) @db.Timestamp(6)
-    updated_at DateTime @updatedAt @db.Timestamp(6)
-    event      Event    @relation(fields: [event_id], references: [id])
+    id          Int        @id @default(autoincrement())
+    event_id    Int
+    event_date  DateTime   @db.Date
+    start_time  DateTime   @db.Time
+    end_time    DateTime   @db.Time
+    date_status DateStatus @default(VALID)
+    created_at  DateTime   @default(now()) @db.Timestamp(6)
+    updated_at  DateTime   @updatedAt @db.Timestamp(6)
+    event       Event      @relation(fields: [event_id], references: [id])
 
     @@map("event_calendar")
+}
+
+enum DateStatus {
+    VALID
+    CANCELLED
 }

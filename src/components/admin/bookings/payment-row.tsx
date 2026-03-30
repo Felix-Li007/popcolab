@@ -32,14 +32,22 @@ export type AdminPaymentListItem = {
     };
     order_items: Array<{
       id: number;
-      experience_id: number;
+      item_type: 'EXPERIENCE' | 'EVENT';
+      experience_id: number | null;
+      event_id: number | null;
       schedule_date: Date;
+      start_time: Date;
+      end_time: Date;
       experience: {
         experience_title: string;
         provider: {
           provider_label: string;
         };
-      };
+      } | null;
+      event: {
+        eventTitle: string;
+        eventLocation: string;
+      } | null;
     }>;
   }>;
 };
@@ -50,7 +58,24 @@ type Props = {
 
 function formatDate(value: Date | null) {
   if (!value) return 'Not set';
-  return new Date(value).toLocaleString('en-CA');
+  return new Date(value).toLocaleDateString('en-CA');
+}
+
+function formatTime(value: Date | null) {
+  if (!value) return 'Not set';
+  return new Date(value).toLocaleTimeString('en-CA', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
+function formatScheduleSlot(item: {
+  schedule_date: Date;
+  start_time: Date;
+  end_time: Date;
+}) {
+  return `${formatDate(item.schedule_date)} ${formatTime(item.start_time)} - ${formatTime(item.end_time)}`;
 }
 
 function toNumberOrNull(value: DecimalLike | null) {
@@ -114,6 +139,49 @@ function getMoreOrdersLabel(orderCount: number) {
   return `+ ${orderCount} more linked orders`;
 }
 
+function getPrimaryItemLabel(
+  item: AdminPaymentListItem['orders'][number]['order_items'][number] | null
+) {
+  if (!item) return null;
+
+  if (item.item_type === 'EVENT') {
+    return item.event?.eventTitle ?? `Event #${item.event_id ?? '-'}`;
+  }
+
+  return (
+    item.experience?.experience_title ??
+    `Experience #${item.experience_id ?? '-'}`
+  );
+}
+
+function getPrimaryItemMeta(
+  item: AdminPaymentListItem['orders'][number]['order_items'][number] | null
+) {
+  if (!item) return null;
+
+  if (item.item_type === 'EVENT') {
+    return item.event?.eventLocation ?? 'Event';
+  }
+
+  return item.experience?.provider.provider_label ?? 'Experience';
+}
+
+function getPrimaryItemHref(
+  item: AdminPaymentListItem['orders'][number]['order_items'][number] | null
+) {
+  if (!item) return null;
+
+  if (item.item_type === 'EVENT' && item.event_id) {
+    return `/admin/events?view=${item.event_id}`;
+  }
+
+  if (item.item_type === 'EXPERIENCE' && item.experience_id) {
+    return `/admin/experiences?view=${item.experience_id}`;
+  }
+
+  return null;
+}
+
 function PaymentTotals({ payment }: Readonly<Props>) {
   return (
     <>
@@ -155,6 +223,10 @@ function PaymentOrderSummary({
     return <p className={styles.secondaryText}>No linked order</p>;
   }
 
+  const primaryItemHref = getPrimaryItemHref(primaryItem);
+  const primaryItemLabel = getPrimaryItemLabel(primaryItem);
+  const primaryItemMeta = getPrimaryItemMeta(primaryItem);
+
   return (
     <>
       <p className={styles.primaryText}>
@@ -166,17 +238,18 @@ function PaymentOrderSummary({
       {primaryItem ? (
         <>
           <p className={styles.secondaryText}>
-            <Link
-              href={`/admin/experiences?view=${primaryItem.experience_id}`}
-              className={styles.orderLink}
-            >
-              {primaryItem.experience.experience_title}
-            </Link>
+            {primaryItemHref && primaryItemLabel ? (
+              <Link href={primaryItemHref} className={styles.orderLink}>
+                {primaryItemLabel}
+              </Link>
+            ) : (
+              (primaryItemLabel ?? 'Untitled item')
+            )}
           </p>
           <p className={styles.secondarySmall}>
-            {primaryItem.experience.provider.provider_label}
+            {primaryItemMeta}
             {' · '}
-            {formatDate(primaryItem.schedule_date)}
+            {formatScheduleSlot(primaryItem)}
           </p>
           {additionalItemCount > 0 ? (
             <p className={styles.secondarySmall}>
