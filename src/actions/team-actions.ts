@@ -10,6 +10,7 @@ import {
   updateTeam,
   removeTeamMember,
   addInviteesToTeam,
+  resendTeamInvite,
 } from '@/services/user-team-service';
 
 const TEAMS_PATH = '/dashboard/teams';
@@ -109,6 +110,11 @@ export async function removeTeamMemberAction(
 export type InviteToTeamState = {
   error?: string;
 };
+
+export async function resendTeamInviteAction(inviteId: number): Promise<void> {
+  const user = await getAuthUser();
+  await resendTeamInvite(inviteId, user.id);
+}
 
 export async function addInviteesToTeamAction(
   _prev: InviteToTeamState,

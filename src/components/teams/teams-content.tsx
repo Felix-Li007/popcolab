@@ -7,7 +7,6 @@ import type {
 } from '@/services/user-team-service';
 import TeamCard from './team-card';
 import CreateTeamModal from './create-team-modal';
-import InviteTeamModal from './invite-team-modal';
 import ManageTeamModal from './manage-team-modal';
 import { respondToTeamInviteAction } from '@/actions/team-actions';
 
@@ -18,17 +17,16 @@ type Props = {
   pendingInvites: PendingTeamInvite[];
 };
 
-export default function TeamsContent({ teams, pendingInvites }: Props) {
+export default function TeamsContent({
+  teams,
+  pendingInvites,
+}: Readonly<Props>) {
   const [tab, setTab] = useState<Tab>('my-teams');
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
   const [responding, startRespond] = useTransition();
 
-  const [inviteTeam, setInviteTeam] = useState<{
-    id: number;
-    name: string;
-  } | null>(null);
   const [manageTeam, setManageTeam] = useState<UserTeamItem | null>(null);
 
   function handleModalClose() {
@@ -61,7 +59,7 @@ export default function TeamsContent({ teams, pendingInvites }: Props) {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            My Teams
+            My Teams{' '}
             <span className="ml-1.5 rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] font-bold text-gray-600">
               {teams.length}
             </span>
@@ -124,7 +122,6 @@ export default function TeamsContent({ teams, pendingInvites }: Props) {
                 <TeamCard
                   key={team.id}
                   team={team}
-                  onInvite={(id, name) => setInviteTeam({ id, name })}
                   onManage={t => setManageTeam(t)}
                 />
               ))}
@@ -213,21 +210,11 @@ export default function TeamsContent({ teams, pendingInvites }: Props) {
         onClose={handleModalClose}
       />
 
-      {inviteTeam && (
-        <InviteTeamModal
-          key={`invite-${inviteTeam.id}`}
-          open
-          onClose={() => setInviteTeam(null)}
-          teamId={inviteTeam.id}
-          teamName={inviteTeam.name}
-        />
-      )}
-
       {manageTeam && (
         <ManageTeamModal
           key={`manage-${manageTeam.id}`}
           open
-          onClose={() => setManageTeam(null)}
+          onCloseAction={() => setManageTeam(null)}
           team={manageTeam}
         />
       )}

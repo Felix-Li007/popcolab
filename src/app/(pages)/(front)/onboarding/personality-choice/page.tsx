@@ -37,14 +37,10 @@ export default async function PersonalityChoicePage({
   });
 
   if (!user) redirect('/sign-in');
-  if (!user.personality_complete) redirect('/test');
 
-  const [testResult, assessedAt] = await Promise.all([
-    getTestResult(user.id),
-    getAssessedAt(user.id),
-  ]);
-
-  if (!testResult) redirect('/test');
+  const [testResult, assessedAt] = user.personality_complete
+    ? await Promise.all([getTestResult(user.id), getAssessedAt(user.id)])
+    : [null, null];
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4 py-12">
@@ -62,7 +58,7 @@ export default async function PersonalityChoicePage({
 
         <PersonalityChoice
           firstName={user.profile?.first_name ?? ''}
-          personality={testResult.personality}
+          personality={testResult?.personality ?? null}
           assessedAt={assessedAt}
           redirectTo={redirectTo}
         />

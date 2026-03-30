@@ -1,17 +1,26 @@
 'use client';
 
 import { useTransition } from 'react';
-import { deleteTeamAction } from '@/actions/team-actions';
+import {
+  deleteTeamAction,
+  resendTeamInviteAction,
+} from '@/actions/team-actions';
 import type { UserTeamItem } from '@/services/user-team-service';
 
 type Props = {
   team: UserTeamItem;
-  onInvite: (teamId: number, teamName: string) => void;
   onManage: (team: UserTeamItem) => void;
 };
 
-export default function TeamCard({ team, onInvite, onManage }: Props) {
+export default function TeamCard({ team, onManage }: Props) {
   const [pending, startTransition] = useTransition();
+  const [resending, startResend] = useTransition();
+
+  function handleResend(inviteId: number) {
+    startResend(async () => {
+      await resendTeamInviteAction(inviteId);
+    });
+  }
 
   function handleDelete() {
     if (!confirm(`Delete "${team.name}"? This cannot be undone.`)) return;
@@ -108,6 +117,34 @@ export default function TeamCard({ team, onInvite, onManage }: Props) {
         )}
       </div>
 
+      {/* Pending invites with resend */}
+      {team.isLead && team.pendingInvites.length > 0 && (
+        <div className="mb-3">
+          <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+            Pending invites
+          </p>
+          <div className="mt-1 flex flex-col gap-1">
+            {team.pendingInvites.map(inv => (
+              <div
+                key={inv.id}
+                className="flex items-center justify-between gap-2 rounded-md bg-gray-50 px-2 py-1"
+              >
+                <span className="truncate text-[10px] text-gray-600">
+                  {inv.displayValue}
+                </span>
+                <button
+                  disabled={resending}
+                  onClick={() => handleResend(inv.id)}
+                  className="shrink-0 text-[10px] font-semibold text-[#E91E8C] hover:underline disabled:opacity-50"
+                >
+                  {resending ? 'Sending…' : 'Resend'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
       <div className="flex gap-1.5">
         {team.isLead && (
@@ -118,12 +155,6 @@ export default function TeamCard({ team, onInvite, onManage }: Props) {
             ✎ Manage
           </button>
         )}
-        <button
-          onClick={() => onInvite(team.id, team.name)}
-          className="rounded-md border border-gray-200 px-3 py-1 text-[11px] font-semibold text-gray-600 hover:bg-gray-50"
-        >
-          ✉ Invite
-        </button>
       </div>
 
       <button

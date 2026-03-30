@@ -5,7 +5,7 @@ import type { Personality } from '@/types/personality-type';
 
 type Props = {
   firstName: string;
-  personality: Personality;
+  personality: Personality | null;
   assessedAt: string | null;
   redirectTo?: string;
 };
@@ -15,7 +15,7 @@ export default function PersonalityChoice({
   personality,
   assessedAt,
   redirectTo = '/dashboard',
-}: Props) {
+}: Readonly<Props>) {
   const router = useRouter();
 
   const formattedDate = assessedAt
@@ -25,6 +25,39 @@ export default function PersonalityChoice({
         year: 'numeric',
       })
     : null;
+
+  if (!personality) {
+    return (
+      <div className="px-8 py-7">
+        <h1 className="mb-1 text-lg font-bold text-gray-800">
+          Welcome{firstName ? `, ${firstName}` : ''}! 👋
+        </h1>
+        <p className="mb-5 text-sm text-gray-500">
+          You haven&apos;t taken your personality test yet.
+        </p>
+
+        <div className="mb-5 rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <p className="text-xs text-gray-600">
+            Discover your play personality — find out your play style and get
+            matched with the right experiences. Takes about 5 minutes.
+          </p>
+        </div>
+
+        <button
+          onClick={() => router.push('/test')}
+          className="mb-3 w-full rounded-lg bg-[#E91E8C] py-3 text-sm font-semibold text-white hover:bg-[#c7177a]"
+        >
+          Take test now →
+        </button>
+        <button
+          onClick={() => router.push('/dashboard')}
+          className="w-full rounded-lg border border-gray-200 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+        >
+          Go to dashboard
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="px-8 py-7">

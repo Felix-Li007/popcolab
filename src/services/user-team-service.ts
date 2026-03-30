@@ -18,6 +18,11 @@ export type UserTeamMember = {
   email: string;
 };
 
+export type PendingOutgoingInvite = {
+  id: number;
+  displayValue: string;
+};
+
 export type UserTeamItem = {
   id: number;
   name: string;
@@ -25,6 +30,7 @@ export type UserTeamItem = {
   description: string | null;
   isLead: boolean;
   members: UserTeamMember[];
+  pendingInvites: PendingOutgoingInvite[];
 };
 
 export type PendingTeamInvite = {
@@ -83,6 +89,10 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
             },
             take: 5,
           },
+          team_invites: {
+            where: { status: TeamInviteStatus.pending },
+            select: { id: true, email: true, username: true },
+          },
         },
         orderBy: { created_at: 'desc' },
       },
@@ -108,6 +118,10 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
                   },
                 },
                 take: 5,
+              },
+              team_invites: {
+                where: { status: TeamInviteStatus.pending },
+                select: { id: true, email: true, username: true },
               },
             },
           },
@@ -139,6 +153,7 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
           } | null;
         };
       }[];
+      team_invites: { id: number; email: string; username: string | null }[];
     },
     isLead: boolean
   ): UserTeamItem => ({
@@ -160,6 +175,10 @@ export async function getUserTeams(userId: number): Promise<UserTeamItem[]> {
         email: tm.user.email,
       };
     }),
+    pendingInvites: team.team_invites.map(inv => ({
+      id: inv.id,
+      displayValue: inv.email || (inv.username ? `@${inv.username}` : '?'),
+    })),
   });
 
   for (const team of user.created_teams) {
@@ -191,6 +210,7 @@ export async function getPendingTeamInvites(
     select: {
       id: true,
       created_at: true,
+      team_id: true,
       team: { select: { team_name: true } },
       inviter: {
         select: {
@@ -202,7 +222,15 @@ export async function getPendingTeamInvites(
     orderBy: { created_at: 'desc' },
   });
 
-  return invites.map(inv => {
+  // Show only the most recent pending invite per team
+  const seenTeams = new Set<number>();
+  const deduplicated = invites.filter(inv => {
+    if (seenTeams.has(inv.team_id)) return false;
+    seenTeams.add(inv.team_id);
+    return true;
+  });
+
+  return deduplicated.map(inv => {
     const { first_name, last_name } = inv.inviter.profile ?? {};
     const inviterName =
       [first_name, last_name].filter(Boolean).join(' ').trim() ||
@@ -372,17 +400,43 @@ export async function addInviteesToTeam(params: {
     throw new Error('Not authorised to invite to this team.');
   }
 
-  const inviteData = params.invitees.map(inv => {
+  const resolved = params.invitees.map(inv => {
     const isEmail = inv.value.includes('@') && !inv.value.startsWith('@');
     return {
-      team_id: params.teamId,
-      invited_by: params.inviterId,
       email: isEmail ? inv.value : '',
       username: isEmail ? null : inv.value.replace(/^@/, ''),
-      token: randomBytes(24).toString('hex'),
-      status: TeamInviteStatus.pending,
     };
   });
+
+  const existingPending = await prisma.teamInvite.findMany({
+    where: {
+      team_id: params.teamId,
+      status: TeamInviteStatus.pending,
+    },
+    select: { email: true, username: true },
+  });
+
+  const existingEmails = new Set(
+    existingPending.map(e => e.email).filter(Boolean)
+  );
+  const existingUsernames = new Set(
+    existingPending.map(e => e.username).filter(Boolean)
+  );
+
+  const newResolved = resolved.filter(r =>
+    r.email ? !existingEmails.has(r.email) : !existingUsernames.has(r.username)
+  );
+
+  if (newResolved.length === 0) return;
+
+  const inviteData = newResolved.map(r => ({
+    team_id: params.teamId,
+    invited_by: params.inviterId,
+    email: r.email,
+    username: r.username,
+    token: randomBytes(24).toString('hex'),
+    status: TeamInviteStatus.pending,
+  }));
 
   await prisma.teamInvite.createMany({
     data: inviteData,
@@ -496,4 +550,69 @@ export async function respondToTeamInvite(
       });
     }
   }
+}
+
+export async function resendTeamInvite(
+  inviteId: number,
+  requesterId: number
+): Promise<void> {
+  const invite = await prisma.teamInvite.findUnique({
+    where: { id: inviteId },
+    select: {
+      token: true,
+      email: true,
+      username: true,
+      status: true,
+      team: { select: { team_name: true, created_by: true } },
+    },
+  });
+
+  if (!invite) throw new Error('Invite not found.');
+  if (invite.team.created_by !== requesterId)
+    throw new Error('Not authorised.');
+  if (invite.status !== TeamInviteStatus.pending) return;
+
+  const appBaseUrl = getFallbackAppBaseUrl();
+  if (!appBaseUrl) return;
+
+  let recipientEmail = invite.email;
+  if (!recipientEmail && invite.username) {
+    const user = await prisma.user.findFirst({
+      where: { user_name: invite.username },
+      select: { email: true },
+    });
+    recipientEmail = user?.email ?? '';
+  }
+  if (!recipientEmail) return;
+
+  const inviter = await prisma.user.findUnique({
+    where: { id: requesterId },
+    select: {
+      user_name: true,
+      profile: { select: { first_name: true, last_name: true } },
+    },
+  });
+
+  const inviterName =
+    [inviter?.profile?.first_name, inviter?.profile?.last_name]
+      .filter(Boolean)
+      .join(' ')
+      .trim() ||
+    inviter?.user_name ||
+    'A teammate';
+
+  const from = process.env.RESEND_FROM_EMAIL ?? '';
+  const joinUrl = buildTeamInviteAbsoluteUrl(appBaseUrl, invite.token);
+
+  await sendResendEmail({
+    to: recipientEmail,
+    from,
+    subject: `You've been invited to join ${invite.team.team_name} on Pop CoLab`,
+    react: TeamInviteEmail({
+      inviteeName: recipientEmail,
+      teamName: invite.team.team_name,
+      inviterName,
+      joinUrl,
+    }),
+  });
 }

@@ -7,9 +7,9 @@ import { getTestResult } from '@/services/response-service';
 import { buildAuthPath } from '@/utils/url-helper';
 import JoinPersonalityChoice from '@/components/teams/join-personality-choice';
 
-type PageProps = {
+type PageProps = Readonly<{
   params: Promise<{ token: string }>;
-};
+}>;
 
 const Logo = () => (
   <div className="bg-[#111827] px-8 py-7 text-center">

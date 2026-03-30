@@ -87,7 +87,10 @@ export default function CreateTeamModal({ open, onClose }: Props) {
           <input
             type="hidden"
             name="invitees"
-            value={JSON.stringify(invitees)}
+            value={JSON.stringify([
+              ...invitees,
+              ...(inputVal.trim() ? [{ value: inputVal.trim() }] : []),
+            ])}
           />
           <div className="p-6 flex flex-col gap-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
