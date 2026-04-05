@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { Prisma } from '@/libs/prisma/client';
+import { Prisma, MessageType } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { enqueueNotificationQueueJob } from '@/services/queue-service';
 import { handleQStashTask, publishQStashTask } from '@/services/qstash-service';
@@ -203,6 +203,60 @@ async function getPurchasedEventRecipients(params: {
   return [...deduped.values()];
 }
 
+export async function enqueueRequestMatchedNotification(params: {
+  userId: number;
+  recipientEmail: string;
+  recipientName: string;
+  requestId: number;
+  proposalId: number;
+  objectiveCategory: string;
+}) {
+  await prisma.notification.create({
+    data: {
+      user_id: params.userId,
+      message_type: MessageType.REQUEST_MATCHED,
+      message_title: `Request #${params.requestId} matched`,
+      message_body:
+        'Your request has been approved and is now matched with a proposal.',
+      message_data: {
+        requestId: params.requestId,
+        proposalId: params.proposalId,
+        objectiveCategory: params.objectiveCategory,
+      },
+    },
+  });
+
+  await enqueueNotificationQueueJob({
+    type: NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL,
+    recipientEmail: params.recipientEmail,
+    recipientName: params.recipientName,
+    requestId: params.requestId,
+    objectiveCategory: params.objectiveCategory,
+    queuedAt: new Date().toISOString(),
+  });
+
+  try {
+    await publishQStashTask({
+      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
+      batchSize: 100,
+    });
+  } catch (error) {
+    logger.warn(
+      {
+        error,
+        requestId: params.requestId,
+        proposalId: params.proposalId,
+      },
+      'QStash publish failed for request matched notification, processing queue locally'
+    );
+
+    await handleQStashTask({
+      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
+      batchSize: 100,
+    });
+  }
+}
+
 export async function enqueueEventCanceledNotifications(params: {
   eventId: number;
   eventTitle: string;
@@ -265,7 +319,7 @@ export async function enqueueEventCanceledNotifications(params: {
     await prisma.notification.createMany({
       data: persistedRecipients.map(recipient => ({
         user_id: recipient.userId,
-        notification_type: 'event.canceled',
+        message_type: MessageType.EVENT_CANCELED,
         message_title: `Event canceled: ${params.eventTitle}`,
         message_body: `${params.eventTitle} at ${params.eventLocation} has been canceled.`,
         message_data: {
@@ -468,7 +522,7 @@ export async function enqueueEventDateCanceledNotifications(params: {
     await prisma.notification.createMany({
       data: recipients.map(recipient => ({
         user_id: recipient.userId,
-        notification_type: 'event.date_canceled',
+        message_type: MessageType.DATE_CANCELED,
         message_title: `Event date canceled: ${params.eventTitle}`,
         message_body: `${params.eventTitle} on ${canceledDateLabel}${canceledTimeLabel ? ` ${canceledTimeLabel}` : ''} has been canceled.`,
         message_data: {

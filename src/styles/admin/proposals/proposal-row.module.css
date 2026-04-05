@@ -1,0 +1,498 @@
+@reference "../../../app/globals.css";
+
+.proposalRow {
+  @apply relative rounded-2xl border border-slate-200 p-3;
+  border-color: rgba(226, 232, 240, 0.62);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.7),
+    rgba(241, 245, 249, 0.5)
+  );
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  backdrop-filter: blur(12px) saturate(120%);
+  box-shadow:
+    0 18px 34px rgba(15, 23, 42, 0.09),
+    0 6px 12px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.proposalRow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 1rem 0 0 1rem;
+  background: linear-gradient(180deg, #14b8a6, #0ea5e9);
+}
+
+.proposalRow::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85),
+    rgba(255, 255, 255, 0.2)
+  );
+  pointer-events: none;
+}
+
+.proposalRow:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 24px 44px rgba(15, 23, 42, 0.12),
+    0 8px 18px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.proposalSummary {
+  @apply rounded-xl border border-slate-200 p-2.5;
+  border-color: rgba(226, 232, 240, 0.6);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(20, 184, 166, 0.14),
+      transparent 38%
+    ),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.66), rgba(248, 250, 252, 0.5));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 6px 12px rgba(15, 23, 42, 0.04);
+}
+
+.proposalSummaryGrid {
+  @apply mt-2 grid grid-cols-1 gap-2;
+}
+
+.keyMetricStrip {
+  @apply mt-2 grid grid-cols-2 gap-2;
+}
+
+.keyMetricCard {
+  @apply rounded-lg border border-slate-200 px-2.5 py-2;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95),
+    rgba(240, 249, 255, 0.72)
+  );
+  box-shadow:
+    0 8px 14px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.keyMetricCard:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 20px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.keyMetricCard:nth-child(1) {
+  background: linear-gradient(
+    180deg,
+    rgba(236, 253, 245, 0.95),
+    rgba(209, 250, 229, 0.65)
+  );
+}
+
+.keyMetricCard:nth-child(2) {
+  background: linear-gradient(
+    180deg,
+    rgba(239, 246, 255, 0.95),
+    rgba(219, 234, 254, 0.68)
+  );
+}
+
+.keyMetricCard:nth-child(3) {
+  background: linear-gradient(
+    180deg,
+    rgba(254, 249, 195, 0.95),
+    rgba(254, 240, 138, 0.58)
+  );
+}
+
+.keyMetricCard:nth-child(4) {
+  background: linear-gradient(
+    180deg,
+    rgba(243, 232, 255, 0.95),
+    rgba(233, 213, 255, 0.62)
+  );
+}
+
+.keyMetricLabel {
+  @apply text-caption font-semibold uppercase tracking-wide text-slate-500;
+  letter-spacing: 0.04em;
+}
+
+.keyMetricValue {
+  @apply mt-0.5 text-sm font-semibold text-slate-800;
+}
+
+.keyMetricValueCompact {
+  @apply mt-0.5 text-xs font-semibold text-slate-700;
+}
+
+.proposalInfoHead {
+  @apply mb-1.5 flex items-start justify-between gap-2;
+}
+
+.requestInlineLink {
+  @apply inline-flex items-center rounded-md px-1 py-0.5 text-caption font-semibold;
+  color: #0369a1;
+  transition: background-color 0.15s ease;
+}
+
+.requestInlineLink:hover {
+  background: rgba(14, 165, 233, 0.1);
+  text-decoration: underline;
+}
+
+.proposalTitle {
+  @apply text-base font-semibold text-slate-800;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.proposalTitleGroup {
+  @apply min-w-0;
+}
+
+.proposalSubTitle {
+  @apply mt-0.5 text-caption font-semibold text-slate-500;
+  letter-spacing: 0.01em;
+}
+
+.infoBlock {
+  @apply mt-2 rounded-lg border border-slate-200 p-2;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.infoLabel {
+  @apply text-caption font-semibold text-slate-500;
+  letter-spacing: 0.03em;
+}
+
+.infoText {
+  @apply mt-0.5 text-xs text-slate-700;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.infoReasonText {
+  @apply mt-0.5 rounded-md border border-slate-200 px-2 py-1.5 text-xs text-slate-700;
+  background: rgba(255, 255, 255, 0.64);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: blur(8px) saturate(120%);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.sectionTitle {
+  @apply text-caption font-semibold uppercase tracking-wide text-slate-500;
+  letter-spacing: 0.04em;
+}
+
+.matchScoreRow {
+  @apply mt-1 mb-1.5 flex flex-wrap gap-1.5;
+}
+
+.scoreHeroRow {
+  @apply mt-1.5 flex flex-wrap items-center gap-2;
+}
+
+.scoreHero {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  border-width: 1px;
+  border-style: solid;
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.scoreHeroHigh {
+  color: #065f46;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(209, 250, 229, 0.9);
+}
+
+.scoreHeroMedium {
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(254, 243, 199, 0.9);
+}
+
+.scoreHeroLow {
+  color: #9f1239;
+  border-color: rgba(244, 63, 94, 0.32);
+  background: rgba(255, 228, 230, 0.9);
+}
+
+.actionRow {
+  @apply mt-2 flex flex-wrap items-center gap-2 pt-1;
+}
+
+.acceptButton,
+.regenerateButton,
+.deleteButton {
+  @apply inline-flex h-8 w-20 items-center justify-center rounded-full px-3 text-xs font-semibold;
+}
+
+.acceptButton {
+  color: #065f46;
+  border: 1px solid rgba(5, 150, 105, 0.35);
+  background: rgba(236, 253, 245, 0.95);
+}
+
+.regenerateButton {
+  color: #1e3a8a;
+  border: 1px solid rgba(30, 64, 175, 0.3);
+  background: rgba(239, 246, 255, 0.95);
+}
+
+.deleteButton {
+  color: #991b1b;
+  border: 1px solid rgba(220, 38, 38, 0.32);
+  background: rgba(254, 242, 242, 0.95);
+}
+
+.actionButtonDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(0.15);
+}
+
+.experienceSection {
+  @apply mt-2.5 rounded-xl border border-slate-200 p-2.5;
+  border-color: rgba(226, 232, 240, 0.6);
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.62),
+    rgba(241, 245, 249, 0.45)
+  );
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  backdrop-filter: blur(10px) saturate(120%);
+  box-shadow:
+    0 10px 20px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.experienceToggle {
+  @apply flex cursor-pointer list-none items-center justify-between gap-2;
+}
+
+.experienceSection[open] .experienceToggle {
+  @apply pb-1;
+}
+
+.experienceToggleIcon {
+  @apply inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold text-slate-500;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.88);
+  transition: transform 0.15s ease;
+}
+
+.experienceSection:not([open]) .experienceToggleIcon {
+  transform: rotate(-90deg);
+}
+
+.experienceToggle::-webkit-details-marker {
+  display: none;
+}
+
+.experienceSectionTitle {
+  @apply text-xs font-semibold text-slate-700;
+}
+
+.experienceGrid {
+  @apply mt-2 grid grid-cols-1 gap-2 md:grid-cols-2;
+}
+
+.experienceCard {
+  @apply relative rounded-lg border border-slate-200 p-2.5;
+  border-left: 3px solid rgba(20, 184, 166, 0.35);
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(56, 189, 248, 0.08),
+      transparent 36%
+    ),
+    rgba(255, 255, 255, 0.94);
+  box-shadow:
+    0 10px 18px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.experienceCard::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.15)
+  );
+  pointer-events: none;
+}
+
+.experienceCard:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 24px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  border-left-color: rgba(14, 165, 233, 0.55);
+}
+
+.experienceDeleteIconButton {
+  @apply absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full;
+  color: #991b1b;
+  border: 1px solid rgba(220, 38, 38, 0.28);
+  background: rgba(254, 242, 242, 0.92);
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.experienceDeleteIconButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(220, 38, 38, 0.42);
+  background: rgba(254, 226, 226, 0.96);
+}
+
+.experienceDeleteIconButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.experienceHeadLine {
+  @apply flex items-baseline gap-1.5;
+}
+
+.matchPanel {
+  @apply mt-2 rounded-lg border px-2.5 py-2;
+  border-color: rgba(16, 185, 129, 0.26);
+  background: linear-gradient(
+    180deg,
+    rgba(236, 253, 245, 0.85),
+    rgba(240, 253, 250, 0.65)
+  );
+}
+
+.experienceDataPanel {
+  @apply mt-2 rounded-lg border px-2.5 py-2;
+  border-color: rgba(14, 165, 233, 0.25);
+  background: linear-gradient(
+    180deg,
+    rgba(239, 246, 255, 0.86),
+    rgba(248, 250, 252, 0.72)
+  );
+}
+
+.detailGrid {
+  @apply mt-1.5 grid grid-cols-1 gap-1.5;
+}
+
+.detailItem {
+  @apply flex items-center justify-between gap-2 rounded-md border border-slate-200 px-2 py-1;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.detailLabel {
+  @apply text-caption font-semibold text-slate-500;
+  letter-spacing: 0.01em;
+}
+
+.detailValue {
+  @apply text-xs font-semibold text-slate-700;
+  font-weight: 700;
+  text-align: right;
+}
+
+.experienceIdPill {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-badge font-semibold;
+  color: #0f766e;
+  border: 1px solid rgba(20, 184, 166, 0.35);
+  background: rgba(240, 253, 250, 0.92);
+}
+
+.experienceTitle {
+  @apply text-sm font-semibold text-slate-800;
+  letter-spacing: 0.01em;
+}
+
+.experienceTitleButton {
+  @apply inline-flex rounded-md border-0 bg-transparent p-0 text-left;
+  cursor: pointer;
+}
+
+.experienceTitleButton:hover .experienceTitle,
+.experienceTitleButton:focus-visible .experienceTitle {
+  color: #0369a1;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.experienceTitleButton:focus-visible {
+  outline: 2px solid rgba(14, 165, 233, 0.35);
+  outline-offset: 2px;
+}
+
+.metricChip {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-badge font-semibold;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #334155;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 3px 8px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.srOnlyLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (min-width: 1024px) {
+  .proposalSummaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .keyMetricStrip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .detailGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

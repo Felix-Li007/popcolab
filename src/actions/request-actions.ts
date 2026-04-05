@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
+import { ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { createRequest } from '@/services/user-request-service';
 
@@ -156,7 +157,7 @@ export async function acceptProposalAction(proposalId: number): Promise<void> {
 
   await prisma.proposal.update({
     where: { id: proposalId },
-    data: { proposal_status: 'accepted' },
+    data: { proposal_status: ProposalStatus.ACCEPTED },
   });
 
   revalidatePath(REQUESTS_PATH);
@@ -189,7 +190,7 @@ export async function rejectProposalAction(
 
   await prisma.proposal.update({
     where: { id: proposalId },
-    data: { proposal_status: 'rejected' },
+    data: { proposal_status: ProposalStatus.REJECTED },
   });
 
   revalidatePath(REQUESTS_PATH);

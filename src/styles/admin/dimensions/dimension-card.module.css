@@ -90,8 +90,20 @@
   @apply text-heading font-bold text-foreground leading-tight;
 }
 
+.titleRow {
+  @apply mt-1 flex items-center gap-2;
+}
+
+.categoryPill {
+  @apply text-caption text-foreground/65;
+}
+
+.indexText {
+  @apply text-heading font-bold text-foreground leading-tight;
+}
+
 .category {
-  @apply text-caption text-foreground/65 mt-1;
+  @apply text-caption font-bold text-foreground/75 mt-1;
 }
 
 .notes {

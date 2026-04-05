@@ -10,7 +10,7 @@ import type {
   DimensionDataType,
   DimensionFormState,
 } from '@/types/dimension-type';
-import type { IntakeForm } from '@/types/question-type';
+import type { FormName } from '@/types/question-type';
 import styles from '@/styles/admin/dimensions/dimension-form.module.css';
 
 type FormAction = (
@@ -20,7 +20,7 @@ type FormAction = (
 
 const EMPTY_STATE: DimensionFormState = { errors: {} };
 const DATA_TYPES: DimensionDataType[] = ['numeric', 'text'];
-const FORM_OPTIONS: Array<{ value: IntakeForm; label: string }> = [
+const FORM_OPTIONS: Array<{ value: FormName; label: string }> = [
   { value: 'REQUEST', label: 'LEADER' },
   { value: 'MEMBER', label: 'MEMBER' },
   { value: 'ASSESS', label: 'ASSESS' },
@@ -48,6 +48,7 @@ type OptionDraft = {
   id: string;
   label: string;
   value: string;
+  penalty: string;
 };
 
 function createOptionDraft(label = '', value = ''): OptionDraft {
@@ -55,6 +56,7 @@ function createOptionDraft(label = '', value = ''): OptionDraft {
     id: crypto.randomUUID(),
     label,
     value,
+    penalty: '',
   };
 }
 
@@ -82,9 +84,10 @@ function DimensionFormBody({
       id: crypto.randomUUID(),
       label: opt.label,
       value: opt.value,
+      penalty: opt.penalty != null ? String(opt.penalty) : '',
     })) ?? [createOptionDraft()]
   );
-  const [selectedForms, setSelectedForms] = useState<IntakeForm[]>(
+  const [selectedForms, setSelectedForms] = useState<FormName[]>(
     initial?.formNames ?? []
   );
   const indexNameId = `${formFieldId}-index-name`;
@@ -127,7 +130,7 @@ function DimensionFormBody({
     );
   }
 
-  function toggleFormName(formName: IntakeForm) {
+  function toggleFormName(formName: FormName) {
     setSelectedForms(prev =>
       prev.includes(formName)
         ? prev.filter(item => item !== formName)
@@ -203,36 +206,48 @@ function DimensionFormBody({
           rows={2}
         />
 
-        <div>
-          <label
-            htmlFor={categoryId}
-            className="block text-body font-bold text-foreground/75 mb-2"
-          >
-            CATEGORY <span className="text-magenta">*</span>
-          </label>
-          <select
-            id={categoryId}
-            name="categoryId"
-            title="Dimension category"
-            aria-label="Dimension category"
-            defaultValue={String(initial?.categoryId ?? '')}
-            className="w-full px-3 py-2 text-body bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold text-foreground"
-            required
-          >
-            <option value="" disabled>
-              Select a category
-            </option>
-            {categories.map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Input
+            name="penaltyValue"
+            label="Penalty Value"
+            type="number"
+            step="0.01"
+            placeholder="Optional penalty (e.g. -1.25)"
+            defaultValue={initial?.penaltyValue ?? ''}
+            inputSize="sm"
+          />
+
+          <div>
+            <label
+              htmlFor={categoryId}
+              className="block text-body font-bold text-foreground/75 mb-2"
+            >
+              CATEGORY <span className="text-magenta">*</span>
+            </label>
+            <select
+              id={categoryId}
+              name="categoryId"
+              title="Dimension category"
+              aria-label="Dimension category"
+              defaultValue={String(initial?.categoryId ?? '')}
+              className="w-full px-3 py-2 text-body bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold text-foreground"
+              required
+            >
+              <option value="" disabled>
+                Select a category
               </option>
-            ))}
-          </select>
-          {state.errors.categoryId && (
-            <p className="text-body text-red-500 mt-1">
-              {state.errors.categoryId}
-            </p>
-          )}
+              {categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            {state.errors.categoryId && (
+              <p className="text-body text-red-500 mt-1">
+                {state.errors.categoryId}
+              </p>
+            )}
+          </div>
         </div>
 
         <fieldset>
@@ -267,19 +282,16 @@ function DimensionFormBody({
               );
             })}
           </div>
-          <p className="mt-1 text-caption text-foreground/45">
-            Select which intake forms should use this dimension.
-          </p>
         </fieldset>
 
-        <fieldset>
+        <fieldset className="w-full">
           <legend
             id={dataTypeLegendId}
-            className="block text-body font-bold text-foreground/75"
+            className="w-full flex items-center justify-between gap-4 text-body font-bold text-foreground/75"
           >
-            DATA TYPE <span className="text-red-500">*</span>
-          </legend>
-          <div className="mb-2 mt-2 flex items-center justify-between gap-3">
+            <span>
+              DATA TYPE <span className="text-red-500">*</span>
+            </span>
             <label className="inline-flex items-center gap-2 cursor-pointer">
               <span className="text-caption font-semibold text-foreground/75">
                 Hard Filter
@@ -295,8 +307,8 @@ function DimensionFormBody({
                 <span className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4" />
               </span>
             </label>
-          </div>
-          <div className="flex flex-wrap gap-2">
+          </legend>
+          <div className="mt-2 flex justify-start flex-wrap gap-2">
             {DATA_TYPES.map(type => (
               <button
                 key={type}
@@ -354,7 +366,7 @@ function DimensionFormBody({
             {options.map((option, index) => (
               <div
                 key={option.id}
-                className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2"
+                className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-2 items-center"
               >
                 <input
                   type="text"
@@ -370,9 +382,17 @@ function DimensionFormBody({
                   placeholder="Option value"
                   className="min-w-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-body outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30"
                 />
+                <input
+                  type="number"
+                  step="0.01"
+                  value={option.penalty}
+                  onChange={e => updateOption(index, 'penalty', e.target.value)}
+                  placeholder="Penalty"
+                  className="w-24 min-w-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-2 text-body outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30"
+                />
                 <button
                   type="button"
-                  className="rounded-xl border border-gray-200 bg-white px-3 text-gray-400 transition-colors hover:text-red-500"
+                  className="h-9 w-9 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                   onClick={() => removeOption(index)}
                   title="Remove option"
                   aria-label="Remove option"
@@ -381,6 +401,11 @@ function DimensionFormBody({
                 </button>
                 <input type="hidden" name="optionLabel" value={option.label} />
                 <input type="hidden" name="optionValue" value={option.value} />
+                <input
+                  type="hidden"
+                  name="optionPenalty"
+                  value={option.penalty}
+                />
               </div>
             ))}
           </div>

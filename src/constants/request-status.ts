@@ -1,22 +1,31 @@
-import type { RequestStatus as PrismaRequestStatusValue } from '@/libs/prisma/client';
-
 export const REQUEST_STATUS = {
-  OPENED: 'opened',
-  PENDING: 'pending',
-  MATCHED: 'matched',
-  CLOSED: 'closed',
+  OPENED: 'OPENED',
+  PENDING: 'PENDING',
+  MATCHED: 'MATCHED',
+  CLOSED: 'CLOSED',
+  PROCESSING: 'PROCESSING',
+  RETRYING: 'RETRYING',
 } as const;
 
-export type RequestStatus = PrismaRequestStatusValue;
+export type RequestStatus =
+  (typeof REQUEST_STATUS)[keyof typeof REQUEST_STATUS];
 
 export const REQUEST_STATUS_OPTIONS: Array<{
   value: RequestStatus;
   label: string;
 }> = [
-  { value: REQUEST_STATUS.OPENED, label: 'Opened' },
-  { value: REQUEST_STATUS.PENDING, label: 'Pending' },
-  { value: REQUEST_STATUS.MATCHED, label: 'Matched' },
-  { value: REQUEST_STATUS.CLOSED, label: 'Closed' },
+  { value: REQUEST_STATUS.OPENED, label: 'OPENED' },
+  { value: REQUEST_STATUS.PENDING, label: 'PENDING' },
+  { value: REQUEST_STATUS.MATCHED, label: 'MATCHED' },
+  { value: REQUEST_STATUS.CLOSED, label: 'CLOSED' },
+  {
+    value: REQUEST_STATUS.PROCESSING,
+    label: 'PROCESSING',
+  },
+  {
+    value: REQUEST_STATUS.RETRYING,
+    label: 'RETRYING',
+  },
 ];
 
 export const REQUEST_STATUS_SET = new Set<RequestStatus>(
@@ -27,12 +36,16 @@ export function isRequestStatus(value: string): value is RequestStatus {
   return REQUEST_STATUS_SET.has(value as RequestStatus);
 }
 
+export function toRequestStatus(value: string): RequestStatus | null {
+  const normalized = value.trim().toUpperCase();
+  return isRequestStatus(normalized) ? normalized : null;
+}
+
 export function normalizeRequestStatus(
   value: string | null | undefined
 ): RequestStatus | null {
   if (!value) return null;
-  const normalized = value.trim().toLowerCase();
-  return isRequestStatus(normalized) ? normalized : null;
+  return toRequestStatus(value);
 }
 
 export function getRequestStatusLabel(

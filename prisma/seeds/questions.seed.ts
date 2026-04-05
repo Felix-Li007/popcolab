@@ -1737,6 +1737,7 @@ export async function seedQuestions(
   }
 
   await prisma.answer.deleteMany({});
+  await prisma.requestPreference.deleteMany({});
   await prisma.questionDimension.deleteMany({});
   await prisma.questionOption.deleteMany({});
   await prisma.question.deleteMany({});

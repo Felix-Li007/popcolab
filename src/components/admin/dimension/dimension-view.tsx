@@ -50,13 +50,27 @@ export default function DimensionView({
       panelTestId="dimension-view-modal"
     >
       <div className="space-y-5 px-1 py-1">
-        <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
-          <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-1">
-            Category
-          </p>
-          <Badge variant="default" size="sm">
-            {dimension.categoryName}
-          </Badge>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+            <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-1">
+              Category
+            </p>
+            <Badge variant="default" size="sm">
+              {dimension.categoryName}
+            </Badge>
+          </div>
+
+          {dimension.penaltyValue != null && (
+            <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
+              <p className="text-badge font-bold text-foreground/45 uppercase tracking-wide mb-1">
+                Penalty
+              </p>
+              <p className="text-heading font-semibold text-foreground/80">
+                {dimension.penaltyValue > 0 ? '+' : ''}
+                {Number(dimension.penaltyValue).toFixed(2)}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2">
@@ -134,6 +148,20 @@ export default function DimensionView({
                 <Badge key={option.id} variant="secondary" size="xs">
                   {option.label}
                   {option.label === option.value ? '' : ` (${option.value})`}
+                  {option.penalty != null && (
+                    <span
+                      className={`ml-2 text-caption ${
+                        Number(option.penalty) > 0
+                          ? 'text-red-500'
+                          : Number(option.penalty) < 0
+                            ? 'text-green-500'
+                            : ''
+                      }`}
+                    >
+                      ({option.penalty > 0 ? '+' : ''}
+                      {Number(option.penalty).toFixed(2)})
+                    </span>
+                  )}
                 </Badge>
               ))}
             </div>

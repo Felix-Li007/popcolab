@@ -1,4 +1,4 @@
-import type { IntakeForm } from '@/types/question-type';
+import type { FormName } from '@/types/question-type';
 
 export const DIMENSION_DATA_TYPES = {
   NUMERIC: 'numeric',
@@ -19,6 +19,7 @@ export type DimensionOption = {
   id?: number;
   label: string;
   value: string;
+  penalty?: number | null;
 };
 
 export type Dimension = {
@@ -32,8 +33,9 @@ export type Dimension = {
   hardFilter: boolean;
   scaleMin?: number | null;
   scaleMax?: number | null;
+  penaltyValue?: number | null;
   options: DimensionOption[];
-  formNames: IntakeForm[];
+  formNames: FormName[];
   createdAt?: Date;
   updatedAt?: Date;
 };

@@ -42,16 +42,20 @@ export async function getUserRequests(
       participant_count: true,
       created_at: true,
       proposals: {
-        where: { proposal_status: ProposalStatus.pending },
-        select: {
-          id: true,
-          rationale_desc: true,
-          experience: {
-            select: {
-              experience_title: true,
-              delivery_methods: true,
-              capacity_max: true,
+        where: { proposal_status: ProposalStatus.PENDING },
+        include: {
+          proposal_experiences: {
+            include: {
+              experience: {
+                select: {
+                  experience_title: true,
+                  delivery_methods: true,
+                  capacity_max: true,
+                },
+              },
             },
+            orderBy: [{ id: 'asc' }],
+            take: 1,
           },
         },
         take: 1,
@@ -70,10 +74,17 @@ export async function getUserRequests(
     proposal: r.proposals[0]
       ? {
           id: r.proposals[0].id,
-          rationale: r.proposals[0].rationale_desc,
-          experienceTitle: r.proposals[0].experience.experience_title,
-          deliveryMethod: r.proposals[0].experience.delivery_methods,
-          capacityMax: r.proposals[0].experience.capacity_max,
+          rationale:
+            r.proposals[0].proposal_experiences[0]?.rationale_desc ?? '-',
+          experienceTitle:
+            r.proposals[0].proposal_experiences[0]?.experience
+              .experience_title ?? '-',
+          deliveryMethod:
+            r.proposals[0].proposal_experiences[0]?.experience
+              .delivery_methods ?? '-',
+          capacityMax:
+            r.proposals[0].proposal_experiences[0]?.experience.capacity_max ??
+            0,
         }
       : null,
   }));

@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
 import { getQuestions } from '@/services/question-service';
+import { FORM_NAME } from '@/types/question-type';
 import PersonalityTest from '@/components/front/test/personality-test';
 
 export default async function TestPage() {
-  const questions = await getQuestions();
+  const questions = await getQuestions(FORM_NAME.ASSESS);
 
   if (questions.length === 0) {
     return (

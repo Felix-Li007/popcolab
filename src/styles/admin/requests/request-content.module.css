@@ -1,0 +1,374 @@
+@reference "../../../app/globals.css";
+
+.root {
+  @apply flex flex-col;
+  min-height: calc(100dvh - 6rem);
+}
+
+.content {
+  @apply flex flex-1 min-h-0 px-4 py-3;
+}
+
+.panel {
+  @apply w-full border border-slate-200 flex flex-col bg-white z-10 rounded-2xl overflow-hidden;
+  box-shadow:
+    0 16px 38px rgba(15, 23, 42, 0.08),
+    0 3px 10px rgba(15, 23, 42, 0.05);
+}
+
+.heading {
+  @apply border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 250, 252, 0.9),
+    rgba(255, 255, 255, 1)
+  );
+}
+
+.filterBar {
+  @apply border-b border-slate-200 px-4 py-3;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.5), #ffffff);
+}
+
+.filterForm {
+  @apply flex flex-wrap items-center gap-2 rounded-full px-2.5 py-1.5;
+}
+
+.keywordField {
+  @apply min-w-0 flex-1;
+}
+
+.standaloneInputShell {
+  @apply flex h-9 min-w-[7rem] items-center rounded-full p-0.5;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.78),
+    rgba(241, 245, 249, 0.62)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 16px rgba(15, 23, 42, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.standaloneInputShell .filterInput {
+  @apply h-full min-w-0 border-0 bg-transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.standaloneInputShell .filterInput:focus {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.standaloneInputShell:focus-within {
+  border-color: rgba(20, 184, 166, 0.48);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(236, 253, 245, 0.62)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 0 3px rgba(20, 184, 166, 0.14),
+    0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.keywordRow {
+  @apply flex h-9 w-full min-w-0 items-center gap-1.5 rounded-full p-0.5;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.78),
+    rgba(241, 245, 249, 0.62)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 16px rgba(15, 23, 42, 0.08);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.keywordRow .filterInput {
+  @apply h-full min-w-0 flex-1 border-0 bg-transparent px-3;
+}
+
+.keywordRow .filterInput:focus {
+  @apply outline-none;
+}
+
+.searchButton {
+  @apply h-full rounded-full px-3 text-xs font-semibold text-white;
+  border: 1px solid rgba(15, 23, 42, 0.42);
+  background: linear-gradient(
+    180deg,
+    rgba(51, 65, 85, 0.96),
+    rgba(15, 23, 42, 0.96)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 8px 16px rgba(15, 23, 42, 0.24);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.searchButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 23, 42, 0.62);
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.98),
+    rgba(2, 6, 23, 0.98)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 10px 20px rgba(15, 23, 42, 0.32);
+}
+
+.filterInput {
+  @apply h-9 min-w-[7rem] rounded-full px-3.5 text-xs text-gray-700;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(241, 245, 249, 0.58)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 6px 14px rgba(15, 23, 42, 0.06);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+select.filterInput {
+  @apply pr-8;
+  appearance: none;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.72),
+      rgba(241, 245, 249, 0.58)
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9L12 15L18 9' stroke='%2364758B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-size:
+    auto,
+    0.8rem 0.8rem;
+  background-position:
+    0 0,
+    right 0.8rem center;
+}
+
+.filterInput:focus {
+  outline: none;
+  border-color: rgba(20, 184, 166, 0.48);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(236, 253, 245, 0.62)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 0 3px rgba(20, 184, 166, 0.14),
+    0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.filterButton {
+  @apply h-9 rounded-full px-4 text-xs font-semibold text-white;
+  border: 1px solid rgba(15, 118, 110, 0.26);
+  background: linear-gradient(
+    180deg,
+    rgba(20, 184, 166, 0.92),
+    rgba(15, 118, 110, 0.9)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 8px 16px rgba(15, 118, 110, 0.24);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.filterButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.45);
+  background: linear-gradient(
+    180deg,
+    rgba(13, 148, 136, 0.94),
+    rgba(15, 118, 110, 0.94)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    0 10px 20px rgba(15, 118, 110, 0.28);
+}
+
+.filterClearLink {
+  @apply h-9 inline-flex items-center rounded-full px-3 text-xs font-semibold;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #475569;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.74),
+    rgba(241, 245, 249, 0.62)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 6px 14px rgba(15, 23, 42, 0.06);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.filterClearLink:hover {
+  border-color: rgba(100, 116, 139, 0.45);
+  color: #334155;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.srOnlyLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.listArea {
+  @apply flex-1 overflow-y-auto p-3;
+  background:
+    radial-gradient(
+      circle at 14% -30%,
+      rgba(45, 212, 191, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 88% -20%,
+      rgba(14, 116, 144, 0.08),
+      transparent 60%
+    ),
+    #f8fafc;
+}
+
+.tableWrap {
+  @apply w-full overflow-x-auto rounded-2xl border border-slate-200;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 18px 30px rgba(15, 23, 42, 0.08);
+}
+
+.table {
+  @apply min-w-[1400px] w-full border-separate bg-transparent;
+  border-spacing: 0;
+}
+
+.table th {
+  @apply px-3 py-2.5 text-left text-caption font-semibold uppercase tracking-[0.08em] text-slate-500;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  border-bottom: 1px solid rgb(203 213 225 / 80%);
+}
+
+.table td {
+  @apply px-3 py-3 text-xs text-slate-700 align-middle;
+  border-bottom: 1px solid rgb(226 232 240 / 80%);
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.table tbody tr:nth-child(even) td {
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.table tbody tr:hover td {
+  background: rgba(240, 253, 250, 0.92);
+}
+
+.requestCellTitle {
+  @apply text-xs font-semibold text-slate-800;
+}
+
+.userProfileButton {
+  @apply text-xs font-semibold text-left;
+  color: #0f172a;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.userProfileButton:hover {
+  color: #0f766e;
+}
+
+.requestCellSub {
+  @apply mt-0.5 text-caption text-slate-500;
+}
+
+.rowViewButton {
+  @apply inline-flex h-7 items-center rounded-full px-3 text-caption font-semibold text-white;
+  background: linear-gradient(180deg, #0f766e 0%, #115e59 100%);
+  box-shadow: 0 8px 16px rgba(15, 118, 110, 0.25);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.rowViewButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 118, 110, 0.32);
+}
+
+.countLinkButton {
+  @apply inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 text-xs font-semibold;
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  color: #0f766e;
+  background: linear-gradient(
+    180deg,
+    rgba(240, 253, 250, 1),
+    rgba(204, 251, 241, 0.9)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.countLinkButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.4);
+  background: linear-gradient(
+    180deg,
+    rgba(204, 251, 241, 1),
+    rgba(153, 246, 228, 0.95)
+  );
+}

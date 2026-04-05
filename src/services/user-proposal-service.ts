@@ -5,7 +5,7 @@ import { ProposalStatus } from '@/libs/prisma/client';
 
 export type UserProposalItem = {
   id: number;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: 'pending' | 'approved' | 'accepted' | 'rejected';
   experienceTitle: string;
   deliveryMethod: string;
   capacityMax: number;
@@ -24,14 +24,19 @@ export async function getUserProposals(
     select: {
       id: true,
       proposal_status: true,
-      rationale_desc: true,
       created_at: true,
-      experience: {
-        select: {
-          experience_title: true,
-          delivery_methods: true,
-          capacity_max: true,
+      proposal_experiences: {
+        include: {
+          experience: {
+            select: {
+              experience_title: true,
+              delivery_methods: true,
+              capacity_max: true,
+            },
+          },
         },
+        orderBy: [{ id: 'asc' }],
+        take: 1,
       },
       request: {
         select: {
@@ -44,11 +49,17 @@ export async function getUserProposals(
 
   return proposals.map(p => ({
     id: p.id,
-    status: p.proposal_status as 'pending' | 'accepted' | 'rejected',
-    experienceTitle: p.experience.experience_title,
-    deliveryMethod: p.experience.delivery_methods,
-    capacityMax: p.experience.capacity_max,
-    rationale: p.rationale_desc,
+    status: String(p.proposal_status).toLowerCase() as
+      | 'pending'
+      | 'approved'
+      | 'accepted'
+      | 'rejected',
+    experienceTitle:
+      p.proposal_experiences[0]?.experience.experience_title ?? '-',
+    deliveryMethod:
+      p.proposal_experiences[0]?.experience.delivery_methods ?? '-',
+    capacityMax: p.proposal_experiences[0]?.experience.capacity_max ?? 0,
+    rationale: p.proposal_experiences[0]?.rationale_desc ?? '-',
     objectiveCategory: p.request.objective_category,
     createdAt: p.created_at,
   }));
@@ -58,7 +69,7 @@ export async function getPendingProposalCount(userId: number): Promise<number> {
   return prisma.proposal.count({
     where: {
       request: { user_id: userId },
-      proposal_status: ProposalStatus.pending,
+      proposal_status: ProposalStatus.PENDING,
     },
   });
 }

@@ -1,0 +1,249 @@
+@reference "../../../app/globals.css";
+
+.page {
+  @apply relative w-full overflow-hidden rounded-3xl bg-linear-to-br from-cyan-50 via-slate-50 to-amber-50 p-4;
+}
+
+@media (min-width: 640px) {
+  .page {
+    @apply p-6;
+  }
+}
+
+.blobLeft {
+  @apply pointer-events-none absolute -left-16 top-8 h-44 w-44 rounded-full bg-cyan-200/45 blur-3xl;
+}
+
+.blobRight {
+  @apply pointer-events-none absolute -right-20 bottom-4 h-52 w-52 rounded-full bg-amber-200/35 blur-3xl;
+}
+
+.panel {
+  @apply relative rounded-3xl border border-white/60 bg-white/75 backdrop-blur-xl;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+}
+
+.header {
+  @apply border-b border-white/70 bg-linear-to-r from-slate-100/85 via-white/70 to-cyan-100/80 px-5 py-4;
+}
+
+.headerRow {
+  @apply flex items-start justify-between gap-3;
+}
+
+.title {
+  @apply mt-1 text-xl font-bold tracking-tight text-slate-800;
+}
+
+.meta {
+  @apply mt-1 text-xs font-semibold text-slate-600;
+}
+
+.requestLink {
+  @apply text-sky-700 underline-offset-4;
+}
+
+.requestLink:hover {
+  @apply underline;
+}
+
+.headerActions {
+  @apply flex items-center gap-2;
+}
+
+.backToProposals {
+  @apply inline-flex h-8 items-center rounded-full border border-slate-300/70 bg-white/85 px-3 text-[11px] font-semibold text-slate-700 shadow-sm transition;
+}
+
+.backToProposals:hover {
+  @apply bg-white;
+}
+
+.statusPill {
+  @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-[0.08em] shadow-sm;
+}
+
+.statusPending {
+  @apply border-amber-200 bg-amber-100 text-amber-700;
+}
+
+.statusApproved {
+  @apply border-emerald-200 bg-emerald-100 text-emerald-700;
+}
+
+.statusAccepted {
+  @apply border-teal-200 bg-teal-100 text-teal-700;
+}
+
+.statusRejected {
+  @apply border-rose-200 bg-rose-100 text-rose-700;
+}
+
+.statusDefault {
+  @apply border-slate-200 bg-slate-100 text-slate-700;
+}
+
+.form {
+  @apply space-y-5 px-5 py-5;
+}
+
+.layout {
+  @apply grid grid-cols-1 gap-5;
+}
+
+@media (min-width: 1280px) {
+  .layout {
+    @apply grid-cols-2;
+  }
+}
+
+.leftSection {
+  @apply rounded-2xl border border-white/80 bg-white/70 p-4 backdrop-blur-lg;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.rightSection {
+  @apply rounded-2xl border border-white/80 bg-white/70 p-4 backdrop-blur-lg;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.sectionTitle {
+  @apply mb-3 text-base font-semibold tracking-tight text-slate-800;
+}
+
+.searchRow {
+  @apply mt-4 grid grid-cols-1 gap-3;
+}
+
+@media (min-width: 640px) {
+  .searchRow {
+    grid-template-columns: 1fr auto auto;
+  }
+}
+
+.searchInput {
+  @apply h-10 rounded-full border border-white/75 bg-white/70 px-4 text-sm text-slate-700 backdrop-blur-md outline-none ring-0 transition;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+}
+
+.searchInput:focus {
+  @apply border-cyan-300 bg-white/85;
+  box-shadow: 0 10px 24px rgba(34, 211, 238, 0.18);
+}
+
+.searchButton {
+  @apply inline-flex h-10 items-center justify-center rounded-full border border-white/75 bg-white/72 px-4 text-xs font-semibold uppercase tracking-[0.08em] text-slate-700 backdrop-blur-md transition;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.1);
+}
+
+.searchButton:hover {
+  @apply bg-white/90;
+}
+
+.searchButton:disabled {
+  @apply opacity-60;
+}
+
+.clearButton {
+  @apply inline-flex h-10 items-center justify-center rounded-full border border-white/75 bg-white/65 px-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-500 backdrop-blur-md transition;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
+}
+
+.clearButton:hover {
+  @apply bg-white/85;
+}
+
+.clearButton:disabled {
+  @apply opacity-40;
+}
+
+.pageMeta {
+  @apply mt-3 rounded-lg border border-white/70 bg-white/70 px-3 py-2 text-[11px] font-medium text-slate-500;
+}
+
+.searchMessage {
+  @apply mt-3 rounded-lg border border-slate-200/70 bg-white/80 px-3 py-2 text-xs font-medium text-slate-600;
+}
+
+.resultGrid {
+  @apply mt-4 grid grid-cols-1 gap-3;
+}
+
+@media (min-width: 768px) {
+  .resultGrid {
+    @apply grid-cols-2;
+  }
+}
+
+.paginationWrap {
+  @apply mt-5 rounded-xl border border-white/80 bg-white/70 p-2;
+}
+
+.dialogOverlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-sm;
+}
+
+.dialogPanel {
+  @apply w-full max-w-lg rounded-2xl border border-white/70 bg-white/85 p-4 backdrop-blur-xl;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+}
+
+.dialogTitle {
+  @apply text-sm font-bold uppercase tracking-[0.12em] text-slate-800;
+}
+
+.dialogSubtitle {
+  @apply mt-1 text-xs text-slate-600;
+}
+
+.dialogTextarea {
+  @apply mt-3 w-full rounded-xl border border-slate-200/80 bg-white/90 px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition;
+}
+
+.dialogTextarea:focus {
+  @apply border-cyan-300 bg-white;
+}
+
+.dialogActions {
+  @apply mt-3 flex items-center justify-end gap-2;
+}
+
+.cancelButton {
+  @apply inline-flex h-9 items-center rounded-full border border-slate-300 bg-white/85 px-4 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 shadow-sm;
+}
+
+.cancelButton:disabled {
+  @apply opacity-60;
+}
+
+.confirmButton {
+  @apply inline-flex h-9 items-center rounded-full bg-teal-deep px-4 text-xs font-semibold uppercase tracking-[0.08em] text-white shadow-sm;
+}
+
+.confirmButton:disabled {
+  @apply opacity-60;
+}
+
+.errorMessage {
+  @apply rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700;
+}
+
+.successMessage {
+  @apply rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700;
+}
+
+.footerActions {
+  @apply flex items-center justify-end gap-2;
+}
+
+.backButton {
+  @apply inline-flex h-9 items-center rounded-full border border-slate-300/80 bg-white/80 px-4 text-xs font-semibold uppercase tracking-[0.08em] text-slate-600 shadow-sm;
+}
+
+.saveButton {
+  @apply inline-flex h-9 items-center rounded-full bg-teal-deep px-4 text-xs font-semibold uppercase tracking-[0.08em] text-white shadow-sm;
+}
+
+.saveButton:disabled {
+  @apply opacity-60;
+}

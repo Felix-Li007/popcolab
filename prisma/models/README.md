@@ -23,7 +23,7 @@ This directory contains individual model definitions for documentation and refer
 - **Answer.prisma** - Answer model definition (individual answers to questions)
 - **UserScore.prisma** - UserScore model definition (calculated scores across dimensions)
 - **UserVector.prisma** - UserVector model definition (vector representations of user responses)
-- **UserPreference.prisma** - UserPreference model definition (persisted recommendation preference snapshots)
+- **HistoryPreference.prisma** - HistoryPreference model definition (persisted recommendation preference snapshots)
 - **Provider.prisma** - Provider model definition (authentication or service providers)
 - **Category.prisma** - Category model definition (hierarchical categories for experiences)
 - **Experience.prisma** - Experience model definition (experiences/activities offered by providers)

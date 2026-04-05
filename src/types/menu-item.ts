@@ -21,6 +21,7 @@ export type CountKey =
   | 'payments'
   | 'teams'
   | 'requests'
+  | 'proposals'
   | 'experiences'
   | 'dimensions'
   | 'dimensionCategories';
@@ -158,7 +159,7 @@ export const menuSection: MenuGroup[] = [
         href: '/admin/bookings',
         countKey: 'bookings',
         children: [
-          { label: 'Bookings', href: '/admin/bookings', countKey: 'bookings' },
+          { label: 'Orders', href: '/admin/bookings', countKey: 'bookings' },
           {
             label: 'Payments',
             href: '/admin/bookings/payments',
@@ -172,6 +173,11 @@ export const menuSection: MenuGroup[] = [
         countKey: 'requests',
         children: [
           { label: 'Requests', href: '/admin/requests', countKey: 'requests' },
+          {
+            label: 'Proposals',
+            href: '/admin/proposals',
+            countKey: 'proposals',
+          },
         ],
       },
     ],
@@ -186,7 +192,8 @@ export const getMenuItem = (pathname: string) =>
   sectionItems.find(item =>
     item.href === '/admin'
       ? pathname === '/admin'
-      : pathname.startsWith(item.href)
+      : pathname.startsWith(item.href) ||
+        item.children.some(child => pathname.startsWith(child.href))
   );
 
 export const topTabs: MenuItem[] = [

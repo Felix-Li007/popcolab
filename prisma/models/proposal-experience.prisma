@@ -1,0 +1,16 @@
+model ProposalExperience {
+    id              Int      @id @default(autoincrement())
+    proposal_id     Int
+    experience_id   Int
+    base_score      Decimal  @default(0.00) @db.Decimal(19, 2)
+    risk_adjustment Decimal  @default(0.00) @db.Decimal(19, 2)
+    rationale_desc  String   @db.VarChar(255)
+    created_at      DateTime @default(now()) @db.Timestamp(6)
+
+    proposal   Proposal   @relation(fields: [proposal_id], references: [id], onDelete: Cascade)
+    experience Experience @relation(fields: [experience_id], references: [id])
+
+    @@unique([proposal_id, experience_id])
+    @@index([experience_id])
+    @@map("proposal_experience")
+}

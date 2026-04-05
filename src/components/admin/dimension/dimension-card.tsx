@@ -1,3 +1,6 @@
+'use client';
+
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Badge, Button } from '@/ui';
 import { cssVarStyle } from '@/utils/css-helper';
 import type { Dimension, DimensionCategory } from '@/types/dimension-type';
@@ -230,6 +233,7 @@ function StandardDimensionCard({
   onView,
   onDelete,
 }: Readonly<DimensionCardProps>) {
+  console.log('Rendering DimensionCard for dimension:', dimension);
   const {
     options,
     dataType,
@@ -240,8 +244,13 @@ function StandardDimensionCard({
     categoryName,
     indexNotes,
   } = dimension;
-  const shownOptions = options.slice(0, 3);
-  const hiddenCount = Math.max(0, options.length - shownOptions.length);
+  const [visibleCount, setVisibleCount] = useState(options.length);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const measureRefs = useRef<Record<string, HTMLSpanElement | null>>({});
+  const plusRef = useRef<HTMLSpanElement | null>(null);
+
+  const shownOptions = options.slice(0, visibleCount);
+  const hiddenCount = Math.max(0, options.length - visibleCount);
   const normalizedType = dataType.toLowerCase();
   const glowStyle = cssVarStyle({
     '--glow-color':
@@ -251,6 +260,117 @@ function StandardDimensionCard({
   const typeBadgeStyle = TYPE_BADGE_STYLE[normalizedType] ?? {
     variant: 'secondary' as const,
   };
+
+  const penaltyRaw = dimension.penaltyValue;
+  const penaltyBg =
+    penaltyRaw == null
+      ? undefined
+      : penaltyRaw > 0
+        ? 'bg-teal-deep/10'
+        : 'bg-coral-red/10';
+  const penaltyText =
+    penaltyRaw == null
+      ? undefined
+      : penaltyRaw > 0
+        ? 'text-teal-deep'
+        : 'text-coral-red';
+  const penaltyVariant =
+    penaltyRaw == null ? undefined : penaltyRaw > 0 ? 'success' : 'danger';
+
+  useLayoutEffect(() => {
+    function measure() {
+      const container = containerRef.current;
+      if (!container) return;
+
+      const containerWidth = container.getBoundingClientRect().width;
+
+      // measure widths of each option via measurement refs
+      const widths: number[] = options.map((option, idx) => {
+        const key = String(option.id ?? idx);
+        const el = measureRefs.current[key] ?? measureRefs.current['m_' + key];
+        if (!el) return 0;
+        const style = getComputedStyle(el);
+        const mr = parseFloat(style.marginRight || '0') || 0;
+        return el.getBoundingClientRect().width + mr;
+      });
+
+      const plusWidth = plusRef.current
+        ? plusRef.current.getBoundingClientRect().width
+        : 32;
+
+      // Fill first line
+      let sum1 = 0;
+      let count1 = 0;
+      for (let i = 0; i < widths.length; i++) {
+        const w = widths[i];
+        if (sum1 + w > containerWidth) break;
+        sum1 += w;
+        count1++;
+      }
+
+      // Fill second line starting after first line
+      let sum2 = 0;
+      let count2 = 0;
+      for (let i = count1; i < widths.length; i++) {
+        const w = widths[i];
+        if (sum2 + w > containerWidth) break;
+        sum2 += w;
+        count2++;
+      }
+
+      let visible = count1 + count2;
+      let hidden = widths.length - visible;
+
+      if (hidden > 0) {
+        // Ensure the +N badge fits in the second line; shrink second line first, then first line
+        const available = containerWidth - sum2;
+        if (plusWidth > available) {
+          // remove from second line until plus fits or second line empty
+          while (
+            count2 > 0 &&
+            plusWidth > containerWidth - (sum2 - widths[count1 + count2 - 1])
+          ) {
+            // remove last in second line
+            sum2 -= widths[count1 + count2 - 1];
+            count2--;
+            visible--;
+            hidden++;
+          }
+
+          // if second line empty and plus still doesn't fit, remove from first line and re-fill second
+          while (
+            count2 === 0 &&
+            count1 > 0 &&
+            plusWidth > containerWidth - sum2
+          ) {
+            // remove last from first line
+            sum1 -= widths[count1 - 1];
+            count1--;
+            // refill second line starting from new count1
+            sum2 = 0;
+            count2 = 0;
+            for (let i = count1; i < widths.length; i++) {
+              const w = widths[i];
+              if (sum2 + w > containerWidth) break;
+              sum2 += w;
+              count2++;
+            }
+            visible = count1 + count2;
+            hidden = widths.length - visible;
+            // if we reduced first line, loop again to ensure plus fits
+            if (plusWidth <= containerWidth - sum2) break;
+          }
+        }
+      }
+
+      if (visible === 0 && widths.length > 0) visible = 1;
+      setVisibleCount(visible);
+    }
+
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [options]);
 
   return (
     <div
@@ -299,10 +419,17 @@ function StandardDimensionCard({
           >
             {dataType}
           </Badge>
+          {categoryName && (
+            <Badge variant="secondary" size="xs" className="ml-auto">
+              {categoryName}
+            </Badge>
+          )}
         </div>
-
-        <h3 className={styles.title}>{indexName}</h3>
-        <p className={styles.category}>{categoryName}</p>
+        <div className={styles.titleRow}>
+          <span className={styles.indexText}>
+            {indexName || indexKey || '—'}
+          </span>
+        </div>
 
         {indexNotes && <p className={styles.notes}>{indexNotes}</p>}
 
@@ -321,17 +448,104 @@ function StandardDimensionCard({
           </div>
         </div>
 
-        <div className={styles.options}>
-          {shownOptions.map(option => (
-            <Badge key={option.id} variant="default" size="xs">
-              {option.label}
-            </Badge>
-          ))}
-          {hiddenCount > 0 && (
-            <Badge variant="default" size="xs">
-              +{hiddenCount}
-            </Badge>
-          )}
+        {dimension.penaltyValue != null && (
+          <div className={styles.formSection} style={{ marginTop: 8 }}>
+            <p className={styles.formLabel}>Penalty</p>
+            <div className={styles.formList}>
+              <span
+                className={`ml-2 text-caption font-bold ${
+                  Number(dimension.penaltyValue) > 0
+                    ? 'text-red-500'
+                    : Number(dimension.penaltyValue) < 0
+                      ? 'text-green-500'
+                      : ''
+                }`}
+              >
+                {dimension.penaltyValue > 0 ? '+' : ''}
+                {Number(dimension.penaltyValue).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div>
+          <p className={styles.formLabel}>Options</p>
+          <div
+            className={styles.options}
+            ref={containerRef}
+            style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}
+          >
+            {shownOptions.map((option, idx) => (
+              <span
+                key={option.id ?? idx}
+                ref={el => {
+                  measureRefs.current[String(option.id ?? idx)] = el;
+                }}
+                style={{ display: 'inline-block', marginRight: 8 }}
+              >
+                <Badge variant="default" size="xs">
+                  {option.label}
+                  {option.penalty != null && (
+                    <span
+                      className={`ml-2 text-caption ${
+                        Number(option.penalty) > 0
+                          ? 'text-red-500'
+                          : Number(option.penalty) < 0
+                            ? 'text-green-500'
+                            : ''
+                      }`}
+                    >
+                      ({option.penalty > 0 ? '+' : ''}
+                      {Number(option.penalty).toFixed(2)})
+                    </span>
+                  )}
+                </Badge>
+              </span>
+            ))}
+
+            {hiddenCount > 0 && (
+              <span
+                ref={el => {
+                  plusRef.current = el;
+                }}
+                style={{ display: 'inline-block' }}
+              >
+                <Badge variant="default" size="xs">
+                  +{hiddenCount}
+                </Badge>
+              </span>
+            )}
+          </div>
+
+          {/* Hidden measurement container */}
+          <div
+            style={{
+              position: 'absolute',
+              visibility: 'hidden',
+              height: 0,
+              overflow: 'hidden',
+              pointerEvents: 'none',
+            }}
+          >
+            {options.map((option, idx) => (
+              <span
+                key={'m_' + (option.id ?? idx)}
+                ref={el => {
+                  measureRefs.current['m_' + String(option.id ?? idx)] = el;
+                }}
+                style={{ display: 'inline-block', marginRight: 8 }}
+              >
+                <Badge variant="default" size="xs">
+                  {option.label}
+                </Badge>
+              </span>
+            ))}
+            <span ref={plusRef} style={{ display: 'inline-block' }}>
+              <Badge variant="default" size="xs">
+                +99
+              </Badge>
+            </span>
+          </div>
         </div>
       </div>
 

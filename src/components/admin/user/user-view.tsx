@@ -57,6 +57,8 @@ export default function UserViewModal({
       }
       rootTestId="user-detail-modal-root"
       panelTestId="user-detail-modal"
+      panelClassName={styles.userModalPanel}
+      bodyClassName={styles.userModalBody}
     >
       <div className={styles.content} data-testid="user-detail-view-body">
         <div className={styles.grid}>

@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { EventCancellationEmail } from '@/emails/templates/event-cancel-template';
+import { RequestMatchedEmail } from '@/emails/templates/request-matched-template';
 import { sendResendEmail } from '@/services/resend-service';
 import {
   NOTIFICATION_QUEUE_JOB_TYPE,
@@ -20,6 +21,10 @@ function buildEventCanceledSubject(eventTitle: string) {
 
 function buildEventDateCanceledSubject(eventTitle: string) {
   return `Event date canceled: ${eventTitle}`;
+}
+
+function buildRequestMatchedSubject(requestId: number) {
+  return `Request #${requestId} approved and matched`;
 }
 
 export async function processNotificationQueueJob(job: NotificationQueueJob) {
@@ -57,6 +62,31 @@ export async function processNotificationQueueJob(job: NotificationQueueJob) {
         resendMessageId: result.id,
       },
       'Event cancellation email sent'
+    );
+
+    return result;
+  }
+
+  console.log('Job type:', job.type);
+  if (job.type === NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL) {
+    const result = await sendResendEmail({
+      to: job.recipientEmail,
+      from: resendFrom,
+      subject: buildRequestMatchedSubject(job.requestId),
+      react: RequestMatchedEmail({
+        recipientName: job.recipientName,
+        requestId: job.requestId,
+        objectiveCategory: job.objectiveCategory,
+      }),
+    });
+
+    logger.info(
+      {
+        jobType: job.type,
+        recipientEmail: job.recipientEmail,
+        resendMessageId: result.id,
+      },
+      'Request matched email sent'
     );
 
     return result;

@@ -1,6 +1,11 @@
-import type { Experience, ExperienceDimension } from '@/libs/prisma/client';
+import type {
+  Experience,
+  ExperienceDimension,
+  FormName,
+} from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { DIMENSION_DATA_TYPES } from '@/types/dimension-type';
+import { FORM_NAME } from '@/types/question-type';
 
 const COMPLETED_PROCESS_STATUS = 'COMPLETED' as const;
 
@@ -10,7 +15,7 @@ export interface FeatureVector {
   fullVector: number[];
 }
 
-export interface UserPreferenceVector {
+export interface HistoryPreferenceVector {
   categoryScores: Record<string, number>;
   providerScores: Record<string, number>;
   durationDistribution: Record<string, number>;
@@ -42,17 +47,46 @@ export type ExperienceWithDimensions = Experience & {
 
 let orderedDimensionIdsPromise: Promise<number[]> | null = null;
 
-async function getOrderedDimensionIds(): Promise<number[]> {
-  if (!orderedDimensionIdsPromise) {
-    orderedDimensionIdsPromise = prisma.dimensionIndex
-      .findMany({
-        orderBy: { id: 'asc' },
-        select: { id: true },
-      })
-      .then(rows => rows.map(row => row.id));
+export async function getOrderedDimensionIds(
+  formName?: FormName | null
+): Promise<number[]> {
+  // If no formName requested, use the cached global ordering
+  if (!formName) {
+    if (!orderedDimensionIdsPromise) {
+      orderedDimensionIdsPromise = prisma.dimensionIndex
+        .findMany({
+          orderBy: { id: 'asc' },
+          select: { id: true },
+        })
+        .then(rows => rows.map(row => row.id));
+    }
+
+    return orderedDimensionIdsPromise;
   }
 
-  return orderedDimensionIdsPromise;
+  // For a specific form, fetch the applied dimensions in order from DimensionApply
+  const applies = await prisma.dimensionApply.findMany({
+    where: { form_name: formName },
+    orderBy: { id: 'asc' },
+    select: { dimension_id: true },
+  });
+
+  // Preserve order and dedupe
+  const ids: number[] = [];
+  for (const a of applies) {
+    if (!ids.includes(a.dimension_id)) ids.push(a.dimension_id);
+  }
+
+  // If none found, fall back to global ordering
+  if (ids.length === 0) {
+    const global = await prisma.dimensionIndex.findMany({
+      orderBy: { id: 'asc' },
+      select: { id: true },
+    });
+    return global.map(r => r.id);
+  }
+
+  return ids;
 }
 
 function normalizeDimensionValue(
@@ -82,26 +116,30 @@ function normalizeDimensionValue(
 
 export async function createExperienceVector(
   experience: ExperienceWithDimensions,
-  orderedDimensionIds?: number[]
+  dimensionIds?: number[] | null
 ): Promise<number[]> {
-  const resolvedOrderedDimensionIds =
-    orderedDimensionIds ?? (await getOrderedDimensionIds());
+  // When dimensionIds is provided, build vector strictly on those ids.
+  const finalOrderedDimensionIds =
+    dimensionIds ?? (await getOrderedDimensionIds());
+
   const vector: number[] = [];
 
-  // Normalize core experience attributes into a compact base feature block.
-  // The scaling here is intentionally simple and consistent with the reference
-  // implementation, so all experiences are projected into the same range.
-  vector.push(experience.category_id / 100);
-  vector.push(experience.provider_id / 100);
-  vector.push(Math.min(experience.popularity_index / 100, 1));
+  if (!dimensionIds || dimensionIds.length === 0) {
+    // Normalize core experience attributes into a compact base feature block.
+    // The scaling here is intentionally simple and consistent with the reference
+    // implementation, so all experiences are projected into the same range.
+    vector.push(experience.category_id / 100);
+    vector.push(experience.provider_id / 100);
+    vector.push(Math.min(experience.popularity_index / 100, 1));
 
-  // Use the average of the minimum and maximum duration as the representative
-  // duration value, then normalize it to keep the feature numerically stable.
-  const avgDuration = (experience.duration_min + experience.duration_max) / 2;
-  vector.push(Math.min(avgDuration / 100, 1));
+    // Use the average of the minimum and maximum duration as the representative
+    // duration value, then normalize it to keep the feature numerically stable.
+    const avgDuration = (experience.duration_min + experience.duration_max) / 2;
+    vector.push(Math.min(avgDuration / 100, 1));
 
-  // Capacity is also normalized so large values do not dominate the vector.
-  vector.push(Math.min(experience.capacity_max / 100, 1));
+    // Capacity is also normalized so large values do not dominate the vector.
+    vector.push(Math.min(experience.capacity_max / 100, 1));
+  }
 
   const dimensionValueMap = new Map<number, number[]>();
 
@@ -114,7 +152,7 @@ export async function createExperienceVector(
 
   // Append one slot per global dimension id so the vector lives in a stable
   // feature space across every experience.
-  for (const dimensionId of resolvedOrderedDimensionIds) {
+  for (const dimensionId of finalOrderedDimensionIds) {
     const values = dimensionValueMap.get(dimensionId);
     if (!values || values.length === 0) {
       vector.push(0);
@@ -129,6 +167,230 @@ export async function createExperienceVector(
   // Apply L2 normalization so cosine similarity becomes a stable comparison.
   const magnitude = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0));
   return magnitude > 0 ? vector.map(v => v / magnitude) : vector;
+}
+
+/**
+ * Filter a list of ordered dimension ids to those that are applied to a
+ * specific form. If filtering would remove all ids, return the original list
+ * as a safe fallback.
+ */
+export async function filterDimensionIdsToForm(
+  orderedIds: number[],
+  formName: FormName
+): Promise<number[]> {
+  const targetIds = await getOrderedDimensionIds(formName);
+  const set = new Set<number>(targetIds);
+  const filtered = orderedIds.filter(id => set.has(id));
+  return filtered.length === 0 ? orderedIds : filtered;
+}
+
+/**
+ * Return a stable union of two ordered id lists: items from `a` first,
+ * then items from `b` that are not in `a`, preserving `b`'s order.
+ */
+export function unionOrderedDimensionIds(a: number[], b: number[]): number[] {
+  const set = new Set<number>(a);
+  const out = [...a];
+  for (const id of b) {
+    if (!set.has(id)) {
+      set.add(id);
+      out.push(id);
+    }
+  }
+  return out;
+}
+
+/**
+ * Resolve the ordered dimension IDs that should be used by both
+ * buildRequestVector and createExperienceVector for request matching.
+ *
+ * The result is the request/team comparable dimension space intersected with
+ * dimensions actually present on one experience.
+ */
+export async function resolveSharedRequestExperienceDimensionIds(experience: {
+  experience_dimensions?: Array<{ dimension_id?: number | null }>;
+}): Promise<number[]> {
+  const orderedRequestDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.REQUEST
+  );
+  const orderedMemberDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.MEMBER
+  );
+  const orderedAssessDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.ASSESS
+  );
+
+  const filteredAssessDimensionIds = await filterDimensionIdsToForm(
+    orderedAssessDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+  const filteredMemberDimensionIds = await filterDimensionIdsToForm(
+    orderedMemberDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+  const filteredRequestDimensionIds = await filterDimensionIdsToForm(
+    orderedRequestDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+
+  const requestComparableDimensionIds = unionOrderedDimensionIds(
+    filteredAssessDimensionIds,
+    unionOrderedDimensionIds(
+      filteredRequestDimensionIds,
+      filteredMemberDimensionIds
+    )
+  );
+
+  const experienceDimensionIdSet = new Set<number>();
+  for (const dimension of experience.experience_dimensions || []) {
+    if (dimension?.dimension_id) {
+      experienceDimensionIdSet.add(dimension.dimension_id);
+    }
+  }
+
+  return requestComparableDimensionIds.filter(dimensionId =>
+    experienceDimensionIdSet.has(dimensionId)
+  );
+}
+
+/**
+ * Compute average preference value per-dimension for a list of invited users.
+ * Returns a Map from dimension_id -> average normalized value.
+ */
+export async function computeTeamPreference(
+  invitedUserIds: number[],
+  dimensionIds: number[]
+): Promise<Map<number, number>> {
+  const result = new Map<number, number>();
+  if (
+    !invitedUserIds ||
+    invitedUserIds.length === 0 ||
+    dimensionIds.length === 0
+  ) {
+    for (const dimensionId of dimensionIds) result.set(dimensionId, 0);
+    return result;
+  }
+
+  const userPreferences = await prisma.userPreference.findMany({
+    where: {
+      user_id: { in: invitedUserIds },
+      dimension_id: { in: dimensionIds },
+    },
+    include: { dimension_index: true },
+  });
+
+  const sumAggregation = new Map<number, { sum: number; count: number }>();
+  for (const userPreference of userPreferences) {
+    if (!userPreference.dimension_id) continue;
+    const normalizedValue = normalizePreferenceValue(
+      userPreference.desired_value,
+      userPreference.dimension_index ?? null
+    );
+    const currentAggregation = sumAggregation.get(
+      userPreference.dimension_id
+    ) ?? { sum: 0, count: 0 };
+    currentAggregation.sum += normalizedValue;
+    currentAggregation.count += 1;
+    sumAggregation.set(userPreference.dimension_id, currentAggregation);
+  }
+
+  for (const dimensionId of dimensionIds) {
+    const entry = sumAggregation.get(dimensionId);
+    result.set(
+      dimensionId,
+      entry && entry.count > 0 ? entry.sum / entry.count : 0
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Compute average preference value per-dimension for a list of invited users
+ * using the `UserPersonality` table. This mirrors `computeTeamMap` but
+ * reads the explicit personality snapshots rather than `user_preference`.
+ */
+export async function computeTeamPersonality(
+  invitedUserIds: number[],
+  dimensionIds: number[]
+): Promise<Map<number, number>> {
+  const result = new Map<number, number>();
+  if (
+    !invitedUserIds ||
+    invitedUserIds.length === 0 ||
+    dimensionIds.length === 0
+  ) {
+    for (const id of dimensionIds) result.set(id, 0);
+    return result;
+  }
+
+  const prefs = await prisma.userPersonality.findMany({
+    where: {
+      user_id: { in: invitedUserIds },
+      dimension_id: { in: dimensionIds },
+    },
+    include: { dimension_index: true },
+  });
+
+  const sums = new Map<number, { sum: number; count: number }>();
+  for (const p of prefs) {
+    if (!p.dimension_id) continue;
+    const val = normalizePreferenceValue(
+      p.desired_value,
+      p.dimension_index ?? null
+    );
+    const cur = sums.get(p.dimension_id) ?? { sum: 0, count: 0 };
+    cur.sum += val;
+    cur.count += 1;
+    sums.set(p.dimension_id, cur);
+  }
+
+  for (const id of dimensionIds) {
+    const entry = sums.get(id);
+    result.set(id, entry && entry.count > 0 ? entry.sum / entry.count : 0);
+  }
+
+  return result;
+}
+
+/**
+ * Compute average request preference per-dimension for a given request.
+ * Returns a Map from dimension_id -> average normalized value.
+ */
+export async function computeRequestPreference(
+  requestId: number,
+  dimensionIds: number[]
+): Promise<Map<number, number>> {
+  const result = new Map<number, number>();
+  if (!requestId || dimensionIds.length === 0) {
+    for (const id of dimensionIds) result.set(id, 0);
+    return result;
+  }
+
+  const reqPrefs = await prisma.requestPreference.findMany({
+    where: { request_id: requestId, dimension_id: { in: dimensionIds } },
+    include: { dimension_index: true },
+  });
+
+  const agg = new Map<number, { sum: number; count: number }>();
+  for (const rp of reqPrefs) {
+    if (!rp.dimension_id) continue;
+    const norm = normalizePreferenceValue(
+      rp.desired_value,
+      rp.dimension_index ?? null
+    );
+    const cur = agg.get(rp.dimension_id) ?? { sum: 0, count: 0 };
+    cur.sum += norm;
+    cur.count += 1;
+    agg.set(rp.dimension_id, cur);
+  }
+
+  for (const id of dimensionIds) {
+    const e = agg.get(id);
+    result.set(id, e && e.count > 0 ? e.sum / e.count : 0);
+  }
+
+  return result;
 }
 
 /**
@@ -313,7 +575,7 @@ export interface RecommendationResult {
 }
 
 export function recommendExperiencesByUser(
-  preferenceVector: UserPreferenceVector,
+  preferenceVector: HistoryPreferenceVector,
   candidateExperiences: Array<ExperienceWithDimensions>
 ): Promise<RecommendationResult[]> {
   const recommendations: RecommendationResult[] = [];
@@ -376,4 +638,215 @@ export function calculateMultiFactorSimilarity(
     durationSimilarity * weights.duration +
     dimensionSimilarity * weights.dimensions
   );
+}
+
+/**
+ * Build a request vector by combining explicit RequestPreference entries
+ * and invited users' UserPreference-derived vectors.
+ * - requestId: if provided, will load `request_preference` rows and base request fields
+ * - invitedUserIds: list of invited users to aggregate preferences from
+ * - weights: tuning for combining request vs team (defaults: request 0.6, team 0.4)
+ */
+/**
+ * Normalize a stored preference value (string) according to a dimension definition
+ */
+function normalizePreferenceValue(
+  desiredValue: string | null | undefined,
+  dimension?: {
+    data_type?: string;
+    scale_min?: number | null;
+    scale_max?: number | null;
+  } | null
+): number {
+  if (!dimension || !desiredValue) return 0;
+
+  if (
+    dimension.data_type === DIMENSION_DATA_TYPES.SCALE ||
+    dimension.data_type === DIMENSION_DATA_TYPES.NUMERIC
+  ) {
+    const num = parseFloat(String(desiredValue));
+    const min = dimension.scale_min ?? 0;
+    const max = dimension.scale_max ?? 10;
+    if (isNaN(num)) return 0;
+    return max === min
+      ? 0.5
+      : Math.max(0, Math.min(1, (num - min) / (max - min)));
+  }
+
+  const parts = String(desiredValue).split(';').filter(Boolean);
+  return Math.min(parts.length / 5, 1);
+}
+
+export { normalizePreferenceValue };
+
+/**
+ * Parse a stored dimension value into a list of normalized tokens.
+ * Behavior varies by dimension data_type:
+ * - For SCALE / NUMERIC types: treat the entire raw value as a single token
+ * - Otherwise: split on common separators and lowercase tokens
+ */
+export function parseDimensionValues(dimensionValue?: string | null): string[] {
+  if (!dimensionValue) return [];
+
+  return Array.from(
+    new Set(
+      String(dimensionValue)
+        .split(/[\n,;|]+/)
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean)
+    )
+  );
+}
+
+/**
+ * Build a preference vector for a single user directly from `user_preference` rows.
+ * Returns a full vector matching the experience vector layout: 5 base slots + ordered dimensions.
+ */
+export async function getUserPreferenceVector(
+  userId: number
+): Promise<number[]> {
+  // Load user preferences with dimension info to allow proper normalization
+  const userPreferences = await prisma.userPreference.findMany({
+    where: { user_id: userId },
+    include: { dimension_index: true },
+    orderBy: { created_at: 'desc' },
+    take: 200,
+  });
+
+  if (!userPreferences || userPreferences.length === 0) return [];
+
+  const orderedMemberDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.MEMBER
+  );
+
+  // Filter MEMBER-ordered dimensions to include only those that are
+  // applied to the EXPERIENCE form. This ensures user preference vectors
+  // only contain dimensions that experiences also use.
+  const filteredMemberDimensionIds = await filterDimensionIdsToForm(
+    orderedMemberDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+
+  const aggregateSums = new Map<number, { sum: number; count: number }>();
+  for (const userPreference of userPreferences) {
+    // Skip preferences that do not have a dimension or whose dimension is not in the filtered list
+    if (
+      !userPreference.dimension_id ||
+      !filteredMemberDimensionIds.includes(userPreference.dimension_id)
+    )
+      continue;
+    const normalizedValue = normalizePreferenceValue(
+      userPreference.desired_value,
+      userPreference.dimension_index ?? null
+    );
+    const currentAggregate = aggregateSums.get(userPreference.dimension_id) ?? {
+      sum: 0,
+      count: 0,
+    };
+    currentAggregate.sum += normalizedValue;
+    currentAggregate.count += 1;
+    aggregateSums.set(userPreference.dimension_id, currentAggregate);
+  }
+
+  const vector: number[] = [];
+  // base placeholders (category, provider, popularity, duration, capacity)
+  //vector.push(0, 0, 0, 0, 0);
+
+  for (const dimensionId of filteredMemberDimensionIds) {
+    const entry = aggregateSums.get(dimensionId);
+    if (!entry || entry.count === 0) {
+      vector.push(0);
+      continue;
+    }
+    vector.push(entry.sum / entry.count);
+  }
+  // Apply L2 normalization to the user preference vector so it can be meaningfully compared to experience vectors using cosine similarity.
+  const magnitude = Math.sqrt(vector.reduce((s, v) => s + v * v, 0));
+  return magnitude > 0 ? vector.map(v => v / magnitude) : vector;
+}
+
+export async function buildRequestVector(
+  requestId: number | null,
+  userIds: number[] = [],
+  // Optional: explicit dimension ids to use for the combined request vector.
+  // When provided, these ids define the exact vector dimension slots.
+  dimensionIds?: number[]
+): Promise<number[]> {
+  const orderedRequestDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.REQUEST
+  );
+  const orderedMemberDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.MEMBER
+  );
+  const orderedAssessDimensionIds = await getOrderedDimensionIds(
+    FORM_NAME.ASSESS
+  );
+  const filteredAssessDimensionIds = await filterDimensionIdsToForm(
+    orderedAssessDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+  const filteredMemberDimensionIds = await filterDimensionIdsToForm(
+    orderedMemberDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+
+  const filteredRequestDimensionIds = await filterDimensionIdsToForm(
+    orderedRequestDimensionIds,
+    FORM_NAME.EXPERIENCE
+  );
+
+  // 1) Build team dimension slots by averaging per-user preference vectors
+  const teamPreferences = await computeTeamPreference(
+    userIds,
+    filteredMemberDimensionIds
+  );
+  // 2) Build team personality slots by averaging per-user personality vectors
+  const teamPersonalities = await computeTeamPersonality(
+    userIds,
+    filteredMemberDimensionIds
+  );
+  // 3) Build request dimension slots by averaging per-request preferences vectors
+  const requestPreferences = requestId
+    ? await computeRequestPreference(requestId, filteredRequestDimensionIds)
+    : new Map<number, number>(filteredRequestDimensionIds.map(id => [id, 0]));
+
+  // 4) Combine dimension ids from request, team preferences, and team personality
+  const combinedDimensionIds = unionOrderedDimensionIds(
+    filteredAssessDimensionIds,
+    unionOrderedDimensionIds(
+      filteredRequestDimensionIds,
+      filteredMemberDimensionIds
+    )
+  );
+
+  // If caller provides explicit dimension IDs, use them directly.
+  const finalCombinedDimensionIds =
+    dimensionIds && dimensionIds.length > 0
+      ? dimensionIds
+      : combinedDimensionIds;
+  const hasExplicitDimensionIds =
+    Array.isArray(dimensionIds) && dimensionIds.length > 0;
+
+  const requestWeight = 0.4;
+  const teamWeight = 0.6;
+  const personalityWeight = 0.5; // portion of team weight allocated to personality vs preferences
+
+  // 5) Build combined dimension values by weighted sum of request, team preferences, and team personality
+  const combinedDimensionValue: number[] = [];
+  for (const dimensionId of finalCombinedDimensionIds) {
+    const teamPersonalityValue = teamPersonalities.get(dimensionId) ?? 0;
+    const requestPreferenceValue = requestPreferences.get(dimensionId) ?? 0;
+    const teamPreferenceValue = teamPreferences.get(dimensionId) ?? 0;
+    combinedDimensionValue.push(
+      requestWeight * requestPreferenceValue +
+        teamWeight * teamPreferenceValue +
+        personalityWeight * teamPersonalityValue
+    );
+  }
+
+  // Keep same base-slot behavior as experience vectors.
+  const base: number[] = hasExplicitDimensionIds ? [] : [0, 0, 0, 0, 0];
+  const vector = [...base, ...combinedDimensionValue];
+
+  return l2Normalize(vector);
 }

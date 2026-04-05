@@ -1,6 +1,7 @@
 'use client';
 
 import UserAvatar from '@/components/shared/user-avatar';
+import NotificationsBell from '@/components/shared/notifications-bell';
 import type { CompanyInfo } from '@/types/company-type';
 
 export default function DashboardTopnav({
@@ -55,6 +56,7 @@ export default function DashboardTopnav({
           </button>
         </div>
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <NotificationsBell variant="user" />
           <div className="hidden sm:block w-px h-6 bg-[rgba(1,43,48,0.15)] mx-1" />
           <UserAvatar
             displayName={userDisplayName}

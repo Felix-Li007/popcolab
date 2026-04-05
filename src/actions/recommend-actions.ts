@@ -5,13 +5,13 @@ import {
   getPopularExperiences,
   getSimilarExperiences,
   getRecommendationInsights,
-  RecommendationResult,
+  RecommendedResult,
 } from '@/services/recommend-service';
 import { getCurrentDbUserId } from '@/services/clerk-service';
 
 export interface RecommendationResponse {
   success: boolean;
-  data?: RecommendationResult[];
+  data?: RecommendedResult[];
   error?: string;
 }
 

@@ -13,9 +13,10 @@ jest.mock('@/libs/prisma-client', () => ({
 
 jest.mock('@/libs/prisma/client', () => ({
   ProposalStatus: {
-    pending: 'pending',
-    accepted: 'accepted',
-    rejected: 'rejected',
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    ACCEPTED: 'ACCEPTED',
+    REJECTED: 'REJECTED',
   },
   RequestStatus: {
     opened: 'opened',
@@ -31,10 +32,15 @@ jest.mock('@/utils/logging-util', () => ({
   },
 }));
 
+jest.mock('@/services/recommend-service', () => ({
+  getRequestExperiences: jest.fn(),
+}));
+
 import { ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { REQUEST_STATUS } from '@/constants/request-status';
 import { createFittedProposal } from '@/services/proposal-service';
+import { getRequestExperiences } from '@/services/recommend-service';
 import { REQUEST_QUEUE_TRIGGER } from '@/types/queue-job';
 import { logger } from '@/utils/logging-util';
 
@@ -43,13 +49,13 @@ type PrismaMock = {
     findUnique: jest.Mock;
     update: jest.Mock;
   };
-  experience: {
-    findFirst: jest.Mock;
-  };
   $transaction: jest.Mock;
 };
 
 const prismaMock = prisma as unknown as PrismaMock;
+const getRequestExperiencesMock = getRequestExperiences as jest.MockedFunction<
+  typeof getRequestExperiences
+>;
 const loggerMock = logger as unknown as {
   info: jest.Mock;
 };
@@ -97,10 +103,13 @@ describe('proposal-service', () => {
     });
   });
 
-  test('creates a proposal with the matching candidate', async () => {
+  test('creates proposals from recommendation results', async () => {
     const tx = {
       proposal: {
-        create: jest.fn().mockResolvedValue({ id: 901 }),
+        create: jest
+          .fn()
+          .mockResolvedValueOnce({ id: 901, experience_id: 55 })
+          .mockResolvedValueOnce({ id: 902, experience_id: 56 }),
       },
       request: {
         update: jest.fn().mockResolvedValue({ id: 30 }),
@@ -109,16 +118,33 @@ describe('proposal-service', () => {
 
     prismaMock.request.findUnique.mockResolvedValue({
       id: 30,
-      budget_min: 100,
-      budget_max: 200,
-      duration_max: 90,
       request_status: REQUEST_STATUS.OPENED,
       proposals: [],
     });
-    prismaMock.experience.findFirst.mockResolvedValue({
-      id: 55,
-      experience_title: 'Workshop',
-    });
+    getRequestExperiencesMock.mockResolvedValue([
+      {
+        experience: { id: 55 } as never,
+        score: 0.91,
+        reason: 'Very similar to request preferences',
+        recommendationSource: 'request',
+        breakdown: {
+          baseScore: 0.81,
+          debriefBoost: 0.1,
+          opennessBoost: 0.08,
+        },
+      },
+      {
+        experience: { id: 56 } as never,
+        score: 0.79,
+        reason: 'Similar to request preferences',
+        recommendationSource: 'request',
+        breakdown: {
+          baseScore: 0.7,
+          debriefBoost: -0.05,
+          opennessBoost: 0,
+        },
+      },
+    ]);
     prismaMock.$transaction.mockImplementation(async callback => callback(tx));
 
     const result = await createFittedProposal({
@@ -127,33 +153,35 @@ describe('proposal-service', () => {
       queuedAt: '2026-03-09T12:00:00.000Z',
     });
 
-    expect(prismaMock.experience.findFirst).toHaveBeenCalledWith({
-      where: {
-        duration_max: { lte: 90 },
-      },
-      orderBy: [
-        { popularity_index: 'desc' },
-        { duration_max: 'asc' },
-        { id: 'asc' },
-      ],
-      select: {
-        id: true,
-        experience_title: true,
-      },
-    });
-    expect(tx.proposal.create).toHaveBeenCalledWith({
+    expect(getRequestExperiencesMock).toHaveBeenCalledWith(30, [], 10);
+    expect(tx.proposal.create).toHaveBeenNthCalledWith(1, {
       data: {
         request_id: 30,
         experience_id: 55,
-        proposal_status: ProposalStatus.pending,
-        objective_alignment: `Generated from ${REQUEST_QUEUE_TRIGGER.INVITED_CONFIRMED}`,
-        base_score: 100,
-        risk_adjustment: 0,
-        rationale_desc:
-          'Auto-generated for request 30 using experience Workshop.',
+        proposal_status: ProposalStatus.PENDING,
+        objective_alignment: 'source:request',
+        base_score: 81,
+        risk_adjustment: 18,
+        rationale_desc: 'Very similar to request preferences',
       },
       select: {
         id: true,
+        experience_id: true,
+      },
+    });
+    expect(tx.proposal.create).toHaveBeenNthCalledWith(2, {
+      data: {
+        request_id: 30,
+        experience_id: 56,
+        proposal_status: ProposalStatus.PENDING,
+        objective_alignment: 'source:request',
+        base_score: 70,
+        risk_adjustment: -5,
+        rationale_desc: 'Similar to request preferences',
+      },
+      select: {
+        id: true,
+        experience_id: true,
       },
     });
     expect(result).toEqual({
@@ -163,39 +191,22 @@ describe('proposal-service', () => {
     expect(loggerMock.info).toHaveBeenCalledWith(
       {
         requestId: 30,
-        proposalId: 901,
-        experienceId: 55,
+        proposalIds: [901, 902],
+        experienceIds: [55, 56],
+        proposalCount: 2,
         trigger: REQUEST_QUEUE_TRIGGER.INVITED_CONFIRMED,
       },
       'Proposal generated from queue job'
     );
   });
 
-  test('falls back to the cheapest experience when no exact candidate matches', async () => {
-    const tx = {
-      proposal: {
-        create: jest.fn().mockResolvedValue({ id: 902 }),
-      },
-      request: {
-        update: jest.fn().mockResolvedValue({ id: 31 }),
-      },
-    };
-
+  test('returns no_recommendations when recommendation results are empty', async () => {
     prismaMock.request.findUnique.mockResolvedValue({
       id: 31,
-      budget_min: 500,
-      budget_max: 600,
-      duration_max: 30,
       request_status: REQUEST_STATUS.OPENED,
       proposals: [],
     });
-    prismaMock.experience.findFirst
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({
-        id: 66,
-        experience_title: 'Fallback experience',
-      });
-    prismaMock.$transaction.mockImplementation(async callback => callback(tx));
+    getRequestExperiencesMock.mockResolvedValue([]);
 
     const result = await createFittedProposal({
       requestId: 31,
@@ -203,30 +214,63 @@ describe('proposal-service', () => {
       queuedAt: '2026-03-09T12:00:00.000Z',
     });
 
-    expect(prismaMock.experience.findFirst).toHaveBeenCalledTimes(2);
     expect(result).toEqual({
-      created: true,
-      proposalId: 902,
+      created: false,
+      reason: 'no_recommendations',
+      proposalId: null,
     });
   });
 
-  test('throws when no experience is available at all', async () => {
+  test('creates proposal even when breakdown is missing', async () => {
+    const tx = {
+      proposal: {
+        create: jest.fn().mockResolvedValue({ id: 903, experience_id: 66 }),
+      },
+      request: {
+        update: jest.fn().mockResolvedValue({ id: 32 }),
+      },
+    };
+
     prismaMock.request.findUnique.mockResolvedValue({
       id: 32,
-      budget_min: null,
-      budget_max: null,
-      duration_max: null,
       request_status: REQUEST_STATUS.OPENED,
       proposals: [],
     });
-    prismaMock.experience.findFirst.mockResolvedValue(null);
+    getRequestExperiencesMock.mockResolvedValue([
+      {
+        experience: { id: 66 } as never,
+        score: 0.66,
+        reason: 'Recommended based on your interests',
+        recommendationSource: 'request',
+      },
+    ]);
+    prismaMock.$transaction.mockImplementation(async callback => callback(tx));
 
-    await expect(
-      createFittedProposal({
-        requestId: 32,
-        trigger: REQUEST_QUEUE_TRIGGER.REQUEST_EXPIRED,
-        queuedAt: '2026-03-09T12:00:00.000Z',
-      })
-    ).rejects.toThrow('No experience is available to generate a proposal.');
+    const result = await createFittedProposal({
+      requestId: 32,
+      trigger: REQUEST_QUEUE_TRIGGER.REQUEST_EXPIRED,
+      queuedAt: '2026-03-09T12:00:00.000Z',
+    });
+
+    expect(tx.proposal.create).toHaveBeenCalledWith({
+      data: {
+        request_id: 32,
+        experience_id: 66,
+        proposal_status: ProposalStatus.PENDING,
+        objective_alignment: 'source:request',
+        base_score: 66,
+        risk_adjustment: 0,
+        rationale_desc: 'Recommended based on your interests',
+      },
+      select: {
+        id: true,
+        experience_id: true,
+      },
+    });
+
+    expect(result).toEqual({
+      created: true,
+      proposalId: 903,
+    });
   });
 });

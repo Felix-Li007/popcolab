@@ -9,7 +9,7 @@ import {
 } from '@/services/queue-service';
 import { processNotificationQueueJob } from '@/services/delivery-service';
 import { expireExperienceOrderIfDue } from '@/services/order-service';
-import { refreshUserPreference } from '@/services/preference-service';
+import { refreshHistoryPreference } from '@/services/preference-service';
 import { createFittedProposal } from '@/services/proposal-service';
 import { enqueueRequestReady } from '@/services/request-service';
 import {
@@ -253,7 +253,7 @@ async function handleExperienceOrderExpiry(
 }
 
 async function handleExperienceCompleted(payload: ExperienceCompletedPayload) {
-  const result = await refreshUserPreference(payload.userExperienceId);
+  const result = await refreshHistoryPreference(payload.userExperienceId);
 
   return {
     ok: true,

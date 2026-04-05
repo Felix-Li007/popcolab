@@ -310,19 +310,6 @@ export default function ExperienceView({
                   );
                 })}
               </div>
-
-              {showEditButton ? (
-                <div className="mt-3 flex justify-end">
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="md"
-                    onClick={() => onEdit?.(experience.id)}
-                  >
-                    Edit
-                  </Button>
-                </div>
-              ) : null}
             </div>
 
             <div className={styles.topPanelBody}>

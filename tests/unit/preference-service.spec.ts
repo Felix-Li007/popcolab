@@ -8,7 +8,7 @@ jest.mock('@/libs/prisma-client', () => ({
       findMany: jest.fn(),
       update: jest.fn(),
     },
-    userPreference: {
+    historyPreference: {
       findFirst: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -27,7 +27,7 @@ jest.mock('@/services/vector-service', () => ({
 import { prisma } from '@/libs/prisma-client';
 import { extractPreferenceVector } from '@/services/vector-service';
 import { completeExperience } from '@/services/user-service';
-import { refreshUserPreference } from '@/services/preference-service';
+import { refreshHistoryPreference } from '@/services/preference-service';
 import { publishQStashTask } from '@/services/qstash-service';
 
 type MockedPrisma = {
@@ -39,7 +39,7 @@ type MockedPrisma = {
     findMany: jest.Mock;
     update: jest.Mock;
   };
-  userPreference: {
+  historyPreference: {
     findFirst: jest.Mock;
     create: jest.Mock;
     update: jest.Mock;
@@ -127,20 +127,20 @@ describe('preference-service', () => {
         },
       },
     ]);
-    prismaMock.userPreference.findFirst.mockResolvedValue(null);
-    prismaMock.userPreference.create.mockResolvedValue({
+    prismaMock.historyPreference.findFirst.mockResolvedValue(null);
+    prismaMock.historyPreference.create.mockResolvedValue({
       id: 99,
       source_window: 2,
     });
 
-    await expect(refreshUserPreference(11)).resolves.toMatchObject({
+    await expect(refreshHistoryPreference(11)).resolves.toMatchObject({
       experienceId: 11,
       userId: 21,
       userPreferenceId: 99,
       sourceWindow: 2,
     });
 
-    expect(prismaMock.userPreference.create).toHaveBeenCalledWith({
+    expect(prismaMock.historyPreference.create).toHaveBeenCalledWith({
       data: {
         user_id: 21,
         category_score: { '1': 1 },

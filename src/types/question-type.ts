@@ -4,7 +4,8 @@ export type QuestionType =
   | 'scale'
   | 'text_input';
 
-export type IntakeForm = 'REQUEST' | 'MEMBER' | 'ASSESS' | 'EXPERIENCE';
+export { FormName as FORM_NAME } from '@/libs/prisma/enums';
+export type { FormName } from '@/libs/prisma/enums';
 
 export type QuestionOption = {
   id?: number;
@@ -43,7 +44,7 @@ export type DimensionIndex = {
 
 export type Question = {
   id?: number;
-  formName: IntakeForm;
+  formName: FormName;
   type: QuestionType;
   text: string;
   description: string;

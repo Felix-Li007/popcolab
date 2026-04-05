@@ -1,13 +1,17 @@
 model RequestPreference {
-  id              Int            @id @default(autoincrement())
-  dimension_id    Int
-  request_id      Int
-  desired_score   Decimal        @db.Decimal(19, 0)
-  weight_rate     Decimal        @db.Decimal(19, 0)
-  created_at      DateTime       @default(now()) @db.Timestamp(6)
-  updated_at      DateTime       @updatedAt @db.Timestamp(6)
-  dimension_index DimensionIndex @relation(fields: [dimension_id], references: [id])
-  request         Request        @relation(fields: [request_id], references: [id])
+  id               Int              @id @default(autoincrement())
+  dimension_id     Int?
+  request_id       Int
+  question_id      Int
+  desired_value    String
+  option_id        Int?
+  weight_rate      Decimal          @default(0.00)@db.Decimal(19, 0)
+  created_at       DateTime         @default(now()) @db.Timestamp(6)
+  updated_at       DateTime         @updatedAt @db.Timestamp(6)
+  dimension_index  DimensionIndex?  @relation(fields: [dimension_id], references: [id])
+  question         Question?        @relation(fields: [question_id], references: [id])
+  dimension_option DimensionOption? @relation(fields: [option_id], references: [id])
+  request          Request          @relation(fields: [request_id], references: [id])
 
   @@map("request_preference")
 }

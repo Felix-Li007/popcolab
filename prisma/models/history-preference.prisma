@@ -1,0 +1,16 @@
+model HistoryPreference {
+    id               Int      @id @default(autoincrement())
+    user_id          Int
+    category_score   Json
+    provider_score   Json
+    duration_range   Json
+    dimension_weight Json
+    vector_embed     Json
+    created_at       DateTime @default(now()) @db.Timestamp(6)
+    updated_at       DateTime @updatedAt @db.Timestamp(6)
+    source_window    Int
+    user             User     @relation(fields: [user_id], references: [id])
+
+    @@index([user_id, source_window])
+    @@map("history_preference")
+}

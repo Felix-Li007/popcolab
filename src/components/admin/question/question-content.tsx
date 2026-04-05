@@ -3,11 +3,7 @@
 import { useState, useEffect, useMemo, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import QuestionPanel from '@/components/admin/question/question-panel';
-import type {
-  Question,
-  DimensionIndex,
-  IntakeForm,
-} from '@/types/question-type';
+import type { Question, DimensionIndex, FormName } from '@/types/question-type';
 import {
   createQuestionAction,
   updateQuestionAction,
@@ -32,13 +28,8 @@ const TYPE_FILTERS = [
   'text_input',
 ] as const;
 type TypeFilter = (typeof TYPE_FILTERS)[number];
-const FORM_FILTERS: IntakeForm[] = [
-  'REQUEST',
-  'MEMBER',
-  'ASSESS',
-  'EXPERIENCE',
-];
-const INTAKE_FORM_LABELS: Record<IntakeForm, string> = {
+const FORM_FILTERS: FormName[] = ['REQUEST', 'MEMBER', 'ASSESS', 'EXPERIENCE'];
+const INTAKE_FORM_LABELS: Record<FormName, string> = {
   REQUEST: 'LEADER',
   MEMBER: 'MEMBER',
   ASSESS: 'ASSESS',
@@ -74,8 +65,7 @@ export default function QuestionContent({
   const [, startDeleteTransition] = useTransition();
   const [questions, setQuestions] = useState<Question[]>(initialData);
   const [filter, setFilter] = useState<TypeFilter>('All');
-  const [selectedForms, setSelectedForms] =
-    useState<IntakeForm[]>(FORM_FILTERS);
+  const [selectedForms, setSelectedForms] = useState<FormName[]>(FORM_FILTERS);
   const [search, setSearch] = useState('');
   const idParam = searchParams.get('id');
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -146,7 +136,7 @@ export default function QuestionContent({
       handleDelete(selectedId, selectedQuestion.text);
   }
 
-  function toggleFormFilter(formName: IntakeForm) {
+  function toggleFormFilter(formName: FormName) {
     setSelectedForms(prev =>
       prev.includes(formName)
         ? prev.filter(item => item !== formName)

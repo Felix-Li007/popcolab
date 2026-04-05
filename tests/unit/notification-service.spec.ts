@@ -1,3 +1,6 @@
+import { prisma } from '@/libs/prisma-client';
+import { MessageType } from '@/libs/prisma/client';
+
 jest.mock('@/libs/prisma-client', () => ({
   prisma: {
     $queryRaw: jest.fn(),
@@ -15,7 +18,6 @@ jest.mock('@/services/qstash-service', () => ({
   publishQStashTask: jest.fn(),
 }));
 
-import { prisma } from '@/libs/prisma-client';
 import {
   enqueueEventCanceledNotifications,
   enqueueEventDateCanceledNotifications,
@@ -83,7 +85,7 @@ describe('notification-service', () => {
       data: [
         {
           user_id: 7,
-          notification_type: 'event.canceled',
+          message_type: MessageType.EVENT_CANCELED,
           message_title: 'Event canceled: Spring Gala',
           message_body: 'Spring Gala at Main Hall has been canceled.',
           message_data: {
@@ -95,7 +97,7 @@ describe('notification-service', () => {
         },
         {
           user_id: 9,
-          notification_type: 'event.canceled',
+          message_type: MessageType.EVENT_CANCELED,
           message_title: 'Event canceled: Spring Gala',
           message_body: 'Spring Gala at Main Hall has been canceled.',
           message_data: {
@@ -153,7 +155,7 @@ describe('notification-service', () => {
       data: [
         {
           user_id: 7,
-          notification_type: 'event.date_canceled',
+          message_type: MessageType.DATE_CANCELED,
           message_title: 'Event date canceled: Spring Gala',
           message_body:
             'Spring Gala on Apr 5, 2026 18:00 - 20:00 has been canceled.',

@@ -10,6 +10,8 @@ type Props = {
   onChange: (value: string) => void;
   placeholder: string;
   defaultTime: string;
+  triggerIcon?: 'chevron' | 'calendar';
+  inputClassName?: string;
 };
 
 type CalendarCell = {
@@ -118,6 +120,8 @@ export default function DatePicker({
   onChange,
   placeholder,
   defaultTime,
+  triggerIcon = 'chevron',
+  inputClassName,
 }: Readonly<Props>) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const parsedValue = useMemo(() => parseDateTimeValue(value), [value]);
@@ -184,12 +188,50 @@ export default function DatePicker({
           readOnly
           value={parsedValue ? formatTriggerLabel(value, placeholder) : ''}
           placeholder={placeholder}
-          className={`${styles.filterInput} ${styles.datePickerInput}`}
+          className={`${styles.filterInput} ${styles.datePickerInput}${inputClassName ? ` ${inputClassName}` : ''}`}
           onClick={togglePicker}
           onFocus={openPicker}
         />
         <span className={styles.datePickerTriggerIcon} aria-hidden="true">
-          ▾
+          {triggerIcon === 'calendar' ? (
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 2V5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+              <path
+                d="M16 2V5"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+              <rect
+                x="3"
+                y="4"
+                width="18"
+                height="17"
+                rx="3"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              />
+              <path
+                d="M3 9H21"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          ) : (
+            '▾'
+          )}
         </span>
       </div>
 
@@ -273,6 +315,7 @@ export default function DatePicker({
               type="time"
               value={draftTime}
               onChange={event => setDraftTime(event.target.value)}
+              aria-label={`${ariaLabel} time`}
               className={styles.datePickerTimeInput}
             />
           </div>

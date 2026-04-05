@@ -8,7 +8,7 @@ import type {
   DimensionCategoryFormState,
   DimensionOption,
 } from '@/types/dimension-type';
-import type { IntakeForm } from '@/types/question-type';
+import type { FormName } from '@/types/question-type';
 
 type UpsertDimensionInput = {
   indexKey: string | null;
@@ -20,7 +20,8 @@ type UpsertDimensionInput = {
   scaleMin: number | null;
   scaleMax: number | null;
   options: DimensionOption[];
-  formNames: IntakeForm[];
+  formNames: FormName[];
+  penaltyValue?: number | null;
 };
 
 type DimensionRow = Awaited<
@@ -43,7 +44,7 @@ type DimensionValidationFields = {
 export function mapDimensionRow(
   row: DimensionRow & { category: { category_name: string } },
   options?: DimensionOption[],
-  formNames?: IntakeForm[]
+  formNames?: FormName[]
 ): Dimension {
   return {
     id: row.id,
@@ -56,6 +57,7 @@ export function mapDimensionRow(
     hardFilter: row.hard_filter,
     scaleMin: row.scale_min,
     scaleMax: row.scale_max,
+    penaltyValue: row.penalty_value == null ? null : Number(row.penalty_value),
     options: options ?? [],
     formNames: formNames ?? [],
     createdAt: row.created_at,
@@ -216,8 +218,9 @@ async function getOptionsByDimensionId(): Promise<
         dimension_id: number;
         option_label: string;
         option_value: string;
+        penalty_value: string | null;
       }[]
-    >`SELECT "id", "dimension_id", "option_label", "option_value" FROM "dimension_option" ORDER BY "id" ASC`;
+    >`SELECT "id", "dimension_id", "option_label", "option_value", "penalty_value" FROM "dimension_option" ORDER BY "id" ASC`;
 
     const map = new Map<number, DimensionOption[]>();
     for (const row of optionRows) {
@@ -226,6 +229,7 @@ async function getOptionsByDimensionId(): Promise<
         id: row.id,
         label: row.option_label,
         value: row.option_value,
+        penalty: row.penalty_value == null ? null : Number(row.penalty_value),
       });
       map.set(row.dimension_id, values);
     }
@@ -235,13 +239,13 @@ async function getOptionsByDimensionId(): Promise<
   }
 }
 
-async function getFormNamesByDimensionId(): Promise<Map<number, IntakeForm[]>> {
+async function getFormNamesByDimensionId(): Promise<Map<number, FormName[]>> {
   try {
     const rows = await prisma.$queryRaw<
       { dimension_id: number; form_name: string }[]
     >`SELECT "dimension_id", "form_name"::text AS "form_name" FROM "dimension_apply" ORDER BY "id" ASC`;
 
-    const map = new Map<number, IntakeForm[]>();
+    const map = new Map<number, FormName[]>();
     for (const row of rows) {
       if (
         row.form_name !== 'REQUEST' &&
@@ -261,7 +265,7 @@ async function getFormNamesByDimensionId(): Promise<Map<number, IntakeForm[]>> {
 
     return map;
   } catch {
-    return new Map<number, IntakeForm[]>();
+    return new Map<number, FormName[]>();
   }
 }
 
@@ -283,6 +287,7 @@ async function replaceDimensionOptions(
         dimension_id: dimensionId,
         option_label: option.label,
         option_value: option.value,
+        penalty_value: option.penalty ?? null,
       })),
     });
   } catch {
@@ -292,7 +297,7 @@ async function replaceDimensionOptions(
 
 async function replaceDimensionFormNames(
   dimensionId: number,
-  formNames: IntakeForm[]
+  formNames: FormName[]
 ): Promise<void> {
   try {
     await prisma.dimensionApply.deleteMany({
@@ -368,6 +373,7 @@ export async function createDimension(
       index_name: input.indexName,
       index_notes: input.indexNotes,
       category_id: input.categoryId,
+      penalty_value: input.penaltyValue ?? null,
       data_type: input.dataType,
       hard_filter: input.hardFilter,
       scale_min: input.scaleMin,
@@ -391,6 +397,7 @@ export async function updateDimension(
       index_key: input.indexKey,
       index_name: input.indexName,
       index_notes: input.indexNotes,
+      penalty_value: input.penaltyValue ?? null,
       category_id: input.categoryId,
       data_type: input.dataType,
       hard_filter: input.hardFilter,

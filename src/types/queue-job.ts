@@ -38,6 +38,7 @@ export function isRequestQueueJob(value: unknown): value is RequestQueueJob {
 export const NOTIFICATION_QUEUE_JOB_TYPE = {
   EVENT_CANCELED_EMAIL: 'event_canceled_email',
   EVENT_DATE_CANCELED_EMAIL: 'event_date_canceled_email',
+  REQUEST_MATCHED_EMAIL: 'request_matched_email',
 } as const;
 
 export type NotificationQueueJobType =
@@ -47,24 +48,36 @@ type NotificationQueueJobBase = {
   type: NotificationQueueJobType;
   recipientEmail: string;
   recipientName: string;
-  eventTitle: string;
-  eventLocation: string;
   queuedAt: string;
 };
 
-export type EventCanceledEmailJob = NotificationQueueJobBase & {
+type EventNotificationQueueJobBase = NotificationQueueJobBase & {
+  recipientEmail: string;
+  recipientName: string;
+  eventTitle: string;
+  eventLocation: string;
+};
+
+export type EventCanceledEmailJob = EventNotificationQueueJobBase & {
   type: typeof NOTIFICATION_QUEUE_JOB_TYPE.EVENT_CANCELED_EMAIL;
 };
 
-export type EventDateCanceledEmailJob = NotificationQueueJobBase & {
+export type EventDateCanceledEmailJob = EventNotificationQueueJobBase & {
   type: typeof NOTIFICATION_QUEUE_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL;
   canceledDateLabel: string;
   canceledTimeLabel: string | null;
 };
 
+export type RequestMatchedEmailJob = NotificationQueueJobBase & {
+  type: typeof NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL;
+  requestId: number;
+  objectiveCategory: string;
+};
+
 export type NotificationQueueJob =
   | EventCanceledEmailJob
-  | EventDateCanceledEmailJob;
+  | EventDateCanceledEmailJob
+  | RequestMatchedEmailJob;
 
 // Runtime guard for validating notification queue payloads before delivery.
 export function isNotificationQueueJob(
@@ -76,8 +89,6 @@ export function isNotificationQueueJob(
   const hasBaseFields =
     typeof job.recipientEmail === 'string' &&
     typeof job.recipientName === 'string' &&
-    typeof job.eventTitle === 'string' &&
-    typeof job.eventLocation === 'string' &&
     typeof job.queuedAt === 'string';
 
   if (!hasBaseFields) {
@@ -86,12 +97,23 @@ export function isNotificationQueueJob(
 
   switch (job.type) {
     case NOTIFICATION_QUEUE_JOB_TYPE.EVENT_CANCELED_EMAIL:
-      return true;
+      return (
+        typeof job.eventTitle === 'string' &&
+        typeof job.eventLocation === 'string'
+      );
     case NOTIFICATION_QUEUE_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL:
       return (
+        typeof job.eventTitle === 'string' &&
+        typeof job.eventLocation === 'string' &&
         typeof job.canceledDateLabel === 'string' &&
         (typeof job.canceledTimeLabel === 'string' ||
           job.canceledTimeLabel === null)
+      );
+    case NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL:
+      return (
+        typeof job.requestId === 'number' &&
+        Number.isInteger(job.requestId) &&
+        typeof job.objectiveCategory === 'string'
       );
     default:
       return false;

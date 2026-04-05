@@ -1,5 +1,6 @@
 import { prisma } from '@/libs/prisma-client';
 import type {
+  FormName,
   QuestionType,
   QuestionOption,
   DimensionIndex,
@@ -7,7 +8,7 @@ import type {
 } from '@/types/question-type';
 
 export type {
-  IntakeForm,
+  FormName,
   QuestionType,
   QuestionOption as QuestionOptionData,
   QuestionDimension as QuestionDimensionData,
@@ -137,8 +138,9 @@ async function loadQuestionDimensions(
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
-export async function getQuestions(): Promise<Question[]> {
+export async function getQuestions(formName?: FormName): Promise<Question[]> {
   const rows = await prisma.question.findMany({
+    where: formName ? { form_name: formName } : undefined,
     orderBy: [{ order_index: 'asc' }, { id: 'asc' }],
     include: {
       question_options: { orderBy: { id: 'asc' } },

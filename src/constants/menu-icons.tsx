@@ -81,6 +81,15 @@ export const menuIcons: Partial<Record<string, ReactNode>> = {
       />
     </svg>
   ),
+  '/admin/proposals': (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+      <path
+        fillRule="evenodd"
+        d="M4 3a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V7.414A2 2 0 0016.414 6l-2.414-2.414A2 2 0 0012.586 3H4zm2 4a1 1 0 000 2h8a1 1 0 100-2H6zm0 4a1 1 0 000 2h8a1 1 0 100-2H6z"
+        clipRule="evenodd"
+      />
+    </svg>
+  ),
   '/admin/settings': (
     <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
       <path

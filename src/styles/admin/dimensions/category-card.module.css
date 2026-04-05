@@ -87,7 +87,7 @@
 }
 
 .category {
-  @apply text-caption text-foreground/65 mt-1;
+  @apply text-caption font-bold text-foreground/75 mt-1;
 }
 
 .notes {

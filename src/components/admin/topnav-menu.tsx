@@ -6,6 +6,7 @@ import styles from '@/styles/admin/topnav-menu.module.css';
 import { getBadge } from '@/utils/menu-helper';
 import { getMenuItem, topTabs, BadgeCounts } from '@/types/menu-item';
 import UserAvatar from '@/components/shared/user-avatar';
+import NotificationsBell from '@/components/shared/notifications-bell';
 import type { CompanyInfo } from '@/types/company-type';
 import type { RoleBranding } from '@/constants/role-branding';
 import RoleLogo from '@/components/branding/role-logo';
@@ -161,19 +162,7 @@ export default function TopnavMenu({
                   />
                 </svg>
               </div>
-              <button
-                type="button"
-                aria-label="View notifications"
-                className="relative w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 002-2H8a2 2 0 002 2z" />
-                </svg>
-              </button>
+              <NotificationsBell />
               <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
               <UserAvatar
                 displayName={userDisplayName}

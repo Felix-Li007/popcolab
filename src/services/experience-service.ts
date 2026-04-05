@@ -101,7 +101,7 @@ type ExperienceWithRelations = ExperienceRow & {
   }>;
   _count: {
     experience_dimensions: number;
-    proposals: number;
+    proposal_experiences: number;
     experience_calendars: number;
   };
 };
@@ -239,7 +239,7 @@ function mapExperienceRow(
     travelFlying: row.travel_flying,
     createdBy: row.created_by,
     dimensionCount: row._count.experience_dimensions,
-    proposalCount: row._count.proposals,
+    proposalCount: row._count.proposal_experiences,
     calendarCount: row._count.experience_calendars,
     dimensionValues,
     createdAt: row.created_at,
@@ -610,7 +610,7 @@ export async function getExperiences(): Promise<Experience[]> {
         _count: {
           select: {
             experience_dimensions: true,
-            proposals: true,
+            proposal_experiences: true,
             experience_calendars: true,
           },
         },
@@ -669,7 +669,7 @@ export async function getDashboardExperiences(
         _count: {
           select: {
             experience_dimensions: true,
-            proposals: true,
+            proposal_experiences: true,
             experience_calendars: true,
           },
         },
@@ -733,7 +733,7 @@ export async function getPurchasableExperiences(): Promise<Experience[]> {
         _count: {
           select: {
             experience_dimensions: true,
-            proposals: true,
+            proposal_experiences: true,
             experience_calendars: true,
           },
         },
@@ -796,7 +796,7 @@ export async function getPurchasableExperienceById(
         _count: {
           select: {
             experience_dimensions: true,
-            proposals: true,
+            proposal_experiences: true,
             experience_calendars: true,
           },
         },
@@ -856,7 +856,7 @@ export async function getExperienceById(
         _count: {
           select: {
             experience_dimensions: true,
-            proposals: true,
+            proposal_experiences: true,
             experience_calendars: true,
           },
         },
@@ -963,7 +963,7 @@ export async function deleteExperience(id: number): Promise<void> {
       id: true,
       _count: {
         select: {
-          proposals: true,
+          proposal_experiences: true,
         },
       },
     },
@@ -971,7 +971,7 @@ export async function deleteExperience(id: number): Promise<void> {
 
   if (!experience) return;
 
-  if (experience._count.proposals > 0) {
+  if (experience._count.proposal_experiences > 0) {
     throw new Error(
       'This experience is linked to proposals and cannot be deleted.'
     );

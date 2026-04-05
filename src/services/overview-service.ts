@@ -299,7 +299,9 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
           ${REQUEST_STATUS.OPENED}::text,
           ${REQUEST_STATUS.PENDING}::text,
           ${REQUEST_STATUS.MATCHED}::text,
-          ${REQUEST_STATUS.CLOSED}::text
+          ${REQUEST_STATUS.CLOSED}::text,
+          ${REQUEST_STATUS.PROCESSING}::text,
+          ${REQUEST_STATUS.RETRYING}::text
         ]) AS request_status
       ),
       request_counts AS (
@@ -335,7 +337,12 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
           WHERE r.request_status::text IN (${REQUEST_STATUS.MATCHED}, ${REQUEST_STATUS.CLOSED})
         )::int AS matched_count,
         COUNT(*) FILTER (
-          WHERE r.request_status::text IN (${REQUEST_STATUS.OPENED}, ${REQUEST_STATUS.PENDING})
+          WHERE r.request_status::text IN (
+            ${REQUEST_STATUS.OPENED},
+            ${REQUEST_STATUS.PENDING},
+            ${REQUEST_STATUS.PROCESSING},
+            ${REQUEST_STATUS.RETRYING}
+          )
         )::int AS backlog_count,
         COALESCE(
           AVG(
@@ -359,8 +366,8 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       SELECT
         e.experience_title AS label,
         COUNT(*)::int AS value
-      FROM "proposal" p
-      INNER JOIN "experience" e ON e.id = p.experience_id
+      FROM "proposal_experience" pe
+      INNER JOIN "experience" e ON e.id = pe.experience_id
       GROUP BY e.id, e.experience_title
       ORDER BY COUNT(*) DESC, e.experience_title ASC
       LIMIT 5

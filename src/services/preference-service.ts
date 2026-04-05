@@ -1,4 +1,4 @@
-import { ProcessStatus, type UserPreference } from '@/libs/prisma/client';
+import { ProcessStatus, type HistoryPreference } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { extractPreferenceVector } from '@/services/vector-service';
 
@@ -121,10 +121,10 @@ async function loadCompletedExperiences(
   });
 }
 
-export async function calcualateUserPreference(
+export async function calcualateHistoryPreference(
   userId: number,
   limit = DEFAULT_SOURCE_WINDOW
-): Promise<UserPreference | null> {
+): Promise<HistoryPreference | null> {
   const completedExperiences = await loadCompletedExperiences(userId, limit);
 
   if (completedExperiences.length === 0) {
@@ -134,20 +134,20 @@ export async function calcualateUserPreference(
   const vectorEmbed = await extractPreferenceVector(userId);
   const snapshot = buildPreferenceSnapshot(completedExperiences, vectorEmbed);
 
-  const latestPreference = await prisma.userPreference.findFirst({
+  const latestPreference = await prisma.historyPreference.findFirst({
     where: { user_id: userId },
     orderBy: { created_at: 'desc' },
     select: { id: true },
   });
 
   if (latestPreference) {
-    return prisma.userPreference.update({
+    return prisma.historyPreference.update({
       where: { id: latestPreference.id },
       data: snapshot,
     });
   }
 
-  return prisma.userPreference.create({
+  return prisma.historyPreference.create({
     data: {
       user_id: userId,
       ...snapshot,
@@ -155,10 +155,10 @@ export async function calcualateUserPreference(
   });
 }
 
-export async function getLatestUserPreferenceVector(
+export async function getHistoryPreferenceVector(
   userId: number
 ): Promise<number[] | null> {
-  const latestPreference = await prisma.userPreference.findFirst({
+  const latestPreference = await prisma.historyPreference.findFirst({
     where: { user_id: userId },
     orderBy: { created_at: 'desc' },
     select: { vector_embed: true },
@@ -179,7 +179,9 @@ export async function getLatestUserPreferenceVector(
   return vector.length > 0 ? vector : null;
 }
 
-export async function refreshUserPreference(experienceId: number): Promise<{
+// (alias removed) use `getHistoryPreferenceVector` directly
+
+export async function refreshHistoryPreference(experienceId: number): Promise<{
   experienceId: number;
   userId: number;
   userPreferenceId: number | null;
@@ -206,7 +208,7 @@ export async function refreshUserPreference(experienceId: number): Promise<{
     };
   }
 
-  const preference = await calcualateUserPreference(userExperience.user_id);
+  const preference = await calcualateHistoryPreference(userExperience.user_id);
 
   return {
     experienceId: experienceId,

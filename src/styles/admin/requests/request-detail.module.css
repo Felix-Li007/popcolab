@@ -1,0 +1,255 @@
+@reference "../../../app/globals.css";
+
+.root {
+  @apply flex flex-col;
+  min-height: calc(100dvh - 6rem);
+  background:
+    radial-gradient(
+      circle at 8% -12%,
+      rgba(45, 212, 191, 0.16),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 94% -10%,
+      rgba(56, 189, 248, 0.14),
+      transparent 44%
+    ),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.panel {
+  @apply flex w-full flex-1 min-h-0 flex-col px-4 py-4 sm:px-5;
+}
+
+.header {
+  @apply mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/80 px-4 py-3.5 sm:px-5;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 250, 252, 0.9),
+    rgba(255, 255, 255, 1)
+  );
+  box-shadow:
+    0 12px 30px rgba(15, 23, 42, 0.08),
+    0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.title {
+  @apply text-lg font-bold tracking-tight text-slate-900;
+}
+
+.subtitle {
+  @apply mt-1 text-sm text-slate-600;
+}
+
+.headerActions {
+  @apply flex items-center gap-2;
+}
+
+.backLink {
+  @apply inline-flex h-8 items-center rounded-full px-3 text-caption font-semibold;
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  color: #0f766e;
+  background: linear-gradient(
+    180deg,
+    rgba(240, 253, 250, 1),
+    rgba(204, 251, 241, 0.9)
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.backLink:hover {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.4);
+  background: linear-gradient(
+    180deg,
+    rgba(204, 251, 241, 1),
+    rgba(153, 246, 228, 0.95)
+  );
+}
+
+.body {
+  @apply flex-1 overflow-y-auto rounded-2xl border border-slate-200/80 p-3.5 sm:p-4;
+  background:
+    radial-gradient(
+      circle at 14% -30%,
+      rgba(45, 212, 191, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 88% -20%,
+      rgba(14, 116, 144, 0.08),
+      transparent 60%
+    ),
+    #f8fafc;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.content {
+  @apply space-y-4 text-sm text-slate-700;
+}
+
+.sectionCard {
+  @apply rounded-xl p-3.5 sm:p-4;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.68)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    inset 0 -8px 14px rgba(15, 23, 42, 0.04),
+    0 14px 26px rgba(15, 23, 42, 0.1),
+    0 4px 10px rgba(15, 23, 42, 0.06);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.sectionTitle {
+  @apply text-xs font-bold uppercase tracking-[0.08em] text-slate-600;
+}
+
+.requestGrid {
+  @apply mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.infoItem {
+  @apply rounded-lg px-3 py-2.5;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(241, 245, 249, 0.62)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 6px 12px rgba(15, 23, 42, 0.06);
+}
+
+.infoLabel {
+  @apply text-caption font-semibold uppercase tracking-[0.06em] text-slate-500;
+}
+
+.infoValue {
+  @apply mt-1.5 text-sm font-semibold leading-snug text-slate-800;
+}
+
+.notesCard {
+  @apply mt-3 rounded-lg p-2.5;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.84),
+    rgba(241, 245, 249, 0.66)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 18px rgba(15, 23, 42, 0.08);
+}
+
+.notesText {
+  @apply mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-slate-700;
+}
+
+.preferenceHeader {
+  @apply mb-2 flex flex-wrap items-center justify-between gap-2;
+}
+
+.preferenceCount {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-badge font-semibold;
+  border: 1px solid rgba(15, 118, 110, 0.28);
+  color: #115e59;
+  background: linear-gradient(
+    180deg,
+    rgba(240, 253, 250, 0.95),
+    rgba(204, 251, 241, 0.8)
+  );
+}
+
+.preferenceList {
+  @apply space-y-2.5 overflow-y-auto pr-1;
+  max-height: min(62dvh, 44rem);
+}
+
+.preferenceCard {
+  @apply rounded-lg p-3;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(248, 250, 252, 0.78)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 8px 16px rgba(15, 23, 42, 0.07);
+}
+
+.preferenceCard:hover {
+  border-color: rgba(14, 116, 144, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 10px 20px rgba(15, 23, 42, 0.09);
+}
+
+.preferenceQuestionRow {
+  @apply flex items-start gap-2;
+}
+
+.preferenceIndex {
+  @apply inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-badge font-semibold;
+  border: 1px solid rgba(15, 118, 110, 0.3);
+  background: linear-gradient(
+    180deg,
+    rgba(236, 254, 255, 0.92),
+    rgba(207, 250, 254, 0.72)
+  );
+  color: #0f766e;
+  flex-shrink: 0;
+}
+
+.preferenceQuestion {
+  @apply text-sm font-semibold text-slate-800;
+  line-height: 1.5;
+}
+
+.preferenceAnswerBlock {
+  @apply mt-1.5;
+}
+
+.preferenceAnswerLabel {
+  @apply text-caption font-semibold uppercase tracking-[0.06em] text-slate-500;
+}
+
+.preferenceAnswer {
+  @apply mt-1 text-sm text-slate-700;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.preferenceAnswerChips {
+  @apply mt-1 flex flex-wrap gap-1.5;
+}
+
+.preferenceAnswerChip {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-badge text-slate-700;
+  font-weight: 600;
+  border: 1px solid rgba(14, 116, 144, 0.3);
+  background: linear-gradient(
+    180deg,
+    rgba(236, 254, 255, 0.92),
+    rgba(207, 250, 254, 0.72)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 4px 10px rgba(14, 116, 144, 0.16);
+}
+
+.emptyText {
+  @apply text-sm text-slate-500;
+}

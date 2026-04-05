@@ -224,6 +224,16 @@ async function upsertEvent(
 export async function seedEvents(prisma: PrismaClient): Promise<void> {
   const createdBy = await resolveCreatedById(prisma);
 
+  // Removing events with ON DELETE SET NULL can violate order_item check constraints
+  // for EVENT rows, so clear event-linked order items first.
+  await prisma.orderItem.deleteMany({
+    where: {
+      event_id: {
+        not: null,
+      },
+    },
+  });
+
   await prisma.eventPricing.deleteMany({});
   await prisma.eventCalendar.deleteMany({});
   await prisma.eventGallery.deleteMany({});

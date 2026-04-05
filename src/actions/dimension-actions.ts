@@ -9,7 +9,7 @@ import type {
   DimensionDataType,
 } from '@/types/dimension-type';
 import { DIMENSION_DATA_TYPES } from '@/types/dimension-type';
-import type { IntakeForm } from '@/types/question-type';
+import type { FormName } from '@/types/question-type';
 import {
   createDimension,
   updateDimension,
@@ -59,12 +59,18 @@ function revalidateAdminPaths() {
 function parseOptions(formData: FormData) {
   const labels = getTrimmedFormStrings(formData, 'optionLabel');
   const values = getTrimmedFormStrings(formData, 'optionValue');
-  const length = Math.max(labels.length, values.length);
+  const penalties = getTrimmedFormStrings(formData, 'optionPenalty');
+  const length = Math.max(labels.length, values.length, penalties.length);
 
-  return Array.from({ length }, (_, index) => ({
-    label: labels[index] ?? '',
-    value: values[index] ?? '',
-  })).filter(option => option.label || option.value);
+  return Array.from({ length }, (_, index) => {
+    const penaltyRaw = penalties[index] ?? '';
+    const penalty = penaltyRaw === '' ? null : Number(penaltyRaw);
+    return {
+      label: labels[index] ?? '',
+      value: values[index] ?? '',
+      penalty,
+    };
+  }).filter(option => option.label || option.value);
 }
 
 function hashString(value: string): string {
@@ -104,7 +110,7 @@ function parseDimensionForm(formData: FormData) {
     .getAll('formName')
     .map(getFormEntryString)
     .filter(
-      (value): value is IntakeForm =>
+      (value): value is FormName =>
         value === 'REQUEST' ||
         value === 'MEMBER' ||
         value === 'ASSESS' ||
@@ -113,6 +119,8 @@ function parseDimensionForm(formData: FormData) {
 
   const scaleMin = scaleMinRaw === '' ? null : Number(scaleMinRaw);
   const scaleMax = scaleMaxRaw === '' ? null : Number(scaleMaxRaw);
+  const penaltyValueRaw = getTrimmedFormString(formData, 'penaltyValue');
+  const penaltyValue = penaltyValueRaw === '' ? null : Number(penaltyValueRaw);
 
   return {
     indexKey: generateDimensionKey(indexName),
@@ -124,6 +132,7 @@ function parseDimensionForm(formData: FormData) {
     scaleMin,
     scaleMax,
     options,
+    penaltyValue,
     formNames,
   };
 }

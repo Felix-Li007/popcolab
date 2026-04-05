@@ -1,6 +1,9 @@
 jest.mock('@/libs/prisma-client', () => ({
   prisma: {
     request: {
+      count: jest.fn(),
+      findMany: jest.fn(),
+      groupBy: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
     },
@@ -20,9 +23,10 @@ jest.mock('@/libs/prisma/client', () => ({
     rejected: 'rejected',
   },
   ProposalStatus: {
-    pending: 'pending',
-    accepted: 'accepted',
-    rejected: 'rejected',
+    PENDING: 'PENDING',
+    APPROVED: 'APPROVED',
+    ACCEPTED: 'ACCEPTED',
+    REJECTED: 'REJECTED',
   },
   RequestStatus: {
     opened: 'opened',
@@ -46,6 +50,7 @@ import { prisma } from '@/libs/prisma-client';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import { REQUEST_STATUS } from '@/constants/request-status';
 import {
+  getAdminRequestsPage,
   enqueueRequestReady,
   handleRejectedProposal,
   handleUserConfirmed,
@@ -56,6 +61,9 @@ import { REQUEST_QUEUE_TRIGGER } from '@/types/queue-job';
 
 type PrismaMock = {
   request: {
+    count: jest.Mock;
+    findMany: jest.Mock;
+    groupBy: jest.Mock;
     findUnique: jest.Mock;
     update: jest.Mock;
   };
@@ -205,7 +213,7 @@ describe('request-service', () => {
       expect(prismaMock.proposal.update).toHaveBeenCalledWith({
         where: { id: 5 },
         data: {
-          proposal_status: ProposalStatus.rejected,
+          proposal_status: ProposalStatus.REJECTED,
         },
         select: {
           id: true,
@@ -313,5 +321,254 @@ describe('request-service', () => {
         },
       });
     });
+  });
+});
+
+describe('getAdminRequestsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('builds request filters including status, userId, search, and created date range', async () => {
+    prismaMock.request.count.mockResolvedValue(0);
+    prismaMock.request.findMany.mockResolvedValue([]);
+    prismaMock.request.groupBy.mockResolvedValue([]);
+
+    await getAdminRequestsPage({
+      search: 'alex',
+      userEmail: 'user@example.com',
+      companyName: 'acme',
+      status: REQUEST_STATUS.PENDING,
+      userId: 12,
+      createdFrom: '2026-03-01',
+      createdTo: '2026-03-10',
+      page: 2,
+      pageSize: 5,
+    });
+
+    expect(prismaMock.request.count).toHaveBeenCalledTimes(1);
+    expect(prismaMock.request.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaMock.request.groupBy).toHaveBeenCalledTimes(1);
+
+    const countArgs = prismaMock.request.count.mock.calls[0][0];
+    const findManyArgs = prismaMock.request.findMany.mock.calls[0][0];
+
+    expect(findManyArgs.skip).toBe(5);
+    expect(findManyArgs.take).toBe(5);
+
+    const whereFromCount = countArgs.where;
+    expect(whereFromCount.AND).toEqual(
+      expect.arrayContaining([
+        { request_status: REQUEST_STATUS.PENDING },
+        { user_id: 12 },
+        {
+          user: {
+            is: {
+              email: {
+                contains: 'user@example.com',
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+        {
+          user: {
+            is: {
+              corporate: {
+                is: {
+                  company_name: {
+                    contains: 'acme',
+                    mode: 'insensitive',
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          created_at: {
+            gte: new Date('2026-03-01T00:00:00'),
+            lt: new Date('2026-03-11T00:00:00'),
+          },
+        },
+        expect.objectContaining({ OR: expect.any(Array) }),
+      ])
+    );
+
+    const whereFromFindMany = findManyArgs.where;
+    expect(whereFromFindMany).toEqual(whereFromCount);
+
+    const groupByArgs = prismaMock.request.groupBy.mock.calls[0][0];
+    const statusWhere = groupByArgs.where;
+    expect(statusWhere.AND).toEqual(
+      expect.arrayContaining([
+        { user_id: 12 },
+        {
+          user: {
+            is: {
+              email: {
+                contains: 'user@example.com',
+                mode: 'insensitive',
+              },
+            },
+          },
+        },
+        {
+          user: {
+            is: {
+              corporate: {
+                is: {
+                  company_name: {
+                    contains: 'acme',
+                    mode: 'insensitive',
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
+          created_at: {
+            gte: new Date('2026-03-01T00:00:00'),
+            lt: new Date('2026-03-11T00:00:00'),
+          },
+        },
+        expect.objectContaining({ OR: expect.any(Array) }),
+      ])
+    );
+
+    const hasStatusFilter = (
+      statusWhere.AND as Array<Record<string, unknown>>
+    ).some(clause => 'request_status' in clause);
+    expect(hasStatusFilter).toBe(false);
+  });
+
+  it('maps row details and status counts correctly', async () => {
+    prismaMock.request.count.mockResolvedValue(1);
+    prismaMock.request.findMany.mockResolvedValue([
+      {
+        id: 77,
+        request_status: REQUEST_STATUS.MATCHED,
+        objective_category: 'Team Bonding',
+        delivery_method: 'in_person',
+        duration_max: 4,
+        budget_min: { toString: () => '1000' },
+        budget_max: { toString: () => '2500' },
+        participant_count: 20,
+        capacity_max: 30,
+        constraint_mode: 'SOFT',
+        preferred_date: new Date('2026-03-22T09:00:00.000Z'),
+        expired_at: new Date('2026-03-20T09:00:00.000Z'),
+        notes_for_admin: 'Need indoor setup',
+        created_at: new Date('2026-03-10T08:00:00.000Z'),
+        updated_at: new Date('2026-03-11T08:00:00.000Z'),
+        user: {
+          id: 9,
+          email: 'user@example.com',
+          user_name: 'user_9',
+          profile: {
+            first_name: 'Alex',
+            last_name: 'Chen',
+          },
+          corporate: {
+            company_name: 'Acme',
+            department_name: 'HR',
+            role_title: 'Manager',
+          },
+        },
+        invited_users: [
+          {
+            id: 2,
+            invited_status: 'accepted',
+            user_name: 'Teammate A',
+            user_email: 'a@example.com',
+            created_at: new Date('2026-03-10T10:00:00.000Z'),
+            respond_at: new Date('2026-03-10T12:00:00.000Z'),
+            expired_at: null,
+          },
+          {
+            id: 1,
+            invited_status: 'pending',
+            user_name: 'Teammate B',
+            user_email: 'b@example.com',
+            created_at: new Date('2026-03-10T09:00:00.000Z'),
+            respond_at: null,
+            expired_at: null,
+          },
+        ],
+        proposals: [
+          {
+            id: 5,
+            proposal_status: 'accepted',
+            rationale_desc: 'Best fit for your team objective',
+            created_at: new Date('2026-03-11T10:00:00.000Z'),
+            updated_at: new Date('2026-03-11T11:00:00.000Z'),
+            experience: {
+              experience_title: 'Creative Workshop',
+            },
+          },
+        ],
+      },
+    ]);
+    prismaMock.request.groupBy.mockResolvedValue([
+      { request_status: REQUEST_STATUS.OPENED, _count: { id: 4 } },
+      { request_status: REQUEST_STATUS.PENDING, _count: { id: 3 } },
+      { request_status: REQUEST_STATUS.MATCHED, _count: { id: 2 } },
+      { request_status: REQUEST_STATUS.CLOSED, _count: { id: 1 } },
+    ]);
+
+    const result = await getAdminRequestsPage({
+      search: '',
+      userEmail: '',
+      companyName: '',
+      status: 'all',
+      userId: null,
+      createdFrom: '',
+      createdTo: '',
+      page: 1,
+      pageSize: 12,
+    });
+
+    expect(result.totalItems).toBe(1);
+    expect(result.totalPages).toBe(1);
+    expect(result.currentPage).toBe(1);
+    expect(result.statusCounts).toEqual({
+      [REQUEST_STATUS.OPENED]: 4,
+      [REQUEST_STATUS.PENDING]: 3,
+      [REQUEST_STATUS.MATCHED]: 2,
+      [REQUEST_STATUS.CLOSED]: 1,
+      [REQUEST_STATUS.PROCESSING]: 0,
+      [REQUEST_STATUS.RETRYING]: 0,
+    });
+
+    expect(result.items).toHaveLength(1);
+    const item = result.items[0];
+
+    expect(item.id).toBe(77);
+    expect(item.status).toBe(REQUEST_STATUS.MATCHED);
+    expect(item.user.displayName).toBe('Alex Chen');
+    expect(item.budgetMin).toBe(1000);
+    expect(item.budgetMax).toBe(2500);
+    expect(item.inviteSummary).toEqual({
+      total: 2,
+      pending: 1,
+      accepted: 1,
+      rejected: 0,
+    });
+    expect(item.proposalSummary).toEqual({
+      total: 1,
+      pending: 0,
+      accepted: 1,
+      rejected: 0,
+    });
+
+    expect(item.invitedUsers[0].id).toBe(2);
+    expect(item.proposals[0]).toEqual(
+      expect.objectContaining({
+        id: 5,
+        status: 'accepted',
+        experienceTitle: 'Creative Workshop',
+      })
+    );
   });
 });

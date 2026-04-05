@@ -62,6 +62,26 @@ const actions: ActionLink[] = [
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
+          d="M7 8h10M7 12h10M7 16h6M6 3h9l3 3v15a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"
+        />
+      </svg>
+    ),
+    label: 'Proposals',
+    href: '/admin/proposals',
+    tone: 'border-indigo-100 bg-indigo-50 text-indigo-700 hover:border-indigo-200 hover:bg-indigo-100/70',
+  },
+  {
+    icon: (
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
           d="M9 12h6m-6 4h6M7 4h10a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2z"
         />
       </svg>
