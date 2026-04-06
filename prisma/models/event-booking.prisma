@@ -1,0 +1,18 @@
+model Booking {
+  id Int @id @default(autoincrement())
+
+  event_id   Int
+  event_date DateTime
+
+  ticket_type  String
+  quantity     Int
+  total_amount Float
+
+  status        String  @default("CONFIRMED")
+  cancel_reason String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  event Event @relation(fields: [event_id], references: [id])
+}

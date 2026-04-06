@@ -13,7 +13,7 @@ model Event {
     event_calendars EventCalendar[]
     event_pricing   EventPricing[]
     order_items     OrderItem[]
-
+    bookings        Booking[]
     @@map("event")
 }
 
