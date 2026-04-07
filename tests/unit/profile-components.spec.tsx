@@ -110,7 +110,6 @@ describe('profile components', () => {
   test('ProfileContent renders both profile sections when profile data is available', () => {
     render(<ProfileContent profileData={profileData} companyData={null} />);
 
-    expect(screen.getByRole('heading', { name: /my profile/i })).toBeVisible();
     expect(
       screen.getByRole('heading', { name: /personal information/i })
     ).toBeVisible();

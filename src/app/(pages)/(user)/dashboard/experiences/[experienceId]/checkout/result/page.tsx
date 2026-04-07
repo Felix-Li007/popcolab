@@ -24,25 +24,25 @@ function getFirstValue(
 
 function getStatusContent(status: string) {
   switch (status) {
-    case 'paid':
+    case 'PAID':
       return {
         title: 'Payment received',
         tone: 'bg-emerald-50 text-emerald-800',
         body: 'Your booking has been paid successfully.',
       };
-    case 'processing':
+    case 'PROCESSING':
       return {
         title: 'Payment processing',
         tone: 'bg-amber-50 text-amber-800',
         body: 'Stripe is still processing the payment. Refresh this page in a moment if needed.',
       };
-    case 'payment_failed':
+    case 'PAYMENT_FAILED':
       return {
         title: 'Payment needs attention',
         tone: 'bg-rose-50 text-rose-800',
         body: 'The payment was not completed. You can return to checkout and try again.',
       };
-    case 'canceled':
+    case 'CANCELED':
       return {
         title: 'Payment canceled',
         tone: 'bg-gray-100 text-gray-700',

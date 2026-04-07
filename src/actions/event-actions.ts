@@ -87,6 +87,21 @@ type UpdateEventActionData = Partial<EventFormState> & {
   }>;
 };
 
+type BookingInput = {
+  eventId: number;
+  calendarId: number;
+  quantity: number;
+  total: number;
+  tickets: Array<{
+    priceId: number;
+    qty: number;
+  }>;
+};
+
+function toPlainObject<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
+
 function getActiveEventCalendars<
   T extends {
     date_status?: string;
@@ -762,4 +777,203 @@ export async function cancelEventCalendarAction(
     }
     return { success: false, error: 'Failed to cancel event date' };
   }
+}
+
+export async function getActiveEventsAction() {
+  const events = await prisma.event.findMany({
+    where: {
+      eventStatus: EventStatus.ACTIVE,
+    },
+    include: {
+      event_galleries: true,
+      event_pricing: true,
+      event_calendars: true,
+    },
+  });
+
+  return toPlainObject(events);
+}
+
+export async function getEventByIdAction(eventId: number) {
+  if (!eventId || Number.isNaN(eventId)) {
+    throw new Error('Invalid event ID');
+  }
+
+  const event = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: {
+      event_galleries: true,
+      event_calendars: true,
+      event_pricing: true,
+    },
+  });
+
+  if (!event) {
+    return null;
+  }
+
+  return toPlainObject({
+    ...event,
+    event_pricing: event.event_pricing || [],
+    event_galleries: event.event_galleries || [],
+    event_calendars: event.event_calendars || [],
+  });
+}
+
+export async function getConfirmedBookingsAction() {
+  const bookings = await prisma.userEvent.findMany({
+    where: {
+      status: 'CONFIRMED',
+    },
+    orderBy: { id: 'desc' },
+    include: {
+      event: {
+        include: {
+          event_galleries: true,
+        },
+      },
+    },
+  });
+
+  return toPlainObject(bookings);
+}
+
+export async function createOrUpdateBookingAction(input: BookingInput) {
+  const eventId = Number(input.eventId);
+  const calendarId = Number(input.calendarId);
+  const quantity = Number(input.quantity);
+  const total = Number(input.total);
+  const normalizedTickets = input.tickets
+    .map(ticket => ({
+      priceId: Number(ticket.priceId),
+      qty: Number(ticket.qty),
+    }))
+    .filter(
+      ticket =>
+        Number.isInteger(ticket.priceId) &&
+        ticket.priceId > 0 &&
+        Number.isInteger(ticket.qty) &&
+        ticket.qty > 0
+    );
+
+  if (!Number.isInteger(calendarId) || calendarId <= 0) {
+    throw new Error('Invalid event calendar ID');
+  }
+
+  if (normalizedTickets.length === 0) {
+    throw new Error('At least one ticket type is required.');
+  }
+
+  const eventCalendar = await prisma.eventCalendar.findFirst({
+    where: {
+      id: calendarId,
+      event_id: eventId,
+    },
+    select: {
+      event_date: true,
+    },
+  });
+
+  if (!eventCalendar) {
+    throw new Error('Selected event date was not found');
+  }
+
+  const eventPricingRows = await prisma.eventPricing.findMany({
+    where: {
+      event_id: eventId,
+      id: {
+        in: normalizedTickets.map(ticket => ticket.priceId),
+      },
+    },
+    select: {
+      id: true,
+      price_level: true,
+      event_price: true,
+    },
+  });
+
+  const eventPricingById = new Map(
+    eventPricingRows.map(row => [
+      row.id,
+      {
+        priceLevel: String(row.price_level),
+        unitPrice: Number(row.event_price.toString()),
+      },
+    ])
+  );
+
+  const ticketLines = normalizedTickets.map(ticket => {
+    const pricing = eventPricingById.get(ticket.priceId);
+    if (!pricing) {
+      throw new Error(`Ticket price ${ticket.priceId} is not available.`);
+    }
+
+    return {
+      priceId: ticket.priceId,
+      qty: ticket.qty,
+      priceLevel: pricing.priceLevel,
+      lineTotal: pricing.unitPrice * ticket.qty,
+    };
+  });
+
+  const expectedQuantity = ticketLines.reduce((sum, line) => sum + line.qty, 0);
+  const expectedTotal = ticketLines.reduce(
+    (sum, line) => sum + line.lineTotal,
+    0
+  );
+
+  if (expectedQuantity !== quantity) {
+    throw new Error('Ticket quantity mismatch. Please refresh and try again.');
+  }
+
+  if (expectedTotal !== total) {
+    throw new Error('Ticket total mismatch. Please refresh and try again.');
+  }
+
+  const ticketType = ticketLines
+    .map(line => `${line.priceLevel} x${line.qty}`)
+    .join(', ');
+  const eventDate = new Date(eventCalendar.event_date);
+
+  const existing = await prisma.userEvent.findFirst({
+    where: {
+      event_id: eventId,
+      event_date: eventDate,
+      status: 'CONFIRMED',
+    },
+  });
+
+  if (existing) {
+    const updated = await prisma.userEvent.update({
+      where: { id: existing.id },
+      data: {
+        quantity: existing.quantity + quantity,
+        total_amount: existing.total_amount + total,
+        ticket_type: `${existing.ticket_type}, ${ticketType}`,
+      },
+    });
+
+    return toPlainObject({
+      message: 'Booking updated',
+      booking: updated,
+      alreadyExists: true,
+    });
+  }
+
+  const booking = await prisma.userEvent.create({
+    data: {
+      event_id: eventId,
+      event_date: eventDate,
+      ticket_type: ticketType,
+      quantity,
+      total_amount: total,
+      status: 'CONFIRMED',
+    },
+  });
+
+  return toPlainObject({
+    message: 'Booking created',
+    booking,
+    alreadyExists: false,
+  });
 }

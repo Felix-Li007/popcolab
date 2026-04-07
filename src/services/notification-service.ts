@@ -173,7 +173,7 @@ async function getPurchasedEventRecipients(params: {
     inner join "user" u on u.id = o.user_id
     where oi.item_type = 'EVENT'
       and oi.event_id = ${params.eventId}
-      and o.order_status = 'paid'
+      and o.order_status = 'PAID'
       ${
         scheduleSlotTexts.length > 0
           ? Prisma.sql`and (

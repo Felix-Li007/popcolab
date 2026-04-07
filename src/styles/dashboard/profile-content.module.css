@@ -5,55 +5,23 @@
 }
 
 .pageContent {
-  @apply flex flex-1 min-h-0 px-4 py-3;
+  @apply flex min-h-0 flex-1 px-4 py-3;
 }
 
 .pageInner {
-  @apply w-full;
-}
-
-.shell {
-  @apply relative w-full overflow-hidden rounded-2xl border border-teal-deep/10 bg-linear-to-br from-white via-lavender/25 to-coral-light/65 shadow-sm;
-}
-
-.shellOrbLeft {
-  @apply pointer-events-none absolute -left-10 top-24 h-40 w-40 rounded-full bg-lavender/45 blur-3xl;
-}
-
-.shellOrbRight {
-  @apply pointer-events-none absolute -right-12 top-0 h-48 w-48 rounded-full bg-coral-soft/50 blur-3xl;
-}
-
-.shellOrbBottom {
-  @apply pointer-events-none absolute bottom-0 right-20 h-32 w-32 rounded-full bg-brand-yellow/20 blur-3xl;
-}
-
-.header {
-  @apply relative overflow-hidden border-b border-teal-medium/15 bg-linear-to-r from-teal-medium via-lavender to-coral-soft px-5 py-4 text-teal-deep;
-}
-
-.headerGlowLarge {
-  @apply pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-white/35 blur-2xl;
-}
-
-.headerGlowSmall {
-  @apply pointer-events-none absolute right-20 top-0 h-16 w-16 rounded-full bg-coral-light/40 blur-2xl;
-}
-
-.pageTitle {
-  @apply text-xs font-bold text-gray-700;
+  @apply w-full bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.75),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(255,221,234,0.28),transparent_28%)] bg-transparent;
 }
 
 .body {
-  @apply relative bg-linear-to-b from-white/20 via-white/10 to-grey-light/15 p-3;
+  @apply relative bg-transparent p-2.5;
 }
 
 .sectionGrid {
-  @apply grid gap-3 xl:grid-cols-[1.2fr_1fr];
+  @apply grid gap-5 xl:grid-cols-[1.08fr_0.92fr];
 }
 
 .emptyCard {
-  @apply rounded-2xl border border-teal-medium/15 bg-white/95 p-3 shadow-sm backdrop-blur-[2px];
+  @apply rounded-[1.75rem] border border-white/50 bg-white/60 p-4 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur-xl;
 }
 
 .emptyState {

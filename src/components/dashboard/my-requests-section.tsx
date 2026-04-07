@@ -38,16 +38,22 @@ type Props = {
 
 export default function MyRequestsSection({ requests }: Readonly<Props>) {
   return (
-    <section data-testid="my-requests-section">
+    <section
+      className="dashboard-glass-panel p-5 sm:p-6"
+      data-testid="my-requests-section"
+    >
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg">📋</span>
-        <h2 className="text-sm font-bold text-slate-900">
-          Experience Requests
-        </h2>
+        <div>
+          <p className="dashboard-section-eyebrow">Workflows</p>
+          <h2 className="mt-1 text-base font-bold text-slate-900">
+            Experience Requests
+          </h2>
+        </div>
       </div>
 
       {requests.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-[24px] border border-dashed border-[rgba(1,43,48,0.10)] bg-[rgba(255,255,255,0.72)] py-10 text-center">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-[24px] border border-dashed border-[rgba(1,43,48,0.10)] bg-[rgba(255,255,255,0.62)] py-10 text-center backdrop-blur-xl">
           <span className="text-3xl">📋</span>
           <p className="text-sm font-medium text-slate-600">
             No experience requests yet.
@@ -58,7 +64,7 @@ export default function MyRequestsSection({ requests }: Readonly<Props>) {
           </p>
         </div>
       ) : (
-        <div className="rounded-[24px] border border-[rgba(1,43,48,0.08)] bg-[rgba(255,255,255,0.80)] overflow-hidden shadow-sm">
+        <div className="overflow-hidden rounded-[1.6rem] border border-white/78 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,250,252,0.76))] shadow-[0_18px_36px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-xl">
           {requests.map((req, i) => {
             const style = STATUS_STYLES[req.status] ?? {
               label: req.status,
@@ -85,7 +91,7 @@ export default function MyRequestsSection({ requests }: Readonly<Props>) {
                 <div className="flex items-center gap-3">
                   <Link
                     href={buildDashboardRequestInvitePath(req.id)}
-                    className="text-xs font-semibold text-fuchsia-600 hover:opacity-80"
+                    className="dashboard-pill-button dashboard-pill-button--secondary !px-3 !py-1.5 !text-[11px]"
                   >
                     Invite
                   </Link>

@@ -17,9 +17,16 @@ jest.mock('@/libs/prisma-client', () => ({
 }));
 
 jest.mock('@/libs/prisma/client', () => ({
+  OrderStatus: {
+    PENDING_PAYMENT: 'PENDING_PAYMENT',
+    PROCESSING: 'PROCESSING',
+    PAID: 'PAID',
+    PAYMENT_FAILED: 'PAYMENT_FAILED',
+    CANCELED: 'CANCELED',
+  },
   CalendarStatus: {
-    LOCKED: 'locked',
-    BLOCKED: 'blocked',
+    LOCKED: 'LOCKED',
+    BLOCKED: 'BLOCKED',
   },
   ProcessStatus: {
     PROGRESS: 'PROGRESS',
@@ -146,7 +153,7 @@ describe('order-service booking slot locking', () => {
         findFirst: jest
           .fn()
           .mockResolvedValueOnce(null)
-          .mockResolvedValueOnce({ calendar_status: 'locked' }),
+          .mockResolvedValueOnce({ calendar_status: 'LOCKED' }),
         create: jest.fn().mockRejectedValue(createSlotUniqueError()),
       },
       payment: {
@@ -182,7 +189,7 @@ describe('order-service booking slot locking', () => {
         findFirst: jest
           .fn()
           .mockResolvedValueOnce(null)
-          .mockResolvedValueOnce({ calendar_status: 'blocked' }),
+          .mockResolvedValueOnce({ calendar_status: 'BLOCKED' }),
         create: jest.fn().mockRejectedValue(createSlotUniqueError()),
       },
       payment: {
@@ -274,7 +281,7 @@ describe('order-service booking slot locking', () => {
         schedule_date: new Date('2026-03-20T11:00:00.000Z'),
       },
       data: {
-        calendar_status: 'blocked',
+        calendar_status: 'BLOCKED',
       },
     });
   });

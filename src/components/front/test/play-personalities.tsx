@@ -72,12 +72,9 @@ export default function PlayPersonalities({
 
   return (
     <div className="flex flex-col gap-8" data-testid="results-page">
-      {/* Header */}
       <div className="flex flex-col gap-1">
-        <p className="text-xs text-gray-400 uppercase tracking-widest">
-          Pop CoLab
-        </p>
-        <h1 className="text-2xl font-bold text-gray-800">
+        <p className="dashboard-section-eyebrow">Pop CoLab</p>
+        <h1 className="dashboard-section-title mt-2">
           Your Play Personalities
         </h1>
         <p className="text-sm text-gray-500">
@@ -166,7 +163,7 @@ export default function PlayPersonalities({
       {/* Share */}
       <button
         onClick={handleShare}
-        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-teal-deep text-sm font-semibold text-teal-deep hover:bg-teal-deep hover:text-white transition-all"
+        className="dashboard-pill-button dashboard-pill-button--secondary"
       >
         <svg
           className="w-4 h-4"
@@ -192,7 +189,7 @@ export default function PlayPersonalities({
         {BENEFITS.map(({ icon, title, desc }) => (
           <div
             key={title}
-            className="rounded-xl bg-white border border-gray-100 shadow-sm p-4 flex flex-col gap-2"
+            className="rounded-[1.5rem] border border-white/78 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(248,250,252,0.76))] p-4 shadow-[0_14px_28px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-xl flex flex-col gap-2"
             data-testid="results-benefit-tile"
           >
             <span className="text-2xl">{icon}</span>
@@ -220,7 +217,7 @@ export default function PlayPersonalities({
             </div>
             <Link
               href="/dashboard"
-              className={`${ctaStyles.primaryButton} block w-full text-center`}
+              className={`${ctaStyles.primaryButton} dashboard-pill-button dashboard-pill-button--primary block w-full text-center`}
             >
               Go to my dashboard
             </Link>
@@ -238,7 +235,7 @@ export default function PlayPersonalities({
             </div>
             <Link
               href={`/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`}
-              className={`${ctaStyles.primaryButton} block w-full text-center`}
+              className={`${ctaStyles.primaryButton} dashboard-pill-button dashboard-pill-button--primary block w-full text-center`}
               onClick={() =>
                 localStorage.setItem('pclab_pending_key', primaryKey)
               }

@@ -70,24 +70,23 @@ export default function RequestsContent({
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-5 flex items-start justify-between">
+      <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Requests</h1>
-          <p className="text-xs text-[#E91E8C] mt-0.5">
+          <p className="dashboard-section-eyebrow">Requests workspace</p>
+          <h1 className="mt-2 text-xl font-bold text-gray-800">Requests</h1>
+          <p className="mt-1 text-xs text-[#E91E8C]">
             Submit an experience request — admin will review and respond
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="rounded-lg bg-[#E91E8C] px-4 py-2 text-xs font-semibold text-white hover:bg-[#c7177a]"
+          className="dashboard-pill-button dashboard-pill-button--primary"
         >
           + New Request
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="flex mb-5">
+      <div className="mb-5 flex flex-wrap gap-3">
         {[
           { label: 'Total', value: stats.total, color: 'text-[#E91E8C]' },
           {
@@ -101,16 +100,10 @@ export default function RequestsContent({
             color: 'text-amber-500',
           },
           { label: 'Closed', value: stats.closed, color: 'text-gray-500' },
-        ].map((s, i, arr) => (
+        ].map(s => (
           <div
             key={s.label}
-            className={`px-5 py-3 border border-gray-200 bg-white ${
-              i === 0
-                ? 'rounded-l-xl'
-                : i === arr.length - 1
-                  ? 'rounded-r-xl border-l-0'
-                  : 'border-l-0'
-            }`}
+            className="min-w-[8rem] rounded-[1.4rem] border border-white/78 bg-[linear-gradient(180deg,rgba(255,255,255,0.86),rgba(248,250,252,0.76))] px-5 py-3 shadow-[0_14px_28px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.82)] backdrop-blur-xl"
           >
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-[10px] text-gray-400">{s.label}</p>
@@ -118,18 +111,17 @@ export default function RequestsContent({
         ))}
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b-2 border-gray-200 mb-5">
+      <div className="mb-5 flex flex-wrap gap-2 rounded-[1.4rem] border border-white/80 bg-white/62 p-2 shadow-[0_12px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl">
         {TABS.map(t => {
           const count = stats[t.statKey];
           return (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-4 py-2 text-xs font-medium border-b-2 -mb-0.5 transition-colors ${
+              className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                 tab === t.key
-                  ? 'border-[#E91E8C] text-[#E91E8C] font-semibold'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'bg-[#E91E8C] text-white shadow-[0_12px_22px_rgba(233,30,140,0.24)]'
+                  : 'text-gray-500 hover:bg-white/80 hover:text-gray-700'
               }`}
             >
               {t.label} ({count})
@@ -140,7 +132,7 @@ export default function RequestsContent({
 
       {/* Cards */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50 py-16 text-center">
+        <div className="flex flex-col items-center justify-center rounded-[1.6rem] border border-dashed border-gray-200/90 bg-white/55 py-16 text-center backdrop-blur-xl">
           <p className="text-sm font-semibold text-gray-500">
             No requests found.
           </p>

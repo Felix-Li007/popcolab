@@ -14,7 +14,7 @@ export default function PersonalityResultCard({
 }: Readonly<Props>) {
   if (!personality) {
     return (
-      <section className="rounded-[28px] border border-[rgba(1,43,48,0.08)] bg-[rgba(255,255,255,0.82)] p-6 shadow-sm">
+      <section className="dashboard-glass-panel p-6">
         <div
           className="flex flex-col items-center justify-center gap-4 py-8 text-center"
           data-testid="personality-empty-state"
@@ -31,7 +31,7 @@ export default function PersonalityResultCard({
           </div>
           <Link
             href="/dashboard/test"
-            className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-700 transition-colors"
+            className="dashboard-pill-button dashboard-pill-button--primary mt-2"
           >
             Take the Assessment →
           </Link>
@@ -42,29 +42,27 @@ export default function PersonalityResultCard({
 
   return (
     <section
-      className="rounded-[28px] border border-[rgba(1,43,48,0.08)] bg-[rgba(255,255,255,0.82)] shadow-sm overflow-hidden"
+      className="dashboard-glass-panel overflow-hidden"
       data-testid="personality-result-card"
     >
       {/* Accent header */}
-      <div className="px-6 pt-6 pb-4 bg-rose-100/75">
+      <div className="bg-[linear-gradient(135deg,rgba(255,232,241,0.92),rgba(255,255,255,0.46))] px-6 pb-5 pt-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="text-4xl leading-none">{personality.emoji}</span>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
-                Your Play Personality
-              </p>
-              <h2 className="text-xl font-bold text-slate-900 mt-0.5">
+              <p className="dashboard-section-eyebrow">Your Play Personality</p>
+              <h2 className="mt-1 text-xl font-bold text-slate-900">
                 {personality.name}
               </h2>
             </div>
           </div>
           {totalScore !== null && (
-            <div className="shrink-0 rounded-2xl px-3 py-1.5 text-center bg-white/70">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-600">
+            <div className="rounded-[1.35rem] border border-white/70 bg-white/72 px-4 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_28px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-fuchsia-600">
                 Score
               </p>
-              <p className="text-lg font-bold text-fuchsia-600">
+              <p className="mt-1 text-xl font-extrabold leading-none text-fuchsia-600">
                 {Math.round(totalScore)}
               </p>
             </div>
@@ -80,7 +78,7 @@ export default function PersonalityResultCard({
         <div className="mt-4 flex items-center gap-3">
           <Link
             href="/dashboard/test"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-100 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-600 hover:border-fuchsia-600 hover:text-fuchsia-600 transition-colors"
+            className="dashboard-pill-button dashboard-pill-button--secondary"
           >
             🔄 Retake Test
           </Link>

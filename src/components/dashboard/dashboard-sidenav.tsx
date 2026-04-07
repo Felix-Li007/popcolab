@@ -119,8 +119,8 @@ const navGroups = [
     title: 'BUSINESS',
     items: [
       {
-        label: 'Events',   // 👈 ADD THIS
-        href: '/dashboard/events',  // or '/events' if user side
+        label: 'Events',
+        href: '/dashboard/events',
         icon: (
           <svg
             className="w-4 h-4"
@@ -189,29 +189,31 @@ export default function DashboardSidenav({
   onNavigate,
   className = '',
   branding,
+  collapsed = false,
 }: Readonly<{
   onNavigate?: () => void;
   className?: string;
   branding?: RoleBranding;
+  collapsed?: boolean;
 }>) {
   const isAdminTheme = branding?.dataRole === 'role_admin';
 
   const dashboardSidenavAppearance = isAdminTheme
     ? adminStandardSidenavAppearance
     : {
-      ...adminStandardSidenavAppearance,
-      itemClassName:
-        'flex items-center gap-2 px-2 py-1.5 rounded-lg text-heading font-bold mb-0.5 transition-colors',
-      titleClassName:
-        'text-[var(--palette-foreground)]/55 font-bold px-2 mb-1 tracking-wider text-[10px]',
-      itemActiveClassName:
-        'bg-[rgba(1,43,48,0.08)] text-[var(--palette-foreground)]',
-      itemInactiveClassName:
-        'text-[var(--palette-foreground)]/75 hover:bg-[rgba(1,43,48,0.05)] hover:text-[var(--palette-foreground)]',
-      badgeLiveClassName: 'bg-[var(--palette-foreground)] text-white',
-      badgeCountClassName:
-        'bg-[rgba(1,43,48,0.12)] text-[var(--palette-foreground)]',
-    };
+        ...adminStandardSidenavAppearance,
+        itemClassName:
+          'flex items-center gap-2 rounded-full px-3 py-2 text-heading font-bold mb-1 transition-colors',
+        titleClassName:
+          'px-3 mb-2 text-[10px] font-bold tracking-[0.18em] text-[var(--palette-foreground)]/55',
+        itemActiveClassName:
+          'bg-[var(--palette-foreground)] text-white shadow-[0_10px_24px_rgba(1,43,48,0.18)]',
+        itemInactiveClassName:
+          'text-[var(--palette-foreground)]/78 hover:bg-[rgba(255,255,255,0.45)] hover:text-[var(--palette-foreground)]',
+        badgeLiveClassName: 'bg-white text-[var(--palette-foreground)]',
+        badgeCountClassName:
+          'bg-[rgba(1,43,48,0.10)] text-[var(--palette-foreground)]',
+      };
 
   return (
     <AppSidenav
@@ -230,6 +232,7 @@ export default function DashboardSidenav({
       }
       appearance={dashboardSidenavAppearance}
       branding={branding}
+      collapsed={collapsed}
     />
   );
 }

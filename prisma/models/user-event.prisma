@@ -1,4 +1,4 @@
-model Booking {
+model UserEvent {
   id Int @id @default(autoincrement())
 
   event_id   Int
@@ -15,4 +15,6 @@ model Booking {
   updated_at DateTime @updatedAt
 
   event Event @relation(fields: [event_id], references: [id])
+
+  @@map("user_event")
 }

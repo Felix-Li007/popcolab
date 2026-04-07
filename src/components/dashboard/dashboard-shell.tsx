@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import DashboardSidenav from '@/components/dashboard/dashboard-sidenav';
 import DashboardTopnav from '@/components/dashboard/dashboard-topnav';
 import PageFooter from '@/components/shared/page-footer';
@@ -21,6 +21,9 @@ export default function DashboardShell({
   branding?: RoleBranding;
 }>) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
+    useState(false);
+  const sidebarDragStartXRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isSidebarOpen) return;
@@ -39,9 +42,47 @@ export default function DashboardShell({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  useEffect(() => {
+    const dragThreshold = 28;
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (sidebarDragStartXRef.current === null) return;
+
+      const deltaX = event.clientX - sidebarDragStartXRef.current;
+      if (!isDesktopSidebarCollapsed && deltaX <= -dragThreshold) {
+        setIsDesktopSidebarCollapsed(true);
+        sidebarDragStartXRef.current = null;
+      } else if (isDesktopSidebarCollapsed && deltaX >= dragThreshold) {
+        setIsDesktopSidebarCollapsed(false);
+        sidebarDragStartXRef.current = null;
+      }
+    };
+
+    const onPointerUp = () => {
+      sidebarDragStartXRef.current = null;
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, [isDesktopSidebarCollapsed]);
+
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidenav className="hidden sm:flex" branding={branding} />
+    <div className="flex min-h-screen flex-col bg-background">
+      <DashboardTopnav
+        isSidebarOpen={isSidebarOpen}
+        onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+        userDisplayName={userDisplayName}
+        userRoleLabel={userRoleLabel}
+        initialCompany={initialCompany}
+        branding={branding}
+      />
 
       <div
         className={
@@ -63,19 +104,33 @@ export default function DashboardShell({
         branding={branding}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <DashboardTopnav
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          userDisplayName={userDisplayName}
-          userRoleLabel={userRoleLabel}
-          initialCompany={initialCompany}
-        />
-        <main className="flex-1 overflow-auto flex flex-col">
-          <div className="flex-1">{children}</div>
-          <PageFooter branding={branding} />
-        </main>
+      <div className="flex min-h-0 flex-1">
+        <div className="relative hidden sm:flex">
+          <DashboardSidenav
+            className="hidden sm:flex"
+            branding={branding}
+            collapsed={isDesktopSidebarCollapsed}
+          />
+          <button
+            type="button"
+            onPointerDown={event => {
+              sidebarDragStartXRef.current = event.clientX;
+            }}
+            aria-label={
+              isDesktopSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'
+            }
+            className="absolute inset-y-0 right-0 z-20 hidden w-1 translate-x-1/2 cursor-ew-resize touch-none bg-transparent shadow-none transition-all duration-200 hover:w-2 hover:bg-transparent hover:shadow-none focus-visible:w-2 focus-visible:bg-transparent focus-visible:shadow-none sm:flex"
+          />
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col border-l border-black/10">
+          <main className="flex-1 overflow-auto" suppressHydrationWarning>
+            {children}
+          </main>
+        </div>
       </div>
+
+      <PageFooter branding={branding} />
     </div>
   );
 }

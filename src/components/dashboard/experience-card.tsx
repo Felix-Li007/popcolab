@@ -67,6 +67,7 @@ export default function ExperienceCard({
 
   return (
     <article className={`${styles.root} group`}>
+      <div className={styles.cardGlow} />
       <div className={styles.header}>
         <div className={styles.categoryWrap}>
           <span className={styles.categoryPill}>{exp.categoryTitle}</span>
@@ -102,7 +103,7 @@ export default function ExperienceCard({
           className={styles.imageButton}
         >
           {galleryImages.length > 0 ? (
-            <span className="absolute right-2 top-2 z-10 inline-flex items-center rounded-full border border-gray-200 bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-gray-600 shadow-sm backdrop-blur-sm">
+            <span className={styles.imageCountBadge}>
               {galleryImages.length}
             </span>
           ) : null}

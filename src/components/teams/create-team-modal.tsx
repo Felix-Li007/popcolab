@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { createTeamAction, type CreateTeamState } from '@/actions/team-actions';
 
 type Invitee = { value: string };
@@ -61,9 +62,9 @@ export default function CreateTeamModal({ open, onClose }: Props) {
     }
   }
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={e => {
@@ -229,6 +230,7 @@ export default function CreateTeamModal({ open, onClose }: Props) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

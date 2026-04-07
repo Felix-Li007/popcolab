@@ -5,6 +5,7 @@ model OrderItem {
   experience_id Int?
   event_id      Int?
   item_price    Decimal       @db.Decimal(19, 0)
+  item_quantity Int           @default(1)
   schedule_date DateTime      @db.Date
   start_time    DateTime      @db.Time
   end_time      DateTime      @db.Time

@@ -1,4 +1,4 @@
-import { PrismaClient, type Prisma } from '@/libs/prisma/client';
+import { OrderStatus, PrismaClient, type Prisma } from '@/libs/prisma/client';
 import {
   formatDateForPrismaDateField,
   formatTimeForPrismaTimeField,
@@ -230,7 +230,7 @@ export async function seedEventCancellationOrders(
     const order = await prisma.order.create({
       data: {
         user_id: user.id,
-        order_status: 'paid',
+        order_status: OrderStatus.PAID,
         payment_id: payment.id,
       },
       select: {

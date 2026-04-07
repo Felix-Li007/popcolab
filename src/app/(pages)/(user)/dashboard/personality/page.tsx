@@ -16,30 +16,35 @@ export default async function PersonalityPage() {
 
   if (!personality) {
     return (
-      <div className="p-6 max-w-2xl mx-auto">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">
-          Play Personality
-        </h1>
-        <p className="text-sm text-gray-500 mb-6">
-          You haven&apos;t taken the assessment yet.
-        </p>
-        <div className="rounded-2xl border border-gray-200 bg-white p-10 flex flex-col items-center gap-4 text-center shadow-sm">
-          <span className="text-6xl">🎭</span>
-          <div>
-            <h2 className="text-lg font-bold text-gray-900">
-              Discover Your Play Personality
-            </h2>
-            <p className="text-sm text-gray-500 mt-1 max-w-sm">
-              Take the Play Personality Assessment to unlock your unique play
-              style, curated experiences, and team insights.
-            </p>
+      <div className="dashboard-glass-page">
+        <div className="dashboard-glass-inner">
+          <div className="dashboard-glass-stack">
+            <section className="dashboard-glass-panel p-6 sm:p-8">
+              <p className="dashboard-section-eyebrow">Personality profile</p>
+              <h1 className="dashboard-section-title mt-2">Play Personality</h1>
+              <p className="mt-2 text-sm text-slate-600">
+                You haven&apos;t taken the assessment yet.
+              </p>
+              <div className="flex flex-col items-center gap-4 py-8 text-center">
+                <span className="text-6xl">🎭</span>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">
+                    Discover Your Play Personality
+                  </h2>
+                  <p className="mt-1 max-w-sm text-sm text-gray-500">
+                    Take the Play Personality Assessment to unlock your unique
+                    play style, curated experiences, and team insights.
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/test"
+                  className="dashboard-pill-button dashboard-pill-button--primary mt-2"
+                >
+                  Take the Assessment →
+                </Link>
+              </div>
+            </section>
           </div>
-          <Link
-            href="/dashboard/test"
-            className="mt-2 rounded-2xl bg-teal-deep px-6 py-2.5 text-sm font-semibold text-white hover:bg-teal-deep/90 transition-colors"
-          >
-            Take the Assessment →
-          </Link>
         </div>
       </div>
     );
@@ -66,143 +71,145 @@ export default async function PersonalityPage() {
   const accentColor = personality.accentColor ?? '#09191b';
 
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">Play Personality</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Your saved personality profile from the assessment.
-        </p>
-      </div>
-
-      {/* Primary result card */}
-      <div
-        className="rounded-2xl overflow-hidden border shadow-sm"
-        style={{ borderColor: accentColor + '40' }}
-      >
-        {/* Coloured header */}
-        <div
-          className="px-6 py-5 flex items-center gap-4"
-          style={{ backgroundColor: accentColor }}
-        >
-          <span className="text-5xl leading-none">{personality.emoji}</span>
-          <div className="text-white">
-            <p className="text-xs font-bold uppercase tracking-widest opacity-75">
-              Primary Type
+    <div className="dashboard-glass-page">
+      <div className="dashboard-glass-inner">
+        <div className="dashboard-glass-stack">
+          <section className="dashboard-glass-panel p-6">
+            <p className="dashboard-section-eyebrow">Personality profile</p>
+            <h1 className="dashboard-section-title mt-2">Play Personality</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Your saved personality profile from the assessment.
             </p>
-            <h2 className="text-2xl font-bold leading-tight mt-0.5">
-              {personality.name}
-            </h2>
-          </div>
-          {primary && (
-            <div className="ml-auto text-right text-white">
-              <p className="text-xs font-bold uppercase tracking-wide opacity-75">
-                Match
-              </p>
-              <p className="text-3xl font-extrabold leading-none">
-                {primary.matchPercent}%
+          </section>
+
+          <div
+            className="dashboard-glass-panel overflow-hidden"
+            style={{ borderColor: accentColor + '40' }}
+          >
+            <div
+              className="flex items-center gap-4 px-6 py-5"
+              style={{ backgroundColor: accentColor }}
+            >
+              <span className="text-5xl leading-none">{personality.emoji}</span>
+              <div className="text-white">
+                <p className="text-xs font-bold uppercase tracking-widest opacity-75">
+                  Primary Type
+                </p>
+                <h2 className="mt-0.5 text-2xl font-bold leading-tight">
+                  {personality.name}
+                </h2>
+              </div>
+              {primary && (
+                <div className="ml-auto text-right text-white">
+                  <p className="text-xs font-bold uppercase tracking-wide opacity-75">
+                    Match
+                  </p>
+                  <p className="text-3xl font-extrabold leading-none">
+                    {primary.matchPercent}%
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white/72 px-6 py-5 backdrop-blur-xl">
+              <p className="text-sm leading-relaxed text-gray-600">
+                {personality.description}
               </p>
             </div>
-          )}
-        </div>
-
-        {/* Description */}
-        <div className="bg-white px-6 py-5">
-          <p className="text-sm text-gray-600 leading-relaxed">
-            {personality.description}
-          </p>
-        </div>
-      </div>
-
-      {/* Other personality matches */}
-      {others.length > 0 && (
-        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="text-sm font-bold text-gray-800">Other Matches</h3>
-            <p className="text-xs text-gray-400 mt-0.5">
-              You also show traits of these personality types
-            </p>
           </div>
-          <div className="divide-y divide-gray-50">
-            {others.map(({ personality: p, matchPercent }) => {
-              const color = p.accentColor ?? '#09191b';
-              return (
-                <div
-                  key={p.type}
-                  className="flex items-center gap-3 px-6 py-3.5"
-                >
-                  <span className="text-2xl leading-none">{p.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-800 leading-tight">
-                      {p.name}
-                    </p>
-                    <p className="text-xs text-gray-400 truncate mt-0.5">
-                      {p.description}
-                    </p>
-                  </div>
-                  {/* Match bar */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="w-20 h-1.5 rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${matchPercent}%`,
-                          backgroundColor: color,
-                        }}
-                      />
-                    </div>
-                    <span
-                      className="text-sm font-bold w-9 text-right"
-                      style={{ color }}
+
+          {others.length > 0 && (
+            <div className="dashboard-glass-panel overflow-hidden">
+              <div className="border-b border-gray-100/70 px-6 py-4">
+                <h3 className="text-sm font-bold text-gray-800">
+                  Other Matches
+                </h3>
+                <p className="mt-0.5 text-xs text-gray-400">
+                  You also show traits of these personality types
+                </p>
+              </div>
+              <div className="divide-y divide-gray-50/90">
+                {others.map(({ personality: p, matchPercent }) => {
+                  const color = p.accentColor ?? '#09191b';
+                  return (
+                    <div
+                      key={p.type}
+                      className="flex items-center gap-3 px-6 py-3.5"
                     >
-                      {matchPercent}%
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                      <span className="text-2xl leading-none">{p.emoji}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold leading-tight text-gray-800">
+                          {p.name}
+                        </p>
+                        <p className="mt-0.5 truncate text-xs text-gray-400">
+                          {p.description}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-gray-100">
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${matchPercent}%`,
+                              backgroundColor: color,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className="w-9 text-right text-sm font-bold"
+                          style={{ color }}
+                        >
+                          {matchPercent}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="dashboard-glass-panel p-6 space-y-3">
+            <h3 className="text-sm font-bold text-gray-800">
+              What this means for you
+            </h3>
+            <ul className="space-y-2.5">
+              {[
+                {
+                  icon: '🎯',
+                  text: 'You thrive in activities that match your natural play style.',
+                },
+                {
+                  icon: '👥',
+                  text: 'Understanding your type helps your team collaborate better.',
+                },
+                {
+                  icon: '📊',
+                  text: 'Your profile is saved and will improve experience matching.',
+                },
+              ].map(({ icon, text }) => (
+                <li key={text} className="flex items-start gap-2.5">
+                  <span className="mt-0.5 text-lg leading-none">{icon}</span>
+                  <p className="text-sm leading-relaxed text-gray-600">
+                    {text}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard/test"
+              className="dashboard-pill-button dashboard-pill-button--secondary"
+            >
+              🔄 Retake Assessment
+            </Link>
+            <span className="text-xs text-gray-400">
+              Retaking will update your saved result.
+            </span>
           </div>
         </div>
-      )}
-
-      {/* What this means */}
-      <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 space-y-3">
-        <h3 className="text-sm font-bold text-gray-800">
-          What this means for you
-        </h3>
-        <ul className="space-y-2.5">
-          {[
-            {
-              icon: '🎯',
-              text: 'You thrive in activities that match your natural play style.',
-            },
-            {
-              icon: '👥',
-              text: 'Understanding your type helps your team collaborate better.',
-            },
-            {
-              icon: '📊',
-              text: 'Your profile is saved and will improve experience matching.',
-            },
-          ].map(({ icon, text }) => (
-            <li key={text} className="flex items-start gap-2.5">
-              <span className="text-lg leading-none mt-0.5">{icon}</span>
-              <p className="text-sm text-gray-600 leading-relaxed">{text}</p>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Retake */}
-      <div className="flex items-center gap-3">
-        <Link
-          href="/test"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-xs font-semibold text-gray-600 hover:border-teal-deep hover:text-teal-deep transition-colors"
-        >
-          🔄 Retake Assessment
-        </Link>
-        <span className="text-xs text-gray-400">
-          Retaking will update your saved result.
-        </span>
       </div>
     </div>
   );

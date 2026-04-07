@@ -230,11 +230,11 @@ export default async function OrderContent({ searchParams }: Readonly<Props>) {
                 className={styles.filterControl}
               >
                 <option value="">All Order Status</option>
-                <option value="pending_payment">Pending Payment</option>
-                <option value="paid">Paid</option>
-                <option value="processing">Processing</option>
-                <option value="payment_failed">Payment Failed</option>
-                <option value="canceled">Canceled</option>
+                <option value="PENDING_PAYMENT">Pending Payment</option>
+                <option value="PAID">Paid</option>
+                <option value="PROCESSING">Processing</option>
+                <option value="PAYMENT_FAILED">Payment Failed</option>
+                <option value="CANCELED">Canceled</option>
               </select>
 
               <input

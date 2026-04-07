@@ -2,7 +2,7 @@ model Order {
   id               Int              @id @default(autoincrement())
   proposal_id      Int?
   user_id          Int
-  order_status     String           @db.VarChar(20)
+  order_status     OrderStatus
   payment_id       Int?
   expired_at       DateTime?        @db.Timestamp(6)
   created_at       DateTime         @default(now()) @db.Timestamp(6)
@@ -17,4 +17,12 @@ model Order {
   @@index([user_id])
   @@index([payment_id])
   @@map("order")
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PROCESSING
+  PAID
+  PAYMENT_FAILED
+  CANCELED
 }

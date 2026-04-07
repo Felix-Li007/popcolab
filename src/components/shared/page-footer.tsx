@@ -28,15 +28,29 @@ const supportLinks: MenuItem[] = [
   { label: 'popcolab.ca ↗', href: 'https://popcolab.ca', external: true },
 ];
 
+const dashboardLinks: MenuItem[] = [
+  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Personality', href: '/dashboard/personality' },
+  { label: 'Experiences', href: '/dashboard/experiences' },
+  { label: 'Events', href: '/dashboard/events' },
+  { label: 'Teams', href: '/dashboard/teams' },
+  { label: 'Requests', href: '/dashboard/requests' },
+  { label: 'Bookings', href: '/dashboard/bookings' },
+  { label: 'Profile', href: '/dashboard/profile' },
+];
+
 export default function PageFooter({
   branding,
 }: Readonly<{ branding?: RoleBranding }>) {
   const pathname = usePathname();
   if (pathname.startsWith('/sign-in')) return null;
-  return <PageFooterInner branding={branding} />;
+  return <PageFooterInner branding={branding} pathname={pathname} />;
 }
 
-function PageFooterInner({ branding }: Readonly<{ branding?: RoleBranding }>) {
+function PageFooterInner({
+  branding,
+  pathname,
+}: Readonly<{ branding?: RoleBranding; pathname: string }>) {
   const { isLoaded: isAuthLoaded, sessionClaims } = useAuth();
   const { isLoaded: isUserLoaded, user } = useUser();
 
@@ -50,6 +64,8 @@ function PageFooterInner({ branding }: Readonly<{ branding?: RoleBranding }>) {
   );
   const role = claimRole ?? metadataRole;
   const isAdmin = isAuthLoaded && isUserLoaded && role === 'role_admin';
+  const isDashboard = pathname.startsWith('/dashboard');
+  const showDashboardLinks = isDashboard && !isAdmin;
   const footerBranding = branding ?? {
     role: 'role_user',
     dataRole: 'role_user',
@@ -78,11 +94,15 @@ function PageFooterInner({ branding }: Readonly<{ branding?: RoleBranding }>) {
   const footerBorder = useThemeForeground
     ? 'border-(--palette-foreground)/10'
     : 'border-(--palette-shell-foreground)/10';
+  const footerGridClassName =
+    isAdmin || showDashboardLinks
+      ? 'grid grid-cols-2 gap-8 sm:grid-cols-2 lg:grid-cols-5'
+      : 'grid grid-cols-2 gap-8 sm:grid-cols-2 lg:grid-cols-4';
 
   return (
     <footer className={`bg-(--palette-shell-background) ${footerText} mt-auto`}>
       <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className={footerGridClassName}>
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2 mb-3">
@@ -118,6 +138,28 @@ function PageFooterInner({ branding }: Readonly<{ branding?: RoleBranding }>) {
               </h4>
               <ul className="space-y-1.5">
                 {adminLinks.map(link => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className={`text-heading font-bold ${footerTextSoft} hover:${footerText} transition-colors`}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {showDashboardLinks ? (
+            <div>
+              <h4
+                className={`text-xs font-bold uppercase tracking-wider ${footerTextMuted} mb-3`}
+              >
+                Dashboard
+              </h4>
+              <ul className="space-y-1.5">
+                {dashboardLinks.map(link => (
                   <li key={link.label}>
                     <Link
                       href={link.href}

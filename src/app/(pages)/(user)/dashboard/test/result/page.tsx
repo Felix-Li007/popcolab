@@ -47,13 +47,17 @@ export default async function DashboardResultPage({
   const primaryKey = matches[0]?.personality.type ?? '';
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <PlayPersonalities
-        matches={matches}
-        isAuthenticated={authContext.isAuthenticated}
-        primaryKey={primaryKey}
-        retakeHref="/dashboard/test"
-      />
+    <div className="dashboard-glass-page">
+      <div className="dashboard-glass-inner">
+        <div className="dashboard-glass-panel p-6 sm:p-8">
+          <PlayPersonalities
+            matches={matches}
+            isAuthenticated={authContext.isAuthenticated}
+            primaryKey={primaryKey}
+            retakeHref="/dashboard/test"
+          />
+        </div>
+      </div>
     </div>
   );
 }

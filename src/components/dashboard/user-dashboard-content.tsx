@@ -26,33 +26,37 @@ export default function UserDashboardContent({
   requests,
 }: Readonly<Props>) {
   return (
-    <div className="flex flex-col bg-[linear-gradient(180deg,rgba(255,250,247,0.92)_0%,rgba(255,245,251,0.78)_100%)]">
-      <div className="flex flex-1 gap-0">
-        {/* Main content */}
-        <div className="flex-1 min-w-0 p-4 space-y-5">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              Welcome back, {displayName}
-            </h1>
-            <p className="text-sm text-slate-600 mt-0.5">
-              Here&apos;s a summary of your Pop CoLab profile.
-            </p>
+    <div className="dashboard-glass-page">
+      <div className="dashboard-glass-inner">
+        <div className="grid w-full grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+          <div className="min-w-0 flex-1 space-y-5">
+            <section className="dashboard-glass-panel px-5 py-5 sm:px-6">
+              <p className="dashboard-section-eyebrow">Dashboard overview</p>
+              <h1 className="dashboard-section-title mt-2">
+                Welcome back, {displayName}
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm font-medium text-slate-600">
+                Your user dashboard now brings personality, teams, requests, and
+                next actions into one softer glass workspace.
+              </p>
+            </section>
+
+            <PersonalityResultCard
+              personality={personality}
+              totalScore={totalScore}
+            />
+
+            <MyTeamsSection teams={teams} />
+
+            <MyRequestsSection requests={requests} />
           </div>
 
-          <PersonalityResultCard
-            personality={personality}
-            totalScore={totalScore}
-          />
-
-          <MyTeamsSection teams={teams} />
-
-          <MyRequestsSection requests={requests} />
+          <aside className="hidden w-full lg:block">
+            <div className="sticky top-5 space-y-4">
+              <UserQuickActions hasPersonality={personality !== null} />
+            </div>
+          </aside>
         </div>
-
-        {/* Right sidebar — mirrors admin overview */}
-        <aside className="w-56 shrink-0 p-4 space-y-4 border-l border-[rgba(1,43,48,0.08)] hidden lg:block">
-          <UserQuickActions hasPersonality={personality !== null} />
-        </aside>
       </div>
     </div>
   );

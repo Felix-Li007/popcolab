@@ -1,7 +1,12 @@
 import 'server-only';
 
 import type Stripe from 'stripe';
-import { CalendarStatus, Prisma, ProcessStatus } from '@/libs/prisma/client';
+import {
+  CalendarStatus,
+  OrderStatus,
+  Prisma,
+  ProcessStatus,
+} from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import {
@@ -49,10 +54,18 @@ export type CreatedExperienceCheckout = {
   quote: ExperienceCheckoutQuote;
 };
 
+export type CreatedEventCheckout = {
+  orderId: number;
+  paymentId: number;
+  paymentIntentId: string;
+  clientSecret: string;
+  amountCad: number;
+};
+
 export type ExperienceOrderResult = {
   orderId: number;
   paymentId: number | null;
-  orderStatus: string;
+  orderStatus: OrderStatus;
   paymentStatus: string | null;
   paymentMethod: string | null;
   customerEmail: string | null;
@@ -79,6 +92,20 @@ type CreateExperienceCheckoutInput = {
   requestedHours?: number | null;
   scheduleDate: string;
   proposalId?: number | null;
+};
+
+type CreateEventCheckoutInput = {
+  clerkUserId: string;
+  customerEmail: string;
+  customerName?: string | null;
+  eventId: number;
+  calendarId: number;
+  quantity: number;
+  total: number;
+  tickets: Array<{
+    priceId: number;
+    qty: number;
+  }>;
 };
 
 type PrismaUniqueConstraintError = {
@@ -231,13 +258,16 @@ async function lockExperienceScheduleDate(
 }
 
 function getExperienceCalendarSyncAction(
-  orderStatus: string
+  orderStatus: OrderStatus
 ): ExperienceCalendarSyncAction {
-  if (orderStatus === 'paid') {
+  if (orderStatus === OrderStatus.PAID) {
     return 'block';
   }
 
-  if (orderStatus === 'payment_failed' || orderStatus === 'canceled') {
+  if (
+    orderStatus === OrderStatus.PAYMENT_FAILED ||
+    orderStatus === OrderStatus.CANCELED
+  ) {
     return 'release_locked';
   }
 
@@ -332,7 +362,7 @@ async function releaseLockedExperienceCalendarSlot(
 async function syncExperienceCalendarForOrderStatus(
   tx: Prisma.TransactionClient,
   orderItems: OrderCalendarItem[],
-  orderStatus: string
+  orderStatus: OrderStatus
 ): Promise<void> {
   const action = getExperienceCalendarSyncAction(orderStatus);
 
@@ -421,41 +451,41 @@ function mapStripeStatuses(
 ): Pick<ExperienceOrderResult, 'orderStatus' | 'paymentStatus'> {
   if (status === 'succeeded') {
     return {
-      orderStatus: 'paid',
+      orderStatus: OrderStatus.PAID,
       paymentStatus: 'succeeded',
     };
   }
 
   if (status === 'processing') {
     return {
-      orderStatus: 'processing',
+      orderStatus: OrderStatus.PROCESSING,
       paymentStatus: 'processing',
     };
   }
 
   if (status === 'requires_action') {
     return {
-      orderStatus: 'pending_payment',
+      orderStatus: OrderStatus.PENDING_PAYMENT,
       paymentStatus: 'requires_action',
     };
   }
 
   if (status === 'requires_payment_method') {
     return {
-      orderStatus: 'payment_failed',
+      orderStatus: OrderStatus.PAYMENT_FAILED,
       paymentStatus: 'requires_payment',
     };
   }
 
   if (status === 'canceled') {
     return {
-      orderStatus: 'canceled',
+      orderStatus: OrderStatus.CANCELED,
       paymentStatus: 'canceled',
     };
   }
 
   return {
-    orderStatus: 'pending_payment',
+    orderStatus: OrderStatus.PENDING_PAYMENT,
     paymentStatus: 'pending',
   };
 }
@@ -495,7 +525,7 @@ function getExperienceOrderItems(
 
 function buildOrderResult(order: {
   id: number;
-  order_status: string;
+  order_status: OrderStatus;
   expired_at: Date | null;
   updated_at: Date;
   payment: {
@@ -559,7 +589,12 @@ function buildOrderResult(order: {
 async function getOrderForSync(orderId: number) {
   return prisma.order.findUnique({
     where: { id: orderId },
-    include: {
+    select: {
+      id: true,
+      user_id: true,
+      proposal_id: true,
+      order_status: true,
+      expired_at: true,
       payment: {
         select: {
           id: true,
@@ -572,7 +607,12 @@ async function getOrderForSync(orderId: number) {
       },
       order_items: {
         orderBy: { id: 'asc' },
-        include: {
+        select: {
+          experience_id: true,
+          schedule_date: true,
+          start_time: true,
+          end_time: true,
+          item_price: true,
           experience: {
             select: {
               id: true,
@@ -589,8 +629,6 @@ async function getOrderForSync(orderId: number) {
               },
             },
           },
-          start_time: true,
-          end_time: true,
         },
       },
     },
@@ -603,7 +641,11 @@ async function getOwnedOrder(orderId: number, clerkUserId: string) {
       id: orderId,
       user: { clerk_id: clerkUserId },
     },
-    include: {
+    select: {
+      id: true,
+      order_status: true,
+      expired_at: true,
+      updated_at: true,
       payment: {
         select: {
           id: true,
@@ -616,7 +658,11 @@ async function getOwnedOrder(orderId: number, clerkUserId: string) {
       },
       order_items: {
         orderBy: { id: 'asc' },
-        include: {
+        select: {
+          schedule_date: true,
+          start_time: true,
+          end_time: true,
+          item_price: true,
           experience: {
             select: {
               id: true,
@@ -633,8 +679,6 @@ async function getOwnedOrder(orderId: number, clerkUserId: string) {
               },
             },
           },
-          start_time: true,
-          end_time: true,
         },
       },
     },
@@ -701,11 +745,13 @@ async function applyStripePaymentIntentSync(
         data: {
           order_status: mapped.orderStatus,
           expired_at:
-            mapped.orderStatus === 'paid' ? null : existingOrder.expired_at,
+            mapped.orderStatus === OrderStatus.PAID
+              ? null
+              : existingOrder.expired_at,
         },
       });
 
-      if (mapped.orderStatus === 'paid') {
+      if (mapped.orderStatus === OrderStatus.PAID) {
         const experienceItems = getExperienceOrderItems(
           existingOrder.order_items.map(item => ({
             experience_id: item.experience_id,
@@ -746,11 +792,13 @@ async function applyStripePaymentIntentSync(
       data: {
         order_status: mapped.orderStatus,
         expired_at:
-          mapped.orderStatus === 'paid' ? null : existingOrder.expired_at,
+          mapped.orderStatus === OrderStatus.PAID
+            ? null
+            : existingOrder.expired_at,
       },
     });
 
-    if (mapped.orderStatus === 'paid') {
+    if (mapped.orderStatus === OrderStatus.PAID) {
       const experienceItems = getExperienceOrderItems(
         existingOrder.order_items.map(item => ({
           experience_id: item.experience_id,
@@ -855,7 +903,7 @@ export async function expireExperienceOrderIfDue(orderId: number) {
     return { expired: false, reason: 'not_due' } as const;
   }
 
-  if (order.order_status !== 'pending_payment') {
+  if (order.order_status !== OrderStatus.PENDING_PAYMENT) {
     return { expired: false, reason: 'order_not_pending' } as const;
   }
 
@@ -863,7 +911,7 @@ export async function expireExperienceOrderIfDue(orderId: number) {
     await tx.order.update({
       where: { id: order.id },
       data: {
-        order_status: 'canceled',
+        order_status: OrderStatus.CANCELED,
       },
     });
 
@@ -882,7 +930,7 @@ export async function expireExperienceOrderIfDue(orderId: number) {
     await syncExperienceCalendarForOrderStatus(
       tx,
       getExperienceOrderItems(order.order_items),
-      'canceled'
+      OrderStatus.CANCELED
     );
   });
 
@@ -953,7 +1001,7 @@ export async function createExperienceCheckout(
       data: {
         proposal_id: input.proposalId ?? null,
         user_id: userId,
-        order_status: 'pending_payment',
+        order_status: OrderStatus.PENDING_PAYMENT,
         payment_id: payment.id,
         expired_at: expiredAt,
       },
@@ -1034,7 +1082,7 @@ export async function createExperienceCheckout(
 
       await tx.order.update({
         where: { id: order.id },
-        data: { order_status: 'payment_failed' },
+        data: { order_status: OrderStatus.PAYMENT_FAILED },
       });
 
       await tx.experienceCalendar.deleteMany({
@@ -1042,6 +1090,239 @@ export async function createExperienceCheckout(
           experience_id: experience.id,
           schedule_date: scheduleDate,
           calendar_status: EXPERIENCE_CALENDAR_STATUS.LOCKED,
+        },
+      });
+    });
+
+    throw error;
+  }
+}
+
+export async function createEventCheckout(
+  input: CreateEventCheckoutInput
+): Promise<CreatedEventCheckout> {
+  const customerEmail = normalizeCustomerEmail(input.customerEmail);
+  const amountCad = Number(input.total);
+  const quantity = Number(input.quantity);
+  const normalizedTickets = input.tickets
+    .map(ticket => ({
+      priceId: Number(ticket.priceId),
+      qty: Number(ticket.qty),
+    }))
+    .filter(
+      ticket =>
+        Number.isInteger(ticket.priceId) &&
+        ticket.priceId > 0 &&
+        Number.isInteger(ticket.qty) &&
+        ticket.qty > 0
+    );
+
+  if (!Number.isInteger(input.eventId) || input.eventId <= 0) {
+    throw new Error('Invalid event id.');
+  }
+
+  if (!Number.isInteger(input.calendarId) || input.calendarId <= 0) {
+    throw new Error('Invalid event calendar id.');
+  }
+
+  if (!Number.isFinite(amountCad) || amountCad <= 0) {
+    throw new Error('Invalid checkout amount.');
+  }
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error('Invalid ticket quantity.');
+  }
+
+  if (normalizedTickets.length === 0) {
+    throw new Error('At least one ticket type is required.');
+  }
+
+  const stripe = getStripeServerClient();
+
+  const eventCalendar = await prisma.eventCalendar.findFirst({
+    where: {
+      id: input.calendarId,
+      event_id: input.eventId,
+      date_status: 'VALID',
+    },
+    select: {
+      id: true,
+      event_date: true,
+      start_time: true,
+      end_time: true,
+      event: {
+        select: {
+          eventTitle: true,
+        },
+      },
+    },
+  });
+
+  if (!eventCalendar) {
+    throw new Error('Selected event date is not available.');
+  }
+
+  const eventPricingRows = await prisma.eventPricing.findMany({
+    where: {
+      event_id: input.eventId,
+    },
+    select: {
+      id: true,
+      price_level: true,
+      event_price: true,
+    },
+  });
+
+  const eventPriceById = new Map<
+    number,
+    { priceLevel: string; unitPrice: number }
+  >(
+    eventPricingRows.map(row => [
+      row.id,
+      {
+        priceLevel: String(row.price_level),
+        unitPrice: Number(row.event_price.toString()),
+      },
+    ])
+  );
+
+  const orderItemLines = normalizedTickets.map(ticket => {
+    const pricing = eventPriceById.get(ticket.priceId);
+
+    if (!pricing || !Number.isFinite(pricing.unitPrice)) {
+      throw new Error(`Ticket price ${ticket.priceId} is not available.`);
+    }
+
+    return {
+      ticketName: pricing.priceLevel,
+      itemPrice: pricing.unitPrice,
+      itemQuantity: ticket.qty,
+      lineTotal: pricing.unitPrice * ticket.qty,
+    };
+  });
+
+  const expectedQuantity = orderItemLines.reduce(
+    (sum, line) => sum + line.itemQuantity,
+    0
+  );
+  const expectedAmountCad = orderItemLines.reduce(
+    (sum, line) => sum + line.lineTotal,
+    0
+  );
+
+  if (expectedQuantity !== quantity) {
+    throw new Error('Ticket quantity mismatch. Please refresh and try again.');
+  }
+
+  if (expectedAmountCad !== amountCad) {
+    throw new Error('Ticket total mismatch. Please refresh and try again.');
+  }
+
+  const stripeCustomer = await stripe.customers.create({
+    email: customerEmail,
+    name: normalizeCustomerName(input.customerName),
+    metadata: {
+      clerkUserId: input.clerkUserId,
+    },
+  });
+
+  const { userId } = await upsertClerkUser(input.clerkUserId, customerEmail);
+
+  const { order, payment } = await prisma.$transaction(async tx => {
+    const payment = await tx.payment.create({
+      data: {
+        order_amount: amountCad,
+        gst_rate: null,
+        pst_rate: null,
+        hst_rate: null,
+        grand_total: amountCad,
+        gst_amount: null,
+        hst_amount: null,
+        payment_method: PAYMENT_METHOD_PLACEHOLDER,
+        customer_id: stripeCustomer.id,
+        customer_email: customerEmail,
+        payment_status: 'pending',
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const order = await tx.order.create({
+      data: {
+        proposal_id: null,
+        user_id: userId,
+        order_status: OrderStatus.PENDING_PAYMENT,
+        payment_id: payment.id,
+        expired_at: null,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    await tx.orderItem.createMany({
+      data: orderItemLines.map(line => ({
+        order_id: order.id,
+        item_type: 'EVENT',
+        event_id: input.eventId,
+        item_price: line.itemPrice,
+        item_quantity: line.itemQuantity,
+        schedule_date: eventCalendar.event_date,
+        start_time: eventCalendar.start_time,
+        end_time: eventCalendar.end_time,
+      })),
+    });
+
+    return { order, payment };
+  });
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: toStripeAmountCents(amountCad),
+      currency: 'cad',
+      customer: stripeCustomer.id,
+      receipt_email: customerEmail,
+      description: `${eventCalendar.event.eventTitle} booking`,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        flow: 'event_checkout',
+        orderId: String(order.id),
+        paymentId: String(payment.id),
+        eventId: String(input.eventId),
+        calendarId: String(eventCalendar.id),
+        eventDate: formatDateForPrismaDateField(eventCalendar.event_date),
+        quantity: String(quantity),
+        clerkUserId: input.clerkUserId,
+      },
+    });
+
+    if (!paymentIntent.client_secret) {
+      throw new Error('Unable to initialize payment.');
+    }
+
+    return {
+      orderId: order.id,
+      paymentId: payment.id,
+      paymentIntentId: paymentIntent.id,
+      clientSecret: paymentIntent.client_secret,
+      amountCad,
+    };
+  } catch (error) {
+    await prisma.$transaction(async tx => {
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          payment_status: 'failed',
+        },
+      });
+
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          order_status: OrderStatus.PAYMENT_FAILED,
         },
       });
     });
@@ -1095,4 +1376,80 @@ export async function syncExperienceOrderPaymentByWebhook(
 
   await applyStripePaymentIntentSync(orderId, paymentIntent);
   return orderId;
+}
+
+export async function syncEventOrderPayment(params: {
+  orderId: number;
+  clerkUserId: string;
+  paymentIntentId?: string | null;
+}): Promise<{
+  orderId: number;
+  orderStatus: OrderStatus;
+  paymentStatus: string | null;
+} | null> {
+  if (!Number.isInteger(params.orderId) || params.orderId <= 0) {
+    return null;
+  }
+
+  const order = await prisma.order.findFirst({
+    where: {
+      id: params.orderId,
+      user: { clerk_id: params.clerkUserId },
+    },
+    select: {
+      id: true,
+      order_status: true,
+      payment: {
+        select: {
+          payment_status: true,
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    return null;
+  }
+
+  if (!params.paymentIntentId) {
+    return {
+      orderId: order.id,
+      orderStatus: order.order_status,
+      paymentStatus: order.payment?.payment_status ?? null,
+    };
+  }
+
+  const stripe = getStripeServerClient();
+  const paymentIntent = await stripe.paymentIntents.retrieve(
+    params.paymentIntentId
+  );
+
+  if (paymentIntent.metadata.orderId !== String(order.id)) {
+    throw new Error('Payment intent does not belong to this order.');
+  }
+
+  await applyStripePaymentIntentSync(order.id, paymentIntent);
+
+  const refreshedOrder = await prisma.order.findUnique({
+    where: { id: order.id },
+    select: {
+      id: true,
+      order_status: true,
+      payment: {
+        select: {
+          payment_status: true,
+        },
+      },
+    },
+  });
+
+  if (!refreshedOrder) {
+    return null;
+  }
+
+  return {
+    orderId: refreshedOrder.id,
+    orderStatus: refreshedOrder.order_status,
+    paymentStatus: refreshedOrder.payment?.payment_status ?? null,
+  };
 }

@@ -287,18 +287,6 @@ To deploy this Next.js app, we use the Vercel Platform (https://vercel.com). Bel
    - If a build fails, check Vercel's build logs for missing environment variables or failing `prisma generate` steps.
    - For scheduled or automated migrations, run `npx prisma migrate deploy` from a CI job (GitHub Actions) or a one-off server task that has `DATABASE_URL` and `CLERK` secrets configured.
 
-## Run Docker Compose
-
-ENV_FILE=.env.development docker-compose up --build
-
-## Run Docker container
-
-docker run -d \
- -p 80:80 \
- -e CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }} \
-    -e DATABASE_URL=${{ secrets.DATABASE_URL }} \
- ghcr.io/${{ github.repository_owner }}/popcolab-app:latest
-
 ## Stripe Integration
 
 This project uses `Next.js + Stripe Elements` for experience checkout.

@@ -8,33 +8,40 @@ export default async function DashboardTestPage() {
 
   if (questions.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 text-sm">
-          No questions available yet. Please check back soon.
-        </p>
+      <div className="dashboard-glass-page">
+        <div className="dashboard-glass-inner">
+          <div className="dashboard-glass-panel py-12 text-center">
+            <p className="text-sm text-gray-500">
+              No questions available yet. Please check back soon.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex justify-center py-8 px-4">
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-gray-800">
+    <div className="dashboard-glass-page">
+      <div className="dashboard-glass-inner">
+        <div className="flex flex-col gap-5">
+          <section className="dashboard-glass-panel p-6 sm:p-8">
+            <p className="dashboard-section-eyebrow">Assessment</p>
+            <h1 className="dashboard-section-title mt-2">
               Play Personality Test
             </h1>
-            <p className="text-sm text-gray-500">
-              Answer honestly — there are no right or wrong answers.
+            <p className="mt-2 text-sm text-gray-500">
+              Answer honestly. There are no right or wrong answers.
             </p>
-          </div>
+          </section>
 
-          <Suspense>
-            <PersonalityTest
-              questions={questions}
-              resultHref="/dashboard/test/result"
-            />
-          </Suspense>
+          <div className="dashboard-glass-panel p-6 sm:p-8">
+            <Suspense>
+              <PersonalityTest
+                questions={questions}
+                resultHref="/dashboard/test/result"
+              />
+            </Suspense>
+          </div>
         </div>
       </div>
     </div>

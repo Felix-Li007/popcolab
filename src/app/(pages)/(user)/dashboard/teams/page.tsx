@@ -28,14 +28,21 @@ export default async function TeamsPage() {
   ]);
 
   return (
-    <div className="p-6 max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">Teams</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Teams you own or belong to, and any pending invitations.
-        </p>
+    <div className="dashboard-glass-page">
+      <div className="dashboard-glass-inner">
+        <div className="dashboard-glass-stack">
+          <section className="dashboard-glass-panel px-6 py-5">
+            <p className="dashboard-section-eyebrow">Teams workspace</p>
+            <h1 className="dashboard-section-title mt-2">Teams</h1>
+            <p className="mt-2 text-sm text-gray-500">
+              Teams you own or belong to, and any pending invitations.
+            </p>
+          </section>
+          <div className="dashboard-glass-panel p-5 sm:p-6">
+            <TeamsContent teams={teams} pendingInvites={pendingInvites} />
+          </div>
+        </div>
       </div>
-      <TeamsContent teams={teams} pendingInvites={pendingInvites} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { OrderStatus } from '@/libs/prisma/client';
 import { formatCadAmount } from '@/utils/experience';
 import styles from '@/styles/admin/bookings/payment-content.module.css';
 
@@ -23,7 +24,7 @@ export type AdminPaymentListItem = {
   updated_at: Date;
   orders: Array<{
     id: number;
-    order_status: string;
+    order_status: OrderStatus;
     created_at: Date;
     expired_at: Date | null;
     user: {
@@ -101,14 +102,14 @@ function getPaymentStatusClass(status: string) {
   }
 }
 
-function getOrderStatusClass(status: string | null | undefined) {
+function getOrderStatusClass(status: OrderStatus | null | undefined) {
   switch (status) {
-    case 'paid':
+    case 'PAID':
       return styles.orderStatusSuccess;
-    case 'processing':
+    case 'PROCESSING':
       return styles.orderStatusProcessing;
-    case 'payment_failed':
-    case 'canceled':
+    case 'PAYMENT_FAILED':
+    case 'CANCELED':
       return styles.orderStatusError;
     default:
       return styles.orderStatusDefault;

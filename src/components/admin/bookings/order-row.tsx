@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { OrderStatus } from '@/libs/prisma/client';
 import { formatCadAmount } from '@/utils/experience';
 import styles from '@/styles/admin/bookings/order-content.module.css';
 
@@ -8,7 +9,7 @@ type DecimalLike = {
 
 export type AdminOrderListItem = {
   id: number;
-  order_status: string;
+  order_status: OrderStatus;
   created_at: Date;
   updated_at: Date;
   expired_at: Date | null;
@@ -74,14 +75,14 @@ function formatScheduleSlot(item: {
   return `${formatDate(item.schedule_date)} ${formatTime(item.start_time)} - ${formatTime(item.end_time)}`;
 }
 
-function getOrderStatusClass(status: string) {
+function getOrderStatusClass(status: OrderStatus) {
   switch (status) {
-    case 'paid':
+    case 'PAID':
       return styles.orderStatusSuccess;
-    case 'processing':
+    case 'PROCESSING':
       return styles.orderStatusProcessing;
-    case 'payment_failed':
-    case 'canceled':
+    case 'PAYMENT_FAILED':
+    case 'CANCELED':
       return styles.orderStatusError;
     default:
       return styles.orderStatusDefault;

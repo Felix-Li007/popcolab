@@ -29,13 +29,17 @@ export default async function RequestsPage() {
   ]);
 
   return (
-    <div className="p-8">
-      <RequestsContent
-        requests={requests}
-        stats={stats}
-        memberQuestions={memberQuestions}
-        userTeams={userTeams}
-      />
+    <div className="dashboard-glass-page">
+      <div className="dashboard-glass-inner">
+        <div className="dashboard-glass-stack">
+          <RequestsContent
+            requests={requests}
+            stats={stats}
+            memberQuestions={memberQuestions}
+            userTeams={userTeams}
+          />
+        </div>
+      </div>
     </div>
   );
 }

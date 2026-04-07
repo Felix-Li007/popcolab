@@ -1,37 +1,57 @@
 @reference "../../app/globals.css";
 
 .card {
-  @apply rounded-2xl bg-white/95 p-3 shadow-sm backdrop-blur-[2px];
+  @apply relative overflow-hidden rounded-[1.85rem] border bg-[linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.72))] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.08),0_4px_18px_rgba(15,23,42,0.04)] backdrop-blur-xl;
 }
 
 .cardPersonal {
-  @apply border border-teal-medium/15;
+  @apply border-white/75;
 }
 
 .cardWork {
-  @apply border border-coral-soft;
+  @apply border-white/75;
+}
+
+.cardGlow {
+  @apply pointer-events-none absolute inset-x-6 top-0 h-16 rounded-full bg-white/55 blur-2xl;
 }
 
 .header {
-  @apply mb-4;
+  @apply relative mb-4 border-b border-slate-200/55 pb-4;
+}
+
+.cardBody {
+  @apply relative;
+}
+
+.badge {
+  @apply inline-flex rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-xl;
+}
+
+.badgePersonal {
+  @apply border-teal-deep/12 bg-teal-deep/7 text-teal-deep;
+}
+
+.badgeWork {
+  @apply border-coral-vibe/12 bg-coral-soft/35 text-coral-vibe;
 }
 
 .title {
-  @apply flex items-center gap-2 text-heading font-bold text-gray-900;
+  @apply mt-3 flex items-center gap-3 text-[1.45rem] font-bold tracking-[-0.03em] text-slate-900;
 }
 
 .icon {
-  @apply inline-flex h-8 w-8 items-center justify-center rounded-xl;
+  @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_20px_rgba(15,23,42,0.06)];
 }
 
 .iconPersonal {
-  @apply bg-teal-deep/10 text-teal-deep;
+  @apply text-teal-deep;
 }
 
 .iconWork {
-  @apply bg-coral-soft text-coral-vibe;
+  @apply text-coral-vibe;
 }
 
 .description {
-  @apply mt-1 text-body text-gray-500;
+  @apply mt-2 max-w-xl text-sm leading-6 text-slate-600/95;
 }
