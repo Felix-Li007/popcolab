@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { createRequest } from '@/services/user-request-service';
+import { sendRequestInvitations } from '@/services/invitation-service';
 
 const REQUESTS_PATH = '/dashboard/requests';
 
@@ -62,6 +63,57 @@ function buildNotes(parts: (string | null)[]): string | null {
   return joined || null;
 }
 
+async function resolveInviteEmails(
+  inviteValues: string[]
+): Promise<{ userName: string; userEmail: string }[]> {
+  const result: { userName: string; userEmail: string }[] = [];
+
+  for (const v of inviteValues) {
+    if (v.startsWith('email:')) {
+      const email = v.slice(6).trim();
+      if (email) {
+        const name = email.split('@')[0] ?? email;
+        result.push({ userName: name, userEmail: email });
+      }
+    } else if (v.startsWith('team:')) {
+      const teamId = Number(v.slice(5));
+      if (!Number.isNaN(teamId)) {
+        const members = await prisma.teamMate.findMany({
+          where: { team_id: teamId },
+          select: {
+            user: {
+              select: {
+                email: true,
+                profile: { select: { first_name: true, last_name: true } },
+              },
+            },
+          },
+        });
+        for (const m of members) {
+          const name =
+            [m.user.profile?.first_name, m.user.profile?.last_name]
+              .filter(Boolean)
+              .join(' ')
+              .trim() || m.user.email.split('@')[0];
+          result.push({ userName: name, userEmail: m.user.email });
+        }
+      }
+    }
+  }
+
+  // Deduplicate by email
+  const seen = new Set<string>();
+  return result.filter(r => {
+    if (seen.has(r.userEmail)) return false;
+    seen.add(r.userEmail);
+    return true;
+  });
+}
+
+function getAppBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+}
+
 // ── Action ───────────────────────────────────────────────────────────────────
 
 export async function createRequestAction(
@@ -72,6 +124,7 @@ export async function createRequestAction(
 
   const eventTypes = parseList((formData.get('eventTypes') as string) ?? '');
   const objectives = parseList((formData.get('objectives') as string) ?? '');
+  const inviteRaw = parseList((formData.get('invites') as string) ?? '');
   const anythingElse = (formData.get('anythingElse') as string)?.trim() || null;
   const budgetRaw = (formData.get('budget') as string)?.trim() || null;
   const startDateRaw = (formData.get('startDate') as string)?.trim() || null;
@@ -126,7 +179,7 @@ export async function createRequestAction(
     anythingElse,
   ]);
 
-  await createRequest({
+  const requestId = await createRequest({
     userId: user.id,
     eventTypes,
     durationMax,
@@ -136,6 +189,22 @@ export async function createRequestAction(
     participantCount: groupSize,
     notesForAdmin,
   });
+
+  if (inviteRaw.length > 0) {
+    const invitations = await resolveInviteEmails(inviteRaw);
+    if (invitations.length > 0) {
+      try {
+        await sendRequestInvitations({
+          clerkUserId: (await auth()).userId!,
+          requestId,
+          invitations,
+          appBaseUrl: getAppBaseUrl(),
+        });
+      } catch {
+        // Invites failing should not block the request from being created
+      }
+    }
+  }
 
   revalidatePath(REQUESTS_PATH);
   return {};

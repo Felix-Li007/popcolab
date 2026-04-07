@@ -1,0 +1,42 @@
+import { Suspense } from 'react';
+import { getQuestions } from '@/services/question-service';
+import { FORM_NAME } from '@/types/question-type';
+import PersonalityTest from '@/components/front/test/personality-test';
+
+export default async function DashboardTestPage() {
+  const questions = await getQuestions(FORM_NAME.ASSESS);
+
+  if (questions.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-sm">
+          No questions available yet. Please check back soon.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex justify-center py-8 px-4">
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Play Personality Test
+            </h1>
+            <p className="text-sm text-gray-500">
+              Answer honestly — there are no right or wrong answers.
+            </p>
+          </div>
+
+          <Suspense>
+            <PersonalityTest
+              questions={questions}
+              resultHref="/dashboard/test/result"
+            />
+          </Suspense>
+        </div>
+      </div>
+    </div>
+  );
+}

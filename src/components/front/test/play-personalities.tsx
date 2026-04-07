@@ -5,7 +5,6 @@ import { useState } from 'react';
 import type { Personality } from '@/types/personality-type';
 import { cssVarStyle } from '@/utils/css-helper';
 import styles from '@/styles/play-personality.module.css';
-import cardStyles from '@/styles/admin/personalities/personality-card.module.css';
 import ctaStyles from '@/styles/landing-ctasection.module.css';
 
 type PersonalityMatch = {
@@ -17,6 +16,7 @@ type Props = {
   matches: PersonalityMatch[];
   isAuthenticated: boolean;
   primaryKey: string;
+  retakeHref?: string;
 };
 
 const BENEFITS = [
@@ -37,31 +37,11 @@ const BENEFITS = [
   },
 ];
 
-const EXPERIENCE_TEASERS = [
-  {
-    emoji: '🎨',
-    title: 'Creative Sprint Workshop',
-    tag: 'For Creators',
-    color: '#c026d3',
-  },
-  {
-    emoji: '🧩',
-    title: 'Strategic Play Session',
-    tag: 'For Strategists',
-    color: '#0891b2',
-  },
-  {
-    emoji: '🎭',
-    title: 'Improv & Connection',
-    tag: 'For Performers',
-    color: '#ea580c',
-  },
-];
-
 export default function PlayPersonalities({
   matches,
   isAuthenticated,
   primaryKey,
+  retakeHref = '/test',
 }: Readonly<Props>) {
   const [copied, setCopied] = useState(false);
 
@@ -89,13 +69,6 @@ export default function PlayPersonalities({
       setTimeout(() => setCopied(false), 2500);
     }
   }
-
-  const experienceHref = isAuthenticated
-    ? '/dashboard/experiences'
-    : `/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`;
-  const savePendingKey = () =>
-    globalThis.localStorage.setItem('pclab_pending_key', primaryKey);
-  const experienceCardClick = isAuthenticated ? undefined : savePendingKey;
 
   return (
     <div className="flex flex-col gap-8" data-testid="results-page">
@@ -229,108 +202,6 @@ export default function PlayPersonalities({
         ))}
       </div>
 
-      {/* Team banner — moved above curated experiences */}
-      <div
-        className="relative overflow-hidden rounded-2xl p-6 flex flex-col gap-4"
-        data-testid="results-team-banner"
-        style={{
-          background:
-            'linear-gradient(to bottom right, var(--color-teal-deep), var(--color-teal-medium))',
-        }}
-      >
-        <div className={ctaStyles.pinkCircle} />
-        <div className={ctaStyles.lightCircle} />
-        <div className="relative z-10 flex flex-col gap-3">
-          <div className="flex gap-2 flex-wrap">
-            {matches.slice(0, 4).map(({ personality }) => (
-              <div key={personality.type} className={styles.teamEmojiChip}>
-                {personality.emoji}
-              </div>
-            ))}
-            <div className={styles.teamEmojiChip}>➕</div>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-white leading-tight">
-              Build your dream team
-            </h2>
-            <p
-              className="text-sm mt-1"
-              style={{ color: 'rgba(255,255,255,0.8)' }}
-            >
-              Map every team member&apos;s play personality and unlock curated
-              group experiences together.
-            </p>
-          </div>
-          {!isAuthenticated && (
-            <Link
-              href={`/sign-up?redirect_url=${encodeURIComponent(saveRedirectUrl)}`}
-              className="self-start mt-1 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 px-4 py-2 text-xs font-semibold text-white transition-colors"
-              onClick={() => savePendingKey()}
-            >
-              Get started →
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* Experience teasers */}
-      <div
-        className="flex flex-col gap-3"
-        data-testid="results-experience-teasers"
-      >
-        <div className="flex flex-col gap-0.5">
-          <h2 className="text-base font-bold text-gray-800">
-            Experiences made for you
-          </h2>
-          {isAuthenticated ? (
-            <p className="text-xs text-gray-400">
-              Browse curated activities that match your play personality.
-            </p>
-          ) : (
-            <p className="text-xs text-gray-400">
-              Sign up to unlock curated activities that match your play
-              personality.
-            </p>
-          )}
-        </div>
-        <div className={cardStyles.cardGrid}>
-          {EXPERIENCE_TEASERS.map(({ emoji, title, tag, color }) => (
-            <Link
-              key={title}
-              href={experienceHref}
-              className={`${cardStyles.card} group`}
-              data-testid="results-experience-card"
-              style={cssVarStyle({ '--glow-color': `${color}40` })}
-              onClick={experienceCardClick}
-            >
-              <div className={cardStyles.orb} />
-              {!isAuthenticated && (
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200 z-10"
-                  style={{ background: 'rgba(9,25,27,0.55)' }}
-                >
-                  <span className={styles.experienceLockBadge}>
-                    🔒 Sign up to unlock
-                  </span>
-                </div>
-              )}
-              <div className="relative z-[1] flex flex-col gap-2 p-4 h-full">
-                <span
-                  className="text-xs font-bold tracking-wide rounded-full px-2.5 py-0.5 w-fit"
-                  style={{ background: `${color}20`, color }}
-                >
-                  {tag}
-                </span>
-                <span className="text-3xl leading-none mt-auto">{emoji}</span>
-                <p className="text-sm font-semibold text-gray-800 leading-tight">
-                  {title}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
       {/* CTA — changes based on auth state */}
       <div
         className="flex flex-col gap-4 items-center text-center"
@@ -391,7 +262,7 @@ export default function PlayPersonalities({
       </div>
 
       <Link
-        href="/test"
+        href={retakeHref}
         className="text-sm text-gray-400 underline underline-offset-4 hover:opacity-75 text-center"
       >
         Retake the test

@@ -9,7 +9,7 @@ export default function SignInPage() {
   const email = searchParams.get('email')?.trim() ?? '';
   const redirectUrl = sanitizeRedirectPath(
     searchParams.get('redirect'),
-    '/onboarding/personality-choice'
+    '/dashboard'
   );
 
   return (
@@ -22,8 +22,8 @@ export default function SignInPage() {
           ← Back to Home
         </button>
         <SignIn
-          fallbackRedirectUrl={redirectUrl}
           forceRedirectUrl={redirectUrl}
+          fallbackRedirectUrl={redirectUrl}
           initialValues={email ? { emailAddress: email } : undefined}
           appearance={{
             variables: {

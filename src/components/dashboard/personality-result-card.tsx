@@ -30,7 +30,7 @@ export default function PersonalityResultCard({
             </p>
           </div>
           <Link
-            href="/test"
+            href="/dashboard/test"
             className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-fuchsia-700 transition-colors"
           >
             Take the Assessment →
@@ -79,7 +79,7 @@ export default function PersonalityResultCard({
         </p>
         <div className="mt-4 flex items-center gap-3">
           <Link
-            href="/test"
+            href="/dashboard/test"
             className="inline-flex items-center gap-1.5 rounded-xl border border-rose-100 bg-white/70 px-4 py-2 text-xs font-semibold text-slate-600 hover:border-fuchsia-600 hover:text-fuchsia-600 transition-colors"
           >
             🔄 Retake Test

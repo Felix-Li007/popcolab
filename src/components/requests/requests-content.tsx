@@ -5,30 +5,34 @@ import type {
   UserRequestItem,
   RequestStats,
 } from '@/services/user-request-service';
+import type { Question } from '@/types/question-type';
+import type { UserTeamItem } from '@/services/user-team-service';
 import RequestCard from './request-card';
 import NewRequestModal from './new-request-modal';
 import RejectProposalModal from './reject-proposal-modal';
 
-type Tab = 'all' | 'opened' | 'pending' | 'matched' | 'closed';
+type Tab = 'all' | 'OPENED' | 'underReview' | 'CLOSED';
 
-const TABS: {
-  key: Tab;
-  label: string;
-  statKey: keyof RequestStats | 'total';
-}[] = [
+const TABS: { key: Tab; label: string; statKey: keyof RequestStats }[] = [
   { key: 'all', label: 'All', statKey: 'total' },
-  { key: 'opened', label: 'Submitted', statKey: 'submitted' },
-  { key: 'pending', label: 'Under Review', statKey: 'underReview' },
-  { key: 'matched', label: 'Approved', statKey: 'approved' },
-  { key: 'closed', label: 'Rejected', statKey: 'rejected' },
+  { key: 'OPENED', label: 'Submitted', statKey: 'submitted' },
+  { key: 'underReview', label: 'Under Review', statKey: 'underReview' },
+  { key: 'CLOSED', label: 'Closed', statKey: 'closed' },
 ];
 
 type Props = Readonly<{
   requests: UserRequestItem[];
   stats: RequestStats;
+  memberQuestions: Question[];
+  userTeams: UserTeamItem[];
 }>;
 
-export default function RequestsContent({ requests, stats }: Props) {
+export default function RequestsContent({
+  requests,
+  stats,
+  memberQuestions,
+  userTeams,
+}: Props) {
   const [tab, setTab] = useState<Tab>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
@@ -50,8 +54,19 @@ export default function RequestsContent({ requests, stats }: Props) {
     setRejectTitle('');
   }
 
+  const UNDER_REVIEW_STATUSES = new Set([
+    'PENDING',
+    'PROCESSING',
+    'RETRYING',
+    'MATCHED',
+  ]);
+
   const filtered =
-    tab === 'all' ? requests : requests.filter(r => r.status === tab);
+    tab === 'all'
+      ? requests
+      : tab === 'underReview'
+        ? requests.filter(r => UNDER_REVIEW_STATUSES.has(r.status))
+        : requests.filter(r => r.status === tab);
 
   return (
     <>
@@ -85,8 +100,7 @@ export default function RequestsContent({ requests, stats }: Props) {
             value: stats.underReview,
             color: 'text-amber-500',
           },
-          { label: 'Approved', value: stats.approved, color: 'text-green-600' },
-          { label: 'Rejected', value: stats.rejected, color: 'text-red-500' },
+          { label: 'Closed', value: stats.closed, color: 'text-gray-500' },
         ].map((s, i, arr) => (
           <div
             key={s.label}
@@ -107,7 +121,7 @@ export default function RequestsContent({ requests, stats }: Props) {
       {/* Tabs */}
       <div className="flex border-b-2 border-gray-200 mb-5">
         {TABS.map(t => {
-          const count = stats[t.statKey as keyof RequestStats];
+          const count = stats[t.statKey];
           return (
             <button
               key={t.key}
@@ -155,6 +169,8 @@ export default function RequestsContent({ requests, stats }: Props) {
         key={modalKey}
         open={modalOpen}
         onClose={handleModalClose}
+        memberQuestions={memberQuestions}
+        userTeams={userTeams}
       />
 
       <RejectProposalModal

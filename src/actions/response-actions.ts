@@ -1,5 +1,7 @@
 'use server';
 
+import { auth } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
 import {
   computeTestResult,
   computeAllPersonalityMatches,
@@ -31,15 +33,36 @@ export async function submitTestAction(
     let personalityKey: string;
     let totalScore: number;
 
-    const authContext = await getCurrentAuthContext();
+    // Use auth() directly — reads session cookie reliably without a Clerk API call.
+    // getCurrentAuthContext() fetches the full user object from Clerk's API which
+    // can return null on network hiccups, causing the save to be silently skipped.
+    const { userId: clerkId } = await auth();
 
-    if (authContext.isAuthenticated && authContext.user) {
-      const email = getPrimaryEmail(authContext.user);
-      const { userId } = await upsertClerkUser(authContext.user.id, email);
+    if (clerkId) {
+      // Look up or create the DB user by clerkId. We don't need the email here
+      // since upsertClerkUser only uses it on first creation and the user already
+      // exists in the DB (they're signed in and on the dashboard).
+      let dbUser = await prisma.user.findUnique({
+        where: { clerk_id: clerkId },
+        select: { id: true, email: true },
+      });
 
-      const result = await submitResponse(userId, answers);
+      if (!dbUser) {
+        // Rare edge case: first time on dashboard before upsert ran elsewhere.
+        // Fall back to the full auth context to get the email.
+        const authContext = await getCurrentAuthContext();
+        const email = authContext.user ? getPrimaryEmail(authContext.user) : '';
+        const { userId } = await upsertClerkUser(clerkId, email);
+        dbUser = { id: userId, email };
+      }
+
+      const result = await submitResponse(dbUser.id, answers);
       personalityKey = result.personalityKey;
       totalScore = result.totalScore;
+
+      // Invalidate the dashboard so it shows the new result immediately.
+      revalidatePath('/dashboard');
+      revalidatePath('/dashboard/test');
     } else {
       const result = await computeTestResult(answers);
       personalityKey = result.personalityKey;

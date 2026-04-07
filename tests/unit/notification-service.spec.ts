@@ -1,6 +1,22 @@
 import { prisma } from '@/libs/prisma-client';
 import { MessageType } from '@/libs/prisma/client';
 
+jest.mock('@/libs/prisma/client', () => ({
+  MessageType: {
+    EVENT_CANCELED: 'EVENT_CANCELED',
+    DATE_CANCELED: 'DATE_CANCELED',
+    REQUEST_MATCHED: 'REQUEST_MATCHED',
+  },
+  Prisma: {
+    sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({
+      strings,
+      values,
+    }),
+    join: (values: unknown[]) => values,
+    empty: {},
+  },
+}));
+
 jest.mock('@/libs/prisma-client', () => ({
   prisma: {
     $queryRaw: jest.fn(),

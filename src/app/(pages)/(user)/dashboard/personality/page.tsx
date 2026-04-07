@@ -35,7 +35,7 @@ export default async function PersonalityPage() {
             </p>
           </div>
           <Link
-            href="/test"
+            href="/dashboard/test"
             className="mt-2 rounded-2xl bg-teal-deep px-6 py-2.5 text-sm font-semibold text-white hover:bg-teal-deep/90 transition-colors"
           >
             Take the Assessment →

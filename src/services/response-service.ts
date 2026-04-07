@@ -51,20 +51,27 @@ async function getDimensionMappings(
   }));
 }
 
-async function matchPersonality(
+// ─── Shared Personality Ranking ──────────────────────────────────────────────
+// Single source of truth used by both submitResponse and computeAllPersonalityMatches.
+// Returns personalities sorted: qualified (highest threshold first), then unqualified.
+// sorted[0] is always the primary match.
+
+type PersonalityRow = Awaited<
+  ReturnType<typeof prisma.personalityType.findMany>
+>[number];
+
+async function rankPersonalities(
   totalScore: number
-): Promise<Personality | null> {
+): Promise<PersonalityRow[]> {
   const rows = await prisma.personalityType.findMany({
     where: { status: 'active' },
-    orderBy: { score_threshold: 'asc' },
   });
-  if (rows.length === 0) return null;
-
-  let matched = rows[0];
-  for (const row of rows) {
-    if (totalScore >= row.score_threshold) matched = row;
-  }
-  return mapPersonalityRow(matched);
+  return [...rows].sort((a, b) => {
+    const aQ = totalScore >= a.score_threshold;
+    const bQ = totalScore >= b.score_threshold;
+    if (aQ !== bQ) return aQ ? -1 : 1;
+    return b.score_threshold - a.score_threshold;
+  });
 }
 
 // ─── Main Submit ──────────────────────────────────────────────────────────────
@@ -105,18 +112,20 @@ export async function submitResponse(
     }
   }
 
-  // 4. Total score
-  const totalScore = Array.from(dimensionScoreMap.values()).reduce(
-    (a, b) => a + b,
-    0
+  // 4. Total score — rounded integer so threshold comparisons are exact
+  const totalScore = Math.round(
+    Array.from(dimensionScoreMap.values()).reduce((a, b) => a + b, 0)
   );
 
-  // 5. Match personality
-  const personality = await matchPersonality(totalScore);
+  // 5. Rank personalities using the shared ranker — same logic as computeAllPersonalityMatches
+  //    so the personality saved to DB is always the same one shown on the result page.
+  const ranked = await rankPersonalities(totalScore);
+  const primaryRow = ranked[0];
+  const personality = primaryRow ? mapPersonalityRow(primaryRow) : null;
   const personalityKey = personality?.type ?? 'UNKNOWN';
 
   // 6. Build vector JSON (max 500 chars — keep it compact)
-  const vectorObj: Record<string, number> = { total: Math.round(totalScore) };
+  const vectorObj: Record<string, number> = { total: totalScore };
   dimensionScoreMap.forEach((score, dimId) => {
     vectorObj[`d${dimId}`] = Math.round(score);
   });
@@ -170,7 +179,7 @@ export async function submitResponse(
     });
   });
 
-  return { personalityKey, personality, totalScore: Math.round(totalScore) };
+  return { personalityKey, personality, totalScore };
 }
 
 // ─── Result Fetch ─────────────────────────────────────────────────────────────
@@ -231,7 +240,9 @@ export async function computeTestResult(answers: UserAnswer[]): Promise<{
     Array.from(dimensionScoreMap.values()).reduce((a, b) => a + b, 0)
   );
 
-  const personality = await matchPersonality(totalScore);
+  const ranked = await rankPersonalities(totalScore);
+  const primaryRow = ranked[0];
+  const personality = primaryRow ? mapPersonalityRow(primaryRow) : null;
   const personalityKey = personality?.type ?? 'UNKNOWN';
 
   return { personalityKey, totalScore, personality };
@@ -252,19 +263,10 @@ export async function getPersonalityByKey(
 export async function computeAllPersonalityMatches(
   totalScore: number
 ): Promise<{ key: string; matchPercent: number }[]> {
-  const rows = await prisma.personalityType.findMany({
-    where: { status: 'active' },
-    orderBy: { score_threshold: 'desc' },
-  });
-  if (rows.length === 0) return [];
-
-  // Qualified personalities first (highest threshold first), then unqualified
-  const sorted = [...rows].sort((a, b) => {
-    const aQ = totalScore >= a.score_threshold;
-    const bQ = totalScore >= b.score_threshold;
-    if (aQ !== bQ) return aQ ? -1 : 1;
-    return b.score_threshold - a.score_threshold;
-  });
+  // Uses the shared ranker — identical sort to what submitResponse uses when saving,
+  // so sorted[0] here always matches what was written to userVector.vector_type.
+  const sorted = await rankPersonalities(totalScore);
+  if (sorted.length === 0) return [];
 
   const primaryThreshold = Math.max(1, sorted[0].score_threshold);
   const basePercent = Math.min(

@@ -13,7 +13,13 @@ export type UserRequestProposal = {
 
 export type UserRequestItem = {
   id: number;
-  status: 'opened' | 'pending' | 'matched' | 'closed';
+  status:
+    | 'OPENED'
+    | 'PENDING'
+    | 'MATCHED'
+    | 'CLOSED'
+    | 'PROCESSING'
+    | 'RETRYING';
   objectiveCategory: string;
   preferredDate: Date | null;
   participantCount: number | null;
@@ -25,8 +31,7 @@ export type RequestStats = {
   total: number;
   submitted: number;
   underReview: number;
-  approved: number;
-  rejected: number;
+  closed: number;
 };
 
 export async function getUserRequests(
@@ -42,7 +47,7 @@ export async function getUserRequests(
       participant_count: true,
       created_at: true,
       proposals: {
-        where: { proposal_status: ProposalStatus.PENDING },
+        where: { proposal_status: ProposalStatus.APPROVED },
         include: {
           proposal_experiences: {
             include: {
@@ -103,10 +108,13 @@ export async function getRequestStats(userId: number): Promise<RequestStats> {
 
   return {
     total: Object.values(map).reduce((a, b) => a + b, 0),
-    submitted: map['opened'] ?? 0,
-    underReview: map['pending'] ?? 0,
-    approved: map['matched'] ?? 0,
-    rejected: map['closed'] ?? 0,
+    submitted: map['OPENED'] ?? 0,
+    underReview:
+      (map['PENDING'] ?? 0) +
+      (map['PROCESSING'] ?? 0) +
+      (map['RETRYING'] ?? 0) +
+      (map['MATCHED'] ?? 0),
+    closed: map['CLOSED'] ?? 0,
   };
 }
 
@@ -126,7 +134,7 @@ export async function createRequest(params: {
     data: {
       user_id: params.userId,
       objective_category: objectiveCategory,
-      request_status: 'opened',
+      request_status: 'OPENED',
       delivery_method: 'in_person',
       duration_max: params.durationMax,
       preferred_date: params.preferredDate,

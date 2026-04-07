@@ -10,9 +10,13 @@ import QuestionStep from './question-step';
 
 type Props = {
   questions: Question[];
+  resultHref?: string;
 };
 
-export default function PersonalityTest({ questions }: Readonly<Props>) {
+export default function PersonalityTest({
+  questions,
+  resultHref = '/test/result',
+}: Readonly<Props>) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,7 +69,7 @@ export default function PersonalityTest({ questions }: Readonly<Props>) {
       const result = await submitTestAction(answersArray);
       if (result.success) {
         router.push(
-          `/test/result?matches=${encodeURIComponent(result.matches ?? '')}`
+          `${resultHref}?matches=${encodeURIComponent(result.matches ?? '')}`
         );
       } else {
         setError(result.error ?? 'Something went wrong. Please try again.');
@@ -75,11 +79,7 @@ export default function PersonalityTest({ questions }: Readonly<Props>) {
 
   return (
     <div className="flex flex-col gap-8">
-      <TestProgress
-        current={currentIndex + 1}
-        total={questions.length}
-        currentType={question.type}
-      />
+      <TestProgress current={currentIndex + 1} total={questions.length} />
 
       <QuestionStep
         question={question}

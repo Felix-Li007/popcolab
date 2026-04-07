@@ -4,11 +4,16 @@ import { useTransition } from 'react';
 import type { UserRequestItem } from '@/services/user-request-service';
 import { acceptProposalAction } from '@/actions/request-actions';
 
-const STATUS_MAP = {
-  opened: { label: 'Submitted', className: 'bg-violet-100 text-violet-700' },
-  pending: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
-  matched: { label: 'Approved ✓', className: 'bg-green-100 text-green-700' },
-  closed: { label: 'Rejected', className: 'bg-red-100 text-red-700' },
+const STATUS_MAP: Record<string, { label: string; className: string }> = {
+  OPENED: { label: 'Submitted', className: 'bg-violet-100 text-violet-700' },
+  PENDING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
+  PROCESSING: {
+    label: 'Under Review',
+    className: 'bg-amber-100 text-amber-700',
+  },
+  RETRYING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
+  MATCHED: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
+  CLOSED: { label: 'Closed', className: 'bg-gray-100 text-gray-600' },
 };
 
 function formatDate(d: Date | null): string {
@@ -39,14 +44,23 @@ type Props = {
 
 export default function RequestCard({ request, onReject, onResubmit }: Props) {
   const [accepting, startAccept] = useTransition();
-  const status = STATUS_MAP[request.status];
+  const status = STATUS_MAP[request.status] ?? {
+    label: request.status,
+    className: 'bg-gray-100 text-gray-600',
+  };
 
-  const borderColor =
-    request.status === 'matched'
-      ? 'border-green-200'
-      : request.status === 'closed'
-        ? 'border-red-200'
-        : 'border-gray-200';
+  const isUnderReview =
+    request.status === 'PENDING' ||
+    request.status === 'PROCESSING' ||
+    request.status === 'RETRYING';
+  const isMatched = request.status === 'MATCHED';
+  const isClosed = request.status === 'CLOSED';
+
+  const borderColor = isMatched
+    ? 'border-amber-200'
+    : isClosed
+      ? 'border-gray-200'
+      : 'border-gray-200';
 
   function handleAccept() {
     if (!request.proposal) return;
@@ -80,7 +94,7 @@ export default function RequestCard({ request, onReject, onResubmit }: Props) {
       <div className="flex flex-wrap gap-x-5 gap-y-1.5">
         <div className="flex flex-col">
           <span className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
-            {request.status === 'matched' ? 'Confirmed date' : 'Preferred date'}
+            Preferred date
           </span>
           <span className="text-xs font-medium text-gray-700">
             {formatDate(request.preferredDate)}
@@ -105,25 +119,25 @@ export default function RequestCard({ request, onReject, onResubmit }: Props) {
       </div>
 
       {/* Status-specific content */}
-      {request.status === 'opened' && (
+      {request.status === 'OPENED' && (
         <p className="text-[11px] text-gray-400 pt-2.5 border-t border-gray-100">
           ⏳ Waiting for admin to review your request
         </p>
       )}
 
-      {request.status === 'pending' && (
+      {isUnderReview && (
         <p className="text-[11px] text-amber-600 pt-2.5 border-t border-gray-100">
           🔍 Admin is currently reviewing this request
         </p>
       )}
 
-      {request.status === 'matched' && request.proposal && (
+      {isMatched && request.proposal && (
         <>
-          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
-            <p className="text-[9px] font-bold text-green-800 uppercase tracking-wide mb-1">
-              ✨ Why this is perfect for your team
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
+            <p className="text-[9px] font-bold text-amber-800 uppercase tracking-wide mb-1">
+              ✨ A proposal is ready for your review
             </p>
-            <p className="text-[11px] text-green-800 leading-relaxed">
+            <p className="text-[11px] text-amber-800 leading-relaxed">
               {request.proposal.rationale}
             </p>
           </div>
@@ -131,13 +145,13 @@ export default function RequestCard({ request, onReject, onResubmit }: Props) {
             <button
               disabled={accepting}
               onClick={handleAccept}
-              className="flex-1 rounded-lg bg-green-500 py-2 text-xs font-semibold text-white hover:bg-green-600 disabled:opacity-50"
+              className="flex-1 rounded-lg bg-[#E91E8C] py-2 text-xs font-semibold text-white hover:bg-[#c7177a] disabled:opacity-50"
             >
               {accepting ? 'Confirming…' : '✓ Accept & Confirm'}
             </button>
             <button
               onClick={() => onReject(request.proposal!.id)}
-              className="flex-1 rounded-lg bg-red-50 py-2 text-xs font-semibold text-red-700 hover:bg-red-100"
+              className="flex-1 rounded-lg bg-gray-50 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 border border-gray-200"
             >
               ✕ Reject with Feedback
             </button>
@@ -145,22 +159,21 @@ export default function RequestCard({ request, onReject, onResubmit }: Props) {
         </>
       )}
 
-      {request.status === 'closed' && (
+      {isClosed && (
         <>
-          <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
-            <p className="text-[9px] font-bold text-red-800 uppercase tracking-wide mb-1">
-              Admin Feedback
+          <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
+            <p className="text-[9px] font-bold text-gray-600 uppercase tracking-wide mb-1">
+              Closed
             </p>
-            <p className="text-[11px] text-red-800 leading-relaxed">
-              {request.proposal?.rationale ??
-                'This request was closed by admin.'}
+            <p className="text-[11px] text-gray-600 leading-relaxed">
+              This request has been closed.
             </p>
           </div>
           <button
             onClick={onResubmit}
             className="self-start rounded-lg border border-[#E91E8C] px-4 py-2 text-xs font-semibold text-[#E91E8C] hover:bg-pink-50"
           >
-            ↺ Resubmit Request
+            ↺ Submit New Request
           </button>
         </>
       )}
