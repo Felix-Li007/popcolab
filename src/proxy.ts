@@ -2,7 +2,11 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { normalizeRole, readClaimRole } from '@/utils/clerk-helper';
 
-const redirectRoutes = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)']);
+const redirectRoutes = createRouteMatcher([
+  process.env.NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL as string,
+  process.env.NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL as string,
+  process.env.NEXT_PUBLIC_CLERK_ACTION_DASHBOARD_URL as string,
+]);
 
 const protectedRoutes = createRouteMatcher([
   '/admin/:path*',

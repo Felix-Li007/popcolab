@@ -8,6 +8,7 @@ import { createRequest } from '@/services/user-request-service';
 import { sendRequestInvitations } from '@/services/invitation-service';
 
 const REQUESTS_PATH = '/dashboard/requests';
+const PROPOSALS_PATH = '/dashboard/proposals';
 
 async function getAuthUser() {
   const { userId: clerkId } = await auth();
@@ -230,6 +231,7 @@ export async function acceptProposalAction(proposalId: number): Promise<void> {
   });
 
   revalidatePath(REQUESTS_PATH);
+  revalidatePath(PROPOSALS_PATH);
 }
 
 export type RejectProposalState = {
@@ -263,5 +265,6 @@ export async function rejectProposalAction(
   });
 
   revalidatePath(REQUESTS_PATH);
+  revalidatePath(PROPOSALS_PATH);
   return {};
 }
