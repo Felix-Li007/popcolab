@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
-import SearchPanel from '@/components/admin/common/search-panel';
 import UserClient from '@/components/admin/user/user-client';
 import PaginationBar from '@/components/shared/pagination-bar';
 import { isUserStatus, USER_STATUS_OPTIONS } from '@/constants/user-status';
@@ -11,7 +10,7 @@ import type {
   AdminUsersPageData,
   AdminUsersStatusFilter,
 } from '@/types/user-type';
-import { Badge } from '@/ui';
+import { Badge, Search } from '@/ui';
 import styles from '@/styles/admin/users/user-content.module.css';
 
 type Props = {
@@ -91,84 +90,109 @@ export default function UserContent({ pageData, query }: Readonly<Props>) {
 
   return (
     <div className={styles.root}>
-      <div className={styles.content}>
-        <div className={styles.panel}>
-          <SearchPanel
-            mode="submit"
-            title={`Users (${pageData.totalItems})`}
-            formAction="/admin/users"
-            method="GET"
-            defaultSearchValue={query.search}
-            searchPlaceholder="Search by email, name, company, team..."
-            searchTestId="user-search"
-            hiddenFields={hiddenFields}
-            clearHref={
-              query.search.trim().length > 0
-                ? buildUsersHref({
+      <div className={styles.panel}>
+        <div className={styles.searchRoot}>
+          <div className={styles.searchTop}>
+            <span className={styles.searchTitle}>
+              Users ({pageData.totalItems})
+            </span>
+          </div>
+
+          <div className={styles.filterRow}>
+            <div className={styles.tabs}>
+              {statusTabs.map(tab => {
+                const isActive = activeStatus === tab.value;
+                const href = buildUsersHref({
+                  search: query.search,
+                  status: tab.value,
+                  page: 1,
+                });
+
+                return (
+                  <Link
+                    key={tab.value}
+                    href={href}
+                    className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
+                    aria-current={isActive ? 'page' : undefined}
+                    data-testid={`user-status-tab-${tab.value}`}
+                  >
+                    {tab.label}
+                    <Badge
+                      variant="default"
+                      size="xs"
+                      className={
+                        isActive ? styles.tabBadgeActive : styles.tabBadge
+                      }
+                    >
+                      {tab.count}
+                    </Badge>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <form
+              action="/admin/users"
+              method="GET"
+              className={styles.searchForm}
+            >
+              {(hiddenFields ?? []).map(field => (
+                <input
+                  key={`${field.name}-${field.value}`}
+                  type="hidden"
+                  name={field.name}
+                  value={field.value}
+                />
+              ))}
+              <Search
+                name="q"
+                defaultValue={query.search}
+                placeholder="Search by email, name, company, team..."
+                data-testid="user-search"
+                wrapperClassName={styles.searchWrap}
+                iconClassName={styles.searchIcon}
+                inputClassName={styles.searchInput}
+                buttonClassName={styles.searchButton}
+              />
+              {query.search.trim().length > 0 ? (
+                <Link
+                  href={buildUsersHref({
                     search: '',
                     status: query.status,
                     page: 1,
-                  })
-                : undefined
-            }
-          />
-
-          <div className={styles.tabs}>
-            {statusTabs.map(tab => {
-              const isActive = activeStatus === tab.value;
-              const href = buildUsersHref({
-                search: query.search,
-                status: tab.value,
-                page: 1,
-              });
-
-              return (
-                <Link
-                  key={tab.value}
-                  href={href}
-                  className={`${styles.tab} ${isActive ? styles.tabActive : ''}`}
-                  aria-current={isActive ? 'page' : undefined}
-                  data-testid={`user-status-tab-${tab.value}`}
+                  })}
+                  className={styles.clearLink}
                 >
-                  {tab.label}
-                  <Badge
-                    variant="default"
-                    size="xs"
-                    className={
-                      isActive ? styles.tabBadgeActive : styles.tabBadge
-                    }
-                  >
-                    {tab.count}
-                  </Badge>
+                  Clear
                 </Link>
-              );
-            })}
+              ) : null}
+            </form>
           </div>
-
-          <div className={styles.listArea}>
-            {pageData.items.length === 0 ? (
-              <AdminEmptyState
-                emoji="👤"
-                message={
-                  query.search.trim().length > 0
-                    ? 'No users match your search.'
-                    : 'No users found.'
-                }
-                testId="user-empty"
-              />
-            ) : (
-              <UserClient users={pageData.items} />
-            )}
-          </div>
-
-          <PaginationBar
-            page={pageData.currentPage}
-            totalPages={pageData.totalPages}
-            prevHref={prevHref}
-            nextHref={nextHref}
-            variant="circle"
-          />
         </div>
+
+        <div className={styles.listArea}>
+          {pageData.items.length === 0 ? (
+            <AdminEmptyState
+              emoji="👤"
+              message={
+                query.search.trim().length > 0
+                  ? 'No users match your search.'
+                  : 'No users found.'
+              }
+              testId="user-empty"
+            />
+          ) : (
+            <UserClient users={pageData.items} />
+          )}
+        </div>
+
+        <PaginationBar
+          page={pageData.currentPage}
+          totalPages={pageData.totalPages}
+          prevHref={prevHref}
+          nextHref={nextHref}
+          variant="circle"
+        />
       </div>
     </div>
   );

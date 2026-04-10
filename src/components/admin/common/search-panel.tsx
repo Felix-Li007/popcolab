@@ -30,6 +30,10 @@ type Props = {
   searchPlaceholder: string;
   searchTestId?: string;
   actions?: React.ReactNode;
+  rootClassName?: string;
+  topClassName?: string;
+  titleClassName?: string;
+  actionsClassName?: string;
   searchWrapClassName?: string;
   searchInputClassName?: string;
 } & (InstantProps | SubmitProps);
@@ -39,6 +43,10 @@ export default function SearchPanel({
   searchPlaceholder,
   searchTestId,
   actions,
+  rootClassName,
+  topClassName,
+  titleClassName,
+  actionsClassName,
   searchWrapClassName,
   searchInputClassName,
   ...searchMode
@@ -46,10 +54,16 @@ export default function SearchPanel({
   const isSubmitMode = searchMode.mode === 'submit';
 
   return (
-    <div className={styles.root}>
-      <div className={styles.top}>
-        <span className={styles.title}>{title}</span>
-        {actions ? <div className={styles.actions}>{actions}</div> : null}
+    <div className={`${styles.root} ${rootClassName ?? ''}`}>
+      <div className={`${styles.top} ${topClassName ?? ''}`}>
+        <span className={`${styles.title} ${titleClassName ?? ''}`}>
+          {title}
+        </span>
+        {actions ? (
+          <div className={`${styles.actions} ${actionsClassName ?? ''}`}>
+            {actions}
+          </div>
+        ) : null}
       </div>
 
       {isSubmitMode ? (

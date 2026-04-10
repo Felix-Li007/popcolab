@@ -21,18 +21,32 @@ import type {
   OverviewGrowthPoint,
   OverviewExperienceMetrics,
   OverviewExperienceTrendPoint,
+  OverviewProposalMetrics,
   OverviewQuestionMetrics,
   OverviewQuizMetrics,
   OverviewQuizTrendPoint,
   OverviewRequestMetrics,
   OverviewRequestStatusPoint,
   OverviewRequestTrendPoint,
+  OverviewUserTeamMetrics,
 } from '@/types/overview-type';
 
 type OverviewCountRow = {
   total_users: number | string | bigint;
   total_teams: number | string | bigint;
   total_requests: number | string | bigint;
+  total_proposals: number | string | bigint;
+};
+
+type OverviewUserTeamSummaryRow = {
+  onboarding_completed_users: number | string | bigint;
+  users_in_teams: number | string | bigint;
+  average_team_size: number | string | bigint | null;
+  teams_with_multiple_members: number | string | bigint;
+  total_invites: number | string | bigint;
+  pending_invites: number | string | bigint;
+  accepted_invites: number | string | bigint;
+  rejected_invites: number | string | bigint;
 };
 
 type OverviewGrowthRow = {
@@ -85,6 +99,19 @@ type OverviewQuestionSummaryRow = {
   mapped_questions: number | string | bigint;
   unmapped_questions: number | string | bigint;
   choice_questions_without_options: number | string | bigint;
+};
+
+type OverviewProposalSummaryRow = {
+  pending_count: number | string | bigint;
+  approved_count: number | string | bigint;
+  accepted_count: number | string | bigint;
+  rejected_count: number | string | bigint;
+  avg_experiences_per_proposal: number | string | bigint | null;
+};
+
+type OverviewProposalTrendRow = {
+  week_start: Date | string;
+  count: number | string | bigint;
 };
 
 const NEW_EXPERIENCE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
@@ -204,6 +231,21 @@ function getQuestionTypeLabel(value: string): string {
   }
 }
 
+function getProposalStatusLabel(value: string): string {
+  switch (value) {
+    case 'PENDING':
+      return 'Pending';
+    case 'APPROVED':
+      return 'Approved';
+    case 'ACCEPTED':
+      return 'Accepted';
+    case 'REJECTED':
+      return 'Rejected';
+    default:
+      return value;
+  }
+}
+
 function getWeeklyChangePercentage(
   completionsThisWeek: number,
   completionsPreviousWeek: number
@@ -223,11 +265,16 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
   const [
     countRows,
     growthRows,
+    userTeamSummaryRows,
     requestStatusRows,
     requestTrendRows,
     requestMatchSummaryRows,
     topRequestedCategoryRows,
     topMatchedExperienceRows,
+    proposalSummaryRows,
+    proposalStatusRows,
+    proposalTrendRows,
+    topProposedExperienceRows,
     quizSummaryRows,
     quizTrendRows,
     questionSummaryRows,
@@ -243,7 +290,8 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       SELECT
         (SELECT COUNT(*)::int FROM "user") AS total_users,
         (SELECT COUNT(*)::int FROM "team") AS total_teams,
-        (SELECT COUNT(*)::int FROM "request") AS total_requests
+        (SELECT COUNT(*)::int FROM "request") AS total_requests,
+        (SELECT COUNT(*)::int FROM "proposal") AS total_proposals
     `),
     prisma.$queryRaw<OverviewGrowthRow[]>(Prisma.sql`
       WITH days AS (
@@ -277,6 +325,35 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       LEFT JOIN user_counts ON user_counts.day_start = days.day_start
       LEFT JOIN team_counts ON team_counts.day_start = days.day_start
       ORDER BY days.day_start ASC
+    `),
+    prisma.$queryRaw<OverviewUserTeamSummaryRow[]>(Prisma.sql`
+      WITH team_membership AS (
+        SELECT id AS team_id, created_by AS user_id
+        FROM "team"
+        UNION
+        SELECT team_id, user_id
+        FROM "team_mate"
+      ),
+      team_sizes AS (
+        SELECT
+          team_id,
+          COUNT(DISTINCT user_id)::int AS member_count
+        FROM team_membership
+        GROUP BY team_id
+      ),
+      user_membership AS (
+        SELECT COUNT(DISTINCT user_id)::int AS users_in_teams
+        FROM team_membership
+      )
+      SELECT
+        (SELECT COUNT(*)::int FROM "user" WHERE intake_complete = true AND personality_complete = true) AS onboarding_completed_users,
+        COALESCE((SELECT users_in_teams FROM user_membership), 0)::int AS users_in_teams,
+        COALESCE((SELECT AVG(member_count) FROM team_sizes), 0) AS average_team_size,
+        COALESCE((SELECT COUNT(*)::int FROM team_sizes WHERE member_count >= 2), 0)::int AS teams_with_multiple_members,
+        (SELECT COUNT(*)::int FROM "team_invite") AS total_invites,
+        (SELECT COUNT(*)::int FROM "team_invite" WHERE status = 'pending') AS pending_invites,
+        (SELECT COUNT(*)::int FROM "team_invite" WHERE status = 'accepted') AS accepted_invites,
+        (SELECT COUNT(*)::int FROM "team_invite" WHERE status = 'rejected') AS rejected_invites
     `),
     prisma.$queryRaw<OverviewRequestStatusRow[]>(Prisma.sql`
       SELECT
@@ -347,7 +424,13 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
         COALESCE(
           AVG(
             EXTRACT(EPOCH FROM (fp.first_proposal_at - r.created_at)) / 3600.0
-          ) FILTER (WHERE fp.first_proposal_at IS NOT NULL),
+          ) FILTER (
+            WHERE fp.first_proposal_at IS NOT NULL
+              AND r.request_status::text IN (
+                ${REQUEST_STATUS.MATCHED},
+                ${REQUEST_STATUS.CLOSED}
+              )
+          ),
           0
         ) AS avg_match_hours
       FROM "request" r
@@ -361,6 +444,71 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       GROUP BY objective_category
       ORDER BY COUNT(*) DESC, objective_category ASC
       LIMIT 5
+    `),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        e.experience_title AS label,
+        COUNT(*)::int AS value
+      FROM "proposal_experience" pe
+      INNER JOIN "proposal" p ON p.id = pe.proposal_id
+      INNER JOIN "request" r ON r.id = p.request_id
+      INNER JOIN "experience" e ON e.id = pe.experience_id
+      WHERE r.request_status::text IN (
+        ${REQUEST_STATUS.MATCHED},
+        ${REQUEST_STATUS.CLOSED}
+      )
+      GROUP BY e.id, e.experience_title
+      ORDER BY COUNT(*) DESC, e.experience_title ASC
+      LIMIT 5
+    `),
+    prisma.$queryRaw<OverviewProposalSummaryRow[]>(Prisma.sql`
+      WITH proposal_experience_counts AS (
+        SELECT
+          p.id AS proposal_id,
+          COUNT(pe.experience_id)::int AS experience_count
+        FROM "proposal" p
+        LEFT JOIN "proposal_experience" pe ON pe.proposal_id = p.id
+        GROUP BY p.id
+      )
+      SELECT
+        COUNT(*) FILTER (WHERE proposal_status = 'PENDING')::int AS pending_count,
+        COUNT(*) FILTER (WHERE proposal_status = 'APPROVED')::int AS approved_count,
+        COUNT(*) FILTER (WHERE proposal_status = 'ACCEPTED')::int AS accepted_count,
+        COUNT(*) FILTER (WHERE proposal_status = 'REJECTED')::int AS rejected_count,
+        COALESCE(AVG(experience_count), 0) AS avg_experiences_per_proposal
+      FROM "proposal" p
+      LEFT JOIN proposal_experience_counts pec ON pec.proposal_id = p.id
+    `),
+    prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
+      SELECT
+        proposal_status::text AS label,
+        COUNT(*)::int AS value
+      FROM "proposal"
+      GROUP BY proposal_status::text
+      ORDER BY COUNT(*) DESC, proposal_status::text ASC
+    `),
+    prisma.$queryRaw<OverviewProposalTrendRow[]>(Prisma.sql`
+      WITH weeks AS (
+        SELECT generate_series(
+          date_trunc('week', CURRENT_DATE) - INTERVAL '7 weeks',
+          date_trunc('week', CURRENT_DATE),
+          INTERVAL '1 week'
+        ) AS week_start
+      ),
+      proposal_counts AS (
+        SELECT
+          date_trunc('week', created_at) AS week_start,
+          COUNT(*)::int AS count
+        FROM "proposal"
+        WHERE created_at >= date_trunc('week', CURRENT_DATE) - INTERVAL '7 weeks'
+        GROUP BY 1
+      )
+      SELECT
+        weeks.week_start,
+        COALESCE(proposal_counts.count, 0)::int AS count
+      FROM weeks
+      LEFT JOIN proposal_counts ON proposal_counts.week_start = weeks.week_start
+      ORDER BY weeks.week_start ASC
     `),
     prisma.$queryRaw<OverviewCategoryRow[]>(Prisma.sql`
       SELECT
@@ -518,8 +666,38 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
   }));
 
   const counts = countRows[0];
+  const userTeamSummary = userTeamSummaryRows[0];
   const usersLast14Days = growth.reduce((sum, point) => sum + point.users, 0);
   const teamsLast14Days = growth.reduce((sum, point) => sum + point.teams, 0);
+  const totalUsers = toNumber(counts?.total_users ?? 0);
+  const usersInTeams = toNumber(userTeamSummary?.users_in_teams ?? 0);
+  const totalInvites = toNumber(userTeamSummary?.total_invites ?? 0);
+  const acceptedInvites = toNumber(userTeamSummary?.accepted_invites ?? 0);
+  const userTeamMetrics: OverviewUserTeamMetrics = {
+    onboardingCompletedUsers: toNumber(
+      userTeamSummary?.onboarding_completed_users ?? 0
+    ),
+    onboardingCompletionRate:
+      totalUsers === 0
+        ? 0
+        : (toNumber(userTeamSummary?.onboarding_completed_users ?? 0) /
+            totalUsers) *
+          100,
+    usersInTeams,
+    soloUsers: Math.max(totalUsers - usersInTeams, 0),
+    averageTeamSize: Number(
+      toNumber(userTeamSummary?.average_team_size ?? 0).toFixed(1)
+    ),
+    teamsWithMultipleMembers: toNumber(
+      userTeamSummary?.teams_with_multiple_members ?? 0
+    ),
+    totalInvites,
+    pendingInvites: toNumber(userTeamSummary?.pending_invites ?? 0),
+    acceptedInvites,
+    rejectedInvites: toNumber(userTeamSummary?.rejected_invites ?? 0),
+    inviteAcceptanceRate:
+      totalInvites === 0 ? 0 : (acceptedInvites / totalInvites) * 100,
+  };
   const requestStatus: OverviewRequestStatusPoint[] = requestStatusRows.map(
     row => ({
       id: normalizeRequestStatus(row.request_status) ?? 'unknown',
@@ -543,6 +721,8 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       [REQUEST_STATUS.PENDING]: 0,
       [REQUEST_STATUS.MATCHED]: 0,
       [REQUEST_STATUS.CLOSED]: 0,
+      [REQUEST_STATUS.PROCESSING]: 0,
+      [REQUEST_STATUS.RETRYING]: 0,
     };
 
     existing[normalizedStatus] = toNumber(row.count);
@@ -568,6 +748,34 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       value: toNumber(row.value),
     })),
     topMatchedExperiences: topMatchedExperienceRows.map(row => ({
+      label: row.label,
+      value: toNumber(row.value),
+    })),
+  };
+  const proposalSummary = proposalSummaryRows[0];
+  const totalProposals = toNumber(counts?.total_proposals ?? 0);
+  const acceptedProposals = toNumber(proposalSummary?.accepted_count ?? 0);
+  const proposalMetrics: OverviewProposalMetrics = {
+    totalProposals,
+    pendingProposals: toNumber(proposalSummary?.pending_count ?? 0),
+    approvedProposals: toNumber(proposalSummary?.approved_count ?? 0),
+    acceptedProposals,
+    rejectedProposals: toNumber(proposalSummary?.rejected_count ?? 0),
+    acceptanceRate:
+      totalProposals === 0 ? 0 : (acceptedProposals / totalProposals) * 100,
+    averageExperiencesPerProposal: Number(
+      toNumber(proposalSummary?.avg_experiences_per_proposal ?? 0).toFixed(1)
+    ),
+    statusBreakdown: proposalStatusRows.map(row => ({
+      label: getProposalStatusLabel(row.label),
+      value: toNumber(row.value),
+    })),
+    trend: proposalTrendRows.map(row => ({
+      periodKey: toWeekKey(row.week_start),
+      periodLabel: toWeekLabel(row.week_start),
+      value: toNumber(row.count),
+    })),
+    topProposedExperiences: topProposedExperienceRows.map(row => ({
       label: row.label,
       value: toNumber(row.value),
     })),
@@ -729,15 +937,17 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
   };
 
   return {
-    totalUsers: toNumber(counts?.total_users ?? 0),
+    totalUsers,
     totalTeams: toNumber(counts?.total_teams ?? 0),
     usersLast14Days,
     teamsLast14Days,
     growth,
+    userTeamMetrics,
     totalRequests: toNumber(counts?.total_requests ?? 0),
     requestStatus,
     requestTrend,
     requestMetrics,
+    proposalMetrics,
     experienceMetrics,
     eventMetrics,
     quizMetrics,

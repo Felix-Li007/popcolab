@@ -85,16 +85,15 @@ export default function TeamCard({ team, onViewMembers }: Readonly<Props>) {
       </div>
 
       <div className={styles.footer}>
-        <Button
-          variant="text"
-          size="xs"
+        <button
+          type="button"
           onClick={() => onViewMembers(team)}
           className={styles.actionPrimary}
           data-testid="view-team-view"
-          icon={<EyeIcon className={styles.actionIcon} />}
         >
+          <EyeIcon className={styles.actionIcon} />
           View
-        </Button>
+        </button>
       </div>
     </article>
   );

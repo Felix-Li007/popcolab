@@ -154,8 +154,9 @@ const actions: ActionLink[] = [
 
 export default function QuickActions() {
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
-      <h3 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-500">
+    <div className="relative overflow-hidden rounded-[14px] border border-white/76 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(246,249,252,0.8))] p-4 shadow-[0_26px_52px_rgba(15,23,42,0.09),0_10px_24px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-xl">
+      <div className="pointer-events-none absolute left-4 top-2 h-10 w-24 rounded-full bg-white/55 blur-2xl" />
+      <h3 className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-500">
         Quick Actions
       </h3>
       <div className="grid grid-cols-2 gap-2">
@@ -163,7 +164,7 @@ export default function QuickActions() {
           <Link
             key={action.label}
             href={action.href}
-            className={`group flex min-h-[74px] flex-col items-center justify-center gap-1.5 rounded-lg border p-2.5 text-center transition-all ${action.tone}`}
+            className={`group flex min-h-[78px] flex-col items-center justify-center gap-1.5 rounded-[14px] border p-2.5 text-center shadow-[0_14px_28px_rgba(15,23,42,0.08),0_6px_14px_rgba(15,23,42,0.05),inset_0_1px_0_rgba(255,255,255,0.86)] backdrop-blur-xl transition-all ${action.tone}`}
           >
             <span className="transition-transform group-hover:scale-110">
               {action.icon}

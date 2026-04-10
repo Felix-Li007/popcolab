@@ -1,7 +1,20 @@
 @reference "../../../app/globals.css";
 
 .card {
-  @apply bg-white rounded-xl border border-gray-100 shadow-sm h-full min-h-[312px] flex flex-col w-full overflow-hidden;
+  @apply h-full min-h-[312px] flex flex-col w-full overflow-hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.88),
+    rgba(248, 250, 252, 0.72)
+  );
+  box-shadow:
+    0 22px 44px rgba(15, 23, 42, 0.08),
+    0 8px 18px rgba(148, 163, 184, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
   position: relative;
   transition:
     box-shadow 0.3s ease,
@@ -11,16 +24,18 @@
 
 .card:hover {
   box-shadow:
-    0 0 0 1.5px var(--glow-color),
-    0 0 20px 6px var(--glow-color);
+    0 0 0 1.5px color-mix(in srgb, var(--glow-color) 44%, white),
+    0 30px 56px rgba(15, 23, 42, 0.12),
+    0 0 24px 6px color-mix(in srgb, var(--glow-color) 42%, transparent);
   transform: translateY(-2px);
 }
 
 .cardActive {
-  border-color: var(--color-magenta);
+  border-color: color-mix(in srgb, var(--color-magenta) 28%, white);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--color-magenta) 14%, transparent),
-    0 4px 16px color-mix(in srgb, black 8%, transparent);
+    0 0 0 2px color-mix(in srgb, var(--color-magenta) 20%, transparent),
+    0 24px 48px rgba(15, 23, 42, 0.1),
+    0 0 26px color-mix(in srgb, var(--color-magenta) 18%, transparent);
 }
 
 .orb {
@@ -45,7 +60,8 @@
 }
 
 .cardAction {
-  @apply absolute inset-0 cursor-pointer rounded-xl bg-transparent;
+  @apply absolute inset-0 cursor-pointer bg-transparent;
+  border-radius: 14px;
   z-index: 5;
 }
 
@@ -55,15 +71,28 @@
 }
 
 .selectToggle {
-  @apply absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors z-20;
+  @apply absolute top-3 right-3 flex items-center justify-center transition-colors z-20;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 9999px;
+  border-width: 1px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 18px rgba(148, 163, 184, 0.16);
 }
 
 .selectToggleOn {
-  @apply border-teal-deep bg-teal-deep;
+  border-color: rgba(15, 118, 110, 0.68);
+  background: linear-gradient(
+    180deg,
+    rgba(13, 148, 136, 0.92),
+    rgba(15, 118, 110, 0.96)
+  );
 }
 
 .selectToggleOff {
-  @apply border-gray-300 bg-white;
+  border-color: rgba(203, 213, 225, 0.86);
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .selectDot {
@@ -99,11 +128,30 @@
 }
 
 .footer {
-  @apply relative z-10 px-3 py-2 border-t border-gray-100 flex items-center justify-between;
+  @apply relative z-10 flex items-center justify-between gap-2 px-3 py-2.5;
+  border-top: 1px solid rgba(226, 232, 240, 0.72);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.52),
+    rgba(248, 250, 252, 0.76)
+  );
 }
 
 .actionIcon {
   @apply w-3 h-3;
+}
+
+.footer :global(button) {
+  min-width: 0 !important;
+  height: 2rem !important;
+  padding-inline: 0.85rem !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.72) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 18px rgba(148, 163, 184, 0.1);
+  color: rgba(71, 85, 105, 0.92) !important;
 }
 
 .deleteAction {

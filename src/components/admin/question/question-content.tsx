@@ -175,14 +175,14 @@ export default function QuestionContent({
       : updateQuestionAction.bind(null, selectedId);
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-1 min-h-0 px-4 py-3 gap-4">
+    <div className={styles.pageShell}>
+      <div className={styles.pageGrid}>
         <div
-          className={`${styles.listPanel} border border-gray-200 flex flex-col bg-white z-10 shadow-[2px_0_12px_rgba(0,0,0,0.07)] rounded-2xl overflow-hidden`}
+          className={`${styles.listPanel} z-10 flex flex-col overflow-hidden`}
         >
-          <div className="px-4 py-3 border-b border-gray-100 shrink-0">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-gray-700">
+          <div className={styles.listHeader}>
+            <div className={styles.headerRow}>
+              <span className={styles.headerTitle}>
                 Questions ({filtered.length})
               </span>
               <Button
@@ -193,11 +193,12 @@ export default function QuestionContent({
                 variant="primary"
                 size="sm"
                 icon={<span>+</span>}
+                className="!h-9 !min-w-0 !px-4 border border-white/20 bg-[linear-gradient(135deg,#ff4fa6_0%,#ef476f_55%,#ff7e5f_100%)] shadow-[0_16px_28px_rgba(239,71,111,0.24),inset_0_1px_0_rgba(255,255,255,0.2)]"
               >
                 Add
               </Button>
             </div>
-            <div className="relative">
+            <div className={styles.searchShell}>
               <svg
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -215,14 +216,14 @@ export default function QuestionContent({
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search…"
                 data-testid="survey-search"
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white placeholder-gray-400 transition"
+                className={styles.searchInput}
               />
             </div>
           </div>
 
-          <div className="px-3 py-2 border-b border-gray-100 shrink-0">
-            <div className="rounded-[28px] border border-gray-200 bg-gray-50 px-3 py-2 shadow-sm">
-              <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+          <div className={styles.filterWrap}>
+            <div className={styles.filterCard}>
+              <div className={styles.typePills}>
                 {TYPE_FILTERS.map(f => (
                   <Button
                     key={f}
@@ -230,12 +231,13 @@ export default function QuestionContent({
                     variant="tab"
                     size="xs"
                     isActive={filter === f}
-                    className="whitespace-nowrap !h-8 !min-w-0 !px-3 !py-0 !text-[11px] !font-semibold"
+                    className={styles.typePill}
                   >
                     {getTypeFilterLabel(f)}
                     <Badge
                       variant="default"
                       size="xs"
+                      className={styles.typeCount}
                       bgColor={filter === f ? 'bg-white/20' : 'bg-gray-100'}
                       textColor={filter === f ? 'text-white' : 'text-gray-500'}
                     >
@@ -245,19 +247,17 @@ export default function QuestionContent({
                 ))}
               </div>
 
-              <div className="mt-2 flex items-center justify-between gap-3 border-t border-teal-medium/50 px-1 pt-2">
-                <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-                  Form
-                </span>
-                <div className="flex flex-wrap items-center justify-end gap-1.5">
+              <div className={styles.formRow}>
+                <span className={styles.formLabel}>Form</span>
+                <div className={styles.formPills}>
                   {FORM_FILTERS.map(formName => {
                     const checked = selectedForms.includes(formName);
                     return (
                       <label
                         key={formName}
-                        className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                        className={`${styles.formPill} ${
                           checked
-                            ? 'border-teal-200 bg-white text-teal-800 shadow-sm'
+                            ? 'border-teal-200 bg-white/90 text-teal-800 shadow-[0_8px_18px_rgba(45,212,191,0.16),inset_0_1px_0_rgba(255,255,255,0.84)]'
                             : 'border-transparent text-gray-500 hover:border-gray-200 hover:bg-white/80'
                         }`}
                       >
@@ -276,9 +276,9 @@ export default function QuestionContent({
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className={styles.listArea}>
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center gap-2">
+              <div className={styles.emptyState}>
                 <span className="text-3xl">📋</span>
                 <p className="text-xs text-gray-500" data-testid="survey-empty">
                   {search ? 'No matches found.' : 'No questions yet.'}
@@ -298,19 +298,17 @@ export default function QuestionContent({
                           setSelectedId(q.id ?? null);
                           setIsCreating(false);
                         }}
-                        className={`w-full text-left px-4 py-3 flex items-start gap-2.5 transition-all border-l-4 ${
+                        className={`${styles.rowButton} ${
                           isSelected
-                            ? 'border-magenta bg-magenta/[.06]'
-                            : 'border-transparent hover:bg-magenta/[.03]'
+                            ? styles.rowButtonActive
+                            : styles.rowButtonIdle
                         }`}
                       >
                         <span className="text-[10px] font-bold text-gray-400 w-5 shrink-0 mt-0.5 text-right">
                           {globalIdx}.
                         </span>
                         <div className="flex-1 min-w-0">
-                          <span
-                            className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md mb-1 ${meta.color}`}
-                          >
+                          <span className={`${styles.typeBadge} ${meta.color}`}>
                             {meta.icon} {meta.label}
                           </span>
                           <p
@@ -343,9 +341,7 @@ export default function QuestionContent({
           />
         </div>
 
-        <div
-          className={`${styles.editPanel} bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm`}
-        >
+        <div className={`${styles.editPanel} overflow-hidden`}>
           {showPanel ? (
             <QuestionPanel
               key={isCreating ? 'new' : String(selectedId)}
@@ -357,7 +353,7 @@ export default function QuestionContent({
               onDelete={deleteSelectedQuestion}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-3 p-8">
+            <div className={styles.panelEmptyState}>
               <span className="text-5xl">📋</span>
               <p className="text-sm font-semibold text-gray-600">
                 Select a question to edit

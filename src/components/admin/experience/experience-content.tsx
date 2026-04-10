@@ -1,8 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type FormEvent,
+} from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import SearchPanel from '@/components/admin/common/search-panel';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import ExperienceCard from '@/components/admin/experience/experience-card';
@@ -22,7 +27,7 @@ import type {
   ExperienceFormState,
   ExperienceStatus,
 } from '@/types/experience-type';
-import { Button } from '@/ui';
+import { Button, Search } from '@/ui';
 import { isNewExperience } from '@/utils/experience';
 import styles from '@/styles/admin/experiences/experience-content.module.css';
 
@@ -50,6 +55,7 @@ type StatusFilter = 'all' | ExperienceStatus;
 
 type Props = {
   initialData: Experience[];
+  initialSearch: string;
   providers: Provider[];
   categories: ExperienceCategory[];
   dimensions: Dimension[];
@@ -91,6 +97,7 @@ function parseDeliveryMethodTokens(value: string): string[] {
 
 export default function ExperienceContent({
   initialData,
+  initialSearch,
   providers,
   categories,
   dimensions,
@@ -99,7 +106,7 @@ export default function ExperienceContent({
   const searchParams = useSearchParams();
   const [, startDeleteTransition] = useTransition();
   const [experiences, setExperiences] = useState<Experience[]>(initialData);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
   const idParam = searchParams.get('id');
   const viewParam = searchParams.get('view');
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -116,6 +123,10 @@ export default function ExperienceContent({
   useEffect(() => {
     setExperiences(initialData);
   }, [initialData]);
+
+  useEffect(() => {
+    setSearch(initialSearch);
+  }, [initialSearch]);
 
   useEffect(() => {
     if (!idParam || !/^\d+$/.test(idParam)) {
@@ -139,7 +150,6 @@ export default function ExperienceContent({
   useEffect(() => {
     setPage(1);
   }, [
-    search,
     capacityFilter,
     leadTypeFilter,
     deliveryMethodFilter,
@@ -173,8 +183,6 @@ export default function ExperienceContent({
   );
 
   const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
     return [...experiences]
       .sort((a, b) => {
         const aUpdated = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
@@ -186,22 +194,6 @@ export default function ExperienceContent({
         return b.id - a.id;
       })
       .filter(experience => {
-        const matchesSearch =
-          !query ||
-          [
-            experience.experienceTitle,
-            experience.providerLabel,
-            experience.categoryTitle,
-            experience.pricing.pricingModel ?? '',
-            experience.pricing.pricingNotes ?? '',
-            experience.leadType,
-            experience.deliveryMethods,
-            experience.dietaryConsiderations ?? '',
-          ]
-            .join(' ')
-            .toLowerCase()
-            .includes(query);
-
         const matchesCapacity = matchesRange(
           experience.capacityMax,
           capacityFilter,
@@ -230,7 +222,6 @@ export default function ExperienceContent({
         const matchesNew = !newOnly || isNewExperience(experience.createdAt);
 
         return (
-          matchesSearch &&
           matchesCapacity &&
           matchesLeadType &&
           matchesDeliveryMethod &&
@@ -241,7 +232,6 @@ export default function ExperienceContent({
       });
   }, [
     experiences,
-    search,
     capacityFilter,
     leadTypeFilter,
     deliveryMethodFilter,
@@ -300,6 +290,23 @@ export default function ExperienceContent({
     setIsCreating(true);
   }
 
+  function handleSearchSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    const normalizedSearch = search.trim();
+
+    if (normalizedSearch) {
+      params.set('q', normalizedSearch);
+    }
+
+    router.push(
+      params.toString()
+        ? `/admin/experiences?${params.toString()}`
+        : '/admin/experiences',
+      { scroll: false }
+    );
+  }
+
   function handleCloseForm() {
     setIsCreating(false);
     setSelection(null);
@@ -349,26 +356,23 @@ export default function ExperienceContent({
       <div className={styles.root}>
         <div className={styles.listSection}>
           <div className={styles.listPanel}>
-            <SearchPanel
-              title={`Experiences (${filtered.length})`}
-              searchValue={search}
-              onSearchChange={setSearch}
-              searchPlaceholder="Search experiences, providers, categories, or delivery methods…"
-              searchTestId="experience-search"
-              actions={
-                <Button
-                  onClick={handleCreate}
-                  variant="primary"
-                  size="sm"
-                  icon={<span>+</span>}
-                  disabled={providers.length === 0 || categories.length === 0}
-                >
-                  Add
-                </Button>
-              }
-            />
+            <div className={styles.headerBar}>
+              <span className={styles.headerTitle}>
+                Experiences ({filtered.length})
+              </span>
+              <Button
+                onClick={handleCreate}
+                variant="primary"
+                size="sm"
+                icon={<span>+</span>}
+                disabled={providers.length === 0 || categories.length === 0}
+                className="!h-9 !min-w-0 !px-4 border border-white/20 bg-[linear-gradient(135deg,#ff4fa6_0%,#ef476f_55%,#ff7e5f_100%)] shadow-[0_16px_28px_rgba(239,71,111,0.24),inset_0_1px_0_rgba(255,255,255,0.2)]"
+              >
+                Add
+              </Button>
+            </div>
 
-            <div className={styles.filterRow}>
+            <form className={styles.filterRow} onSubmit={handleSearchSubmit}>
               <select
                 value={capacityFilter}
                 onChange={event =>
@@ -465,12 +469,23 @@ export default function ExperienceContent({
                     setStatusFilter('all');
                     setNewOnly(false);
                   }}
-                  className="shrink-0"
+                  className={`${styles.clearButton} shrink-0`}
                 >
                   Clear Filters
                 </Button>
               ) : null}
-            </div>
+
+              <Search
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Search experiences, providers, categories, or delivery methods…"
+                data-testid="experience-search"
+                wrapperClassName={styles.searchWrap}
+                iconClassName={styles.searchIcon}
+                inputClassName={styles.searchInput}
+                buttonClassName={styles.searchButton}
+              />
+            </form>
 
             <div className={styles.listBody}>
               {filtered.length === 0 ? (

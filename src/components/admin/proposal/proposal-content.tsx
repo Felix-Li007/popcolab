@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
+import Select from '@/ui/Select';
 import PaginationBar from '@/components/shared/pagination-bar';
 import ProposalRow from '@/components/admin/proposal/proposal-row';
 import type {
@@ -221,18 +222,18 @@ export default function ProposalContent({ pageData, query }: Readonly<Props>) {
                 placeholder="Company Name"
                 className={styles.filterInput}
               />
-              <select
+              <Select
                 name="status"
                 defaultValue={query.status}
-                aria-label="Proposal status"
-                className={styles.filterInput}
-              >
-                <option value="all">All Status</option>
-                <option value="pending">PENDING</option>
-                <option value="approved">APPROVED</option>
-                <option value="accepted">ACCEPTED</option>
-                <option value="rejected">REJECTED</option>
-              </select>
+                ariaLabel="Proposal status"
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  { value: 'pending', label: 'PENDING' },
+                  { value: 'approved', label: 'APPROVED' },
+                  { value: 'accepted', label: 'ACCEPTED' },
+                  { value: 'rejected', label: 'REJECTED' },
+                ]}
+              />
 
               <div className={styles.keywordField}>
                 <label

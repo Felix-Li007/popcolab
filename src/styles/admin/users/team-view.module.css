@@ -5,11 +5,20 @@
 }
 
 .infoCard {
-  @apply rounded-xl border border-gray-100 px-3 py-2;
+  @apply rounded-[14px] px-3 py-3;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(248, 250, 252, 0.7)
+  );
+  box-shadow:
+    0 18px 36px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .label {
-  @apply text-[10px] text-gray-400 font-semibold mb-1;
+  @apply mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-gray-400;
 }
 
 .emptyText {
@@ -20,17 +29,60 @@
   @apply mb-2;
 }
 
+.searchWrap {
+  position: relative;
+}
+
+.searchIcon {
+  @apply pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400;
+}
+
 .searchInput {
-  @apply h-8 w-full rounded-lg bg-gray-100 px-3 text-xs text-gray-700 outline-none;
-  transition:
-    background-color 0.15s ease,
-    box-shadow 0.15s ease;
+  width: 100%;
+  height: 2.25rem;
+  padding-left: 2.15rem;
+  padding-right: 5.8rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.66)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(148, 163, 184, 0.12);
+  outline: none;
+  font-size: 0.75rem;
 }
 
 .searchInput:focus {
-  @apply bg-white;
-  box-shadow: 0 0 0 2px
-    color-mix(in srgb, var(--color-magenta) 26%, transparent);
+  border-color: rgba(20, 184, 166, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 0 3px rgba(20, 184, 166, 0.12),
+    0 12px 24px rgba(148, 163, 184, 0.14);
+}
+
+.searchButton {
+  position: absolute;
+  top: 50%;
+  right: 0.32rem;
+  transform: translateY(-50%);
+  height: calc(100% - 0.25rem);
+  min-width: 0;
+  padding-inline: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(51, 65, 85, 0.98),
+    rgba(15, 23, 42, 0.98)
+  );
+  box-shadow:
+    0 12px 22px rgba(15, 23, 42, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .membersList {
@@ -38,12 +90,25 @@
 }
 
 .memberCard {
-  @apply rounded-lg bg-gray-50 px-3 py-2 border border-gray-100 flex items-center gap-3;
+  @apply flex items-center gap-3 rounded-[14px] px-3 py-2;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.68)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 20px rgba(148, 163, 184, 0.1);
 }
 
 .memberAvatar {
   @apply h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0;
-  background: var(--color-lavender);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94),
+    rgba(226, 232, 240, 0.72)
+  );
   color: var(--color-teal-deep);
 }
 

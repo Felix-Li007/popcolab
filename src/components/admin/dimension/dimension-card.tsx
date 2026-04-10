@@ -233,7 +233,6 @@ function StandardDimensionCard({
   onView,
   onDelete,
 }: Readonly<DimensionCardProps>) {
-  console.log('Rendering DimensionCard for dimension:', dimension);
   const {
     options,
     dataType,

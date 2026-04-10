@@ -8,7 +8,6 @@ import {
   useTransition,
 } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import SearchPanel from '@/components/admin/common/search-panel';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import ExperienceCategoryForm from '@/components/admin/experience/category-form';
 import ExperienceCategoryTree from '@/components/admin/experience/category-tree';
@@ -32,7 +31,7 @@ import {
   flattenExperienceCategoryOptions,
   getCategorySubtreeHeight,
 } from '@/utils/experience-category-tree';
-import { Button, Badge } from '@/ui';
+import { Button, Badge, Search } from '@/ui';
 
 type FormIntent = 'create-root' | 'create-child' | 'edit';
 
@@ -241,55 +240,57 @@ export default function ExperienceCategoryContent({
 
   return (
     <div className={styles.root}>
-      <section className={styles.toolbar}>
-        <SearchPanel
-          title="Search All Categories"
-          searchValue={globalSearch}
-          onSearchChange={setGlobalSearch}
-          searchPlaceholder="Search the full category tree by title, status, notes, or counts…"
-          searchTestId="experience-category-search-global"
-          actions={
-            <>
-              <Button
-                onClick={() => openForm('create-root', null)}
-                variant="primary"
-                size="sm"
-                icon={<span>+</span>}
-              >
-                New Root
-              </Button>
-              <Button
-                onClick={() => openForm('create-child', null)}
-                variant="secondary"
-                size="sm"
-                icon={<span>+</span>}
-                disabled={
-                  !selectedCategory ||
-                  selectedCategoryDepth === null ||
-                  selectedCategoryDepth >= MAX_CATEGORY_DEPTH
-                }
-              >
-                Add Child
-              </Button>
-            </>
-          }
-        />
-      </section>
-
       <div className={styles.columns}>
         <section
           className={styles.treePanel}
           data-testid="experience-category-tree-panel"
         >
           <div className={styles.panelHeader}>
-            <div>
+            <div className={styles.treeHeaderTop}>
               <h2 className={styles.panelTitle}>
                 Category Tree ({categories.length})
               </h2>
-              <p className={styles.panelSubtitle}>
-                Up to {MAX_CATEGORY_LEVEL} levels. Select any node to inspect it
-                or add children.
-              </p>
+              <div className={styles.treeHeaderActions}>
+                <Button
+                  onClick={() => openForm('create-root', null)}
+                  variant="primary"
+                  size="sm"
+                  icon={<span>+</span>}
+                  className="!h-9 !min-w-0 !px-4 border border-white/20 bg-[linear-gradient(135deg,#ff4fa6_0%,#ef476f_55%,#ff7e5f_100%)] shadow-[0_16px_28px_rgba(239,71,111,0.24),inset_0_1px_0_rgba(255,255,255,0.2)]"
+                >
+                  New Root
+                </Button>
+                <Button
+                  onClick={() => openForm('create-child', null)}
+                  variant="secondary"
+                  size="sm"
+                  icon={<span>+</span>}
+                  disabled={
+                    !selectedCategory ||
+                    selectedCategoryDepth === null ||
+                    selectedCategoryDepth >= MAX_CATEGORY_DEPTH
+                  }
+                  className="!h-9 !min-w-0 !px-4 rounded-full border border-white/78 bg-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_10px_20px_rgba(148,163,184,0.12)]"
+                >
+                  Add Child
+                </Button>
+              </div>
+            </div>
+            <p className={styles.panelSubtitle}>
+              Up to {MAX_CATEGORY_LEVEL} levels. Select any node to inspect it
+              or add children.
+            </p>
+            <div className={styles.treeSearchWrap}>
+              <Search
+                value={globalSearch}
+                onChange={event => setGlobalSearch(event.target.value)}
+                placeholder="Search the full category tree by title, status, notes, or counts…"
+                data-testid="experience-category-search-global"
+                wrapperClassName={styles.searchRoot}
+                iconClassName={styles.searchIcon}
+                inputClassName={styles.searchInput}
+                buttonClassName={styles.searchButton}
+              />
             </div>
           </div>
           <div className={styles.panelBody}>
@@ -349,6 +350,7 @@ export default function ExperienceCategoryContent({
                       selectedCategory.status
                     )}
                     size="sm"
+                    className={styles.summaryBadge}
                   >
                     {selectedCategory.status}
                   </Badge>
@@ -390,6 +392,7 @@ export default function ExperienceCategoryContent({
                     onClick={() => openForm('edit', selectedCategory.id)}
                     variant="primary"
                     size="sm"
+                    className="border border-white/20 bg-[linear-gradient(135deg,#ff4fa6_0%,#ef476f_55%,#ff7e5f_100%)] shadow-[0_16px_28px_rgba(239,71,111,0.24),inset_0_1px_0_rgba(255,255,255,0.2)]"
                   >
                     Edit Category
                   </Button>
@@ -401,6 +404,7 @@ export default function ExperienceCategoryContent({
                       selectedCategoryDepth === null ||
                       selectedCategoryDepth >= MAX_CATEGORY_DEPTH
                     }
+                    className="rounded-full border border-white/78 bg-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_10px_20px_rgba(148,163,184,0.12)]"
                   >
                     Add Child
                   </Button>
@@ -408,7 +412,7 @@ export default function ExperienceCategoryContent({
                     onClick={() => handleDelete(selectedCategory)}
                     variant="text"
                     size="sm"
-                    className={styles.treeDelete}
+                    className={`${styles.treeDelete} rounded-full border border-white/78 bg-white/82 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_10px_20px_rgba(148,163,184,0.12)]`}
                   >
                     Delete
                   </Button>

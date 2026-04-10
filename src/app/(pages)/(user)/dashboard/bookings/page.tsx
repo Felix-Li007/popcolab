@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import {
+  cancelBookingAction,
+  getBookingsAction,
+} from '@/actions/event-actions';
 
 const CANCEL_REASONS = [
   'Change of plans',
@@ -15,7 +19,7 @@ const CANCEL_REASONS = [
 type BookingType = {
   id: number;
   event_id: number;
-  event_date: string;
+  event_date: string | Date;
   ticket_type: string;
   quantity: number;
   total_amount: number;
@@ -34,9 +38,8 @@ export default function MyEventsPage() {
   const [customReason, setCustomReason] = useState('');
 
   const fetchBookings = async () => {
-    const res = await fetch('/api/bookings');
-    const data = await res.json();
-    setBookings(data);
+    const data = await getBookingsAction();
+    setBookings(data as BookingType[]);
   };
 
   // ✅ FIXED
@@ -59,27 +62,7 @@ export default function MyEventsPage() {
     }
 
     try {
-      const res = await fetch(`/api/bookings/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ reason: finalReason }),
-      });
-
-      const text = await res.text();
-
-      // ✅ FIXED
-      try {
-        JSON.parse(text);
-      } catch {
-        // Ignore parse failures here. The response body is only used for debugging.
-      }
-
-      if (!res.ok) {
-        alert('Cancel failed ❌');
-        return;
-      }
+      await cancelBookingAction(id, finalReason);
 
       // ✅ update UI
       setBookings(prev =>
@@ -95,7 +78,7 @@ export default function MyEventsPage() {
       setCustomReason('');
     } catch (error) {
       console.error(error);
-      alert('Something went wrong');
+      alert(error instanceof Error ? error.message : 'Something went wrong');
     }
   };
 

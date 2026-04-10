@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/ui';
-import SearchPanel from '@/components/admin/common/search-panel';
+import { Button, Search } from '@/ui';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
 import PaginationBar from '@/components/shared/pagination-bar';
 import DimensionCard from '@/components/admin/dimension/dimension-card';
@@ -208,18 +207,17 @@ export default function DimensionContent({
       <div className={styles.root}>
         <div className={styles.listSection}>
           <div className={styles.listPanel}>
-            <SearchPanel
-              title={`Dimensions (${filtered.length})`}
-              searchValue={search}
-              onSearchChange={setSearch}
-              searchPlaceholder="Search dimensions…"
-              searchTestId="dimension-search"
-              actions={
-                <>
+            <div className={styles.searchRoot}>
+              <div className={styles.searchTop}>
+                <span className={styles.searchTitle}>
+                  Dimensions ({filtered.length})
+                </span>
+                <div className={styles.searchActions}>
                   <Button
                     onClick={handleCreate}
                     variant="primary"
                     size="sm"
+                    className={styles.addButton}
                     icon={<span>+</span>}
                   >
                     Add
@@ -228,15 +226,27 @@ export default function DimensionContent({
                     onClick={handleBulkDelete}
                     variant="secondary"
                     size="sm"
-                    className={styles.deleteButton}
+                    className={`${styles.toolbarButton} ${styles.deleteButton}`}
                     disabled={selectedIds.size === 0}
                   >
                     Delete
                     {selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}
                   </Button>
-                </>
-              }
-            />
+                </div>
+              </div>
+
+              <Search
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Search dimensions…"
+                data-testid="dimension-search"
+                buttonType="button"
+                wrapperClassName={styles.searchWrap}
+                iconClassName={styles.searchIcon}
+                inputClassName={styles.searchInput}
+                buttonClassName={styles.searchButton}
+              />
+            </div>
 
             <DimensionCategoryFilterBar
               categories={categories}

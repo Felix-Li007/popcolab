@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { generateProposalForRequestAction } from '@/actions/proposal-actions';
 import AdminEmptyState from '@/components/admin/common/admin-empty-state';
+import Select from '@/ui/Select';
 import DatePicker from '@/components/shared/date-picker';
 import PaginationBar from '@/components/shared/pagination-bar';
 import RequestUsers from '@/components/admin/request/request-users';
@@ -18,7 +19,7 @@ import type {
 } from '@/types/request-type';
 import type { AdminUserListItem } from '@/types/user-type';
 import UserViewModal from '@/components/admin/user/user-view';
-import { Badge } from '@/ui';
+import { Badge, Search } from '@/ui';
 import styles from '@/styles/admin/requests/request-content.module.css';
 
 type Props = {
@@ -235,19 +236,18 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                   className={styles.filterInput}
                 />
               </div>
-              <select
+              <Select
                 name="status"
                 defaultValue={query.status}
-                aria-label="Request status"
-                className={styles.filterInput}
-              >
-                <option value="all">All Status</option>
-                {REQUEST_STATUS_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                ariaLabel="Request status"
+                options={[
+                  { value: 'all', label: 'All Status' },
+                  ...REQUEST_STATUS_OPTIONS.map(option => ({
+                    value: option.value,
+                    label: option.label,
+                  })),
+                ]}
+              />
               <DatePicker
                 id="request-created-from"
                 ariaLabel="Created from"
@@ -288,20 +288,17 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                 <label className={styles.srOnlyLabel} htmlFor="request-keyword">
                   Search
                 </label>
-                <div className={styles.keywordRow}>
-                  <input
-                    id="request-keyword"
-                    type="text"
-                    name="q"
-                    defaultValue={query.search}
-                    placeholder="Keyword (company name, user name)"
-                    className={styles.filterInput}
-                    data-testid="admin-request-search"
-                  />
-                  <button type="submit" className={styles.searchButton}>
-                    Search
-                  </button>
-                </div>
+                <Search
+                  id="request-keyword"
+                  name="q"
+                  defaultValue={query.search}
+                  placeholder="Keyword (company name, user name)"
+                  data-testid="admin-request-search"
+                  wrapperClassName={styles.keywordRow}
+                  iconClassName={styles.searchIcon}
+                  inputClassName={styles.keywordInput}
+                  buttonClassName={styles.searchButton}
+                />
               </div>
 
               <Link

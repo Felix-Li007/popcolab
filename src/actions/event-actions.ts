@@ -821,8 +821,12 @@ export async function getEventByIdAction(eventId: number) {
 }
 
 export async function getConfirmedBookingsAction() {
+  const userId = await getCurrentDbUserId();
+  if (!userId) throw new Error('Authentication required.');
+
   const bookings = await prisma.userEvent.findMany({
     where: {
+      user_id: userId,
       status: 'CONFIRMED',
     },
     orderBy: { id: 'desc' },
@@ -838,7 +842,31 @@ export async function getConfirmedBookingsAction() {
   return toPlainObject(bookings);
 }
 
+export async function getBookingsAction() {
+  const userId = await getCurrentDbUserId();
+  if (!userId) throw new Error('Authentication required.');
+
+  const bookings = await prisma.userEvent.findMany({
+    where: {
+      user_id: userId,
+    },
+    orderBy: { id: 'desc' },
+    include: {
+      event: {
+        include: {
+          event_galleries: true,
+        },
+      },
+    },
+  });
+
+  return toPlainObject(bookings);
+}
+
 export async function createOrUpdateBookingAction(input: BookingInput) {
+  const userId = await getCurrentDbUserId();
+  if (!userId) throw new Error('Authentication required.');
+
   const eventId = Number(input.eventId);
   const calendarId = Number(input.calendarId);
   const quantity = Number(input.quantity);
@@ -937,6 +965,7 @@ export async function createOrUpdateBookingAction(input: BookingInput) {
 
   const existing = await prisma.userEvent.findFirst({
     where: {
+      user_id: userId,
       event_id: eventId,
       event_date: eventDate,
       status: 'CONFIRMED',
@@ -953,6 +982,9 @@ export async function createOrUpdateBookingAction(input: BookingInput) {
       },
     });
 
+    revalidatePath('/dashboard/bookings');
+    revalidatePath('/dashboard/events');
+
     return toPlainObject({
       message: 'Booking updated',
       booking: updated,
@@ -962,6 +994,7 @@ export async function createOrUpdateBookingAction(input: BookingInput) {
 
   const booking = await prisma.userEvent.create({
     data: {
+      user_id: userId,
       event_id: eventId,
       event_date: eventDate,
       ticket_type: ticketType,
@@ -971,9 +1004,46 @@ export async function createOrUpdateBookingAction(input: BookingInput) {
     },
   });
 
+  revalidatePath('/dashboard/bookings');
+  revalidatePath('/dashboard/events');
+
   return toPlainObject({
     message: 'Booking created',
     booking,
     alreadyExists: false,
   });
+}
+
+export async function cancelBookingAction(id: number, reason?: string) {
+  const userId = await getCurrentDbUserId();
+  if (!userId) throw new Error('Authentication required.');
+
+  const bookingId = Number(id);
+  if (!Number.isInteger(bookingId) || bookingId <= 0) {
+    throw new Error('Invalid booking ID');
+  }
+
+  const existing = await prisma.userEvent.findFirst({
+    where: {
+      id: bookingId,
+      user_id: userId,
+    },
+  });
+
+  if (!existing) {
+    throw new Error('Booking not found');
+  }
+
+  const updated = await prisma.userEvent.update({
+    where: { id: bookingId },
+    data: {
+      status: 'CANCELLED',
+      cancel_reason: reason?.trim() || 'No reason',
+    },
+  });
+
+  revalidatePath('/dashboard/bookings');
+  revalidatePath('/dashboard/events');
+
+  return toPlainObject(updated);
 }

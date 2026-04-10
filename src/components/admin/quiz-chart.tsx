@@ -19,10 +19,11 @@ export default function QuizChart({ metrics }: Readonly<QuizChartProps>) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+    <div className="relative overflow-hidden rounded-[14px] border border-white/76 bg-[linear-gradient(145deg,rgba(255,255,255,0.94),rgba(246,249,252,0.8))] p-4 shadow-[0_26px_52px_rgba(15,23,42,0.09),0_10px_24px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-xl">
+      <div className="pointer-events-none absolute left-4 top-2 h-10 w-24 rounded-full bg-white/55 blur-2xl" />
       <div className="flex items-center gap-1.5 mb-1">
         <span className="text-base">🧠</span>
-        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-500">
           Assessment
         </h3>
       </div>

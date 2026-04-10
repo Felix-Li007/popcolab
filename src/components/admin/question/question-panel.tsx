@@ -123,10 +123,10 @@ function getQuestionTypeButtonClass(
   currentType: QuestionType,
   candidateType: QuestionType
 ) {
-  return `flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all flex-1 min-w-[120px] ${
+  return `flex min-w-[120px] flex-1 items-center justify-center gap-2 rounded-full border px-3 py-2.5 text-xs font-semibold transition-all ${
     currentType === candidateType
-      ? 'border-magenta bg-magenta/5 text-magenta'
-      : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+      ? 'border-fuchsia-200 bg-[linear-gradient(135deg,rgba(236,72,153,0.18),rgba(244,114,182,0.08))] text-fuchsia-700 shadow-[0_10px_24px_rgba(236,72,153,0.16),inset_0_1px_0_rgba(255,255,255,0.75)]'
+      : 'border-white/70 bg-white/65 text-gray-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_8px_20px_rgba(148,163,184,0.12)] hover:border-gray-200 hover:bg-white/85'
   }`;
 }
 
@@ -134,18 +134,18 @@ function getDimensionCategoryFilterClass(
   activeCategory: string,
   categoryName: string
 ) {
-  return `px-2.5 py-1 rounded-full text-[10px] font-semibold transition-colors ${
+  return `rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-colors ${
     activeCategory === categoryName
-      ? 'bg-teal-600 text-white'
-      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+      ? 'border-teal-200 bg-[linear-gradient(135deg,rgba(13,148,136,0.92),rgba(8,145,178,0.86))] text-white shadow-[0_10px_20px_rgba(13,148,136,0.18)]'
+      : 'border-white/75 bg-white/70 text-gray-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_6px_16px_rgba(148,163,184,0.12)] hover:bg-white'
   }`;
 }
 
 function getDimensionCardClass(isSelected: boolean) {
-  return `min-w-0 rounded-xl border px-2.5 py-2 transition-colors ${
+  return `min-w-0 rounded-2xl border px-2.5 py-2 transition-colors ${
     isSelected
-      ? 'border-teal-300 bg-teal-50'
-      : 'border-gray-200 hover:bg-gray-50'
+      ? 'border-teal-200 bg-[linear-gradient(180deg,rgba(240,253,250,0.96),rgba(204,251,241,0.56))] shadow-[0_14px_26px_rgba(45,212,191,0.12),inset_0_1px_0_rgba(255,255,255,0.84)]'
+      : 'border-white/80 bg-white/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_10px_20px_rgba(148,163,184,0.12)] hover:bg-white'
   }`;
 }
 
@@ -169,7 +169,7 @@ function QuestionPanelHeader({
   onDelete,
 }: Readonly<QuestionPanelHeaderProps>) {
   return (
-    <div className="flex items-center justify-between px-6 py-3 bg-gradient-to-r from-lavender via-white to-coral-light border-b border-pink-light/50 shrink-0">
+    <div className="flex shrink-0 items-center justify-between border-b border-slate-200/70 bg-[radial-gradient(circle_at_10%_0%,rgba(45,212,191,0.12),transparent_34%),linear-gradient(180deg,rgba(248,250,252,0.82),rgba(255,255,255,0.7))] px-6 py-3.5">
       <div className="flex items-center gap-2">
         <span className="text-lg leading-none">{isEdit ? '✏️' : '📋'}</span>
         <h3 className="text-sm font-bold text-gray-800">
@@ -183,7 +183,7 @@ function QuestionPanelHeader({
         <button
           type="button"
           onClick={onDelete}
-          className="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-colors"
+          className="flex items-center gap-1.5 rounded-full border border-red-100 bg-white/80 px-3 py-1.5 text-xs font-semibold text-red-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(248,113,113,0.12)] transition-colors hover:bg-red-50 hover:text-red-700"
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
             <path
@@ -304,7 +304,7 @@ function DimensionSelector({
         value={dimensionSearch}
         onChange={event => onSearchChange(event.target.value)}
         placeholder="Search dimensions..."
-        className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 mb-2"
+        className="mb-2 w-full rounded-full border border-white/75 bg-white/72 px-3 py-2 text-xs outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_18px_rgba(148,163,184,0.12)] focus:ring-2 focus:ring-magenta/20"
       />
       <div className="flex flex-wrap gap-1.5 mb-2">
         <button
@@ -345,7 +345,7 @@ function DimensionSelector({
                 onClick={onPrevPage}
                 disabled={dimensionPage <= 1}
                 title="Previous dimension page"
-                className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-800 disabled:pointer-events-none disabled:opacity-30"
+                className="absolute left-0 top-1/2 z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/75 bg-white/82 text-gray-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_10px_18px_rgba(148,163,184,0.16)] transition hover:bg-white hover:text-gray-800 disabled:pointer-events-none disabled:opacity-30"
               >
                 <svg
                   viewBox="0 0 20 20"
@@ -364,7 +364,7 @@ function DimensionSelector({
                 onClick={onNextPage}
                 disabled={dimensionPage >= dimensionTotalPages}
                 title="Next dimension page"
-                className="absolute right-0 top-1/2 z-10 flex h-8 w-8 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 hover:text-gray-800 disabled:pointer-events-none disabled:opacity-30"
+                className="absolute right-0 top-1/2 z-10 flex h-8 w-8 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/75 bg-white/82 text-gray-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_10px_18px_rgba(148,163,184,0.16)] transition hover:bg-white hover:text-gray-800 disabled:pointer-events-none disabled:opacity-30"
               >
                 <svg
                   viewBox="0 0 20 20"
@@ -380,7 +380,7 @@ function DimensionSelector({
               </button>
             </>
           ) : null}
-          <div className="h-[230px] overflow-y-auto rounded-xl border border-gray-200 bg-white px-8 py-2">
+          <div className="h-[230px] overflow-y-auto rounded-[1.35rem] border border-white/75 bg-white/66 px-8 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_14px_28px_rgba(148,163,184,0.14)]">
             <div
               className="grid gap-2 items-start"
               style={{ gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' }}
@@ -439,7 +439,7 @@ function DimensionSelector({
                         onChange={event =>
                           onUpdateWeight(dimension.id, event.target.value)
                         }
-                        className="mt-2 w-full rounded-lg border border-teal-200 bg-white px-2 py-1 text-right text-xs font-semibold outline-none focus:ring-2 focus:ring-teal-300 placeholder:font-normal placeholder-gray-400"
+                        className="mt-2 w-full rounded-full border border-teal-200 bg-white/90 px-2.5 py-1.5 text-right text-xs font-semibold outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92)] focus:ring-2 focus:ring-teal-300 placeholder:font-normal placeholder-gray-400"
                         min="0"
                         step="0.01"
                       />
@@ -513,7 +513,7 @@ function ChoiceOptionsSection({
                 onUpdateOption(index, 'label', event.target.value)
               }
               placeholder="Label"
-              className="flex-1 px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
+              className="flex-1 rounded-full border border-white/75 bg-white/72 px-3 py-2 text-xs font-semibold outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_16px_rgba(148,163,184,0.12)] focus:bg-white focus:ring-2 focus:ring-magenta/20 placeholder:font-normal placeholder-gray-400"
             />
             {options.length > 2 ? (
               <button
@@ -541,7 +541,7 @@ function ChoiceOptionsSection({
       <button
         type="button"
         onClick={onAddOption}
-        className="mt-2 text-xs font-semibold text-magenta hover:text-magenta/70 flex items-center gap-1"
+        className="mt-2 inline-flex items-center gap-1 rounded-full border border-fuchsia-100 bg-white/78 px-3 py-1.5 text-xs font-semibold text-magenta shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_18px_rgba(236,72,153,0.1)] hover:text-magenta/70"
       >
         <span>+</span> Add option
       </button>
@@ -561,7 +561,7 @@ function ScaleSettingsSection({ initial }: Readonly<{ initial?: Question }>) {
             name="option_label"
             placeholder="e.g. 1"
             defaultValue={initial?.options?.[0]?.label ?? '1'}
-            className="w-full px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
+            className="w-full rounded-full border border-white/75 bg-white/72 px-3 py-2 text-xs font-semibold outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_16px_rgba(148,163,184,0.12)] focus:bg-white focus:ring-2 focus:ring-magenta/20 placeholder:font-normal placeholder-gray-400"
           />
           <input
             type="hidden"
@@ -581,7 +581,7 @@ function ScaleSettingsSection({ initial }: Readonly<{ initial?: Question }>) {
             name="option_label"
             placeholder="e.g. 5"
             defaultValue={initial?.options?.[1]?.label ?? '5'}
-            className="w-full px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
+            className="w-full rounded-full border border-white/75 bg-white/72 px-3 py-2 text-xs font-semibold outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_16px_rgba(148,163,184,0.12)] focus:bg-white focus:ring-2 focus:ring-magenta/20 placeholder:font-normal placeholder-gray-400"
           />
           <input
             type="hidden"
@@ -603,7 +603,7 @@ function ScaleSettingsSection({ initial }: Readonly<{ initial?: Question }>) {
             defaultValue={initial?.options?.[2]?.label ?? '1'}
             min="0.01"
             step="0.01"
-            className="w-full px-3 py-2 text-xs bg-gray-100 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 focus:bg-white font-semibold placeholder:font-normal placeholder-gray-400"
+            className="w-full rounded-full border border-white/75 bg-white/72 px-3 py-2 text-xs font-semibold outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_16px_rgba(148,163,184,0.12)] focus:bg-white focus:ring-2 focus:ring-magenta/20 placeholder:font-normal placeholder-gray-400"
           />
           <input
             type="hidden"
@@ -648,7 +648,7 @@ function TextInputSettingsSection({
           value={textPlaceholder}
           onChange={event => onTextPlaceholderChange(event.target.value)}
           placeholder="Type your answer here…"
-          className="w-full px-3 py-2 text-xs bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-magenta/30 resize-none font-semibold placeholder:font-normal placeholder-gray-400"
+          className="w-full rounded-[1rem] border border-white/75 bg-white/74 px-3 py-2 text-xs font-semibold outline-none shadow-[inset_0_1px_0_rgba(255,255,255,0.92),0_8px_16px_rgba(148,163,184,0.12)] focus:ring-2 focus:ring-magenta/20 resize-none placeholder:font-normal placeholder-gray-400"
         />
       </div>
       <div>
@@ -686,8 +686,14 @@ function QuestionPanelFooter({
   isEdit,
 }: Readonly<{ isPending: boolean; isEdit: boolean }>) {
   return (
-    <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-end gap-3 bg-white shrink-0">
-      <Button type="submit" variant="primary" size="md" disabled={isPending}>
+    <div className="flex shrink-0 items-center justify-end gap-3 border-t border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,250,252,0.84))] px-6 py-4">
+      <Button
+        type="submit"
+        variant="primary"
+        size="md"
+        disabled={isPending}
+        className="border border-white/20 bg-[linear-gradient(135deg,#ff4fa6_0%,#ef476f_55%,#ff7e5f_100%)] shadow-[0_18px_28px_rgba(239,71,111,0.24),inset_0_1px_0_rgba(255,255,255,0.2)]"
+      >
         {getQuestionSubmitLabel(isPending, isEdit)}
       </Button>
     </div>
@@ -854,9 +860,9 @@ export default function QuestionPanel({
         onDelete={onDelete}
       />
 
-      <div className="flex-1 min-h-0 px-6 py-5 flex flex-col gap-5 overflow-hidden">
+      <div className="flex flex-1 min-h-0 flex-col gap-5 overflow-hidden px-6 py-5 bg-[linear-gradient(180deg,rgba(255,255,255,0.3),rgba(248,250,252,0.54))]">
         {state.errors._form && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-4 py-2 rounded-xl">
+          <div className="rounded-2xl border border-red-200 bg-red-50/90 px-4 py-2 text-xs text-red-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]">
             {state.errors._form}
           </div>
         )}

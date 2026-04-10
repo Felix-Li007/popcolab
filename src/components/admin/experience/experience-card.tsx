@@ -70,10 +70,10 @@ export function ExperienceCard({
       data-testid="experience-card"
       className={`relative flex h-full w-full flex-col overflow-hidden rounded-xl border p-3 shadow-sm transition ${
         isPicker
-          ? 'min-h-[270px] border-white/90 bg-white/75 backdrop-blur-md hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_0_0_1.5px_rgba(34,211,238,0.16),0_0_24px_6px_rgba(34,211,238,0.12)]'
+          ? 'min-h-[270px] border-white/90 bg-white/72 backdrop-blur-xl shadow-[0_18px_32px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.86)] hover:-translate-y-0.5 hover:border-cyan-200 hover:shadow-[0_0_0_1.5px_rgba(34,211,238,0.16),0_0_24px_6px_rgba(34,211,238,0.12),0_18px_34px_rgba(15,23,42,0.1)]'
           : isEditingSelected
-            ? 'min-h-[312px] border-magenta bg-white shadow-[0_0_0_2px_rgba(233,30,99,0.14),0_4px_16px_rgba(0,0,0,0.08)]'
-            : 'min-h-[312px] border-gray-200 bg-white hover:-translate-y-0.5 hover:border-magenta/20 hover:shadow-[0_0_0_1.5px_rgba(233,30,99,0.12),0_0_20px_6px_rgba(233,30,99,0.10)]'
+            ? 'min-h-[312px] border-magenta/60 bg-white/78 backdrop-blur-xl shadow-[0_0_0_2px_rgba(233,30,99,0.14),0_20px_36px_rgba(15,23,42,0.1),inset_0_1px_0_rgba(255,255,255,0.86)]'
+            : 'min-h-[312px] border-white/85 bg-white/72 backdrop-blur-xl shadow-[0_18px_32px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.86)] hover:-translate-y-0.5 hover:border-magenta/20 hover:shadow-[0_0_0_1.5px_rgba(233,30,99,0.12),0_0_20px_6px_rgba(233,30,99,0.10),0_20px_36px_rgba(15,23,42,0.1)]'
       }`}
     >
       {mode === 'manage' && onSelect ? (
@@ -117,10 +117,10 @@ export function ExperienceCard({
         </div>
         <div className="shrink-0">
           <div
-            className={`flex h-13 w-13 flex-col items-center justify-center rounded-full border text-center shadow-sm ${
+            className={`flex h-13 w-13 flex-col items-center justify-center rounded-full border text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_12px_22px_rgba(148,163,184,0.16)] ${
               isPicker
-                ? 'border-cyan-200 bg-cyan-50/85'
-                : 'border-coral-vibe bg-coral-soft'
+                ? 'border-cyan-200 bg-[linear-gradient(180deg,rgba(236,254,255,0.94),rgba(207,250,254,0.7))]'
+                : 'border-coral-vibe/40 bg-[linear-gradient(180deg,rgba(255,245,240,0.95),rgba(255,228,218,0.82))]'
             }`}
           >
             <p
@@ -143,7 +143,7 @@ export function ExperienceCard({
 
       <div className="relative z-0 mt-3 grid grid-cols-2 gap-2">
         <div
-          className={`rounded-lg px-2 py-1.5 ${isPicker ? 'bg-white/80' : 'bg-gray-50'}`}
+          className={`rounded-2xl px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] ${isPicker ? 'bg-white/82' : 'border border-white/70 bg-white/56'}`}
         >
           <p className="text-[10px] text-gray-400">Duration</p>
           <p className="text-xs font-bold text-gray-700">
@@ -151,7 +151,7 @@ export function ExperienceCard({
           </p>
         </div>
         <div
-          className={`rounded-lg px-2 py-1.5 ${isPicker ? 'bg-white/80' : 'bg-gray-50'}`}
+          className={`rounded-2xl px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] ${isPicker ? 'bg-white/82' : 'border border-white/70 bg-white/56'}`}
         >
           <p className="text-[10px] text-gray-400">Capacity</p>
           <p className="text-xs font-bold text-gray-700">
@@ -159,7 +159,7 @@ export function ExperienceCard({
           </p>
         </div>
         <div
-          className={`rounded-lg px-2 py-1.5 ${isPicker ? 'bg-white/80' : 'bg-gray-50'}`}
+          className={`rounded-2xl px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] ${isPicker ? 'bg-white/82' : 'border border-white/70 bg-white/56'}`}
         >
           <p className="text-[10px] text-gray-400">Lead Type</p>
           <p className="line-clamp-1 text-xs font-bold text-gray-700">
@@ -167,7 +167,7 @@ export function ExperienceCard({
           </p>
         </div>
         <div
-          className={`rounded-lg px-2 py-1.5 ${isPicker ? 'bg-white/80' : 'bg-gray-50'}`}
+          className={`rounded-2xl px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)] ${isPicker ? 'bg-white/82' : 'border border-white/70 bg-white/56'}`}
         >
           <p className="text-[10px] text-gray-400">Delivery</p>
           <p className="line-clamp-1 text-xs font-bold text-gray-700">
@@ -180,8 +180,8 @@ export function ExperienceCard({
         <div
           className={`rounded-lg px-2.5 py-2 ${
             isPicker
-              ? 'border border-cyan-200/70 bg-cyan-50/65'
-              : 'border border-magenta/15 bg-magenta/5'
+              ? 'border border-cyan-200/70 bg-cyan-50/65 shadow-[inset_0_1px_0_rgba(255,255,255,0.84)]'
+              : 'border border-magenta/15 bg-[linear-gradient(180deg,rgba(253,242,248,0.92),rgba(252,231,243,0.62))] shadow-[inset_0_1px_0_rgba(255,255,255,0.86)]'
           }`}
         >
           <p
@@ -198,13 +198,13 @@ export function ExperienceCard({
 
         {!isPicker ? (
           <div className="grid grid-cols-2 gap-2">
-            <div className="rounded-lg bg-gray-50 px-2 py-1.5">
+            <div className="rounded-2xl border border-white/70 bg-white/56 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]">
               <p className="text-[10px] text-gray-400">Take Item</p>
               <p className="text-xs font-bold text-gray-700">
                 {flagLabel(experience.takeItem)}
               </p>
             </div>
-            <div className="rounded-lg bg-gray-50 px-2 py-1.5">
+            <div className="rounded-2xl border border-white/70 bg-white/56 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]">
               <p className="text-[10px] text-gray-400">Travel Friendly</p>
               <p className="text-xs font-bold text-gray-700">
                 {flagLabel(experience.travelFlying)}
@@ -216,7 +216,7 @@ export function ExperienceCard({
 
       <div
         className={`relative z-20 mt-3 flex shrink-0 items-center justify-between gap-1.5 border-t pt-2 ${
-          isPicker ? 'border-cyan-100/80' : 'border-gray-100'
+          isPicker ? 'border-cyan-100/80' : 'border-white/70'
         }`}
       >
         {mode === 'picker' ? (
@@ -269,7 +269,7 @@ export function ExperienceCard({
             <Button
               variant="text"
               size="xs"
-              className="h-8! min-w-0! px-2! text-gray-600! hover:text-magenta!"
+              className="h-8! min-w-0! rounded-full! border border-white/72 bg-white/70 px-3! text-gray-600! shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(148,163,184,0.12)] hover:text-magenta!"
               icon={
                 <ActionIcon>
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -294,7 +294,7 @@ export function ExperienceCard({
               <Button
                 variant="text"
                 size="xs"
-                className="h-8! min-w-0! px-2! text-teal-deep! hover:text-magenta!"
+                className="h-8! min-w-0! rounded-full! border border-white/72 bg-white/70 px-3! text-teal-deep! shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(148,163,184,0.12)] hover:text-magenta!"
                 icon={
                   <ActionIcon>
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

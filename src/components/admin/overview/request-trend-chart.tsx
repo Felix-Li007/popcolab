@@ -17,18 +17,20 @@ const STATUS_COLOR_MAP: Record<RequestStatus, string> = {
   [REQUEST_STATUS.PENDING]: '#f59e0b',
   [REQUEST_STATUS.MATCHED]: '#6366f1',
   [REQUEST_STATUS.CLOSED]: '#e9756e',
+  [REQUEST_STATUS.PROCESSING]: '#0891b2',
+  [REQUEST_STATUS.RETRYING]: '#8b5cf6',
 };
 
 const CHART_KEYS = REQUEST_STATUS_OPTIONS.map(option => option.value);
 
 export default function RequestStatusTrendChart({ data }: Readonly<Props>) {
   return (
-    <div className="h-[280px] w-full rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
+    <div className="h-[320px] w-full rounded-[22px] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
       <ResponsiveBar
         data={data}
         keys={CHART_KEYS}
         indexBy="monthLabel"
-        margin={{ top: 22, right: 18, bottom: 46, left: 40 }}
+        margin={{ top: 22, right: 18, bottom: 36, left: 40 }}
         padding={0.32}
         innerPadding={2}
         borderRadius={6}
@@ -66,12 +68,36 @@ export default function RequestStatusTrendChart({ data }: Readonly<Props>) {
               { offset: 100, color: 'inherit', opacity: 0.75 },
             ],
           },
+          {
+            id: 'processingBarGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.75 },
+            ],
+          },
+          {
+            id: 'retryingBarGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.75 },
+            ],
+          },
         ]}
         fill={[
           { match: { id: REQUEST_STATUS.OPENED }, id: 'openedBarGradient' },
           { match: { id: REQUEST_STATUS.PENDING }, id: 'pendingBarGradient' },
           { match: { id: REQUEST_STATUS.MATCHED }, id: 'matchedBarGradient' },
           { match: { id: REQUEST_STATUS.CLOSED }, id: 'closedBarGradient' },
+          {
+            match: { id: REQUEST_STATUS.PROCESSING },
+            id: 'processingBarGradient',
+          },
+          {
+            match: { id: REQUEST_STATUS.RETRYING },
+            id: 'retryingBarGradient',
+          },
         ]}
         groupMode="stacked"
         valueScale={{ type: 'linear' }}
@@ -82,9 +108,9 @@ export default function RequestStatusTrendChart({ data }: Readonly<Props>) {
         axisRight={null}
         axisBottom={{
           tickSize: 0,
-          tickPadding: 12,
-          legend: 'Month',
-          legendOffset: 38,
+          tickPadding: 10,
+          legend: '',
+          legendOffset: 0,
           legendPosition: 'middle',
         }}
         axisLeft={{

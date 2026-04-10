@@ -174,12 +174,16 @@ export default function ProviderContent({ initialData }: Readonly<Props>) {
               onSearchChange={setSearch}
               searchPlaceholder="Search providers, types, or notes…"
               searchTestId="provider-search"
+              rootClassName={styles.searchRoot}
+              titleClassName={styles.searchTitle}
+              searchInputClassName={styles.searchInput}
               actions={
                 <Button
                   onClick={handleCreate}
                   variant="primary"
                   size="sm"
                   icon={<span>+</span>}
+                  className="!h-9 !min-w-0 !px-4 border border-white/20 bg-[linear-gradient(135deg,#ff4fa6_0%,#ef476f_55%,#ff7e5f_100%)] shadow-[0_16px_28px_rgba(239,71,111,0.24),inset_0_1px_0_rgba(255,255,255,0.2)]"
                 >
                   Add
                 </Button>

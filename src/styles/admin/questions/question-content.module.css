@@ -1,13 +1,186 @@
 @reference "../../../app/globals.css";
 
+.pageShell {
+  @apply flex flex-1 flex-col min-h-0;
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 255, 255, 0.92),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(196, 181, 253, 0.18),
+      transparent 26%
+    ),
+    linear-gradient(180deg, #f4f7fb 0%, #edf3f8 100%);
+}
+
+.pageGrid {
+  @apply flex flex-1 min-h-0 gap-4 p-4;
+}
+
 .listPanel {
   flex: 1.2;
   min-width: 420px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.68);
+  background: rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow:
+    0 24px 52px rgba(15, 23, 42, 0.09),
+    0 8px 20px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
 }
 
 .editPanel {
   flex: 1.8;
   min-width: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.68);
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow:
+    0 26px 56px rgba(15, 23, 42, 0.08),
+    0 8px 22px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
+}
+
+.listHeader {
+  padding: 0.95rem 1rem 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(45, 212, 191, 0.12),
+      transparent 36%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(248, 250, 252, 0.82),
+      rgba(255, 255, 255, 0.68)
+    );
+}
+
+.headerRow {
+  @apply mb-3 flex items-center justify-between gap-3;
+}
+
+.headerTitle {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.64);
+}
+
+.searchShell {
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 0.58rem 0.9rem 0.58rem 2.15rem;
+  font-size: 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.66)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(148, 163, 184, 0.12);
+  outline: none;
+  transition:
+    box-shadow 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.searchInput:focus {
+  border-color: rgba(20, 184, 166, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 0 3px rgba(20, 184, 166, 0.12),
+    0 12px 24px rgba(148, 163, 184, 0.14);
+}
+
+.filterWrap {
+  padding: 0.8rem 0.85rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.46),
+    rgba(248, 250, 252, 0.62)
+  );
+}
+
+.filterCard {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 14px 28px rgba(148, 163, 184, 0.12);
+  padding: 0.7rem 0.75rem;
+}
+
+.typePills {
+  @apply flex min-w-0 flex-wrap items-center gap-1.5;
+}
+
+.typePill {
+  min-width: 0;
+  height: 2rem;
+  padding-inline: 0.8rem;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.typeCount {
+  min-width: 1.3rem;
+  text-align: center;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  color: rgba(15, 23, 42, 0.58);
+}
+
+.formRow {
+  @apply mt-2 flex items-center justify-between gap-3 border-t px-1 pt-2;
+  border-color: rgba(45, 212, 191, 0.24);
+}
+
+.formLabel {
+  @apply shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em];
+  color: rgba(100, 116, 139, 0.8);
+}
+
+.formPills {
+  @apply flex flex-wrap items-center justify-end gap-1.5;
+}
+
+.formPill {
+  @apply flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors;
+}
+
+.listArea {
+  @apply flex-1 overflow-y-auto;
+  background:
+    radial-gradient(
+      circle at 12% -10%,
+      rgba(45, 212, 191, 0.1),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42),
+      rgba(248, 250, 252, 0.72)
+    );
 }
 
 .questionItem {
@@ -23,6 +196,56 @@
     0 0 0 1.5px rgba(233, 30, 99, 0.12),
     0 0 18px 4px rgba(233, 30, 99, 0.08);
   z-index: 1;
+}
+
+.rowButton {
+  @apply flex w-full items-start gap-2.5 px-4 py-3 text-left transition-all border-l-4;
+}
+
+.rowButtonActive {
+  border-color: #ec4899;
+  background: linear-gradient(
+    90deg,
+    rgba(236, 72, 153, 0.11),
+    rgba(236, 72, 153, 0.04)
+  );
+}
+
+.rowButtonIdle {
+  border-color: transparent;
+}
+
+.rowButtonIdle:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(236, 72, 153, 0.06),
+    rgba(236, 72, 153, 0.02)
+  );
+}
+
+.typeBadge {
+  display: inline-block;
+  margin-bottom: 0.3rem;
+  padding: 0.28rem 0.56rem;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 800;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.emptyState {
+  @apply flex flex-col items-center justify-center gap-2 px-4 py-12 text-center;
+}
+
+.panelEmptyState {
+  @apply flex h-full flex-col items-center justify-center gap-3 p-8 text-center;
+  background:
+    radial-gradient(circle at top, rgba(45, 212, 191, 0.08), transparent 30%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.48),
+      rgba(248, 250, 252, 0.74)
+    );
 }
 
 .previewGrid {
@@ -72,4 +295,14 @@
     0 0 20px 6px rgba(233, 30, 99, 0.12),
     0 4px 16px rgba(0, 0, 0, 0.08);
   transform: translateY(-2px);
+}
+
+@media (max-width: 1023px) {
+  .pageGrid {
+    @apply flex-col;
+  }
+
+  .listPanel {
+    min-width: 0;
+  }
 }

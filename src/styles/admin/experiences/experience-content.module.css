@@ -3,6 +3,18 @@
 .root {
   @apply flex flex-col;
   min-height: calc(100dvh - 6rem);
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(255, 255, 255, 0.92),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at top right,
+      rgba(191, 219, 254, 0.2),
+      transparent 28%
+    ),
+    linear-gradient(180deg, #f4f7fb 0%, #edf3f8 100%);
 }
 
 .listSection {
@@ -10,31 +22,174 @@
 }
 
 .listPanel {
-  @apply w-full border border-gray-200 flex flex-col bg-white z-10 shadow-sm rounded-2xl overflow-hidden;
+  @apply z-10 flex w-full flex-col overflow-hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.68);
+  background: rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  backdrop-filter: blur(18px) saturate(130%);
+  box-shadow:
+    0 24px 52px rgba(15, 23, 42, 0.08),
+    0 8px 20px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
+}
+
+.headerBar {
+  @apply flex items-center justify-between gap-3 px-4 py-3;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(45, 212, 191, 0.12),
+      transparent 36%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(248, 250, 252, 0.82),
+      rgba(255, 255, 255, 0.68)
+    );
+}
+
+.headerTitle {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.64);
 }
 
 .listBody {
   @apply flex-1 overflow-y-auto p-3;
+  background:
+    radial-gradient(
+      circle at 12% -10%,
+      rgba(45, 212, 191, 0.1),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42),
+      rgba(248, 250, 252, 0.72)
+    );
 }
 
 .filterRow {
-  @apply flex flex-wrap items-center gap-2 border-b border-gray-100 px-3 py-2;
+  @apply flex flex-wrap items-center gap-2 border-b px-3 py-2.5;
+  border-color: rgba(148, 163, 184, 0.14);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.46),
+    rgba(248, 250, 252, 0.62)
+  );
+}
+
+.searchWrap {
+  position: relative;
+  margin-left: auto;
+  flex: 0 1 22rem;
+  min-width: min(100%, 20rem);
+}
+
+.searchIcon {
+  @apply pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400;
 }
 
 .filterSelect {
-  @apply min-w-[10rem] appearance-none rounded-xl bg-gray-100 px-3 py-2 pr-9 text-xs font-semibold text-gray-700 outline-none transition focus:bg-white focus:ring-2 focus:ring-magenta/30;
+  @apply min-w-[10rem] appearance-none rounded-full px-3 py-2 pr-9 text-xs font-semibold text-gray-700 outline-none transition;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.66)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(148, 163, 184, 0.12);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.85rem center;
   background-size: 0.875rem 0.875rem;
 }
 
+.filterSelect:focus {
+  border-color: rgba(20, 184, 166, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 0 3px rgba(20, 184, 166, 0.12),
+    0 12px 24px rgba(148, 163, 184, 0.14);
+}
+
 .filterCheckbox {
-  @apply inline-flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700;
+  @apply inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-gray-700;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.66)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(148, 163, 184, 0.12);
 }
 
 .checkboxInput {
   @apply h-4 w-4 rounded border-gray-300 text-magenta focus:ring-magenta/30;
+}
+
+.searchInput {
+  width: 100%;
+  padding-left: 2.15rem;
+  padding-right: 5.8rem;
+  outline: none;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.82),
+    rgba(241, 245, 249, 0.66)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 22px rgba(148, 163, 184, 0.12);
+  border-radius: 9999px;
+  height: 2.125rem;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 0.75rem;
+}
+
+.searchInput:focus {
+  border-color: rgba(20, 184, 166, 0.34);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    0 0 0 3px rgba(20, 184, 166, 0.12),
+    0 12px 24px rgba(148, 163, 184, 0.14);
+}
+
+.searchButton {
+  position: absolute;
+  top: 50%;
+  right: 0.32rem;
+  transform: translateY(-50%);
+  height: calc(100% - 0.25rem);
+  min-width: 0;
+  padding-inline: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(
+    180deg,
+    rgba(51, 65, 85, 0.98),
+    rgba(15, 23, 42, 0.98)
+  );
+  box-shadow:
+    0 12px 22px rgba(15, 23, 42, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.clearButton {
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 10px 20px rgba(148, 163, 184, 0.12);
 }
 
 .cardsGrid {

@@ -569,10 +569,77 @@ async function upsertExperiencePricing(
   });
 }
 
-export async function getExperiences(): Promise<Experience[]> {
+export async function getExperiences(search = ''): Promise<Experience[]> {
+  const normalizedSearch = search.trim();
   const [dimensionOptionsById, rows] = await Promise.all([
     getOptionsByDimensionId(),
     prisma.experience.findMany({
+      where: normalizedSearch
+        ? {
+            OR: [
+              {
+                experience_title: {
+                  contains: normalizedSearch,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                lead_type: {
+                  contains: normalizedSearch,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                delivery_methods: {
+                  contains: normalizedSearch,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                dietary_considerations: {
+                  contains: normalizedSearch,
+                  mode: 'insensitive',
+                },
+              },
+              {
+                provider: {
+                  provider_label: {
+                    contains: normalizedSearch,
+                    mode: 'insensitive',
+                  },
+                },
+              },
+              {
+                category: {
+                  category_title: {
+                    contains: normalizedSearch,
+                    mode: 'insensitive',
+                  },
+                },
+              },
+              {
+                experience_pricing: {
+                  is: {
+                    pricing_model: {
+                      contains: normalizedSearch,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+              {
+                experience_pricing: {
+                  is: {
+                    pricing_notes: {
+                      contains: normalizedSearch,
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              },
+            ],
+          }
+        : undefined,
       include: {
         provider: {
           select: {

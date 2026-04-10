@@ -21,6 +21,7 @@ model User {
   user_vector          UserVector?
   history_preferences  HistoryPreference[]
   user_experiences     UserExperience[]
+  user_events          UserEvent[]
   user_preferences     UserPreference[]
   user_personalities   UserPersonality[]
 

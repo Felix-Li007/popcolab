@@ -1,11 +1,22 @@
 @reference "../../app/globals.css";
 
 .section {
-  @apply block;
+  @apply block rounded-[14px] border border-white/75 p-4 backdrop-blur-xl;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(248, 252, 255, 0.84) 52%,
+    rgba(255, 247, 242, 0.78)
+  );
+  box-shadow:
+    0 34px 90px rgba(15, 23, 42, 0.1),
+    0 14px 36px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.08);
 }
 
 .header {
-  @apply mb-3 flex items-center justify-between gap-3;
+  @apply mb-4 flex items-center justify-between gap-3;
 }
 
 .titleGroup {
@@ -17,7 +28,7 @@
 }
 
 .title {
-  @apply text-sm font-bold text-gray-800;
+  @apply text-[1.02rem] font-bold tracking-[-0.02em] text-slate-900;
 }
 
 .viewAllLink {
@@ -30,7 +41,17 @@
 }
 
 .tableShell {
-  @apply overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm;
+  @apply overflow-hidden rounded-[14px] border border-white/82 backdrop-blur-xl;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(247, 250, 252, 0.8)
+  );
+  box-shadow:
+    0 22px 44px rgba(15, 23, 42, 0.08),
+    0 8px 20px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96),
+    inset 0 -1px 0 rgba(148, 163, 184, 0.06);
 }
 
 .tableScroll {
@@ -42,28 +63,32 @@
 }
 
 .tableHeadRow {
-  @apply text-white;
-  background: var(--color-teal-deep);
+  @apply text-slate-700;
+  background: linear-gradient(
+    180deg,
+    rgba(235, 249, 246, 0.92),
+    rgba(247, 252, 249, 0.86)
+  );
 }
 
 .tableHeadCell {
-  @apply px-4 py-2.5 text-left font-bold;
+  @apply px-4 py-3 text-left font-bold uppercase tracking-[0.12em] text-[11px];
 }
 
 .emptyCell {
-  @apply px-4 py-6 text-center text-sm text-gray-400;
+  @apply px-4 py-8 text-center text-sm text-gray-400;
 }
 
 .tableRow {
-  @apply border-t border-gray-50 transition-colors hover:bg-gray-50;
+  @apply border-t border-white/80 transition-colors hover:bg-slate-50/45;
 }
 
 .titleCell {
-  @apply px-4 py-3 text-sm font-bold leading-5 text-gray-900;
+  @apply px-4 py-3.5 text-sm font-bold leading-5 text-slate-900;
 }
 
 .bodyCell {
-  @apply px-4 py-3 text-gray-600;
+  @apply px-4 py-3.5 text-slate-500;
 }
 
 .titleButton {
@@ -76,14 +101,13 @@
 }
 
 .statusBadge {
-  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold;
+  @apply inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.65)];
 }
 
 .statusLive {
-  @apply bg-emerald-100 text-emerald-700;
+  @apply border-emerald-200/80 bg-emerald-50/90 text-emerald-700;
 }
 
 .statusUpcoming {
-  color: var(--color-teal-deep);
-  background: rgba(255, 214, 10, 0.4);
+  @apply border-amber-200/80 bg-amber-50/90 text-amber-700;
 }

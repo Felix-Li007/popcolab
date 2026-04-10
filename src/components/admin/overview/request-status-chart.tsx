@@ -13,12 +13,14 @@ const STATUS_COLOR_MAP: Record<OverviewRequestStatusPoint['id'], string> = {
   [REQUEST_STATUS.PENDING]: '#f59e0b',
   [REQUEST_STATUS.MATCHED]: '#6366f1',
   [REQUEST_STATUS.CLOSED]: '#e9756e',
+  [REQUEST_STATUS.PROCESSING]: '#0891b2',
+  [REQUEST_STATUS.RETRYING]: '#8b5cf6',
   unknown: '#9ca3af',
 };
 
 export default function RequestStatusChart({ data }: Readonly<Props>) {
   return (
-    <div className="h-[300px] w-full rounded-[22px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
+    <div className="h-[320px] w-full rounded-[22px] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_18px_36px_rgba(15,23,42,0.08)] [filter:drop-shadow(0_14px_20px_rgba(15,23,42,0.08))]">
       <ResponsivePie
         data={data}
         margin={{ top: 12, right: 12, bottom: 72, left: 12 }}
@@ -67,12 +69,33 @@ export default function RequestStatusChart({ data }: Readonly<Props>) {
               { offset: 100, color: 'inherit', opacity: 0.72 },
             ],
           },
+          {
+            id: 'processingGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.72 },
+            ],
+          },
+          {
+            id: 'retryingGradient',
+            type: 'linearGradient',
+            colors: [
+              { offset: 0, color: 'inherit', opacity: 1 },
+              { offset: 100, color: 'inherit', opacity: 0.72 },
+            ],
+          },
         ]}
         fill={[
           { match: { id: REQUEST_STATUS.OPENED }, id: 'openedGradient' },
           { match: { id: REQUEST_STATUS.PENDING }, id: 'pendingGradient' },
           { match: { id: REQUEST_STATUS.MATCHED }, id: 'matchedGradient' },
           { match: { id: REQUEST_STATUS.CLOSED }, id: 'closedGradient' },
+          {
+            match: { id: REQUEST_STATUS.PROCESSING },
+            id: 'processingGradient',
+          },
+          { match: { id: REQUEST_STATUS.RETRYING }, id: 'retryingGradient' },
           { match: { id: 'unknown' }, id: 'unknownGradient' },
         ]}
         colors={datum =>

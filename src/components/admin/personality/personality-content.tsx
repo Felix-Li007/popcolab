@@ -71,15 +71,15 @@ export default function PersonalityContent({
                     variant="tab"
                     size="sm"
                     isActive={filter === tab}
+                    className={contentStyles.filterPill}
                   >
-                    {tab}
+                    <span>{tab}</span>
                     <Badge
                       variant="default"
                       size="xs"
-                      bgColor={filter === tab ? 'bg-white/20' : 'bg-gray-100'}
-                      textColor={
-                        filter === tab ? 'text-white' : 'text-gray-500'
-                      }
+                      className={contentStyles.filterCount}
+                      bgColor={filter === tab ? 'rgba(255,255,255,0.2)' : ''}
+                      textColor={filter === tab ? '#ffffff' : ''}
                     >
                       {counts[tab]}
                     </Badge>
@@ -91,7 +91,7 @@ export default function PersonalityContent({
                 variant="primary"
                 size="sm"
                 icon={<span>+</span>}
-                className="shrink-0"
+                className={contentStyles.addButton}
               >
                 Add
               </Button>

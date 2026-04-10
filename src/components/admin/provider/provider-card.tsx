@@ -36,10 +36,10 @@ export default function ProviderCard({
   return (
     <article
       data-testid="provider-card"
-      className={`relative flex h-full min-h-[312px] w-full cursor-pointer flex-col overflow-hidden rounded-xl border bg-white p-2.5 shadow-sm transition ${
+      className={`relative flex h-full min-h-[312px] w-full cursor-pointer flex-col overflow-hidden rounded-[14px] border p-2.5 shadow-sm transition ${
         isEditingSelected
-          ? 'border-magenta shadow-[0_0_0_2px_rgba(233,30,99,0.14),0_4px_16px_rgba(0,0,0,0.08)]'
-          : 'border-gray-200 hover:-translate-y-0.5 hover:border-magenta/20 hover:shadow-[0_0_0_1.5px_rgba(233,30,99,0.12),0_0_20px_6px_rgba(233,30,99,0.10)]'
+          ? 'border-magenta/60 bg-white/78 backdrop-blur-xl shadow-[0_0_0_2px_rgba(233,30,99,0.14),0_20px_36px_rgba(15,23,42,0.1),inset_0_1px_0_rgba(255,255,255,0.86)]'
+          : 'border-white/85 bg-white/72 backdrop-blur-xl shadow-[0_18px_32px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.86)] hover:-translate-y-0.5 hover:border-magenta/20 hover:shadow-[0_0_0_1.5px_rgba(233,30,99,0.12),0_0_20px_6px_rgba(233,30,99,0.10),0_20px_36px_rgba(15,23,42,0.1)]'
       }`}
     >
       <button
@@ -67,13 +67,13 @@ export default function ProviderCard({
         </div>
 
         <div className="mt-2 grid grid-cols-2 gap-1.5">
-          <div className="rounded-lg bg-gray-50 px-2 py-1">
+          <div className="rounded-[14px] border border-white/70 bg-white/56 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]">
             <p className="text-[10px] text-gray-400">Experiences</p>
             <p className="text-xs font-bold text-gray-700">
               {provider.experienceCount}
             </p>
           </div>
-          <div className="rounded-lg bg-gray-50 px-2 py-1">
+          <div className="rounded-[14px] border border-white/70 bg-white/56 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]">
             <p className="text-[10px] text-gray-400">Type</p>
             <p className="truncate text-xs font-bold text-gray-700">
               {provider.providerType}
@@ -82,7 +82,7 @@ export default function ProviderCard({
         </div>
 
         <div className="mt-2 flex-1 min-h-0 space-y-1 text-xs text-gray-500">
-          <div className="rounded-lg bg-gray-50 px-2 py-1.5">
+          <div className="rounded-[14px] border border-white/70 bg-white/56 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400">
               Provider Notes
             </p>
@@ -91,7 +91,7 @@ export default function ProviderCard({
             </p>
           </div>
 
-          <div className="rounded-lg bg-gray-50 px-2 py-1.5">
+          <div className="rounded-[14px] border border-white/70 bg-white/56 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.88)]">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400">
               Pricing Notes
             </p>
@@ -101,11 +101,11 @@ export default function ProviderCard({
           </div>
         </div>
 
-        <div className="mt-2 flex shrink-0 items-center justify-between gap-1.5 border-t border-gray-100 pt-1.5">
+        <div className="mt-2 flex shrink-0 items-center justify-between gap-1.5 border-t border-white/70 pt-1.5">
           <Button
             variant="text"
             size="xs"
-            className="!h-8 !min-w-0 !px-2 !text-gray-600 hover:!text-magenta"
+            className="!h-8 !min-w-0 !rounded-full !border !border-white/72 !bg-white/70 !px-3 !text-gray-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(148,163,184,0.12)] hover:!text-magenta"
             icon={
               <ActionIcon>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@ export default function ProviderCard({
             <Button
               variant="text"
               size="xs"
-              className="!h-8 !min-w-0 !px-2 !text-teal-deep hover:!text-magenta"
+              className="!h-8 !min-w-0 !rounded-full !border !border-white/72 !bg-white/70 !px-3 !text-teal-deep shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(148,163,184,0.12)] hover:!text-magenta"
               icon={
                 <ActionIcon>
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -158,7 +158,7 @@ export default function ProviderCard({
             <Button
               variant="text"
               size="xs"
-              className="!h-8 !min-w-0 !px-2 !text-red-500 hover:!text-red-600"
+              className="!h-8 !min-w-0 !rounded-full !border !border-white/72 !bg-white/70 !px-3 !text-red-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_18px_rgba(148,163,184,0.12)] hover:!text-red-600"
               icon={
                 <ActionIcon className="text-inherit">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">

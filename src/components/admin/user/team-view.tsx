@@ -7,6 +7,7 @@ import {
   getTeamMemberAvatarText,
   getTeamMemberNameLine,
 } from '@/utils/team-member';
+import { Search } from '@/ui';
 import styles from '@/styles/admin/users/team-view.module.css';
 
 type Props = {
@@ -79,13 +80,16 @@ export default function TeamViewModal({
         <div className={styles.infoCard}>
           <p className={styles.label}>Team Mates ({team.memberCount})</p>
           <div className={styles.searchRow}>
-            <input
-              type="search"
+            <Search
               value={keyword}
               onChange={event => setKeyword(event.target.value)}
               placeholder="Filter team mates on this page..."
-              className={styles.searchInput}
               data-testid="team-member-search"
+              buttonType="button"
+              wrapperClassName={styles.searchWrap}
+              iconClassName={styles.searchIcon}
+              inputClassName={styles.searchInput}
+              buttonClassName={styles.searchButton}
             />
           </div>
           {membersContent}

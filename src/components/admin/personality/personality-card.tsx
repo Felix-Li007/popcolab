@@ -35,32 +35,27 @@ export default function PersonalityCard({
 
   return (
     <div className={`${styles.card} ${typeClass}`} style={glowStyle}>
+      <div className={styles.sheen} aria-hidden="true" />
       <div className={styles.orb} aria-hidden="true" />
-      <div className="relative z-10 px-3 pt-3 pb-2 flex-1 flex flex-col min-h-0">
-        <div className="flex items-start justify-between mb-2 shrink-0">
+      <div className={styles.inner}>
+        <div className="flex items-start justify-between mb-3 shrink-0">
           <Badge
             variant="personality"
             size="sm"
             bgColor={accentColor}
             textColor="text-white"
+            className={styles.typeBadge}
           >
             {type}
           </Badge>
         </div>
 
-        <div className="flex items-center justify-between mb-2 shrink-0">
-          <div
-            className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl`}
-          >
-            {emoji}
-          </div>
+        <div className="flex items-center justify-between mb-3 shrink-0 gap-3">
+          <div className={styles.emojiShell}>{emoji}</div>
           {threshold !== undefined && (
-            <div
-              className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 py-1"
-              title="Score threshold"
-            >
+            <div className={styles.thresholdPill} title="Score threshold">
               <svg
-                className="w-3 h-3 text-gray-400 shrink-0"
+                className="w-3 h-3 shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -72,24 +67,24 @@ export default function PersonalityCard({
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 />
               </svg>
-              <span className="text-sm font-bold text-gray-700">
-                {threshold}
-              </span>
+              <span className={styles.thresholdLabel}>Threshold</span>
+              <span className={styles.thresholdValue}>{threshold}</span>
             </div>
           )}
         </div>
 
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <h3 className="text-sm font-bold text-gray-800 mb-1">{name}</h3>
-          <p className="text-xs text-gray-500 line-clamp-3">{description}</p>
+        <div className={styles.body}>
+          <h3 className={styles.title}>{name}</h3>
+          <p className={styles.description}>{description}</p>
         </div>
       </div>
 
-      <div className="relative z-10 px-3 py-2 border-t border-gray-100 flex items-center justify-between flex-nowrap shrink-0">
+      <div className={styles.footer}>
         <Button
           onClick={onEdit}
           variant="text"
           size="xs"
+          className={styles.actionButton}
           icon={
             <svg
               className="w-3 h-3"
@@ -112,7 +107,7 @@ export default function PersonalityCard({
           onClick={onView}
           variant="text"
           size="xs"
-          className="hover:text-teal-deep"
+          className={styles.actionButton}
           icon={
             <svg
               className="w-3 h-3"
@@ -142,7 +137,7 @@ export default function PersonalityCard({
             onClick={onDelete}
             variant="text"
             size="xs"
-            className="hover:text-red-500"
+            className={`${styles.actionButton} ${styles.deleteButton}`}
             icon={
               <svg
                 className="w-3 h-3"

@@ -62,8 +62,6 @@ export const menuSection: MenuGroup[] = [
             href: '/admin/personalities',
             countKey: 'personalities',
           },
-          { label: 'Play Types', href: '/admin/personalities/play-type' },
-          { label: 'Play Natures', href: '/admin/personalities/play-nature' },
         ],
       },
       {

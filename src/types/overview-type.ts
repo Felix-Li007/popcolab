@@ -85,16 +85,45 @@ export type OverviewRequestMetrics = {
   topMatchedExperiences: OverviewBreakdownItem[];
 };
 
+export type OverviewProposalMetrics = {
+  totalProposals: number;
+  pendingProposals: number;
+  approvedProposals: number;
+  acceptedProposals: number;
+  rejectedProposals: number;
+  acceptanceRate: number;
+  averageExperiencesPerProposal: number;
+  statusBreakdown: OverviewBreakdownItem[];
+  trend: OverviewExperienceTrendPoint[];
+  topProposedExperiences: OverviewBreakdownItem[];
+};
+
+export type OverviewUserTeamMetrics = {
+  onboardingCompletedUsers: number;
+  onboardingCompletionRate: number;
+  usersInTeams: number;
+  soloUsers: number;
+  averageTeamSize: number;
+  teamsWithMultipleMembers: number;
+  totalInvites: number;
+  pendingInvites: number;
+  acceptedInvites: number;
+  rejectedInvites: number;
+  inviteAcceptanceRate: number;
+};
+
 export type OverviewGrowthMetrics = {
   totalUsers: number;
   totalTeams: number;
   usersLast14Days: number;
   teamsLast14Days: number;
   growth: OverviewGrowthPoint[];
+  userTeamMetrics: OverviewUserTeamMetrics;
   totalRequests: number;
   requestStatus: OverviewRequestStatusPoint[];
   requestTrend: OverviewRequestTrendPoint[];
   requestMetrics: OverviewRequestMetrics;
+  proposalMetrics: OverviewProposalMetrics;
   experienceMetrics: OverviewExperienceMetrics;
   eventMetrics: OverviewEventMetrics;
   quizMetrics: OverviewQuizMetrics;
