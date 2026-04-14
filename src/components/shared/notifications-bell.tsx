@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import styles from '@/styles/notifications-bell.module.css';
 import {
   fetchNotifications,
@@ -146,29 +147,48 @@ export default function NotificationsBell({
             <div className={styles.emptyState}>No notifications</div>
           ) : (
             <ul className={styles.notificationList}>
-              {items.map(n => (
-                <li key={n.id} className={styles.notificationItem}>
-                  <div className="flex items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div
-                        className={`${styles.msgTitle} font-semibold text-sm truncate`}
-                      >
-                        {n.message_title}
+              {items.map(n => {
+                const inviteToken =
+                  n.message_type === 'REQUEST_INVITATION' &&
+                  n.message_data &&
+                  typeof n.message_data === 'object' &&
+                  'inviteToken' in (n.message_data as object)
+                    ? (n.message_data as { inviteToken: string }).inviteToken
+                    : null;
+
+                return (
+                  <li key={n.id} className={styles.notificationItem}>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className={`${styles.msgTitle} font-semibold text-sm truncate`}
+                        >
+                          {n.message_title}
+                        </div>
+                        <div
+                          className={`${styles.msgBody} text-xs truncate mt-1`}
+                        >
+                          {n.message_body}
+                        </div>
+                        {inviteToken && (
+                          <Link
+                            href={`/invite/${inviteToken}`}
+                            onClick={() => setOpen(false)}
+                            className="mt-2 inline-block rounded-full bg-[#E91E8C] px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#c7177a]"
+                          >
+                            View Invitation →
+                          </Link>
+                        )}
                       </div>
                       <div
-                        className={`${styles.msgBody} text-xs truncate mt-1`}
+                        className={`${styles.msgTime} text-[11px] ml-2 whitespace-nowrap`}
                       >
-                        {n.message_body}
+                        {new Date(n.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <div
-                      className={`${styles.msgTime} text-[11px] ml-2 whitespace-nowrap`}
-                    >
-                      {new Date(n.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

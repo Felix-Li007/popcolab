@@ -7,31 +7,35 @@ import type {
 } from '@/services/user-request-service';
 import type { Question } from '@/types/question-type';
 import type { UserTeamItem } from '@/services/user-team-service';
+import type { RequestAttendeesSummary } from '@/services/request-attendee-service';
+import { REQUEST_STATUS, type RequestStatus } from '@/constants/request-status';
 import RequestCard from './request-card';
 import NewRequestModal from './new-request-modal';
 import RejectProposalModal from './reject-proposal-modal';
 
-type Tab = 'all' | 'OPENED' | 'underReview' | 'CLOSED';
+type Tab = 'all' | 'underReview' | RequestStatus;
 
 const TABS: { key: Tab; label: string; statKey: keyof RequestStats }[] = [
   { key: 'all', label: 'All', statKey: 'total' },
-  { key: 'OPENED', label: 'Submitted', statKey: 'submitted' },
+  { key: REQUEST_STATUS.OPENED, label: 'Submitted', statKey: 'submitted' },
   { key: 'underReview', label: 'Under Review', statKey: 'underReview' },
-  { key: 'CLOSED', label: 'Closed', statKey: 'closed' },
+  { key: REQUEST_STATUS.CLOSED, label: 'Closed', statKey: 'closed' },
 ];
 
 type Props = Readonly<{
   requests: UserRequestItem[];
   stats: RequestStats;
-  memberQuestions: Question[];
+  leaderQuestions: Question[];
   userTeams: UserTeamItem[];
+  attendeeMap: Record<number, RequestAttendeesSummary>;
 }>;
 
 export default function RequestsContent({
   requests,
   stats,
-  memberQuestions,
+  leaderQuestions,
   userTeams,
+  attendeeMap,
 }: Props) {
   const [tab, setTab] = useState<Tab>('all');
   const [modalOpen, setModalOpen] = useState(false);
@@ -42,6 +46,7 @@ export default function RequestsContent({
   function handleModalClose() {
     setModalKey(k => k + 1);
     setModalOpen(false);
+    window.location.href = '/dashboard/requests';
   }
 
   function handleReject(proposalId: number, title: string) {
@@ -54,11 +59,11 @@ export default function RequestsContent({
     setRejectTitle('');
   }
 
-  const UNDER_REVIEW_STATUSES = new Set([
-    'PENDING',
-    'PROCESSING',
-    'RETRYING',
-    'MATCHED',
+  const UNDER_REVIEW_STATUSES = new Set<RequestStatus>([
+    REQUEST_STATUS.PENDING,
+    REQUEST_STATUS.PROCESSING,
+    REQUEST_STATUS.RETRYING,
+    REQUEST_STATUS.MATCHED,
   ]);
 
   const filtered =
@@ -148,6 +153,12 @@ export default function RequestsContent({
             <RequestCard
               key={req.id}
               request={req}
+              attendeeSummary={
+                attendeeMap[req.id] ?? {
+                  attendees: [],
+                  dominantPersonality: null,
+                }
+              }
               onReject={proposalId =>
                 handleReject(proposalId, req.objectiveCategory)
               }
@@ -161,7 +172,7 @@ export default function RequestsContent({
         key={modalKey}
         open={modalOpen}
         onClose={handleModalClose}
-        memberQuestions={memberQuestions}
+        leaderQuestions={leaderQuestions}
         userTeams={userTeams}
       />
 

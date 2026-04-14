@@ -1,8 +1,14 @@
 'use client';
 
 import { useTransition } from 'react';
+import Link from 'next/link';
 import type { UserRequestItem } from '@/services/user-request-service';
-import { acceptProposalAction } from '@/actions/request-actions';
+import type { RequestAttendeesSummary } from '@/services/request-attendee-service';
+import {
+  acceptProposalAction,
+  cancelRequestAction,
+} from '@/actions/request-actions';
+import AttendeePersonalityPanel from './attendee-personality-panel';
 
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
   OPENED: { label: 'Submitted', className: 'bg-violet-100 text-violet-700' },
@@ -38,12 +44,19 @@ function timeAgo(d: Date): string {
 
 type Props = {
   request: UserRequestItem;
+  attendeeSummary: RequestAttendeesSummary;
   onReject: (proposalId: number) => void;
   onResubmit: () => void;
 };
 
-export default function RequestCard({ request, onReject, onResubmit }: Props) {
+export default function RequestCard({
+  request,
+  attendeeSummary,
+  onReject,
+  onResubmit,
+}: Props) {
   const [accepting, startAccept] = useTransition();
+  const [cancelling, startCancel] = useTransition();
   const status = STATUS_MAP[request.status] ?? {
     label: request.status,
     className: 'bg-gray-100 text-gray-600',
@@ -177,6 +190,30 @@ export default function RequestCard({ request, onReject, onResubmit }: Props) {
           </button>
         </>
       )}
+
+      <div className="flex items-center gap-2">
+        <Link
+          href={`/dashboard/requests/${request.id}`}
+          className="rounded-lg border border-[#E91E8C] px-4 py-2 text-xs font-semibold text-[#E91E8C] hover:bg-pink-50 transition-colors"
+        >
+          View Details →
+        </Link>
+        {request.status === 'OPENED' && (
+          <button
+            disabled={cancelling}
+            onClick={() =>
+              startCancel(async () => {
+                await cancelRequestAction(request.id);
+              })
+            }
+            className="rounded-lg border border-red-200 px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+          >
+            {cancelling ? 'Cancelling…' : 'Cancel Request'}
+          </button>
+        )}
+      </div>
+
+      <AttendeePersonalityPanel summary={attendeeSummary} />
     </div>
   );
 }

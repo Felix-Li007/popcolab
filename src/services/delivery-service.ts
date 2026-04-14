@@ -37,7 +37,6 @@ export async function processNotificationQueueJob(job: NotificationQueueJob) {
     {
       jobType: job.type,
       recipientEmail: job.recipientEmail,
-      eventTitle: job.eventTitle,
     },
     'Processing notification queue job'
   );

@@ -7,8 +7,10 @@ import {
 } from '@/services/user-request-service';
 import { getQuestions } from '@/services/question-service';
 import { getUserTeams } from '@/services/user-team-service';
+import { getRequestAttendees } from '@/services/request-attendee-service';
 import { FORM_NAME } from '@/types/question-type';
 import RequestsContent from '@/components/requests/requests-content';
+import type { RequestAttendeesSummary } from '@/services/request-attendee-service';
 
 export default async function RequestsPage() {
   const authContext = await getCurrentAuthContext();
@@ -21,12 +23,21 @@ export default async function RequestsPage() {
 
   const { userId } = await upsertClerkUser(clerkUser.id, email);
 
-  const [requests, stats, memberQuestions, userTeams] = await Promise.all([
+  const [requests, stats, leaderQuestions, userTeams] = await Promise.all([
     getUserRequests(userId),
     getRequestStats(userId),
-    getQuestions(FORM_NAME.MEMBER),
+    getQuestions(FORM_NAME.REQUEST),
     getUserTeams(userId),
   ]);
+
+  const attendeeSummaries = await Promise.all(
+    requests.map(r => getRequestAttendees(r.id))
+  );
+
+  const attendeeMap: Record<number, RequestAttendeesSummary> = {};
+  requests.forEach((r, i) => {
+    attendeeMap[r.id] = attendeeSummaries[i];
+  });
 
   return (
     <div className="dashboard-glass-page">
@@ -35,8 +46,9 @@ export default async function RequestsPage() {
           <RequestsContent
             requests={requests}
             stats={stats}
-            memberQuestions={memberQuestions}
+            leaderQuestions={leaderQuestions}
             userTeams={userTeams}
+            attendeeMap={attendeeMap}
           />
         </div>
       </div>

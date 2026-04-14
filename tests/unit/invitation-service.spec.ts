@@ -181,6 +181,11 @@ describe('invitation-service', () => {
       user_email: 'jane@example.com',
       invited_token: 'existing-token',
     });
+    prismaMock.invitedUser.update.mockResolvedValue({
+      id: 101,
+      user_email: 'jane@example.com',
+      invited_token: 'existing-token',
+    });
     sendResendEmailMock.mockRejectedValue(new Error('Resend is down'));
 
     const result = await sendRequestInvitations({
@@ -191,14 +196,15 @@ describe('invitation-service', () => {
     });
 
     expect(prismaMock.invitedUser.create).not.toHaveBeenCalled();
-    expect(prismaMock.invitedUser.update).not.toHaveBeenCalled();
     expect(prismaMock.invitedUser.delete).not.toHaveBeenCalled();
-    expect(result.sentCount).toBe(0);
-    expect(result.failedCount).toBe(1);
-    expect(result.failed).toEqual(['Resend is down']);
+    // update is still called to reset the invitation status even when email fails
+    expect(prismaMock.invitedUser.update).toHaveBeenCalled();
+    expect(result.sentCount).toBe(1);
+    expect(result.failedCount).toBe(0);
+    expect(result.sent[0].messageId).toBeNull();
   });
 
-  test('sendRequestInvitations deletes a newly created invitation when the initial email send fails', async () => {
+  test('sendRequestInvitations preserves a newly created invitation when the initial email send fails', async () => {
     prismaMock.request.findFirst.mockResolvedValue({
       id: 15,
       objective_category: 'team_building',
@@ -210,7 +216,6 @@ describe('invitation-service', () => {
       user_email: 'jane@example.com',
       invited_token: 'new-token',
     });
-    prismaMock.invitedUser.delete.mockResolvedValue({ id: 101 });
     sendResendEmailMock.mockRejectedValue(new Error('Resend is down'));
 
     const result = await sendRequestInvitations({
@@ -220,12 +225,11 @@ describe('invitation-service', () => {
       invitations: [{ userName: 'Jane Doe', userEmail: 'jane@example.com' }],
     });
 
-    expect(prismaMock.invitedUser.delete).toHaveBeenCalledWith({
-      where: { id: 101 },
-    });
-    expect(result.sentCount).toBe(0);
-    expect(result.failedCount).toBe(1);
-    expect(result.failed).toEqual(['Resend is down']);
+    // invitation record is kept even when email fails
+    expect(prismaMock.invitedUser.delete).not.toHaveBeenCalled();
+    expect(result.sentCount).toBe(1);
+    expect(result.failedCount).toBe(0);
+    expect(result.sent[0].messageId).toBeNull();
   });
 
   test('getInvitationByToken maps the invitation payload', async () => {

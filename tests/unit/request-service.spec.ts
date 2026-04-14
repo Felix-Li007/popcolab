@@ -29,10 +29,12 @@ jest.mock('@/libs/prisma/client', () => ({
     REJECTED: 'REJECTED',
   },
   RequestStatus: {
-    opened: 'opened',
-    pending: 'pending',
-    matched: 'matched',
-    closed: 'closed',
+    OPENED: 'OPENED',
+    PENDING: 'PENDING',
+    MATCHED: 'MATCHED',
+    CLOSED: 'CLOSED',
+    PROCESSING: 'PROCESSING',
+    RETRYING: 'RETRYING',
   },
 }));
 

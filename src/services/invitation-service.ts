@@ -2,7 +2,7 @@ import 'server-only';
 
 import { randomBytes } from 'node:crypto';
 import { RequestInvitationEmail } from '@/emails/templates/request-invitation-template';
-import { InviteStatus } from '@/libs/prisma/client';
+import { InviteStatus, MessageType } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { sendResendEmail } from '@/services/resend-service';
 import { buildInvitationAbsoluteUrl } from '@/utils/url-helper';
@@ -203,20 +203,10 @@ export async function sendRequestInvitations(params: {
           subject: `You're invited to join a ${request.objective_category} request`,
           react: RequestInvitationEmail(emailProps),
         });
-      } catch (error) {
-        if (!existingInvitation) {
-          try {
-            await prisma.invitedUser.delete({
-              where: { id: invitedUser.id },
-            });
-          } catch (cleanupError) {
-            throw new Error(
-              `${getErrorMessage(error)} Cleanup failed: ${getErrorMessage(cleanupError)}`
-            );
-          }
-        }
-
-        throw error;
+      } catch {
+        // Email delivery failed but the invited_user record is kept so the
+        // invite still appears in the system and personality data can be shown.
+        delivery = { id: null };
       }
 
       const persistedInvitation: InvitationRecord = existingInvitation
@@ -235,6 +225,35 @@ export async function sendRequestInvitations(params: {
             },
           })
         : invitedUser;
+
+      // If the invited email belongs to an existing user, create an in-app notification
+      const existingUser = await prisma.user.findUnique({
+        where: { email: recipient.userEmail },
+        select: { id: true },
+      });
+      if (existingUser) {
+        const token = persistedInvitation.invited_token;
+        const alreadyNotified = await prisma.notification.findFirst({
+          where: {
+            user_id: existingUser.id,
+            message_type: MessageType.REQUEST_INVITATION,
+            message_data: { path: ['inviteToken'], equals: token },
+          },
+          select: { id: true },
+        });
+        if (!alreadyNotified) {
+          await prisma.notification.create({
+            data: {
+              user_id: existingUser.id,
+              message_type: MessageType.REQUEST_INVITATION,
+              message_title: `You're invited to a ${request.objective_category} request`,
+              message_body:
+                'Accept or decline this invitation from your inbox.',
+              message_data: { inviteToken: token },
+            },
+          });
+        }
+      }
 
       return {
         invitationId: persistedInvitation.id,

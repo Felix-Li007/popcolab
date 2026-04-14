@@ -1,14 +1,11 @@
-export const REQUEST_STATUS = {
-  OPENED: 'OPENED',
-  PENDING: 'PENDING',
-  MATCHED: 'MATCHED',
-  CLOSED: 'CLOSED',
-  PROCESSING: 'PROCESSING',
-  RETRYING: 'RETRYING',
-} as const;
+import {
+  RequestStatus as PrismaRequestStatus,
+  type RequestStatus as PrismaRequestStatusType,
+} from '@/libs/prisma/enums';
 
-export type RequestStatus =
-  (typeof REQUEST_STATUS)[keyof typeof REQUEST_STATUS];
+export const REQUEST_STATUS = PrismaRequestStatus;
+
+export type RequestStatus = PrismaRequestStatusType;
 
 export const REQUEST_STATUS_OPTIONS: Array<{
   value: RequestStatus;

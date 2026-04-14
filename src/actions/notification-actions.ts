@@ -23,7 +23,15 @@ export async function fetchNotifications(): Promise<Notification[]> {
     take: 20,
   });
 
-  return notifications as Notification[];
+  return notifications.map(notification => ({
+    id: notification.id,
+    message_type: notification.message_type,
+    message_title: notification.message_title,
+    message_body: notification.message_body,
+    message_data: notification.message_data,
+    read_at: notification.read_at?.toISOString() ?? null,
+    created_at: notification.created_at.toISOString(),
+  }));
 }
 
 export async function fetchUnreadCount(): Promise<number> {

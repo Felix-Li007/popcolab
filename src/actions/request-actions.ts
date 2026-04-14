@@ -2,6 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { createRequest } from '@/services/user-request-service';
@@ -208,7 +209,35 @@ export async function createRequestAction(
   }
 
   revalidatePath(REQUESTS_PATH);
-  return {};
+  redirect(REQUESTS_PATH);
+}
+
+// ── Request actions ───────────────────────────────────────────────────────────
+
+export async function cancelRequestAction(requestId: number): Promise<void> {
+  const user = await getAuthUser();
+
+  const request = await prisma.request.findUnique({
+    where: { id: requestId },
+    select: { user_id: true, request_status: true },
+  });
+
+  if (!request || request.user_id !== user.id) {
+    throw new Error('Not authorised.');
+  }
+
+  if (request.request_status !== 'OPENED') {
+    throw new Error(
+      'Only submitted requests that have not yet been reviewed can be cancelled.'
+    );
+  }
+
+  await prisma.request.update({
+    where: { id: requestId },
+    data: { request_status: 'CLOSED' },
+  });
+
+  revalidatePath(REQUESTS_PATH);
 }
 
 // ── Proposal actions ─────────────────────────────────────────────────────────
