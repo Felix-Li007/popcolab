@@ -5,6 +5,7 @@ import { InviteStatus, ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import { REQUEST_STATUS } from '@/constants/request-status';
+import { isRequestStatus } from '@/constants/request-status';
 import { enqueueQueueJob } from '@/services/queue-service';
 import { REQUEST_QUEUE_TRIGGER, RequestQueueTrigger } from '@/types/queue-job';
 import { QSTASH_TASK_TYPE } from '@/types/qstash-task';
@@ -14,6 +15,59 @@ import type {
   AdminRequestsPageQuery,
   AdminRequestStatusCounts,
 } from '@/types/request-type';
+
+async function notifyRequestStatusChanged(params: {
+  requestId: number;
+  previousStatus: string | null;
+  nextStatus: string;
+}) {
+  if (params.previousStatus === params.nextStatus) {
+    return;
+  }
+
+  const request = await prisma.request.findUnique({
+    where: { id: params.requestId },
+    select: {
+      id: true,
+      objective_category: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          user_name: true,
+          profile: {
+            select: {
+              first_name: true,
+              last_name: true,
+            },
+          },
+        },
+      },
+      proposals: {
+        orderBy: [{ id: 'desc' }],
+        select: {
+          id: true,
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!request) return;
+
+  try {
+    const { enqueueRequestChangedNotification } =
+      await import('@/services/notification-service');
+
+    await enqueueRequestChangedNotification({
+      requestId: request.id,
+      previousStatus: params.previousStatus,
+      nextStatus: params.nextStatus,
+    });
+  } catch {
+    // Best-effort notification; the status update itself should still succeed.
+  }
+}
 
 /**
  * When a request expires, schedules a QStash task to enqueue a proposal.
@@ -77,14 +131,27 @@ export async function handleRejectedProposal(proposalId: number) {
     select: {
       id: true,
       request_id: true,
+      request: {
+        select: {
+          request_status: true,
+        },
+      },
     },
   });
+
+  const previousStatus = String(proposal.request.request_status).toUpperCase();
 
   await prisma.request.update({
     where: { id: proposal.request_id },
     data: {
       request_status: REQUEST_STATUS.PENDING as never,
     },
+  });
+
+  await notifyRequestStatusChanged({
+    requestId: proposal.request_id,
+    previousStatus,
+    nextStatus: REQUEST_STATUS.PENDING,
   });
 
   return enqueueRequestReady(
@@ -167,6 +234,12 @@ export async function enqueueRequestReady(
     data: {
       request_status: REQUEST_STATUS.PENDING as never,
     },
+  });
+
+  await notifyRequestStatusChanged({
+    requestId: request.id,
+    previousStatus: String(request.request_status).toUpperCase(),
+    nextStatus: REQUEST_STATUS.PENDING,
   });
 
   const result = await enqueueQueueJob({
@@ -536,8 +609,6 @@ function buildDefaultStatusCounts(): AdminRequestStatusCounts {
     [REQUEST_STATUS.PENDING]: 0,
     [REQUEST_STATUS.MATCHED]: 0,
     [REQUEST_STATUS.CLOSED]: 0,
-    [REQUEST_STATUS.PROCESSING]: 0,
-    [REQUEST_STATUS.RETRYING]: 0,
   };
 }
 
@@ -630,7 +701,7 @@ export async function getAdminRequestsPage(
   const statusCounts = buildDefaultStatusCounts();
   statusRows.forEach(row => {
     const normalizedStatus = String(row.request_status).toUpperCase();
-    if (normalizedStatus in statusCounts) {
+    if (isRequestStatus(normalizedStatus)) {
       statusCounts[normalizedStatus as keyof typeof statusCounts] =
         row._count.id;
     }

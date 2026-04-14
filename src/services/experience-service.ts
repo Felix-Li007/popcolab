@@ -938,7 +938,7 @@ export async function getExperienceById(
 
 export async function createExperience(
   input: UpsertExperienceInput
-): Promise<void> {
+): Promise<number> {
   await assertExperienceRelations(
     input.providerId,
     input.categoryId,
@@ -946,6 +946,7 @@ export async function createExperience(
   );
 
   const createdBy = await getDefaultCreatedById();
+  let createdId: number | null = null;
   await prisma.$transaction(async (tx: ExperienceWriteClient) => {
     const experience = await tx.experience.create({
       data: {
@@ -968,10 +969,12 @@ export async function createExperience(
         id: true,
       },
     });
-
+    createdId = experience.id;
     await replaceExperienceDimensions(tx, experience.id, input.dimensionValues);
     await upsertExperiencePricing(tx, experience.id, input);
   });
+  if (!createdId) throw new Error('Failed to create experience');
+  return createdId;
 }
 
 export async function updateExperience(

@@ -15,14 +15,6 @@ export const REQUEST_STATUS_OPTIONS: Array<{
   { value: REQUEST_STATUS.PENDING, label: 'PENDING' },
   { value: REQUEST_STATUS.MATCHED, label: 'MATCHED' },
   { value: REQUEST_STATUS.CLOSED, label: 'CLOSED' },
-  {
-    value: REQUEST_STATUS.PROCESSING,
-    label: 'PROCESSING',
-  },
-  {
-    value: REQUEST_STATUS.RETRYING,
-    label: 'RETRYING',
-  },
 ];
 
 export const REQUEST_STATUS_SET = new Set<RequestStatus>(

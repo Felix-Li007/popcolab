@@ -5,7 +5,7 @@ jest.mock('@/libs/prisma/client', () => ({
   MessageType: {
     EVENT_CANCELED: 'EVENT_CANCELED',
     DATE_CANCELED: 'DATE_CANCELED',
-    REQUEST_MATCHED: 'REQUEST_MATCHED',
+    REQUEST_CHANGED: 'REQUEST_CHANGED',
   },
   Prisma: {
     sql: (strings: TemplateStringsArray, ...values: unknown[]) => ({
@@ -20,6 +20,9 @@ jest.mock('@/libs/prisma/client', () => ({
 jest.mock('@/libs/prisma-client', () => ({
   prisma: {
     $queryRaw: jest.fn(),
+    request: {
+      findUnique: jest.fn(),
+    },
     notification: {
       createMany: jest.fn(),
     },
@@ -36,15 +39,19 @@ jest.mock('@/services/qstash-service', () => ({
 
 import {
   enqueueEventCanceledNotifications,
-  enqueueEventDateCanceledNotifications,
+  enqueueDateCanceledNotifications,
+  enqueueRequestChangedNotification,
 } from '@/services/notification-service';
 import { enqueueNotificationQueueJob } from '@/services/queue-service';
 import { publishQStashTask } from '@/services/qstash-service';
-import { NOTIFICATION_QUEUE_JOB_TYPE } from '@/types/queue-job';
+import { NOTIFICATION_JOB_TYPE } from '@/types/queue-job';
 import { QSTASH_TASK_TYPE } from '@/types/qstash-task';
 
 type MockedPrisma = {
   $queryRaw: jest.Mock;
+  request: {
+    findUnique: jest.Mock;
+  };
   notification: {
     createMany: jest.Mock;
   };
@@ -126,7 +133,7 @@ describe('notification-service', () => {
       ],
     });
     expect(enqueueNotificationQueueJobMock).toHaveBeenCalledWith({
-      type: NOTIFICATION_QUEUE_JOB_TYPE.EVENT_CANCELED_EMAIL,
+      type: NOTIFICATION_JOB_TYPE.EVENT_CANCELED_EMAIL,
       recipientEmail: 'member@example.com',
       recipientName: 'Member One',
       eventTitle: 'Spring Gala',
@@ -153,7 +160,7 @@ describe('notification-service', () => {
     ]);
     prismaMock.notification.createMany.mockResolvedValue({ count: 1 });
 
-    const result = await enqueueEventDateCanceledNotifications({
+    const result = await enqueueDateCanceledNotifications({
       eventId: 15,
       eventTitle: 'Spring Gala',
       eventLocation: 'Main Hall',
@@ -187,7 +194,7 @@ describe('notification-service', () => {
       ],
     });
     expect(enqueueNotificationQueueJobMock).toHaveBeenCalledWith({
-      type: NOTIFICATION_QUEUE_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL,
+      type: NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL,
       recipientEmail: 'member@example.com',
       recipientName: 'Member One',
       eventTitle: 'Spring Gala',
@@ -199,6 +206,58 @@ describe('notification-service', () => {
     expect(publishQStashTaskMock).toHaveBeenCalledWith({
       type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
       batchSize: 100,
+    });
+    expect(result).toEqual({
+      recipientCount: 1,
+      queuedCount: 1,
+    });
+  });
+
+  test('enqueueRequestChangedNotification creates an in-app notification and queues a request status email', async () => {
+    prismaMock.request.findUnique.mockResolvedValue({
+      id: 44,
+      objective_category: 'Team Bonding',
+      user: {
+        id: 12,
+        email: 'member@example.com',
+        user_name: 'Member One',
+      },
+      proposals: [{ id: 98 }],
+    });
+    prismaMock.notification.createMany.mockResolvedValue({ count: 1 });
+
+    const result = await enqueueRequestChangedNotification({
+      requestId: 44,
+      previousStatus: 'PENDING',
+      nextStatus: 'MATCHED',
+    });
+
+    expect(prismaMock.notification.createMany).toHaveBeenCalledWith({
+      data: [
+        {
+          user_id: 12,
+          message_type: MessageType.REQUEST_CHANGED,
+          message_title: 'Request #44 status changed to MATCHED',
+          message_body: 'Your request status changed from pending to matched.',
+          message_data: {
+            requestId: 44,
+            proposalId: 98,
+            objectiveCategory: 'Team Bonding',
+            previousStatus: 'PENDING',
+            nextStatus: 'MATCHED',
+          },
+        },
+      ],
+    });
+    expect(enqueueNotificationQueueJobMock).toHaveBeenCalledWith({
+      type: NOTIFICATION_JOB_TYPE.REQUEST_CHANGED_EMAIL,
+      recipientEmail: 'member@example.com',
+      recipientName: 'Member One',
+      requestId: 44,
+      objectiveCategory: 'Team Bonding',
+      previousStatus: 'PENDING',
+      nextStatus: 'MATCHED',
+      queuedAt: '2026-03-30T12:00:00.000Z',
     });
     expect(result).toEqual({
       recipientCount: 1,

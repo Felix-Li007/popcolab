@@ -3,11 +3,11 @@ import 'server-only';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
 import {
   deleteRequestQueueJob,
-  deleteNotificationQueueJob,
+  deleteNotificationQueueJob as deleteNotificationJob,
   readNotificationQueueJobs,
   readRequestQueueJobs,
 } from '@/services/queue-service';
-import { processNotificationQueueJob } from '@/services/delivery-service';
+import { processNotificationQueueJob as processNotificationJob } from '@/services/delivery-service';
 import { expireExperienceOrderIfDue } from '@/services/order-service';
 import { refreshHistoryPreference } from '@/services/preference-service';
 import { createFittedProposal } from '@/services/proposal-service';
@@ -154,13 +154,7 @@ async function handleRequestProcess(payload: RequestProcessPayload) {
 }
 
 async function handleNotificationProcess(payload: NotificationProcessPayload) {
-  logInfo(
-    {
-      batchSize: payload.batchSize,
-    },
-    'Notification queue process started'
-  );
-
+  // Read a batch of messages from the notification queue
   const messages = await readNotificationQueueJobs(payload.batchSize);
   const processed: Array<{
     messageId: number;
@@ -168,27 +162,10 @@ async function handleNotificationProcess(payload: NotificationProcessPayload) {
     detail: string;
   }> = [];
 
-  logInfo(
-    {
-      batchSize: payload.batchSize,
-      messageCount: messages.length,
-    },
-    'Notification queue messages fetched'
-  );
-
   for (const message of messages) {
     try {
-      logInfo(
-        {
-          messageId: message.messageId,
-          notificationType: message.job.type,
-          recipientEmail: message.job.recipientEmail,
-        },
-        'Processing notification queue message'
-      );
-
-      await processNotificationQueueJob(message.job);
-      await deleteNotificationQueueJob(message.messageId);
+      await processNotificationJob(message.job);
+      await deleteNotificationJob(message.messageId);
 
       logInfo(
         {
@@ -220,6 +197,22 @@ async function handleNotificationProcess(payload: NotificationProcessPayload) {
         detail: error instanceof Error ? error.message : 'unknown_error',
       });
     }
+  }
+
+  // If this batch is full, there may be more messages in the queue, so re-enqueue QStash task
+  if (messages.length === payload.batchSize) {
+    logInfo(
+      {
+        batchSize: payload.batchSize,
+        processedCount: processed.length,
+      },
+      'Notification queue not empty, re-enqueue QStash task'
+    );
+    // Re-publish QStash task to continue processing remaining queue
+    await publishQStashTask({
+      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
+      batchSize: payload.batchSize,
+    });
   }
 
   logInfo(

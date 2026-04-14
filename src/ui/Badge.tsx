@@ -61,9 +61,16 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
     },
     ref
   ) => {
-    const baseStyles = 'inline-block font-bold rounded-full';
-    const variantStyle = variantStyles[variant];
-    const sizeStyle = sizeStyles[size];
+    const baseStyles =
+      'inline-block font-medium rounded-2xl border border-solid border-gray-200 shadow-none';
+    // Custom variant tweaks for status badges
+    let variantStyle = variantStyles[variant];
+    if (variant === 'danger') variantStyle = 'bg-red-50 text-red-600';
+    if (variant === 'warning') variantStyle = 'bg-yellow-50 text-yellow-700';
+    if (variant === 'secondary') variantStyle = 'bg-gray-100 text-gray-500';
+    // Slightly more padding for status
+    let sizeStyle = sizeStyles[size];
+    if (size === 'xs') sizeStyle = 'text-[11px] px-3 py-1';
 
     // Support both Tailwind classes and raw color values for bgColor/textColor
     const styleObj: React.CSSProperties = {};

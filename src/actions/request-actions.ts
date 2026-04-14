@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
+import { REQUEST_STATUS } from '@/constants/request-status';
 import { createRequest } from '@/services/user-request-service';
 import { sendRequestInvitations } from '@/services/invitation-service';
 
@@ -236,6 +237,18 @@ export async function cancelRequestAction(requestId: number): Promise<void> {
     where: { id: requestId },
     data: { request_status: 'CLOSED' },
   });
+
+  try {
+    const { enqueueRequestChangedNotification } =
+      await import('@/services/notification-service');
+    await enqueueRequestChangedNotification({
+      requestId,
+      previousStatus: REQUEST_STATUS.OPENED,
+      nextStatus: REQUEST_STATUS.CLOSED,
+    });
+  } catch {
+    // Cancellation should still succeed even if notification queueing fails.
+  }
 
   revalidatePath(REQUESTS_PATH);
 }

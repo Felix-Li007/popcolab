@@ -28,8 +28,6 @@ enum RequestStatus {
   PENDING
   MATCHED
   CLOSED
-  PROCESSING
-  RETRYING
 }
 
 enum ConstraintMode {

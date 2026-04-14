@@ -8,7 +8,7 @@ jest.mock('@/services/clerk-service', () => ({
 }));
 
 jest.mock('@/services/notification-service', () => ({
-  enqueueEventDateCanceledNotifications: jest.fn(),
+  enqueueDateCanceledNotifications: jest.fn(),
   getRemovedEventCalendars: jest.fn(),
 }));
 
@@ -35,7 +35,7 @@ import {
   cancelEventAction,
   cancelEventCalendarAction,
 } from '@/actions/event-actions';
-import { enqueueEventDateCanceledNotifications } from '@/services/notification-service';
+import { enqueueDateCanceledNotifications } from '@/services/notification-service';
 import { requireAdminActionAccess } from '@/services/clerk-service';
 
 type MockedPrisma = {
@@ -54,9 +54,9 @@ const requireAdminActionAccessMock =
   requireAdminActionAccess as jest.MockedFunction<
     typeof requireAdminActionAccess
   >;
-const enqueueEventDateCanceledNotificationsMock =
-  enqueueEventDateCanceledNotifications as jest.MockedFunction<
-    typeof enqueueEventDateCanceledNotifications
+const enqueueDateCanceledNotificationsMock =
+  enqueueDateCanceledNotifications as jest.MockedFunction<
+    typeof enqueueDateCanceledNotifications
   >;
 
 describe('event-actions cancellation flow', () => {
@@ -65,7 +65,7 @@ describe('event-actions cancellation flow', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-03-30T12:00:00.000Z'));
 
     requireAdminActionAccessMock.mockResolvedValue(undefined);
-    enqueueEventDateCanceledNotificationsMock.mockResolvedValue({
+    enqueueDateCanceledNotificationsMock.mockResolvedValue({
       recipientCount: 1,
       queuedCount: 1,
     });
@@ -131,7 +131,7 @@ describe('event-actions cancellation flow', () => {
         event_pricing: true,
       },
     });
-    expect(enqueueEventDateCanceledNotificationsMock).toHaveBeenCalledWith({
+    expect(enqueueDateCanceledNotificationsMock).toHaveBeenCalledWith({
       eventId: 15,
       eventTitle: 'Spring Gala',
       eventLocation: 'Main Hall',
@@ -208,7 +208,7 @@ describe('event-actions cancellation flow', () => {
         eventStatus: EventStatus.INACTIVE,
       },
     });
-    expect(enqueueEventDateCanceledNotificationsMock).toHaveBeenCalledWith({
+    expect(enqueueDateCanceledNotificationsMock).toHaveBeenCalledWith({
       eventId: 15,
       eventTitle: 'Spring Gala',
       eventLocation: 'Main Hall',

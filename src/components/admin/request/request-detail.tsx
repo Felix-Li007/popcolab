@@ -21,10 +21,6 @@ function getStatusBadge(status: AdminRequestListItem['status']) {
       return { label: 'MATCHED', variant: 'success' as const };
     case REQUEST_STATUS.CLOSED:
       return { label: 'CLOSED', variant: 'danger' as const };
-    case REQUEST_STATUS.PROCESSING:
-      return { label: 'PROCESSING', variant: 'warning' as const };
-    case REQUEST_STATUS.RETRYING:
-      return { label: 'RETRYING', variant: 'secondary' as const };
     default:
       return { label: status, variant: 'default' as const };
   }

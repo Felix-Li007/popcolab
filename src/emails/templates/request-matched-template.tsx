@@ -1,26 +1,33 @@
-export type RequestMatchedTemplateProps = {
+export type RequestStatusChangedTemplateProps = {
   recipientName: string;
   requestId: number;
   objectiveCategory: string;
+  previousStatus: string | null;
+  nextStatus: string;
 };
 
-export function RequestMatchedEmail(
-  props: Readonly<RequestMatchedTemplateProps>
+function formatStatusLabel(value: string | null) {
+  if (!value) return null;
+  return value.toLowerCase().replaceAll('_', ' ');
+}
+
+export function RequestStatusChangedEmail(
+  props: Readonly<RequestStatusChangedTemplateProps>
 ) {
   const safeName = props.recipientName || 'there';
+  const previousStatusLabel = formatStatusLabel(props.previousStatus);
+  const nextStatusLabel =
+    formatStatusLabel(props.nextStatus) ?? props.nextStatus;
 
   return (
     <html lang="en">
       <body>
         <div>
           <p>Request Update</p>
-          <h1>Your request has been approved</h1>
+          <h1>Your request status has changed</h1>
 
           <p>Hi {safeName},</p>
-          <p>
-            Great news. Your request has been approved by our team and moved to
-            matched status.
-          </p>
+          <p>Your request status has been updated in Pop CoLab.</p>
 
           <div>
             <p>
@@ -29,10 +36,18 @@ export function RequestMatchedEmail(
             <p>
               Objective category: <strong>{props.objectiveCategory}</strong>
             </p>
+            {previousStatusLabel ? (
+              <p>
+                Previous status: <strong>{previousStatusLabel}</strong>
+              </p>
+            ) : null}
+            <p>
+              Current status: <strong>{nextStatusLabel}</strong>
+            </p>
           </div>
 
           <p>
-            You can review your request details and related proposal in your
+            You can review your request details and related updates in your
             dashboard.
           </p>
 

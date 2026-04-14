@@ -13,8 +13,6 @@ const STATUS_COLOR_MAP: Record<OverviewRequestStatusPoint['id'], string> = {
   [REQUEST_STATUS.PENDING]: '#f59e0b',
   [REQUEST_STATUS.MATCHED]: '#6366f1',
   [REQUEST_STATUS.CLOSED]: '#e9756e',
-  [REQUEST_STATUS.PROCESSING]: '#0891b2',
-  [REQUEST_STATUS.RETRYING]: '#8b5cf6',
   unknown: '#9ca3af',
 };
 
@@ -69,33 +67,13 @@ export default function RequestStatusChart({ data }: Readonly<Props>) {
               { offset: 100, color: 'inherit', opacity: 0.72 },
             ],
           },
-          {
-            id: 'processingGradient',
-            type: 'linearGradient',
-            colors: [
-              { offset: 0, color: 'inherit', opacity: 1 },
-              { offset: 100, color: 'inherit', opacity: 0.72 },
-            ],
-          },
-          {
-            id: 'retryingGradient',
-            type: 'linearGradient',
-            colors: [
-              { offset: 0, color: 'inherit', opacity: 1 },
-              { offset: 100, color: 'inherit', opacity: 0.72 },
-            ],
-          },
         ]}
         fill={[
           { match: { id: REQUEST_STATUS.OPENED }, id: 'openedGradient' },
           { match: { id: REQUEST_STATUS.PENDING }, id: 'pendingGradient' },
           { match: { id: REQUEST_STATUS.MATCHED }, id: 'matchedGradient' },
           { match: { id: REQUEST_STATUS.CLOSED }, id: 'closedGradient' },
-          {
-            match: { id: REQUEST_STATUS.PROCESSING },
-            id: 'processingGradient',
-          },
-          { match: { id: REQUEST_STATUS.RETRYING }, id: 'retryingGradient' },
+          // Removed PROCESSING and RETRYING
           { match: { id: 'unknown' }, id: 'unknownGradient' },
         ]}
         colors={datum =>

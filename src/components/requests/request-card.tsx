@@ -13,11 +13,6 @@ import AttendeePersonalityPanel from './attendee-personality-panel';
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
   OPENED: { label: 'Submitted', className: 'bg-violet-100 text-violet-700' },
   PENDING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
-  PROCESSING: {
-    label: 'Under Review',
-    className: 'bg-amber-100 text-amber-700',
-  },
-  RETRYING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
   MATCHED: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
   CLOSED: { label: 'Closed', className: 'bg-gray-100 text-gray-600' },
 };
@@ -62,10 +57,7 @@ export default function RequestCard({
     className: 'bg-gray-100 text-gray-600',
   };
 
-  const isUnderReview =
-    request.status === 'PENDING' ||
-    request.status === 'PROCESSING' ||
-    request.status === 'RETRYING';
+  const isUnderReview = request.status === 'PENDING';
   const isMatched = request.status === 'MATCHED';
   const isClosed = request.status === 'CLOSED';
 

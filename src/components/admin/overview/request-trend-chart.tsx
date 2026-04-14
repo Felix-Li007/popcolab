@@ -17,8 +17,6 @@ const STATUS_COLOR_MAP: Record<RequestStatus, string> = {
   [REQUEST_STATUS.PENDING]: '#f59e0b',
   [REQUEST_STATUS.MATCHED]: '#6366f1',
   [REQUEST_STATUS.CLOSED]: '#e9756e',
-  [REQUEST_STATUS.PROCESSING]: '#0891b2',
-  [REQUEST_STATUS.RETRYING]: '#8b5cf6',
 };
 
 const CHART_KEYS = REQUEST_STATUS_OPTIONS.map(option => option.value);
@@ -90,14 +88,6 @@ export default function RequestStatusTrendChart({ data }: Readonly<Props>) {
           { match: { id: REQUEST_STATUS.PENDING }, id: 'pendingBarGradient' },
           { match: { id: REQUEST_STATUS.MATCHED }, id: 'matchedBarGradient' },
           { match: { id: REQUEST_STATUS.CLOSED }, id: 'closedBarGradient' },
-          {
-            match: { id: REQUEST_STATUS.PROCESSING },
-            id: 'processingBarGradient',
-          },
-          {
-            match: { id: REQUEST_STATUS.RETRYING },
-            id: 'retryingBarGradient',
-          },
         ]}
         groupMode="stacked"
         valueScale={{ type: 'linear' }}

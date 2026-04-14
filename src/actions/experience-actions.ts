@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/libs/prisma-client';
 import { getCurrentDbUserId } from '@/services/clerk-service';
+import { enqueueExperienceCreatedNotifications } from '@/services/notification-service';
 import {
   getPopularExperiences,
   getRecommendedExperiences,
@@ -173,8 +174,23 @@ export async function createExperienceAction(
     return { errors };
 
   try {
-    await createExperience(parsed);
+    const experienceId = await createExperience(parsed);
     revalidateAdminPaths();
+    const experience = await prisma.experience.findUnique({
+      where: { id: experienceId },
+      select: { id: true, experience_title: true, category_id: true },
+    });
+    if (experience) {
+      const category = await prisma.category.findUnique({
+        where: { id: experience.category_id },
+        select: { category_title: true },
+      });
+      await enqueueExperienceCreatedNotifications({
+        experienceId: experience.id,
+        experienceTitle: experience.experience_title,
+        experienceCategory: category?.category_title || '',
+      });
+    }
     return { errors: {}, success: true };
   } catch (error) {
     return { errors: mapExperienceError(error) };

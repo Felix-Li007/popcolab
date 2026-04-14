@@ -1,4 +1,7 @@
 import { sanitizeRedirectPath } from '@/utils/auth-redirect';
+export const DASHBOARD_PATH = '/dashboard';
+export const DASHBOARD_REQUESTS_PATH = `${DASHBOARD_PATH}/requests`;
+export const DASHBOARD_EXPERIENCES_PATH = `${DASHBOARD_PATH}/experiences`;
 
 function normalizeAppPath(
   rawPath: string | null | undefined,
@@ -26,9 +29,14 @@ export const SIGN_UP_PATH = normalizeAppPath(
   process.env.NEXT_PUBLIC_CLERK_SIGN_UP_URL,
   '/sign-up'
 );
-export const DASHBOARD_PATH = '/dashboard';
-export const DASHBOARD_REQUESTS_PATH = `${DASHBOARD_PATH}/requests`;
-export const DASHBOARD_EXPERIENCES_PATH = `${DASHBOARD_PATH}/experiences`;
+
+export function buildEventFullUrl(eventId: string | number): string {
+  return `${normalizeAppBaseUrl(getFallbackAppBaseUrl() ?? '')}/events/${eventId}`;
+}
+
+export function buildExperienceFullUrl(experienceId: string | number): string {
+  return `${normalizeAppBaseUrl(getFallbackAppBaseUrl() ?? '')}/experiences/${experienceId}`;
+}
 
 function toQueryString(
   query?: Record<string, string | number | boolean | null | undefined>

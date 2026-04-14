@@ -1,3 +1,63 @@
+.statusBadgeLineLong {
+  width: 2px;
+  height: 18px;
+  background: #f0f1f3;
+  margin: 0;
+  border-radius: 1px;
+}
+
+/* Status badge column for admin requests table */
+.statusBadgeColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  justify-content: center;
+}
+
+.statusBadgeWithLine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-height: 28px;
+}
+
+.statusBadgeLine {
+  width: 2px;
+  height: 5px;
+  background: #f0f1f3;
+  margin: 0;
+  border-radius: 1px;
+}
+
+.statusBadgeFuture {
+  font-weight: 400;
+  opacity: 0.45;
+  margin-bottom: 0.5px;
+  border: 1px solid #f1f1f1;
+  transform: scale(0.92);
+}
+
+.statusBadgeFutureGroup {
+  margin-top: 4px;
+}
+
+.statusBadgeCurrent {
+  font-weight: 700;
+  opacity: 1;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 4px 0 rgba(37, 99, 235, 0.08);
+  border: 1.5px solid #dbeafe;
+}
+
+.statusBadgeFuture {
+  font-weight: 400;
+  opacity: 0.55;
+  margin-bottom: 1px;
+  border: 1px solid #f1f1f1;
+}
+
 @reference "../../../app/globals.css";
 
 .root {
@@ -285,9 +345,31 @@
 }
 
 .table td {
-  @apply px-3 py-3 text-xs text-slate-700 align-middle;
+  @apply px-3 text-xs text-slate-700 align-middle;
   border-bottom: 1px solid rgb(226 232 240 / 80%);
   background: rgba(255, 255, 255, 0.96);
+  height: 140px;
+  min-height: 140px;
+  max-height: 140px;
+  overflow: hidden;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  vertical-align: middle;
+}
+
+.table tr {
+  overflow: hidden;
+}
+
+.statusBadgeColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  justify-content: center;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .table tbody tr:nth-child(even) td {

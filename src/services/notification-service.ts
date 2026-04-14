@@ -2,9 +2,13 @@ import 'server-only';
 
 import { Prisma, MessageType } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
+import {
+  getRequestStatusLabel,
+  toRequestStatus,
+} from '@/constants/request-status';
 import { enqueueNotificationQueueJob } from '@/services/queue-service';
-import { handleQStashTask, publishQStashTask } from '@/services/qstash-service';
-import { NOTIFICATION_QUEUE_JOB_TYPE } from '@/types/queue-job';
+import { publishQStashTask } from '@/services/qstash-service';
+import { NOTIFICATION_JOB_TYPE, NotificationQueueJob } from '@/types/queue-job';
 import { QSTASH_TASK_TYPE } from '@/types/qstash-task';
 import {
   formatLocalDateValue,
@@ -203,58 +207,399 @@ async function getPurchasedEventRecipients(params: {
   return [...deduped.values()];
 }
 
-export async function enqueueRequestMatchedNotification(params: {
-  userId: number;
-  recipientEmail: string;
-  recipientName: string;
-  requestId: number;
-  proposalId: number;
-  objectiveCategory: string;
-}) {
-  await prisma.notification.create({
-    data: {
-      user_id: params.userId,
-      message_type: MessageType.REQUEST_MATCHED,
-      message_title: `Request #${params.requestId} matched`,
-      message_body:
-        'Your request has been approved and is now matched with a proposal.',
-      message_data: {
-        requestId: params.requestId,
-        proposalId: params.proposalId,
-        objectiveCategory: params.objectiveCategory,
-      },
-    },
-  });
+type RecipientWithOptionalId = { userId?: number; email: string; name: string };
 
-  await enqueueNotificationQueueJob({
-    type: NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL,
-    recipientEmail: params.recipientEmail,
-    recipientName: params.recipientName,
-    requestId: params.requestId,
-    objectiveCategory: params.objectiveCategory,
-    queuedAt: new Date().toISOString(),
-  });
+abstract class NotificationFlow<TRecipient extends RecipientWithOptionalId> {
+  protected readonly PAGE_SIZE: number;
+  protected messageType!: MessageType;
+  protected messageTitle!: (r: TRecipient) => string;
+  protected messageBody!: (r: TRecipient) => string;
+  protected messageData!: (
+    r: TRecipient
+  ) => Prisma.InputJsonValue | typeof Prisma.DbNull | typeof Prisma.JsonNull;
+  protected queueJobType!: NotificationQueueJob['type'];
+  protected queueJobPayload!: (r: TRecipient) => Record<string, unknown>;
 
-  try {
-    await publishQStashTask({
-      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
-      batchSize: 100,
+  constructor(pageSize = 500) {
+    this.PAGE_SIZE = pageSize;
+  }
+
+  protected abstract fetchRecipient(page: number): Promise<TRecipient[]>;
+
+  async run(): Promise<{ recipientCount: number; queuedCount: number }> {
+    let recipientCount = 0;
+    let queuedCount = 0;
+    let page = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const recipients = await this.fetchRecipient(page);
+      if (!recipients || recipients.length === 0) break;
+
+      recipientCount += recipients.length;
+
+      const toPersist = recipients.filter(
+        r => typeof r.userId === 'number' && r.userId! > 0
+      );
+
+      if (toPersist.length > 0) {
+        await prisma.notification.createMany({
+          data: toPersist.map(r => ({
+            user_id: r.userId!,
+            message_type: this.messageType,
+            message_title: this.messageTitle(r),
+            message_body: this.messageBody(r),
+            message_data: (() => {
+              if (!this.messageData) return Prisma.DbNull;
+              const val = this.messageData(r);
+              return val === null || val === undefined ? Prisma.DbNull : val;
+            })(),
+          })),
+        });
+      }
+
+      await Promise.all(
+        recipients.map(r =>
+          enqueueNotificationQueueJob({
+            type: this.queueJobType,
+            recipientEmail: r.email,
+            recipientName: r.name,
+            queuedAt: new Date().toISOString(),
+            ...this.queueJobPayload(r),
+          } as NotificationQueueJob)
+        )
+      );
+
+      queuedCount += recipients.length;
+      hasMore = recipients.length === this.PAGE_SIZE;
+      page++;
+    }
+
+    if (queuedCount === 0) {
+      return { recipientCount: 0, queuedCount: 0 };
+    }
+
+    try {
+      await publishQStashTask({
+        type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
+        batchSize: 100,
+      });
+    } catch (error) {
+      logger.error(
+        { error },
+        'QStash publish failed, notifications not processed'
+      );
+    }
+
+    return { recipientCount, queuedCount };
+  }
+}
+
+class ExperienceCreatedFlow extends NotificationFlow<RecipientWithOptionalId> {
+  constructor(
+    private params: {
+      experienceId: number;
+      experienceTitle: string;
+      experienceCategory: string;
+    }
+  ) {
+    super(500);
+    this.messageType = MessageType.EXPERIENCE_CREATED;
+    this.messageTitle = () =>
+      `New experience published: ${this.params.experienceTitle}`;
+    this.messageBody = () =>
+      `${this.params.experienceTitle} has been published.`;
+    this.messageData = () => ({
+      experienceId: this.params.experienceId,
+      experienceTitle: this.params.experienceTitle,
+      experienceCategory: this.params.experienceCategory,
+      creationType: 'experience',
     });
-  } catch (error) {
-    logger.warn(
-      {
-        error,
-        requestId: params.requestId,
-        proposalId: params.proposalId,
-      },
-      'QStash publish failed for request matched notification, processing queue locally'
-    );
-
-    await handleQStashTask({
-      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
-      batchSize: 100,
+    this.queueJobType = NOTIFICATION_JOB_TYPE.EXPERIENCE_CREATED_EMAIL;
+    this.queueJobPayload = () => ({
+      experienceTitle: this.params.experienceTitle,
+      experienceCategory: this.params.experienceCategory,
+      experienceId: this.params.experienceId,
     });
   }
+
+  protected async fetchRecipient(page: number) {
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true, user_name: true },
+      skip: page * this.PAGE_SIZE,
+      take: this.PAGE_SIZE,
+      orderBy: { id: 'asc' },
+    });
+
+    return users.map(u => ({
+      userId: u.id,
+      email: u.email,
+      name: buildRecipientName(u.user_name, u.email),
+    }));
+  }
+}
+export async function enqueueExperienceCreatedNotifications(params: {
+  experienceId: number;
+  experienceTitle: string;
+  experienceCategory: string;
+}) {
+  return await new ExperienceCreatedFlow(params).run();
+}
+
+class EventCreatedFlow extends NotificationFlow<RecipientWithOptionalId> {
+  constructor(
+    private params: {
+      eventId: number;
+      eventTitle: string;
+      eventLocation: string;
+    }
+  ) {
+    super(500);
+    this.messageType = MessageType.EVENT_CREATED;
+    this.messageTitle = () => `New event created: ${this.params.eventTitle}`;
+    this.messageBody = () => `${this.params.eventTitle} has been created.`;
+    this.messageData = () => ({
+      eventId: this.params.eventId,
+      eventTitle: this.params.eventTitle,
+      eventLocation: this.params.eventLocation,
+      creationType: 'event',
+    });
+    this.queueJobType = NOTIFICATION_JOB_TYPE.EVENT_CREATED_EMAIL;
+    this.queueJobPayload = () => ({
+      eventTitle: this.params.eventTitle,
+      eventLocation: this.params.eventLocation,
+    });
+  }
+
+  protected async fetchRecipient(page: number) {
+    const users = await prisma.user.findMany({
+      select: { id: true, email: true, user_name: true },
+      skip: page * this.PAGE_SIZE,
+      take: this.PAGE_SIZE,
+      orderBy: { id: 'asc' },
+    });
+
+    return users.map(u => ({
+      userId: u.id,
+      email: u.email,
+      name: buildRecipientName(u.user_name, u.email),
+    }));
+  }
+}
+
+class EventCanceledFlow extends NotificationFlow<RecipientWithOptionalId> {
+  constructor(
+    private params: {
+      eventId: number;
+      eventTitle: string;
+      eventLocation: string;
+    }
+  ) {
+    super(500);
+    this.messageType = MessageType.EVENT_CANCELED;
+    this.messageTitle = () => `Event canceled: ${this.params.eventTitle}`;
+    this.messageBody = () =>
+      `${this.params.eventTitle} at ${this.params.eventLocation} has been canceled.`;
+    this.messageData = () => ({
+      eventId: this.params.eventId,
+      eventTitle: this.params.eventTitle,
+      eventLocation: this.params.eventLocation,
+      cancellationType: 'event',
+    });
+    this.queueJobType = NOTIFICATION_JOB_TYPE.EVENT_CANCELED_EMAIL;
+    this.queueJobPayload = () => ({
+      eventTitle: this.params.eventTitle,
+      eventLocation: this.params.eventLocation,
+    });
+  }
+
+  protected async fetchRecipient(page: number) {
+    const rows = await prisma.$queryRaw<
+      Array<{ user_id: number; email: string; user_name: string | null }>
+    >(Prisma.sql`
+      select distinct
+        u.id as user_id,
+        u.email as email,
+        u.user_name as user_name
+      from order_item oi
+      inner join "order" o on o.id = oi.order_id
+      inner join "user" u on u.id = o.user_id
+      where oi.item_type = 'EVENT'
+        and oi.event_id = ${this.params.eventId}
+        and o.order_status = 'PAID'
+      order by u.id asc
+      offset ${page * this.PAGE_SIZE} limit ${this.PAGE_SIZE}
+    `);
+
+    if (rows.length === 0 && page === 0) {
+      const fallback = getTestCancellationRecipient();
+      if (fallback) return [fallback];
+    }
+
+    return rows.map(r => ({
+      userId: r.user_id,
+      email: r.email,
+      name: buildRecipientName(r.user_name, r.email),
+    }));
+  }
+}
+
+class DateCanceledFlow extends NotificationFlow<
+  RecipientWithOptionalId & {
+    calendar: EventCalendarSnapshot;
+    canceledDateLabel: string;
+    canceledTimeLabel: string | null;
+  }
+> {
+  private calendars: EventCalendarSnapshot[];
+  constructor(
+    calendars: EventCalendarSnapshot[],
+    private params: {
+      eventId: number;
+      eventTitle: string;
+      eventLocation: string;
+    }
+  ) {
+    super(500);
+    this.calendars = calendars;
+    this.messageType = MessageType.DATE_CANCELED;
+    this.messageTitle = r => `Event date canceled: ${params.eventTitle}`;
+    this.messageBody = r =>
+      `${params.eventTitle} on ${r.canceledDateLabel}${r.canceledTimeLabel ? ` ${r.canceledTimeLabel}` : ''} has been canceled.`;
+    this.messageData = r => ({
+      eventId: params.eventId,
+      eventTitle: params.eventTitle,
+      eventLocation: params.eventLocation,
+      cancellationType: 'date',
+      canceledDateLabel: r.canceledDateLabel,
+      canceledTimeLabel: r.canceledTimeLabel,
+    });
+    this.queueJobType = NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL;
+    this.queueJobPayload = r => ({
+      eventTitle: params.eventTitle,
+      eventLocation: params.eventLocation,
+      canceledDateLabel: r.canceledDateLabel,
+      canceledTimeLabel: r.canceledTimeLabel,
+    });
+  }
+
+  protected async fetchRecipient(page: number) {
+    // Each page is a calendar slot
+    if (page >= this.calendars.length) return [];
+    const calendar = this.calendars[page];
+    const scheduleSlot = getScheduleSlotForOrderItem(calendar);
+    const canceledDateLabel = formatCanceledDateLabel(calendar);
+    const canceledTimeLabel = formatCanceledTimeLabel(calendar);
+    if (!scheduleSlot || !canceledDateLabel) return [];
+    const recipients = await getPurchasedEventRecipients({
+      eventId: this.params.eventId,
+      scheduleSlots: [scheduleSlot],
+    });
+    return recipients.map(r => ({
+      ...r,
+      calendar,
+      canceledDateLabel,
+      canceledTimeLabel,
+    }));
+  }
+}
+
+function formatRequestStatusForMessage(value: string | null) {
+  const status = value ? toRequestStatus(value) : null;
+  return (
+    getRequestStatusLabel(status)?.toLowerCase() ?? value?.toLowerCase() ?? null
+  );
+}
+
+type RequestChangedRecipient = RecipientWithOptionalId & {
+  objectiveCategory: string;
+  proposalId: number;
+};
+
+class RequestChangedFlow extends NotificationFlow<RequestChangedRecipient> {
+  constructor(
+    private params: {
+      requestId: number;
+      previousStatus: string | null;
+      nextStatus: string;
+    }
+  ) {
+    super(1); // Only one recipient
+    const previousStatusLabel = formatRequestStatusForMessage(
+      params.previousStatus
+    );
+    const nextStatusLabel =
+      formatRequestStatusForMessage(params.nextStatus) ?? params.nextStatus;
+
+    this.messageType = MessageType.REQUEST_CHANGED;
+    this.messageTitle = () =>
+      `Request #${params.requestId} status changed to ${params.nextStatus}`;
+    this.messageBody = () =>
+      previousStatusLabel
+        ? `Your request status changed from ${previousStatusLabel} to ${nextStatusLabel}.`
+        : `Your request status changed to ${nextStatusLabel}.`;
+    this.messageData = r => ({
+      requestId: params.requestId,
+      proposalId: r.proposalId,
+      objectiveCategory: r.objectiveCategory,
+      previousStatus: params.previousStatus,
+      nextStatus: params.nextStatus,
+    });
+    this.queueJobType = NOTIFICATION_JOB_TYPE.REQUEST_CHANGED_EMAIL;
+    this.queueJobPayload = r => ({
+      requestId: params.requestId,
+      objectiveCategory: r.objectiveCategory,
+      previousStatus: params.previousStatus,
+      nextStatus: params.nextStatus,
+    });
+  }
+
+  protected async fetchRecipient(page: number) {
+    if (page > 0) return [];
+    const request = await prisma.request.findUnique({
+      where: { id: this.params.requestId },
+      select: {
+        id: true,
+        objective_category: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            user_name: true,
+          },
+        },
+        proposals: {
+          orderBy: [{ id: 'desc' }],
+          select: {
+            id: true,
+          },
+          take: 1,
+        },
+      },
+    });
+
+    if (!request?.user?.email) {
+      return [];
+    }
+
+    return [
+      {
+        userId: request.user.id,
+        email: request.user.email,
+        name: buildRecipientName(request.user.user_name, request.user.email),
+        objectiveCategory: request.objective_category,
+        proposalId: request.proposals[0]?.id ?? 0,
+      },
+    ];
+  }
+}
+
+export async function enqueueRequestChangedNotification(params: {
+  requestId: number;
+  previousStatus: string | null;
+  nextStatus: string;
+}) {
+  return await new RequestChangedFlow(params).run();
 }
 
 export async function enqueueEventCanceledNotifications(params: {
@@ -262,386 +607,35 @@ export async function enqueueEventCanceledNotifications(params: {
   eventTitle: string;
   eventLocation: string;
 }) {
-  logger.debug(
-    {
-      eventId: params.eventId,
-      eventTitle: params.eventTitle,
-      eventLocation: params.eventLocation,
-    },
-    'Event cancellation notification lookup started'
-  );
-
-  const purchasedRecipients = await getPurchasedEventRecipients({
-    eventId: params.eventId,
-  });
-
-  const testRecipient =
-    purchasedRecipients.length === 0 ? getTestCancellationRecipient() : null;
-
-  const recipients: CancellationRecipient[] = [
-    ...purchasedRecipients.map(recipient => ({
-      ...recipient,
-      source: 'purchase' as const,
-    })),
-    ...(testRecipient ? [testRecipient] : []),
-  ];
-
-  logger.debug(
-    {
-      eventId: params.eventId,
-      eventTitle: params.eventTitle,
-      purchasedRecipientCount: purchasedRecipients.length,
-      fallbackRecipientUsed: Boolean(testRecipient),
-      recipientCount: recipients.length,
-    },
-    'Event cancellation recipients resolved'
-  );
-
-  if (recipients.length === 0) {
-    logger.warn(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-      },
-      'No recipients found for event cancellation notifications'
-    );
-    return {
-      recipientCount: 0,
-      queuedCount: 0,
-    };
-  }
-
-  const persistedRecipients = recipients.filter(
-    recipient => recipient.source === 'purchase'
-  );
-
-  if (persistedRecipients.length > 0) {
-    await prisma.notification.createMany({
-      data: persistedRecipients.map(recipient => ({
-        user_id: recipient.userId,
-        message_type: MessageType.EVENT_CANCELED,
-        message_title: `Event canceled: ${params.eventTitle}`,
-        message_body: `${params.eventTitle} at ${params.eventLocation} has been canceled.`,
-        message_data: {
-          eventId: params.eventId,
-          eventTitle: params.eventTitle,
-          eventLocation: params.eventLocation,
-          cancellationType: 'event',
-        },
-      })),
-    });
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        notificationCount: persistedRecipients.length,
-      },
-      'Event cancellation notifications created'
-    );
-  } else {
-    logger.warn(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-      },
-      'Skipping database notification records because only fallback recipients are being used'
-    );
-  }
-
-  await Promise.all(
-    recipients.map(recipient =>
-      enqueueNotificationQueueJob({
-        type: NOTIFICATION_QUEUE_JOB_TYPE.EVENT_CANCELED_EMAIL,
-        recipientEmail: recipient.email,
-        recipientName: recipient.name,
-        eventTitle: params.eventTitle,
-        eventLocation: params.eventLocation,
-        queuedAt: new Date().toISOString(),
-      })
-    )
-  );
-
-  logger.debug(
-    {
-      eventId: params.eventId,
-      eventTitle: params.eventTitle,
-      queuedCount: recipients.length,
-      fallbackRecipientUsed: Boolean(testRecipient),
-    },
-    'Event cancellation email jobs queued'
-  );
-
-  try {
-    await publishQStashTask({
-      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
-      batchSize: 100,
-    });
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        batchSize: 100,
-      },
-      'Notification queue process task published'
-    );
-  } catch (error) {
-    logger.warn(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        error,
-      },
-      'QStash publish failed, processing cancellation queue locally'
-    );
-
-    await handleQStashTask({
-      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
-      batchSize: 100,
-    });
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        batchSize: 100,
-      },
-      'Notification queue processed locally after publish failure'
-    );
-  }
-
-  return {
-    recipientCount: recipients.length,
-    queuedCount: recipients.length,
-  };
+  const flow = new EventCanceledFlow(params);
+  const result = await flow.run();
+  return result;
 }
 
-export async function enqueueEventDateCanceledNotifications(params: {
+export async function enqueueDateCanceledNotifications(params: {
   eventId: number;
   eventTitle: string;
   eventLocation: string;
   canceledCalendars: EventCalendarSnapshot[];
 }) {
-  logger.debug(
-    {
-      eventId: params.eventId,
-      eventTitle: params.eventTitle,
-      eventLocation: params.eventLocation,
-      canceledCalendarCount: params.canceledCalendars.length,
-    },
-    'Event date cancellation notification lookup started'
-  );
+  const flow = new DateCanceledFlow(params.canceledCalendars, params);
+  const result = await flow.run();
 
-  let recipientCount = 0;
-  let queuedCount = 0;
-
-  for (const calendar of params.canceledCalendars) {
-    const calendarInfo = describeCalendar(calendar);
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        calendar: calendarInfo,
-      },
-      'Evaluating canceled event date'
-    );
-
-    const scheduleSlot = getScheduleSlotForOrderItem(calendar);
-    const canceledDateLabel = formatCanceledDateLabel(calendar);
-    const canceledTimeLabel = formatCanceledTimeLabel(calendar);
-
-    if (!scheduleSlot || !canceledDateLabel) {
-      logger.warn(
-        {
-          eventId: params.eventId,
-          eventTitle: params.eventTitle,
-          calendar: calendarInfo,
-          scheduleSlot,
-          canceledDateLabel,
-        },
-        'Skipping canceled event date because schedule information is incomplete'
-      );
-
-      continue;
-    }
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        calendar: calendarInfo,
-        scheduleDate: formatScheduleStartLabel(scheduleSlot),
-        canceledDateLabel,
-        canceledTimeLabel,
-      },
-      'Resolved canceled event date labels'
-    );
-
-    const recipients = await getPurchasedEventRecipients({
-      eventId: params.eventId,
-      scheduleSlots: [scheduleSlot],
-    });
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        scheduleDate: formatScheduleStartLabel(scheduleSlot),
-        recipientCount: recipients.length,
-      },
-      'Resolved recipients for canceled event date'
-    );
-
-    if (recipients.length === 0) {
-      logger.warn(
-        {
-          eventId: params.eventId,
-          eventTitle: params.eventTitle,
-          calendar: calendarInfo,
-          scheduleDate: formatScheduleStartLabel(scheduleSlot),
-        },
-        'No recipients found for event date cancellation notifications'
-      );
-      continue;
-    }
-
-    recipientCount += recipients.length;
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        scheduleDate: formatScheduleStartLabel(scheduleSlot),
-        notificationCount: recipients.length,
-      },
-      'Creating event date cancellation notifications'
-    );
-
-    await prisma.notification.createMany({
-      data: recipients.map(recipient => ({
-        user_id: recipient.userId,
-        message_type: MessageType.DATE_CANCELED,
-        message_title: `Event date canceled: ${params.eventTitle}`,
-        message_body: `${params.eventTitle} on ${canceledDateLabel}${canceledTimeLabel ? ` ${canceledTimeLabel}` : ''} has been canceled.`,
-        message_data: {
-          eventId: params.eventId,
-          eventTitle: params.eventTitle,
-          eventLocation: params.eventLocation,
-          cancellationType: 'date',
-          canceledDateLabel,
-          canceledTimeLabel,
-        },
-      })),
-    });
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        scheduleDate: formatScheduleStartLabel(scheduleSlot),
-        notificationCount: recipients.length,
-      },
-      'Event date cancellation notifications created'
-    );
-
-    await Promise.all(
-      recipients.map(recipient =>
-        enqueueNotificationQueueJob({
-          type: NOTIFICATION_QUEUE_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL,
-          recipientEmail: recipient.email,
-          recipientName: recipient.name,
-          eventTitle: params.eventTitle,
-          eventLocation: params.eventLocation,
-          canceledDateLabel,
-          canceledTimeLabel,
-          queuedAt: new Date().toISOString(),
-        })
-      )
-    );
-
-    queuedCount += recipients.length;
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        scheduleDate: formatScheduleStartLabel(scheduleSlot),
-        queuedCount: recipients.length,
-      },
-      'Event date cancellation email jobs queued'
-    );
-  }
-
-  if (queuedCount === 0) {
-    logger.warn(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-      },
-      'No event date cancellation email jobs were queued'
-    );
-
+  if (result.queuedCount === 0) {
     return {
       recipientCount: 0,
       queuedCount: 0,
     };
   }
+  return result;
+}
 
-  logger.debug(
-    {
-      eventId: params.eventId,
-      eventTitle: params.eventTitle,
-      queuedCount,
-    },
-    'Publishing notification queue process task'
-  );
-
-  try {
-    await publishQStashTask({
-      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
-      batchSize: 100,
-    });
-  } catch (error) {
-    logger.warn(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        error,
-      },
-      'QStash publish failed for date cancellation, processing queue locally'
-    );
-
-    await handleQStashTask({
-      type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
-      batchSize: 100,
-    });
-
-    logger.debug(
-      {
-        eventId: params.eventId,
-        eventTitle: params.eventTitle,
-        batchSize: 100,
-      },
-      'Date cancellation queue processed locally after publish failure'
-    );
-  }
-
-  logger.debug(
-    {
-      eventId: params.eventId,
-      eventTitle: params.eventTitle,
-      recipientCount,
-      queuedCount,
-    },
-    'Event date cancellation notification flow completed'
-  );
-
-  return {
-    recipientCount,
-    queuedCount,
-  };
+export async function enqueueEventCreatedNotifications(params: {
+  eventId: number;
+  eventTitle: string;
+  eventLocation: string;
+}) {
+  return await new EventCreatedFlow(params).run();
 }
 
 export function getRemovedEventCalendars(params: {

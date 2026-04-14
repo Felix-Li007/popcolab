@@ -35,14 +35,25 @@ export function isRequestQueueJob(value: unknown): value is RequestQueueJob {
 }
 
 // Notification job kinds currently delivered through the async notification queue.
-export const NOTIFICATION_QUEUE_JOB_TYPE = {
+export const NOTIFICATION_JOB_TYPE = {
   EVENT_CANCELED_EMAIL: 'event_canceled_email',
   EVENT_DATE_CANCELED_EMAIL: 'event_date_canceled_email',
-  REQUEST_MATCHED_EMAIL: 'request_matched_email',
+  EVENT_CREATED_EMAIL: 'event_created_email',
+  REQUEST_CHANGED_EMAIL: 'request_changed_email',
+  EXPERIENCE_CREATED_EMAIL: 'experience_created_email',
 } as const;
+type ExperienceNotificationQueueJobBase = NotificationQueueJobBase & {
+  experienceTitle: string;
+  experienceCategory: string;
+  experienceId: number;
+};
+
+export type ExperienceCreatedEmailJob = ExperienceNotificationQueueJobBase & {
+  type: typeof NOTIFICATION_JOB_TYPE.EXPERIENCE_CREATED_EMAIL;
+};
 
 export type NotificationQueueJobType =
-  (typeof NOTIFICATION_QUEUE_JOB_TYPE)[keyof typeof NOTIFICATION_QUEUE_JOB_TYPE];
+  (typeof NOTIFICATION_JOB_TYPE)[keyof typeof NOTIFICATION_JOB_TYPE];
 
 type NotificationQueueJobBase = {
   type: NotificationQueueJobType;
@@ -52,32 +63,39 @@ type NotificationQueueJobBase = {
 };
 
 type EventNotificationQueueJobBase = NotificationQueueJobBase & {
-  recipientEmail: string;
-  recipientName: string;
   eventTitle: string;
   eventLocation: string;
+  eventId: number;
 };
 
 export type EventCanceledEmailJob = EventNotificationQueueJobBase & {
-  type: typeof NOTIFICATION_QUEUE_JOB_TYPE.EVENT_CANCELED_EMAIL;
+  type: typeof NOTIFICATION_JOB_TYPE.EVENT_CANCELED_EMAIL;
 };
 
 export type EventDateCanceledEmailJob = EventNotificationQueueJobBase & {
-  type: typeof NOTIFICATION_QUEUE_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL;
+  type: typeof NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL;
   canceledDateLabel: string;
   canceledTimeLabel: string | null;
 };
 
-export type RequestMatchedEmailJob = NotificationQueueJobBase & {
-  type: typeof NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL;
+export type EventCreatedEmailJob = EventNotificationQueueJobBase & {
+  type: typeof NOTIFICATION_JOB_TYPE.EVENT_CREATED_EMAIL;
+};
+
+export type RequestChangedEmailJob = NotificationQueueJobBase & {
+  type: typeof NOTIFICATION_JOB_TYPE.REQUEST_CHANGED_EMAIL;
   requestId: number;
   objectiveCategory: string;
+  previousStatus: string | null;
+  nextStatus: string;
 };
 
 export type NotificationQueueJob =
   | EventCanceledEmailJob
   | EventDateCanceledEmailJob
-  | RequestMatchedEmailJob;
+  | EventCreatedEmailJob
+  | RequestChangedEmailJob
+  | ExperienceCreatedEmailJob;
 
 // Runtime guard for validating notification queue payloads before delivery.
 export function isNotificationQueueJob(
@@ -96,12 +114,17 @@ export function isNotificationQueueJob(
   }
 
   switch (job.type) {
-    case NOTIFICATION_QUEUE_JOB_TYPE.EVENT_CANCELED_EMAIL:
+    case NOTIFICATION_JOB_TYPE.EXPERIENCE_CREATED_EMAIL:
+      return (
+        typeof job.experienceTitle === 'string' &&
+        typeof job.experienceCategory === 'string'
+      );
+    case NOTIFICATION_JOB_TYPE.EVENT_CANCELED_EMAIL:
       return (
         typeof job.eventTitle === 'string' &&
         typeof job.eventLocation === 'string'
       );
-    case NOTIFICATION_QUEUE_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL:
+    case NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL:
       return (
         typeof job.eventTitle === 'string' &&
         typeof job.eventLocation === 'string' &&
@@ -109,11 +132,19 @@ export function isNotificationQueueJob(
         (typeof job.canceledTimeLabel === 'string' ||
           job.canceledTimeLabel === null)
       );
-    case NOTIFICATION_QUEUE_JOB_TYPE.REQUEST_MATCHED_EMAIL:
+    case NOTIFICATION_JOB_TYPE.EVENT_CREATED_EMAIL:
+      return (
+        typeof job.eventTitle === 'string' &&
+        typeof job.eventLocation === 'string'
+      );
+    case NOTIFICATION_JOB_TYPE.REQUEST_CHANGED_EMAIL:
       return (
         typeof job.requestId === 'number' &&
         Number.isInteger(job.requestId) &&
-        typeof job.objectiveCategory === 'string'
+        typeof job.objectiveCategory === 'string' &&
+        (typeof job.previousStatus === 'string' ||
+          job.previousStatus === null) &&
+        typeof job.nextStatus === 'string'
       );
     default:
       return false;

@@ -47,6 +47,10 @@ jest.mock('@/services/queue-service', () => ({
   enqueueQueueJob: jest.fn(),
 }));
 
+jest.mock('@/services/notification-service', () => ({
+  enqueueRequestChangedNotification: jest.fn(),
+}));
+
 import { InviteStatus, ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { getQStashClient, getQStashEndpointUrl } from '@/libs/qstash-client';
@@ -59,6 +63,7 @@ import {
   scheduleRequestExpiry,
 } from '@/services/request-service';
 import { enqueueQueueJob } from '@/services/queue-service';
+import { enqueueRequestChangedNotification } from '@/services/notification-service';
 import { REQUEST_QUEUE_TRIGGER } from '@/types/queue-job';
 
 type PrismaMock = {
@@ -87,6 +92,10 @@ const getQStashClientMock = getQStashClient as jest.MockedFunction<
 const getQStashEndpointUrlMock = getQStashEndpointUrl as jest.MockedFunction<
   typeof getQStashEndpointUrl
 >;
+const enqueueRequestChangedNotificationMock =
+  enqueueRequestChangedNotification as jest.MockedFunction<
+    typeof enqueueRequestChangedNotification
+  >;
 
 describe('request-service', () => {
   beforeEach(() => {
@@ -196,11 +205,24 @@ describe('request-service', () => {
       prismaMock.proposal.update.mockResolvedValue({
         id: 5,
         request_id: 11,
+        request: {
+          request_status: REQUEST_STATUS.MATCHED,
+        },
       });
       prismaMock.request.findUnique.mockResolvedValue({
         id: 11,
         expired_at: null,
         request_status: REQUEST_STATUS.MATCHED,
+        objective_category: 'Team Bonding',
+        user: {
+          id: 4,
+          email: 'user@example.com',
+          user_name: 'member',
+          profile: {
+            first_name: 'Member',
+            last_name: 'One',
+          },
+        },
         invited_users: [],
         proposals: [{ id: 5 }],
       });
@@ -220,6 +242,11 @@ describe('request-service', () => {
         select: {
           id: true,
           request_id: true,
+          request: {
+            select: {
+              request_status: true,
+            },
+          },
         },
       });
       expect(result).toEqual({
@@ -232,6 +259,11 @@ describe('request-service', () => {
         trigger: REQUEST_QUEUE_TRIGGER.PROPOSAL_REJECTED,
         rejectedProposalId: 5,
         queuedAt: expect.any(String),
+      });
+      expect(enqueueRequestChangedNotificationMock).toHaveBeenCalledWith({
+        requestId: 11,
+        previousStatus: REQUEST_STATUS.MATCHED,
+        nextStatus: REQUEST_STATUS.PENDING,
       });
     });
   });
@@ -296,6 +328,16 @@ describe('request-service', () => {
         id: 23,
         expired_at: null,
         request_status: REQUEST_STATUS.OPENED,
+        objective_category: 'Wellness',
+        user: {
+          id: 8,
+          email: 'owner@example.com',
+          user_name: 'owner',
+          profile: {
+            first_name: 'Owner',
+            last_name: 'User',
+          },
+        },
         invited_users: [
           { invited_status: InviteStatus.accepted },
           { invited_status: InviteStatus.rejected },
@@ -321,6 +363,11 @@ describe('request-service', () => {
         data: {
           request_status: REQUEST_STATUS.PENDING,
         },
+      });
+      expect(enqueueRequestChangedNotificationMock).toHaveBeenCalledWith({
+        requestId: 23,
+        previousStatus: REQUEST_STATUS.OPENED,
+        nextStatus: REQUEST_STATUS.PENDING,
       });
     });
   });
@@ -539,8 +586,6 @@ describe('getAdminRequestsPage', () => {
       [REQUEST_STATUS.PENDING]: 3,
       [REQUEST_STATUS.MATCHED]: 2,
       [REQUEST_STATUS.CLOSED]: 1,
-      [REQUEST_STATUS.PROCESSING]: 0,
-      [REQUEST_STATUS.RETRYING]: 0,
     });
 
     expect(result.items).toHaveLength(1);

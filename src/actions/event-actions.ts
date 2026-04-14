@@ -16,7 +16,8 @@ import {
   requireAdminActionAccess,
 } from '@/services/clerk-service';
 import {
-  enqueueEventDateCanceledNotifications,
+  enqueueDateCanceledNotifications,
+  enqueueEventCreatedNotifications,
   getRemovedEventCalendars,
 } from '@/services/notification-service';
 import { getEventById, serializeEvent } from '@/services/event-service';
@@ -247,6 +248,20 @@ export async function createEventAction(
         event_pricing: true,
       },
     });
+
+    // Send notifications and emails for event creation
+    try {
+      await enqueueEventCreatedNotifications({
+        eventId: event.id,
+        eventTitle: event.eventTitle,
+        eventLocation: event.eventLocation,
+      });
+    } catch (notifyError) {
+      console.error(
+        'Failed to enqueue event creation notifications:',
+        notifyError
+      );
+    }
 
     revalidatePath('/admin/events');
     return { success: true, data: serializeEvent(event) };
@@ -558,7 +573,7 @@ export async function cancelEventAction(
     );
 
     try {
-      const notificationResult = await enqueueEventDateCanceledNotifications({
+      const notificationResult = await enqueueDateCanceledNotifications({
         eventId: existingEvent.id,
         eventTitle: event.eventTitle,
         eventLocation: event.eventLocation,
@@ -739,7 +754,7 @@ export async function cancelEventCalendarAction(
     }
 
     try {
-      const notificationResult = await enqueueEventDateCanceledNotifications({
+      const notificationResult = await enqueueDateCanceledNotifications({
         eventId: existingEvent.id,
         eventTitle: event.eventTitle,
         eventLocation: event.eventLocation,

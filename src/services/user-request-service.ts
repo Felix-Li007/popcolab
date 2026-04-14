@@ -13,13 +13,7 @@ export type UserRequestProposal = {
 
 export type UserRequestItem = {
   id: number;
-  status:
-    | 'OPENED'
-    | 'PENDING'
-    | 'MATCHED'
-    | 'CLOSED'
-    | 'PROCESSING'
-    | 'RETRYING';
+  status: 'OPENED' | 'PENDING' | 'MATCHED' | 'CLOSED';
   objectiveCategory: string;
   preferredDate: Date | null;
   participantCount: number | null;

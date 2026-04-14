@@ -113,10 +113,6 @@ function getStatusBadge(status: AdminRequestListItem['status']) {
       return { label: 'MATCHED', variant: 'success' as const };
     case REQUEST_STATUS.CLOSED:
       return { label: 'CLOSED', variant: 'danger' as const };
-    case REQUEST_STATUS.PROCESSING:
-      return { label: 'PROCESSING', variant: 'warning' as const };
-    case REQUEST_STATUS.RETRYING:
-      return { label: 'RETRYING', variant: 'secondary' as const };
     default:
       return { label: status, variant: 'default' as const };
   }
@@ -355,10 +351,7 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                       const allInvitedUsersResponded =
                         request.inviteSummary.total > 0 &&
                         request.inviteSummary.pending === 0;
-                      const canGenerate =
-                        request.status === REQUEST_STATUS.RETRYING ||
-                        (allInvitedUsersResponded &&
-                          request.status !== REQUEST_STATUS.PROCESSING);
+                      const canGenerate = allInvitedUsersResponded;
 
                       return (
                         <tr key={request.id} data-testid="admin-request-row">
@@ -400,9 +393,77 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                             </div>
                           </td>
                           <td>
-                            <Badge size="xs" variant={status.variant}>
-                              {status.label}
-                            </Badge>
+                            {(() => {
+                              const statusIdx =
+                                REQUEST_STATUS_OPTIONS.findIndex(
+                                  opt => opt.value === request.status
+                                );
+                              return (
+                                <div className={styles.statusBadgeColumn}>
+                                  {(() => {
+                                    const statusArr =
+                                      REQUEST_STATUS_OPTIONS.slice(statusIdx);
+                                    return statusArr.map((opt, idx, arr) => {
+                                      let variant:
+                                        | 'secondary'
+                                        | 'warning'
+                                        | 'success'
+                                        | 'danger' = 'secondary';
+                                      if (opt.value === REQUEST_STATUS.OPENED)
+                                        variant = 'secondary';
+                                      else if (
+                                        opt.value === REQUEST_STATUS.PENDING
+                                      )
+                                        variant = 'warning';
+                                      else if (
+                                        opt.value === REQUEST_STATUS.MATCHED
+                                      )
+                                        variant = 'success';
+                                      else if (
+                                        opt.value === REQUEST_STATUS.CLOSED
+                                      )
+                                        variant = 'danger';
+                                      // Add extra class to the first future badge for visual grouping
+                                      const isCurrent = idx === 0;
+                                      const isFirstFuture = idx === 1;
+                                      return (
+                                        <div
+                                          key={opt.value}
+                                          className={
+                                            styles.statusBadgeWithLine +
+                                            (!isCurrent && isFirstFuture
+                                              ? ' ' +
+                                                styles.statusBadgeFutureGroup
+                                              : '')
+                                          }
+                                        >
+                                          <Badge
+                                            variant={variant}
+                                            size={isCurrent ? 'md' : 'xs'}
+                                            className={
+                                              isCurrent
+                                                ? styles.statusBadgeCurrent
+                                                : styles.statusBadgeFuture
+                                            }
+                                          >
+                                            {opt.label}
+                                          </Badge>
+                                          {idx < arr.length - 1 && (
+                                            <div
+                                              className={
+                                                isCurrent
+                                                  ? styles.statusBadgeLineLong
+                                                  : styles.statusBadgeLine
+                                              }
+                                            />
+                                          )}
+                                        </div>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+                              );
+                            })()}
                           </td>
                           <td>{formatDateTime(request.createdAt)}</td>
                           <td>

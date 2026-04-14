@@ -4,6 +4,7 @@ import { Prisma, ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { REQUEST_STATUS } from '@/constants/request-status';
 import { logger } from '@/utils/logging-util';
+import { getRequestExperiences } from '@/services/recommend-service';
 import { type RequestQueueJob } from '@/types/queue-job';
 import type {
   AdminProposalEditableItem,
@@ -42,15 +43,23 @@ export async function createFittedProposal(job: RequestQueueJob) {
     throw new Error(`Request ${job.requestId} not found.`);
   }
 
+  // 先判断是否已有proposal
   if (request.proposals.length > 0) {
     if (
       String(request.request_status).toUpperCase() !== REQUEST_STATUS.MATCHED
     ) {
+      const previousStatus = String(request.request_status).toUpperCase();
       await prisma.request.update({
         where: { id: request.id },
         data: {
           request_status: REQUEST_STATUS.MATCHED as never,
         },
+      });
+
+      await notifyRequestStatusChanged({
+        requestId: request.id,
+        previousStatus,
+        nextStatus: REQUEST_STATUS.MATCHED,
       });
     }
 
@@ -61,31 +70,17 @@ export async function createFittedProposal(job: RequestQueueJob) {
     };
   }
 
-  await prisma.request.update({
-    where: { id: request.id },
-    data: {
-      request_status: REQUEST_STATUS.PROCESSING as never,
-    },
-  });
-
-  const { getRequestExperiences } =
-    await import('@/services/recommend-service');
-  const recommendations = await getRequestExperiences(job.requestId, [], 10);
-
-  if (recommendations.length === 0) {
-    await prisma.request.update({
-      where: { id: request.id },
-      data: {
-        request_status: REQUEST_STATUS.RETRYING as never,
-      },
-    });
-
+  // 获取推荐结果
+  const recommendations = await getRequestExperiences(request.id, [], 10);
+  if (!recommendations || recommendations.length === 0) {
     return {
       created: false,
       reason: 'no_recommendations',
       proposalId: null,
     };
   }
+
+  // ...rest of the logic remains unchanged for MATCHED/CLOSED/OPENED/PENDING
 
   const createdProposals = await prisma.$transaction(async tx => {
     const txAny = tx as unknown as {
@@ -199,6 +194,12 @@ export async function createFittedProposal(job: RequestQueueJob) {
     'Proposal generated from queue job'
   );
 
+  await notifyRequestStatusChanged({
+    requestId: request.id,
+    previousStatus: REQUEST_STATUS.PENDING,
+    nextStatus: REQUEST_STATUS.MATCHED,
+  });
+
   return {
     created: true,
     proposalId: createdProposals[0]?.id ?? null,
@@ -223,6 +224,59 @@ function buildUserDisplayName(user: {
   return (
     fullName || user.user_name || user.email.split('@')[0] || 'Unknown User'
   );
+}
+
+async function notifyRequestStatusChanged(params: {
+  requestId: number;
+  previousStatus: string | null;
+  nextStatus: string;
+}) {
+  if (params.previousStatus === params.nextStatus) {
+    return;
+  }
+
+  const request = await prisma.request.findUnique({
+    where: { id: params.requestId },
+    select: {
+      id: true,
+      objective_category: true,
+      user: {
+        select: {
+          id: true,
+          email: true,
+          user_name: true,
+          profile: {
+            select: {
+              first_name: true,
+              last_name: true,
+            },
+          },
+        },
+      },
+      proposals: {
+        orderBy: [{ id: 'desc' }],
+        select: {
+          id: true,
+        },
+        take: 1,
+      },
+    },
+  });
+
+  if (!request) return;
+
+  try {
+    const { enqueueRequestChangedNotification } =
+      await import('@/services/notification-service');
+
+    await enqueueRequestChangedNotification({
+      requestId: request.id,
+      previousStatus: params.previousStatus,
+      nextStatus: params.nextStatus,
+    });
+  } catch {
+    // Proposal generation should continue even if notifications fail.
+  }
 }
 
 function buildProposalWhere(query: {
@@ -790,6 +844,7 @@ export async function approveAdminProposal(id: number): Promise<{
       request: {
         select: {
           id: true,
+          request_status: true,
           objective_category: true,
           user: {
             select: {
@@ -823,6 +878,8 @@ export async function approveAdminProposal(id: number): Promise<{
     };
   }
 
+  const previousStatus = proposal.request.request_status;
+
   await prisma.$transaction(async tx => {
     await tx.proposal.update({
       where: { id: proposal.id },
@@ -839,28 +896,20 @@ export async function approveAdminProposal(id: number): Promise<{
     });
   });
 
-  const recipientName = buildUserDisplayName({
-    email: proposal.request.user.email,
-    user_name: proposal.request.user.user_name,
-    profile: proposal.request.user.profile,
-  });
-
   try {
-    const { enqueueRequestMatchedNotification } =
+    const { enqueueRequestChangedNotification } =
       await import('@/services/notification-service');
 
-    await enqueueRequestMatchedNotification({
-      userId: proposal.request.user.id,
-      recipientEmail: proposal.request.user.email,
-      recipientName,
+    await enqueueRequestChangedNotification({
       requestId: proposal.request.id,
-      proposalId: proposal.id,
-      objectiveCategory: proposal.request.objective_category,
+      previousStatus,
+      nextStatus: REQUEST_STATUS.MATCHED,
     });
 
     return {
       success: true,
-      message: 'Proposal approved, request matched, and notifications queued.',
+      message:
+        'Proposal approved, request status updated, and notifications queued.',
     };
   } catch (error) {
     logger.warn(
@@ -870,13 +919,13 @@ export async function approveAdminProposal(id: number): Promise<{
         requestId: proposal.request.id,
         recipientEmail: proposal.request.user.email,
       },
-      'Failed to send request matched email after approval'
+      'Failed to send request changed email after approval'
     );
 
     return {
       success: true,
       message:
-        'Proposal approved and request matched. Failed to queue notifications.',
+        'Proposal approved and request status updated. Failed to queue notifications.',
     };
   }
 }

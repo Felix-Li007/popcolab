@@ -376,9 +376,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
           ${REQUEST_STATUS.OPENED}::text,
           ${REQUEST_STATUS.PENDING}::text,
           ${REQUEST_STATUS.MATCHED}::text,
-          ${REQUEST_STATUS.CLOSED}::text,
-          ${REQUEST_STATUS.PROCESSING}::text,
-          ${REQUEST_STATUS.RETRYING}::text
+          ${REQUEST_STATUS.CLOSED}::text
         ]) AS request_status
       ),
       request_counts AS (
@@ -416,9 +414,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
         COUNT(*) FILTER (
           WHERE r.request_status::text IN (
             ${REQUEST_STATUS.OPENED},
-            ${REQUEST_STATUS.PENDING},
-            ${REQUEST_STATUS.PROCESSING},
-            ${REQUEST_STATUS.RETRYING}
+            ${REQUEST_STATUS.PENDING}
           )
         )::int AS backlog_count,
         COALESCE(
@@ -721,8 +717,6 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
       [REQUEST_STATUS.PENDING]: 0,
       [REQUEST_STATUS.MATCHED]: 0,
       [REQUEST_STATUS.CLOSED]: 0,
-      [REQUEST_STATUS.PROCESSING]: 0,
-      [REQUEST_STATUS.RETRYING]: 0,
     };
 
     existing[normalizedStatus] = toNumber(row.count);

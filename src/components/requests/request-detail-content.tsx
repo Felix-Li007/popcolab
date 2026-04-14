@@ -11,11 +11,6 @@ import { cancelRequestAction } from '@/actions/request-actions';
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
   OPENED: { label: 'Submitted', className: 'bg-violet-100 text-violet-700' },
   PENDING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
-  PROCESSING: {
-    label: 'Under Review',
-    className: 'bg-amber-100 text-amber-700',
-  },
-  RETRYING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
   MATCHED: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
   CLOSED: { label: 'Closed', className: 'bg-gray-100 text-gray-600' },
 };
@@ -128,10 +123,7 @@ export default function RequestDetailContent({
               </button>
             </div>
           )}
-          {(request.status === 'PENDING' ||
-            request.status === 'PROCESSING' ||
-            request.status === 'RETRYING' ||
-            request.status === 'MATCHED') && (
+          {(request.status === 'PENDING' || request.status === 'MATCHED') && (
             <p className="text-[11px] text-amber-600">
               🔍 Admin is currently reviewing this request
             </p>

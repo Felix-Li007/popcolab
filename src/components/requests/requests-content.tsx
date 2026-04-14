@@ -61,8 +61,6 @@ export default function RequestsContent({
 
   const UNDER_REVIEW_STATUSES = new Set<RequestStatus>([
     REQUEST_STATUS.PENDING,
-    REQUEST_STATUS.PROCESSING,
-    REQUEST_STATUS.RETRYING,
     REQUEST_STATUS.MATCHED,
   ]);
 
