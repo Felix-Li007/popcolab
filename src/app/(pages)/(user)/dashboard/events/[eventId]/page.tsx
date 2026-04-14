@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getEventByIdAction } from '@/actions/event-actions';
+import type { Event } from '@/types/event-type';
 import {
   formatLocalDateValue,
   formatScheduleTimeValue,
@@ -25,12 +26,6 @@ type EventGallery = {
   is_cover?: boolean;
 };
 
-type EventPricing = {
-  id: number;
-  price_level: string;
-  event_price: number | string;
-};
-
 type EventDetails = {
   id: number;
   eventTitle: string;
@@ -38,7 +33,7 @@ type EventDetails = {
   eventNotes?: string | null;
   event_galleries?: EventGallery[];
   event_calendars?: EventCalendar[];
-  event_pricing?: EventPricing[];
+  event_pricing?: Event['event_pricing'];
 };
 
 function getCalendarDateKey(value: string | Date | null | undefined) {
@@ -76,8 +71,7 @@ export default function EventDetailsPage() {
     getEventByIdAction(Number(eventId))
       .then(data => {
         if (!data) return;
-        const eventData = data as EventDetails;
-        setEvent(eventData);
+        setEvent(data);
       })
       .catch(error => {
         console.error('Failed to load event details:', error);

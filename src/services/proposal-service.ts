@@ -88,7 +88,7 @@ export async function createFittedProposal(job: RequestQueueJob) {
   }
 
   const createdProposals = await prisma.$transaction(async tx => {
-    const txAny = tx as {
+    const txAny = tx as unknown as {
       proposalExperience?: {
         create: (args: {
           data: {
@@ -122,37 +122,48 @@ export async function createFittedProposal(job: RequestQueueJob) {
       const normalizedBaseScore = Math.round(baseScore * 100);
       const normalizedRiskAdjustment = Math.round(riskAdjustment * 100);
 
-      const created = await tx.proposal.create({
-        data: hasProposalExperienceDelegate
-          ? {
-              request_id: request.id,
-              proposal_status: ProposalStatus.PENDING,
-              objective_alignment: `source:${recommendation.recommendationSource}`,
-            }
-          : {
-              // Backward-compatible path for unit-test mocks still stubbing legacy schema.
-              request_id: request.id,
-              experience_id: recommendation.experience.id,
-              proposal_status: ProposalStatus.PENDING,
-              objective_alignment: `source:${recommendation.recommendationSource}`,
-              base_score: normalizedBaseScore,
-              risk_adjustment: normalizedRiskAdjustment,
-              rationale_desc: recommendation.reason,
-            },
-        select: hasProposalExperienceDelegate
-          ? {
-              id: true,
-            }
-          : {
-              id: true,
-              experience_id: true,
-            },
-      });
+      let createdId: number;
+      let experienceId = recommendation.experience.id;
+
+      if (hasProposalExperienceDelegate) {
+        const created = await tx.proposal.create({
+          data: {
+            request_id: request.id,
+            proposal_status: ProposalStatus.PENDING,
+            objective_alignment: `source:${recommendation.recommendationSource}`,
+          },
+          select: {
+            id: true,
+          },
+        });
+
+        createdId = created.id;
+      } else {
+        const created = await txAny.proposal.create({
+          data: {
+            // Backward-compatible path for unit-test mocks still stubbing legacy schema.
+            request_id: request.id,
+            experience_id: recommendation.experience.id,
+            proposal_status: ProposalStatus.PENDING,
+            objective_alignment: `source:${recommendation.recommendationSource}`,
+            base_score: normalizedBaseScore,
+            risk_adjustment: normalizedRiskAdjustment,
+            rationale_desc: recommendation.reason,
+          },
+          select: {
+            id: true,
+            experience_id: true,
+          },
+        });
+
+        createdId = created.id;
+        experienceId = created.experience_id ?? recommendation.experience.id;
+      }
 
       if (hasProposalExperienceDelegate) {
         await txAny.proposalExperience!.create({
           data: {
-            proposal_id: created.id,
+            proposal_id: createdId,
             experience_id: recommendation.experience.id,
             base_score: normalizedBaseScore,
             risk_adjustment: normalizedRiskAdjustment,
@@ -162,8 +173,8 @@ export async function createFittedProposal(job: RequestQueueJob) {
       }
 
       proposals.push({
-        id: created.id,
-        experienceId: created.experience_id ?? recommendation.experience.id,
+        id: createdId,
+        experienceId,
       });
     }
 
@@ -294,11 +305,15 @@ function buildProposalWhere(query: {
         },
       },
       {
-        experience: {
-          is: {
-            experience_title: {
-              contains: keyword,
-              mode: 'insensitive',
+        proposal_experiences: {
+          some: {
+            experience: {
+              is: {
+                experience_title: {
+                  contains: keyword,
+                  mode: 'insensitive',
+                },
+              },
             },
           },
         },

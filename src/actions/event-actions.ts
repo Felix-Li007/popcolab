@@ -19,7 +19,7 @@ import {
   enqueueEventDateCanceledNotifications,
   getRemovedEventCalendars,
 } from '@/services/notification-service';
-import { serializeEvent } from '@/services/event-service';
+import { getEventById, serializeEvent } from '@/services/event-service';
 import { sanitizeRichTextHtml } from '@/utils/html-sanitizer';
 import { createModuleLogger } from '@/utils/logging-util';
 import { EVENT_CANCEL_MIN_LEAD_DAYS } from '@/constants/event-config';
@@ -791,7 +791,7 @@ export async function getActiveEventsAction() {
     },
   });
 
-  return toPlainObject(events);
+  return events.map(serializeEvent);
 }
 
 export async function getEventByIdAction(eventId: number) {
@@ -799,25 +799,7 @@ export async function getEventByIdAction(eventId: number) {
     throw new Error('Invalid event ID');
   }
 
-  const event = await prisma.event.findUnique({
-    where: { id: eventId },
-    include: {
-      event_galleries: true,
-      event_calendars: true,
-      event_pricing: true,
-    },
-  });
-
-  if (!event) {
-    return null;
-  }
-
-  return toPlainObject({
-    ...event,
-    event_pricing: event.event_pricing || [],
-    event_galleries: event.event_galleries || [],
-    event_calendars: event.event_calendars || [],
-  });
+  return getEventById(eventId);
 }
 
 export async function getConfirmedBookingsAction() {

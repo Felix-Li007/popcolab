@@ -1,3 +1,5 @@
+import type { FormName } from '@/libs/prisma/enums';
+
 export type QuestionType =
   | 'single_choice'
   | 'multi_choice'

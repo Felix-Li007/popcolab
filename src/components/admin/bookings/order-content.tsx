@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { OrderStatus } from '@/libs/prisma/enums';
 import { Prisma } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import OrderRow, {
@@ -34,6 +35,13 @@ function parseDateRangeEnd(value: string | undefined): Date | null {
   return nextDate;
 }
 
+function toOrderStatus(value: string): OrderStatus | null {
+  const normalized = value.trim().toUpperCase();
+  return Object.values(OrderStatus).includes(normalized as OrderStatus)
+    ? (normalized as OrderStatus)
+    : null;
+}
+
 function buildOrderWhere(params: {
   search: string;
   status: string;
@@ -42,16 +50,14 @@ function buildOrderWhere(params: {
 }): Prisma.OrderWhereInput {
   const clauses: Prisma.OrderWhereInput[] = [];
   const trimmedSearch = params.search.trim();
+  const matchedOrderStatus = trimmedSearch
+    ? toOrderStatus(trimmedSearch)
+    : null;
 
   if (trimmedSearch) {
     clauses.push({
       OR: [
-        {
-          order_status: {
-            contains: trimmedSearch,
-            mode: 'insensitive',
-          },
-        },
+        ...(matchedOrderStatus ? [{ order_status: matchedOrderStatus }] : []),
         {
           payment: {
             is: {
@@ -98,9 +104,11 @@ function buildOrderWhere(params: {
     });
   }
 
-  if (params.status) {
+  const statusFilter = params.status ? toOrderStatus(params.status) : null;
+
+  if (statusFilter) {
     clauses.push({
-      order_status: params.status,
+      order_status: statusFilter,
     });
   }
 

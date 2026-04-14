@@ -334,6 +334,11 @@ export default function EventCheckoutClient({
   }
 
   async function handlePrepareCheckout() {
+    if (!event) {
+      setError('Event details are still loading.');
+      return;
+    }
+
     if (!selectedCalendar || !selectedDate) {
       setError('Please choose an event date.');
       return;

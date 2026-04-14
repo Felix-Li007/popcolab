@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { OrderStatus } from '@/libs/prisma/enums';
 import { Prisma } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import PaymentRow, {
@@ -34,6 +35,13 @@ function parseDateRangeEnd(value: string | undefined): Date | null {
   return nextDate;
 }
 
+function toOrderStatus(value: string): OrderStatus | null {
+  const normalized = value.trim().toUpperCase();
+  return Object.values(OrderStatus).includes(normalized as OrderStatus)
+    ? (normalized as OrderStatus)
+    : null;
+}
+
 function buildPaymentWhere(params: {
   search: string;
   status: string;
@@ -42,6 +50,9 @@ function buildPaymentWhere(params: {
 }): Prisma.PaymentWhereInput {
   const clauses: Prisma.PaymentWhereInput[] = [];
   const trimmedSearch = params.search.trim();
+  const matchedOrderStatus = trimmedSearch
+    ? toOrderStatus(trimmedSearch)
+    : null;
 
   if (trimmedSearch) {
     clauses.push({
@@ -74,12 +85,9 @@ function buildPaymentWhere(params: {
           orders: {
             some: {
               OR: [
-                {
-                  order_status: {
-                    contains: trimmedSearch,
-                    mode: 'insensitive',
-                  },
-                },
+                ...(matchedOrderStatus
+                  ? [{ order_status: matchedOrderStatus }]
+                  : []),
                 {
                   order_items: {
                     some: {
@@ -112,9 +120,11 @@ function buildPaymentWhere(params: {
     });
   }
 
-  if (params.status) {
+  const statusFilter = params.status ? params.status.trim() : '';
+
+  if (statusFilter) {
     clauses.push({
-      payment_status: params.status,
+      payment_status: statusFilter,
     });
   }
 

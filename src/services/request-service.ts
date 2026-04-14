@@ -426,14 +426,20 @@ function mapRequestItem(
     ).length,
   };
 
+  const hasProposalStatus = (value: unknown, status: ProposalStatus): boolean =>
+    String(value).toUpperCase() === status;
+
   const proposalSummary = {
     total: row.proposals.length,
-    pending: row.proposals.filter(item => item.proposal_status === 'pending')
-      .length,
-    accepted: row.proposals.filter(item => item.proposal_status === 'accepted')
-      .length,
-    rejected: row.proposals.filter(item => item.proposal_status === 'rejected')
-      .length,
+    pending: row.proposals.filter(item =>
+      hasProposalStatus(item.proposal_status, ProposalStatus.PENDING)
+    ).length,
+    accepted: row.proposals.filter(item =>
+      hasProposalStatus(item.proposal_status, ProposalStatus.ACCEPTED)
+    ).length,
+    rejected: row.proposals.filter(item =>
+      hasProposalStatus(item.proposal_status, ProposalStatus.REJECTED)
+    ).length,
   };
 
   return {

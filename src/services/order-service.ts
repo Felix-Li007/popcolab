@@ -1293,7 +1293,9 @@ export async function createEventCheckout(
         paymentId: String(payment.id),
         eventId: String(input.eventId),
         calendarId: String(eventCalendar.id),
-        eventDate: formatDateForPrismaDateField(eventCalendar.event_date),
+        eventDate: formatDateForPrismaDateField(
+          eventCalendar.event_date
+        ).toISOString(),
         quantity: String(quantity),
         clerkUserId: input.clerkUserId,
       },

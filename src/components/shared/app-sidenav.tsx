@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { RoleBranding } from '@/constants/role-branding';
 import styles from '@/styles/admin/sidenav-menu.module.css';
 
 export type AppSidenavItem = {
@@ -61,7 +62,9 @@ export default function AppSidenav({
   appearance,
   collapsed = false,
   surfaceClassName = 'bg-teal-deep',
+  surfaceBorderClassName = '',
   surfaceTextClassName = 'text-white',
+  branding: _branding,
 }: Readonly<{
   groups: AppSidenavGroup[];
   onNavigate?: () => void;
@@ -70,7 +73,9 @@ export default function AppSidenav({
   appearance?: AppSidenavAppearance;
   collapsed?: boolean;
   surfaceClassName?: string;
+  surfaceBorderClassName?: string;
   surfaceTextClassName?: string;
+  branding?: RoleBranding;
 }>) {
   const pathname = usePathname();
 
@@ -102,7 +107,7 @@ export default function AppSidenav({
       data-testid={testId}
       className={`flex min-h-screen shrink-0 flex-col transition-[width] duration-200 ${
         collapsed ? 'w-20' : 'w-56'
-      } ${surfaceTextClassName} ${surfaceClassName} ${className}`}
+      } ${surfaceTextClassName} ${surfaceClassName} ${surfaceBorderClassName} ${className}`}
     >
       <nav
         className={`flex-1 overflow-y-auto px-2 py-3 ${styles.nav} ${appearance?.navClassName ?? ''}`}

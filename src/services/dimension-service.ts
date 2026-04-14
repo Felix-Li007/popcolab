@@ -287,7 +287,7 @@ async function replaceDimensionOptions(
         dimension_id: dimensionId,
         option_label: option.label,
         option_value: option.value,
-        penalty_value: option.penalty ?? null,
+        penalty_value: option.penalty ?? 0,
       })),
     });
   } catch {
@@ -373,7 +373,7 @@ export async function createDimension(
       index_name: input.indexName,
       index_notes: input.indexNotes,
       category_id: input.categoryId,
-      penalty_value: input.penaltyValue ?? null,
+      penalty_value: input.penaltyValue ?? 0,
       data_type: input.dataType,
       hard_filter: input.hardFilter,
       scale_min: input.scaleMin,
@@ -397,7 +397,7 @@ export async function updateDimension(
       index_key: input.indexKey,
       index_name: input.indexName,
       index_notes: input.indexNotes,
-      penalty_value: input.penaltyValue ?? null,
+      penalty_value: input.penaltyValue ?? 0,
       category_id: input.categoryId,
       data_type: input.dataType,
       hard_filter: input.hardFilter,

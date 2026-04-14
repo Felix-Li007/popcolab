@@ -5,36 +5,11 @@ import {
   getActiveEventsAction,
   getConfirmedBookingsAction,
 } from '@/actions/event-actions';
+import type { Event as EventType } from '@/types/event-type';
 import {
   formatLocalDateValue,
   parseCalendarDateValue,
 } from '@/utils/event-schedule';
-
-// ✅ TYPES
-type EventCalendar = {
-  id: number;
-  event_date: string;
-};
-
-type EventGallery = {
-  image_url: string;
-  is_cover?: boolean;
-};
-
-type EventPricing = {
-  event_price: number;
-};
-
-type EventType = {
-  id: number;
-  eventTitle: string;
-  eventLocation: string;
-  eventNotes?: string;
-  eventStatus: string;
-  event_calendars?: EventCalendar[];
-  event_galleries?: EventGallery[];
-  event_pricing?: EventPricing[];
-};
 
 type Booking = {
   event_id: number;
@@ -64,8 +39,8 @@ export default function EventsPage() {
           getConfirmedBookingsAction(),
         ]);
 
-        setEvents(eventData as EventType[]);
-        setBookings(bookingData as Booking[]);
+        setEvents(eventData);
+        setBookings(bookingData);
       } catch (error) {
         console.error('Failed to load dashboard events:', error);
       }
