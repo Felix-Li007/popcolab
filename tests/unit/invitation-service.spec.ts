@@ -3,7 +3,7 @@ jest.mock('@/libs/prisma-client', () => ({
     request: {
       findFirst: jest.fn(),
     },
-    invitedUser: {
+    requestUser: {
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -40,7 +40,7 @@ type PrismaMock = {
   request: {
     findFirst: jest.Mock;
   };
-  invitedUser: {
+  requestUser: {
     findUnique: jest.Mock;
     create: jest.Mock;
     update: jest.Mock;
@@ -73,10 +73,10 @@ describe('invitation-service', () => {
       objective_category: 'team_building',
       expired_at: new Date('2026-03-20T12:00:00.000Z'),
     });
-    prismaMock.invitedUser.findUnique
+    prismaMock.requestUser.findUnique
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(null);
-    prismaMock.invitedUser.create
+    prismaMock.requestUser.create
       .mockResolvedValueOnce({
         id: 101,
         user_email: 'jane@example.com',
@@ -112,9 +112,9 @@ describe('invitation-service', () => {
         expired_at: true,
       },
     });
-    expect(prismaMock.invitedUser.findUnique).toHaveBeenCalledTimes(2);
-    expect(prismaMock.invitedUser.create).toHaveBeenCalledTimes(2);
-    expect(prismaMock.invitedUser.update).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.findUnique).toHaveBeenCalledTimes(2);
+    expect(prismaMock.requestUser.create).toHaveBeenCalledTimes(2);
+    expect(prismaMock.requestUser.update).not.toHaveBeenCalled();
     expect(sendResendEmailMock).toHaveBeenCalledTimes(2);
     expect(sendResendEmailMock).toHaveBeenNthCalledWith(1, {
       to: 'jane@example.com',
@@ -132,12 +132,12 @@ describe('invitation-service', () => {
       objective_category: 'team_building',
       expired_at: new Date('2026-03-20T12:00:00.000Z'),
     });
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 101,
       user_email: 'jane@example.com',
       invited_token: 'existing-token',
     });
-    prismaMock.invitedUser.update.mockResolvedValue({
+    prismaMock.requestUser.update.mockResolvedValue({
       id: 101,
       user_email: 'jane@example.com',
       invited_token: 'existing-token',
@@ -151,8 +151,8 @@ describe('invitation-service', () => {
       invitations: [{ userName: 'Jane Doe', userEmail: 'jane@example.com' }],
     });
 
-    expect(prismaMock.invitedUser.create).not.toHaveBeenCalled();
-    expect(prismaMock.invitedUser.update).toHaveBeenCalledWith({
+    expect(prismaMock.requestUser.create).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.update).toHaveBeenCalledWith({
       where: { id: 101 },
       data: {
         user_name: 'Jane Doe',
@@ -176,12 +176,12 @@ describe('invitation-service', () => {
       objective_category: 'team_building',
       expired_at: new Date('2026-03-20T12:00:00.000Z'),
     });
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 101,
       user_email: 'jane@example.com',
       invited_token: 'existing-token',
     });
-    prismaMock.invitedUser.update.mockResolvedValue({
+    prismaMock.requestUser.update.mockResolvedValue({
       id: 101,
       user_email: 'jane@example.com',
       invited_token: 'existing-token',
@@ -195,10 +195,10 @@ describe('invitation-service', () => {
       invitations: [{ userName: 'Jane Doe', userEmail: 'jane@example.com' }],
     });
 
-    expect(prismaMock.invitedUser.create).not.toHaveBeenCalled();
-    expect(prismaMock.invitedUser.delete).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.create).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.delete).not.toHaveBeenCalled();
     // update is still called to reset the invitation status even when email fails
-    expect(prismaMock.invitedUser.update).toHaveBeenCalled();
+    expect(prismaMock.requestUser.update).toHaveBeenCalled();
     expect(result.sentCount).toBe(1);
     expect(result.failedCount).toBe(0);
     expect(result.sent[0].messageId).toBeNull();
@@ -210,8 +210,8 @@ describe('invitation-service', () => {
       objective_category: 'team_building',
       expired_at: new Date('2026-03-20T12:00:00.000Z'),
     });
-    prismaMock.invitedUser.findUnique.mockResolvedValue(null);
-    prismaMock.invitedUser.create.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue(null);
+    prismaMock.requestUser.create.mockResolvedValue({
       id: 101,
       user_email: 'jane@example.com',
       invited_token: 'new-token',
@@ -226,14 +226,14 @@ describe('invitation-service', () => {
     });
 
     // invitation record is kept even when email fails
-    expect(prismaMock.invitedUser.delete).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.delete).not.toHaveBeenCalled();
     expect(result.sentCount).toBe(1);
     expect(result.failedCount).toBe(0);
     expect(result.sent[0].messageId).toBeNull();
   });
 
   test('getInvitationByToken maps the invitation payload', async () => {
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 9,
       request_id: 3,
       invited_status: InviteStatus.pending,
@@ -260,13 +260,13 @@ describe('invitation-service', () => {
   });
 
   test('respondToInvitation redirects accepted invitations to sign-in when the account exists', async () => {
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 88,
       invited_status: InviteStatus.pending,
       user_email: 'member@example.com',
       expired_at: null,
     });
-    prismaMock.invitedUser.update.mockResolvedValue({ id: 88 });
+    prismaMock.requestUser.update.mockResolvedValue({ id: 88 });
     prismaMock.user.findUnique.mockResolvedValue({ id: 7 });
 
     await expect(respondToInvitation('token-abc', 'accept')).resolves.toEqual({
@@ -275,7 +275,7 @@ describe('invitation-service', () => {
       authAction: 'sign-in',
     });
 
-    expect(prismaMock.invitedUser.update).toHaveBeenCalledWith({
+    expect(prismaMock.requestUser.update).toHaveBeenCalledWith({
       where: { id: 88 },
       data: {
         invited_status: InviteStatus.accepted,
@@ -285,13 +285,13 @@ describe('invitation-service', () => {
   });
 
   test('respondToInvitation redirects accepted invitations to sign-up when no account exists', async () => {
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 89,
       invited_status: InviteStatus.pending,
       user_email: 'new-user@example.com',
       expired_at: null,
     });
-    prismaMock.invitedUser.update.mockResolvedValue({ id: 89 });
+    prismaMock.requestUser.update.mockResolvedValue({ id: 89 });
     prismaMock.user.findUnique.mockResolvedValue(null);
 
     await expect(respondToInvitation('token-new', 'accept')).resolves.toEqual({
@@ -302,7 +302,7 @@ describe('invitation-service', () => {
   });
 
   test('respondToInvitation redirects rejected and expired invitations to the public invitation page', async () => {
-    prismaMock.invitedUser.findUnique
+    prismaMock.requestUser.findUnique
       .mockResolvedValueOnce({
         id: 90,
         invited_status: InviteStatus.pending,
@@ -315,7 +315,7 @@ describe('invitation-service', () => {
         user_email: 'expired@example.com',
         expired_at: new Date('2026-03-10T12:00:00.000Z'),
       });
-    prismaMock.invitedUser.update.mockResolvedValue({ id: 90 });
+    prismaMock.requestUser.update.mockResolvedValue({ id: 90 });
 
     await expect(
       respondToInvitation('token-reject', 'reject')
@@ -330,7 +330,7 @@ describe('invitation-service', () => {
   });
 
   test('respondToInvitation keeps a previously rejected invitation rejected for crafted accept requests', async () => {
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 92,
       invited_status: InviteStatus.rejected,
       user_email: 'reject@example.com',
@@ -343,12 +343,12 @@ describe('invitation-service', () => {
       type: 'rejected',
     });
 
-    expect(prismaMock.invitedUser.update).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.update).not.toHaveBeenCalled();
     expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
   });
 
   test('respondToInvitation keeps a previously accepted invitation accepted for crafted reject requests', async () => {
-    prismaMock.invitedUser.findUnique.mockResolvedValue({
+    prismaMock.requestUser.findUnique.mockResolvedValue({
       id: 93,
       invited_status: InviteStatus.accepted,
       user_email: 'accepted@example.com',
@@ -364,7 +364,7 @@ describe('invitation-service', () => {
       authAction: 'sign-in',
     });
 
-    expect(prismaMock.invitedUser.update).not.toHaveBeenCalled();
+    expect(prismaMock.requestUser.update).not.toHaveBeenCalled();
     expect(prismaMock.user.findUnique).toHaveBeenCalledWith({
       where: { email: 'accepted@example.com' },
       select: { id: true },

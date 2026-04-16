@@ -1,4 +1,4 @@
-model InvitedUser {
+model RequestUser {
   id             Int          @id @default(autoincrement())
   request_id     Int
   invited_status InviteStatus
@@ -12,7 +12,7 @@ model InvitedUser {
   request        Request      @relation(fields: [request_id], references: [id])
 
   @@unique([request_id, user_email])
-  @@map("invited_user")
+  @@map("request_user")
 }
 
 enum InviteStatus {

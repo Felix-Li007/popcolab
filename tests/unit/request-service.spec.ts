@@ -7,7 +7,7 @@ jest.mock('@/libs/prisma-client', () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
     },
-    invitedUser: {
+    requestUser: {
       findUnique: jest.fn(),
     },
     proposal: {
@@ -74,7 +74,7 @@ type PrismaMock = {
     findUnique: jest.Mock;
     update: jest.Mock;
   };
-  invitedUser: {
+  requestUser: {
     findUnique: jest.Mock;
   };
   proposal: {
@@ -158,13 +158,13 @@ describe('request-service', () => {
   });
 
   describe('handleUserConfirmed', () => {
-    test('enqueues when the invited user belongs to a request ready for queueing', async () => {
-      prismaMock.invitedUser.findUnique.mockResolvedValue({ request_id: 7 });
+    test('enqueues when the request user belongs to a request ready for queueing', async () => {
+      prismaMock.requestUser.findUnique.mockResolvedValue({ request_id: 7 });
       prismaMock.request.findUnique.mockResolvedValue({
         id: 7,
         expired_at: null,
         request_status: REQUEST_STATUS.OPENED,
-        invited_users: [
+        request_users: [
           { invited_status: InviteStatus.accepted },
           { invited_status: InviteStatus.rejected },
         ],
@@ -191,11 +191,11 @@ describe('request-service', () => {
       });
     });
 
-    test('throws when invited user does not exist', async () => {
-      prismaMock.invitedUser.findUnique.mockResolvedValue(null);
+    test('throws when request user does not exist', async () => {
+      prismaMock.requestUser.findUnique.mockResolvedValue(null);
 
       await expect(handleUserConfirmed(12)).rejects.toThrow(
-        'Invited user 12 not found.'
+        'Request user 12 not found.'
       );
     });
   });
@@ -223,7 +223,7 @@ describe('request-service', () => {
             last_name: 'One',
           },
         },
-        invited_users: [],
+        request_users: [],
         proposals: [{ id: 5 }],
       });
       prismaMock.request.update.mockResolvedValue({ id: 11 });
@@ -274,7 +274,7 @@ describe('request-service', () => {
         id: 20,
         expired_at: null,
         request_status: REQUEST_STATUS.OPENED,
-        invited_users: [],
+        request_users: [],
         proposals: [{ id: 1 }],
       });
 
@@ -294,7 +294,7 @@ describe('request-service', () => {
         id: 21,
         expired_at: new Date('2026-03-09T11:59:00.000Z'),
         request_status: REQUEST_STATUS.CLOSED,
-        invited_users: [],
+        request_users: [],
         proposals: [],
       });
 
@@ -311,7 +311,7 @@ describe('request-service', () => {
         id: 22,
         expired_at: new Date('2026-03-09T12:10:00.000Z'),
         request_status: REQUEST_STATUS.OPENED,
-        invited_users: [{ invited_status: InviteStatus.pending }],
+        request_users: [{ invited_status: InviteStatus.pending }],
         proposals: [],
       });
 
@@ -323,7 +323,7 @@ describe('request-service', () => {
       });
     });
 
-    test('queues when all invited users have responded', async () => {
+    test('queues when all request users have responded', async () => {
       prismaMock.request.findUnique.mockResolvedValue({
         id: 23,
         expired_at: null,
@@ -338,7 +338,7 @@ describe('request-service', () => {
             last_name: 'User',
           },
         },
-        invited_users: [
+        request_users: [
           { invited_status: InviteStatus.accepted },
           { invited_status: InviteStatus.rejected },
         ],
@@ -525,7 +525,7 @@ describe('getAdminRequestsPage', () => {
             role_title: 'Manager',
           },
         },
-        invited_users: [
+        request_users: [
           {
             id: 2,
             invited_status: 'accepted',

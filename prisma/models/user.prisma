@@ -18,7 +18,7 @@ model User {
   created_teams        Team[]              @relation("TeamCreator")
   team_mates           TeamMate[]
   team_invites_sent    TeamInvite[]        @relation("TeamInviter")
-  user_vector          UserVector?
+  personality_profile  PersonalityProfile?
   history_preferences  HistoryPreference[]
   user_experiences     UserExperience[]
   user_events          UserEvent[]

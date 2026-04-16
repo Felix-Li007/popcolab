@@ -10,6 +10,7 @@ import {
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { upsertClerkUser } from '@/services/user-service';
 import { prisma } from '@/libs/prisma-client';
+import { getPersonalityLocalTimestamp } from '@/utils/personality-time';
 import type { UserAnswer, TestSubmitResult } from '@/types/response-type';
 import type { CurrentAuthContext } from '@/services/clerk-service';
 
@@ -94,7 +95,7 @@ export async function savePersonalityKeyAction(
     const { userId } = await upsertClerkUser(authContext.user.id, email);
 
     // Don't overwrite an existing saved result
-    const existing = await prisma.userVector.findUnique({
+    const existing = await prisma.personalityProfile.findUnique({
       where: { user_id: userId },
     });
     if (existing) return { success: true };
@@ -105,24 +106,19 @@ export async function savePersonalityKeyAction(
       select: { score_threshold: true },
     });
 
-    const now = new Date();
+    const now = getPersonalityLocalTimestamp();
     const vectorJson = JSON.stringify({
       total: personality?.score_threshold ?? 0,
     });
 
-    await prisma.$transaction(async tx => {
-      const response = await tx.response.create({
-        data: { user_id: userId, completed_at: now },
-      });
-      await tx.userVector.create({
-        data: {
-          user_id: userId,
-          response_id: response.id,
-          vector_json: vectorJson,
-          vector_type: personalityKey,
-          updated_at: now,
-        },
-      });
+    await prisma.personalityProfile.create({
+      data: {
+        user_id: userId,
+        completed_at: now,
+        vector_json: vectorJson,
+        vector_type: personalityKey,
+        updated_at: now,
+      },
     });
 
     return { success: true };

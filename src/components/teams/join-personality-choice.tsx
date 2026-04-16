@@ -39,14 +39,6 @@ export default function JoinPersonalityChoice({
     });
   }
 
-  const formattedDate = assessedAt
-    ? new Date(assessedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : null;
-
   return (
     <div className="px-8 py-7">
       {/* Team invite context */}
@@ -82,8 +74,8 @@ export default function JoinPersonalityChoice({
             <p className="text-sm font-bold text-gray-800">
               {personality.name}
             </p>
-            {formattedDate && (
-              <p className="text-xs text-gray-400">Assessed {formattedDate}</p>
+            {assessedAt && (
+              <p className="text-xs text-gray-400">Assessed {assessedAt}</p>
             )}
           </div>
         </div>

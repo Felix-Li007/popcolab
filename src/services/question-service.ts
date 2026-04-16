@@ -262,7 +262,6 @@ export async function deleteQuestion(id: number): Promise<void> {
   await prisma.$transaction([
     prisma.questionDimension.deleteMany({ where: { question_id: id } }),
     prisma.questionOption.deleteMany({ where: { question_id: id } }),
-    prisma.answer.deleteMany({ where: { question_id: id } }),
     prisma.question.delete({ where: { id } }),
   ]);
 }

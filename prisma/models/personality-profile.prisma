@@ -1,13 +1,12 @@
-model UserVector {
+model PersonalityProfile {
   id          Int      @id @default(autoincrement())
   vector_json String   @db.VarChar(500)
   vector_type String   @db.VarChar(50)
-  response_id Int
   user_id     Int      @unique
+  completed_at DateTime? @db.Timestamp(6)
   created_at  DateTime @default(now()) @db.Timestamp(6)
   updated_at  DateTime @updatedAt @db.Timestamp(6)
-  response    Response @relation(fields: [response_id], references: [id])
   user        User     @relation(fields: [user_id], references: [id])
 
-  @@map("user_vector")
+  @@map("personality_profile")
 }

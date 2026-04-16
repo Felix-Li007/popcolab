@@ -5,6 +5,7 @@ import { prisma } from '@/libs/prisma-client';
 import { getTeamInviteByToken } from '@/services/team-invite-service';
 import { getTestResult } from '@/services/response-service';
 import { buildAuthPath } from '@/utils/url-helper';
+import { formatStoredPersonalityDate } from '@/utils/personality-time';
 import JoinPersonalityChoice from '@/components/teams/join-personality-choice';
 
 type PageProps = Readonly<{
@@ -95,14 +96,7 @@ export default async function TeamInviteLandingPage({ params }: PageProps) {
         redirect('/test');
       }
 
-      const [testResult, lastResponse] = await Promise.all([
-        getTestResult(dbUser.id),
-        prisma.response.findFirst({
-          where: { user_id: dbUser.id, completed_at: { not: null } },
-          orderBy: { completed_at: 'desc' },
-          select: { completed_at: true },
-        }),
-      ]);
+      const testResult = await getTestResult(dbUser.id);
 
       if (!testResult) redirect('/test');
 
@@ -116,7 +110,7 @@ export default async function TeamInviteLandingPage({ params }: PageProps) {
               inviterName={invite.inviterName}
               firstName={dbUser.profile?.first_name ?? ''}
               personality={testResult.personality}
-              assessedAt={lastResponse?.completed_at?.toISOString() ?? null}
+              assessedAt={formatStoredPersonalityDate(testResult.completedAt)}
             />
           </div>
         </main>

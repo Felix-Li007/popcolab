@@ -152,7 +152,7 @@ export async function sendRequestInvitations(params: {
 
   const results = await Promise.allSettled(
     recipients.map(async recipient => {
-      const existingInvitation = await prisma.invitedUser.findUnique({
+      const existingInvitation = await prisma.requestUser.findUnique({
         where: {
           request_id_user_email: {
             request_id: request.id,
@@ -166,9 +166,9 @@ export async function sendRequestInvitations(params: {
         },
       });
 
-      const invitedUser =
+      const requestUser =
         existingInvitation ??
-        (await prisma.invitedUser.create({
+        (await prisma.requestUser.create({
           data: {
             request_id: request.id,
             invited_status: InviteStatus.pending,
@@ -187,7 +187,7 @@ export async function sendRequestInvitations(params: {
 
       const inviteUrl = buildInvitationAbsoluteUrl(
         params.appBaseUrl,
-        invitedUser.invited_token
+        requestUser.invited_token
       );
       const emailProps = {
         inviteeName: recipient.userName,
@@ -204,13 +204,13 @@ export async function sendRequestInvitations(params: {
           react: RequestInvitationEmail(emailProps),
         });
       } catch {
-        // Email delivery failed but the invited_user record is kept so the
+        // Email delivery failed but the request-user record is kept so the
         // invite still appears in the system and personality data can be shown.
         delivery = { id: null };
       }
 
       const persistedInvitation: InvitationRecord = existingInvitation
-        ? await prisma.invitedUser.update({
+        ? await prisma.requestUser.update({
             where: { id: existingInvitation.id },
             data: {
               user_name: recipient.userName,
@@ -224,7 +224,7 @@ export async function sendRequestInvitations(params: {
               invited_token: true,
             },
           })
-        : invitedUser;
+        : requestUser;
 
       // If the invited email belongs to an existing user, create an in-app notification
       const existingUser = await prisma.user.findUnique({
@@ -293,7 +293,7 @@ export async function sendRequestInvitations(params: {
 export async function getInvitationByToken(
   token: string
 ): Promise<InvitationLookupResult | null> {
-  const invitation = await prisma.invitedUser.findUnique({
+  const invitation = await prisma.requestUser.findUnique({
     where: { invited_token: token },
     select: {
       id: true,
@@ -334,7 +334,7 @@ export async function respondToInvitation(
   token: string,
   action: InvitationResponseAction
 ): Promise<InvitationResponseResult> {
-  const invitation = await prisma.invitedUser.findUnique({
+  const invitation = await prisma.requestUser.findUnique({
     where: { invited_token: token },
     select: {
       id: true,
@@ -360,7 +360,7 @@ export async function respondToInvitation(
     action === 'accept' ? InviteStatus.accepted : InviteStatus.rejected;
 
   if (invitation.invited_status === InviteStatus.pending) {
-    await prisma.invitedUser.update({
+    await prisma.requestUser.update({
       where: { id: invitation.id },
       data: {
         invited_status: nextStatus,
@@ -395,7 +395,7 @@ export async function getOwnedRequestInvitationData(params: {
       id: true,
       objective_category: true,
       expired_at: true,
-      invited_users: {
+      request_users: {
         orderBy: [{ created_at: 'desc' }],
         select: {
           id: true,
@@ -414,7 +414,7 @@ export async function getOwnedRequestInvitationData(params: {
     id: request.id,
     objectiveCategory: request.objective_category,
     expiredAt: request.expired_at,
-    invitedUsers: request.invited_users.map(user => ({
+    invitedUsers: request.request_users.map(user => ({
       id: user.id,
       userName: user.user_name,
       userEmail: user.user_email,

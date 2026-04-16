@@ -28,7 +28,7 @@ export type RequestAttendeesSummary = {
 export async function getRequestAttendees(
   requestId: number
 ): Promise<RequestAttendeesSummary> {
-  const invitedUsers = await prisma.invitedUser.findMany({
+  const requestUsers = await prisma.requestUser.findMany({
     where: { request_id: requestId },
     select: {
       user_name: true,
@@ -38,17 +38,17 @@ export async function getRequestAttendees(
     orderBy: { created_at: 'asc' },
   });
 
-  if (invitedUsers.length === 0) {
+  if (requestUsers.length === 0) {
     return { attendees: [], dominantPersonality: null };
   }
 
-  const emails = invitedUsers.map(u => u.user_email);
+  const emails = requestUsers.map(u => u.user_email);
 
   const usersWithVectors = await prisma.user.findMany({
     where: { email: { in: emails } },
     select: {
       email: true,
-      user_vector: {
+      personality_profile: {
         select: { vector_type: true },
       },
     },
@@ -57,7 +57,7 @@ export async function getRequestAttendees(
   const personalityKeys = [
     ...new Set(
       usersWithVectors
-        .map(u => u.user_vector?.vector_type)
+        .map(u => u.personality_profile?.vector_type)
         .filter((k): k is string => Boolean(k))
     ),
   ];
@@ -80,10 +80,13 @@ export async function getRequestAttendees(
   );
 
   const vectorMap = new Map(
-    usersWithVectors.map(u => [u.email, u.user_vector?.vector_type ?? null])
+    usersWithVectors.map(u => [
+      u.email,
+      u.personality_profile?.vector_type ?? null,
+    ])
   );
 
-  const attendees: AttendeePersonality[] = invitedUsers.map(inv => {
+  const attendees: AttendeePersonality[] = requestUsers.map(inv => {
     const personalityKey = vectorMap.get(inv.user_email) ?? null;
     const personalityRow = personalityKey
       ? personalityMap.get(personalityKey)

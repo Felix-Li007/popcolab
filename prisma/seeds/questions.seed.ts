@@ -1736,7 +1736,6 @@ export async function seedQuestions(
     console.log('Cleared existing intake forms');
   }
 
-  await prisma.answer.deleteMany({});
   await prisma.requestPreference.deleteMany({});
   await prisma.questionDimension.deleteMany({});
   await prisma.questionOption.deleteMany({});

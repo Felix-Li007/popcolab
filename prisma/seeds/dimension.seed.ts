@@ -713,7 +713,6 @@ export async function seedDimensions(
   await prisma.experienceDimension.deleteMany({});
   await prisma.questionDimension.deleteMany({});
   await prisma.requestPreference.deleteMany({});
-  await prisma.teamAggregate.deleteMany({});
   await clearTableIfExists('dimension_apply');
   await clearTableIfExists('form_dimension');
   await prisma.dimensionOption.deleteMany({});

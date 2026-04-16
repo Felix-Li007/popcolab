@@ -105,7 +105,7 @@ export async function scheduleRequestExpiry(requestId: number) {
 }
 
 export async function handleUserConfirmed(userId: number) {
-  const user = await prisma.invitedUser.findUnique({
+  const user = await prisma.requestUser.findUnique({
     where: { id: userId },
     select: {
       request_id: true,
@@ -113,7 +113,7 @@ export async function handleUserConfirmed(userId: number) {
   });
 
   if (!user) {
-    throw new Error(`Invited user ${userId} not found.`);
+    throw new Error(`Request user ${userId} not found.`);
   }
 
   return enqueueRequestReady(
@@ -172,7 +172,7 @@ export async function enqueueRequestReady(
       id: true,
       expired_at: true,
       request_status: true,
-      invited_users: {
+      request_users: {
         select: {
           invited_status: true,
         },
@@ -211,8 +211,8 @@ export async function enqueueRequestReady(
 
   const now = new Date();
   const allInvitedAccepted =
-    request.invited_users.length > 0 &&
-    request.invited_users.every(
+    request.request_users.length > 0 &&
+    request.request_users.every(
       invite => invite.invited_status !== InviteStatus.pending
     );
   const expired =
@@ -449,7 +449,7 @@ function mapRequestItem(
           corporate: true;
         };
       };
-      invited_users: true;
+      request_users: true;
       proposals: {
         include: {
           proposal_experiences: {
@@ -488,13 +488,13 @@ function mapRequestItem(
   }>
 ): AdminRequestListItem {
   const inviteSummary = {
-    total: row.invited_users.length,
-    pending: row.invited_users.filter(item => item.invited_status === 'pending')
+    total: row.request_users.length,
+    pending: row.request_users.filter(item => item.invited_status === 'pending')
       .length,
-    accepted: row.invited_users.filter(
+    accepted: row.request_users.filter(
       item => item.invited_status === 'accepted'
     ).length,
-    rejected: row.invited_users.filter(
+    rejected: row.request_users.filter(
       item => item.invited_status === 'rejected'
     ).length,
   };
@@ -562,7 +562,7 @@ function mapRequestItem(
         createdAt: item.created_at.toISOString(),
         updatedAt: item.updated_at.toISOString(),
       })),
-    invitedUsers: row.invited_users
+    invitedUsers: row.request_users
       .slice()
       .sort((a, b) => b.id - a.id)
       .map(item => ({
@@ -649,7 +649,7 @@ export async function getAdminRequestsPage(
             corporate: true,
           },
         },
-        invited_users: true,
+        request_users: true,
         proposals: {
           include: {
             proposal_experiences: {
@@ -734,7 +734,7 @@ export async function getAdminRequestById(
           corporate: true,
         },
       },
-      invited_users: true,
+      request_users: true,
       proposals: {
         include: {
           proposal_experiences: {

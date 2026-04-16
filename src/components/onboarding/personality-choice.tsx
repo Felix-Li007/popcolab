@@ -18,14 +18,6 @@ export default function PersonalityChoice({
 }: Readonly<Props>) {
   const router = useRouter();
 
-  const formattedDate = assessedAt
-    ? new Date(assessedAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      })
-    : null;
-
   if (!personality) {
     return (
       <div className="px-8 py-7">
@@ -82,8 +74,8 @@ export default function PersonalityChoice({
             <p className="text-sm font-bold text-gray-800">
               {personality.name}
             </p>
-            {formattedDate && (
-              <p className="text-xs text-gray-400">Assessed {formattedDate}</p>
+            {assessedAt && (
+              <p className="text-xs text-gray-400">Assessed {assessedAt}</p>
             )}
           </div>
         </div>

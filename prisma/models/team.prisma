@@ -7,10 +7,8 @@ model Team {
   created_at      DateTime        @default(now()) @db.Timestamp(6)
   updated_at      DateTime        @updatedAt @db.Timestamp(6)
   creator         User            @relation("TeamCreator", fields: [created_by], references: [id])
-  team_aggregates TeamAggregate[]
   team_invites    TeamInvite[]
   team_mates      TeamMate[]
-  team_vector     TeamVector?
 
   @@map("team")
 }

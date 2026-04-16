@@ -421,8 +421,6 @@ export async function deleteDimension(id: number): Promise<void> {
     prisma.questionDimension.deleteMany({ where: { dimension_id: id } }),
     prisma.experienceDimension.deleteMany({ where: { dimension_id: id } }),
     prisma.requestPreference.deleteMany({ where: { dimension_id: id } }),
-    prisma.responseScore.deleteMany({ where: { dimension_id: id } }),
-    prisma.teamAggregate.deleteMany({ where: { dimension_id: id } }),
     prisma.dimensionIndex.delete({ where: { id } }),
   ]);
 }

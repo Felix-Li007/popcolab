@@ -15,7 +15,7 @@ model Request {
   participant_count   Int?
   capacity_max        Int                 @default(-1)
   preferred_date      DateTime?           @db.Timestamp(6)
-  invited_users       InvitedUser[]
+  request_users       RequestUser[]
   proposals           Proposal[]
   user                User                @relation(fields: [user_id], references: [id])
   request_preferences RequestPreference[]

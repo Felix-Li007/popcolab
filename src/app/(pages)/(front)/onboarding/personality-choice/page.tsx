@@ -3,16 +3,8 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/libs/prisma-client';
 import { getTestResult } from '@/services/response-service';
 import { sanitizeRedirectPath } from '@/utils/auth-redirect';
+import { formatStoredPersonalityDate } from '@/utils/personality-time';
 import PersonalityChoice from '@/components/onboarding/personality-choice';
-
-async function getAssessedAt(userId: number): Promise<string | null> {
-  const response = await prisma.response.findFirst({
-    where: { user_id: userId, completed_at: { not: null } },
-    orderBy: { completed_at: 'desc' },
-    select: { completed_at: true },
-  });
-  return response?.completed_at?.toISOString() ?? null;
-}
 
 type PageProps = {
   searchParams: Promise<{ redirect?: string }>;
@@ -38,9 +30,9 @@ export default async function PersonalityChoicePage({
 
   if (!user) redirect('/sign-in');
 
-  const [testResult, assessedAt] = user.personality_complete
-    ? await Promise.all([getTestResult(user.id), getAssessedAt(user.id)])
-    : [null, null];
+  const testResult = user.personality_complete
+    ? await getTestResult(user.id)
+    : null;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4 py-12">
@@ -59,7 +51,9 @@ export default async function PersonalityChoicePage({
         <PersonalityChoice
           firstName={user.profile?.first_name ?? ''}
           personality={testResult?.personality ?? null}
-          assessedAt={assessedAt}
+          assessedAt={formatStoredPersonalityDate(
+            testResult?.completedAt ?? null
+          )}
           redirectTo={redirectTo}
         />
       </div>

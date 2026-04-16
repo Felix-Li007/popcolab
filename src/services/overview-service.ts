@@ -521,7 +521,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
         SELECT
           user_id,
           completed_at::date AS completed_day
-        FROM "response"
+        FROM "personality_profile"
         WHERE completed_at IS NOT NULL
       )
       SELECT
@@ -548,7 +548,7 @@ export async function getOverviewGrowthMetrics(): Promise<OverviewGrowthMetrics>
         SELECT
           completed_at::date AS day_start,
           COUNT(*)::int AS count
-        FROM "response"
+        FROM "personality_profile"
         WHERE completed_at >= CURRENT_DATE - INTERVAL '6 days'
           AND completed_at IS NOT NULL
         GROUP BY 1

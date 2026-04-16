@@ -2,6 +2,7 @@ import { prisma } from '@/libs/prisma-client';
 import type { UserAnswer } from '@/types/response-type';
 import type { Personality } from '@/types/personality-type';
 import { mapPersonalityRow } from '@/services/personality-service';
+import { getPersonalityLocalTimestamp } from '@/utils/personality-time';
 
 // ─── Scoring Helpers ──────────────────────────────────────────────────────────
 
@@ -51,6 +52,138 @@ async function getDimensionMappings(
   }));
 }
 
+async function getSelectedOptions(optionIds: number[]): Promise<
+  Map<
+    number,
+    {
+      id: number;
+      option_value: string | null;
+      option_label: string;
+    }
+  >
+> {
+  if (optionIds.length === 0) {
+    return new Map();
+  }
+
+  const rows = await prisma.questionOption.findMany({
+    where: { id: { in: optionIds } },
+    select: {
+      id: true,
+      option_value: true,
+      option_label: true,
+    },
+  });
+
+  return new Map(rows.map(row => [row.id, row]));
+}
+
+function buildUserPersonalitySnapshotRows(
+  userId: number,
+  answers: UserAnswer[],
+  dimMappings: { questionId: number; dimensionId: number; weight: number }[],
+  selectedOptions: Map<
+    number,
+    {
+      id: number;
+      option_value: string | null;
+      option_label: string;
+    }
+  >,
+  now: Date
+): Array<{
+  user_id: number;
+  question_id: number;
+  dimension_id: number;
+  option_id: number | null;
+  desired_value: string;
+  created_at: Date;
+  updated_at: Date;
+}> {
+  const rows: Array<{
+    user_id: number;
+    question_id: number;
+    dimension_id: number;
+    option_id: number | null;
+    desired_value: string;
+    created_at: Date;
+    updated_at: Date;
+  }> = [];
+
+  for (const answer of answers) {
+    const questionDimensions = dimMappings.filter(
+      d => d.questionId === answer.questionId
+    );
+
+    if (questionDimensions.length === 0) {
+      continue;
+    }
+
+    if (answer.questionType === 'scale' && answer.scaleValue !== null) {
+      for (const dim of questionDimensions) {
+        rows.push({
+          user_id: userId,
+          question_id: answer.questionId,
+          dimension_id: dim.dimensionId,
+          option_id: null,
+          desired_value: String(answer.scaleValue),
+          created_at: now,
+          updated_at: now,
+        });
+      }
+      continue;
+    }
+
+    if (answer.questionType === 'text_input') {
+      const desiredValue = answer.textValue?.trim();
+      if (!desiredValue) {
+        continue;
+      }
+
+      for (const dim of questionDimensions) {
+        rows.push({
+          user_id: userId,
+          question_id: answer.questionId,
+          dimension_id: dim.dimensionId,
+          option_id: null,
+          desired_value: desiredValue,
+          created_at: now,
+          updated_at: now,
+        });
+      }
+      continue;
+    }
+
+    for (const optionId of answer.selectedOptionIds) {
+      const option = selectedOptions.get(optionId);
+      if (!option) {
+        continue;
+      }
+
+      const desiredValue =
+        option.option_value?.trim() || option.option_label.trim();
+
+      if (!desiredValue) {
+        continue;
+      }
+
+      for (const dim of questionDimensions) {
+        rows.push({
+          user_id: userId,
+          question_id: answer.questionId,
+          dimension_id: dim.dimensionId,
+          option_id: option.id,
+          desired_value: desiredValue,
+          created_at: now,
+          updated_at: now,
+        });
+      }
+    }
+  }
+
+  return rows;
+}
+
 // ─── Shared Personality Ranking ──────────────────────────────────────────────
 // Single source of truth used by both submitResponse and computeAllPersonalityMatches.
 // Returns personalities sorted: qualified (highest threshold first), then unqualified.
@@ -95,6 +228,9 @@ export async function submitResponse(
   // 2. Get dimension mappings
   const questionIds = answers.map(a => a.questionId);
   const dimMappings = await getDimensionMappings(questionIds);
+  const selectedOptions = await getSelectedOptions(
+    answers.flatMap(a => a.selectedOptionIds)
+  );
 
   // 3. Calculate per-dimension scores
   const dimensionScoreMap = new Map<number, number>();
@@ -132,46 +268,37 @@ export async function submitResponse(
   const vectorJson = JSON.stringify(vectorObj);
 
   // 7. Persist in a single transaction
-  const now = new Date();
+  const now = getPersonalityLocalTimestamp();
+  const userPersonalityRows = buildUserPersonalitySnapshotRows(
+    userId,
+    answers,
+    dimMappings,
+    selectedOptions,
+    now
+  );
 
   await prisma.$transaction(async tx => {
-    const response = await tx.response.create({
-      data: {
-        user_id: userId,
-        completed_at: now,
-        answers: {
-          create: scored.map(item => ({
-            question_id: item.answer.questionId,
-            raw_value: item.rawValue,
-            numeric_value: item.numericValue,
-          })),
-        },
-      },
+    await tx.userPersonality.deleteMany({
+      where: { user_id: userId },
     });
 
-    if (dimensionScoreMap.size > 0) {
-      await tx.responseScore.createMany({
-        data: Array.from(dimensionScoreMap.entries()).map(([dimId, score]) => ({
-          response_id: response.id,
-          dimension_id: dimId,
-          original_score: Math.round(score),
-          normalized_score: Math.round(score),
-          updated_at: now,
-        })),
+    if (userPersonalityRows.length > 0) {
+      await tx.userPersonality.createMany({
+        data: userPersonalityRows,
       });
     }
 
-    await tx.userVector.upsert({
+    await tx.personalityProfile.upsert({
       where: { user_id: userId },
       create: {
         user_id: userId,
-        response_id: response.id,
+        completed_at: now,
         vector_json: vectorJson,
         vector_type: personalityKey,
         updated_at: now,
       },
       update: {
-        response_id: response.id,
+        completed_at: now,
         vector_json: vectorJson,
         vector_type: personalityKey,
         updated_at: now,
@@ -187,8 +314,9 @@ export async function submitResponse(
 export async function getTestResult(userId: number): Promise<{
   personality: Personality;
   totalScore: number;
+  completedAt: Date | null;
 } | null> {
-  const vector = await prisma.userVector.findUnique({
+  const vector = await prisma.personalityProfile.findUnique({
     where: { user_id: userId },
   });
   if (!vector) return null;
@@ -201,7 +329,11 @@ export async function getTestResult(userId: number): Promise<{
   });
   if (!row) return null;
 
-  return { personality: mapPersonalityRow(row), totalScore };
+  return {
+    personality: mapPersonalityRow(row),
+    totalScore,
+    completedAt: vector.completed_at,
+  };
 }
 
 // ─── Anonymous Score Compute (no DB write) ───────────────────────────────────
@@ -264,7 +396,7 @@ export async function computeAllPersonalityMatches(
   totalScore: number
 ): Promise<{ key: string; matchPercent: number }[]> {
   // Uses the shared ranker — identical sort to what submitResponse uses when saving,
-  // so sorted[0] here always matches what was written to userVector.vector_type.
+  // so sorted[0] here always matches what was written to personalityProfile.vector_type.
   const sorted = await rankPersonalities(totalScore);
   if (sorted.length === 0) return [];
 

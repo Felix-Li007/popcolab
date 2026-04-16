@@ -31,7 +31,7 @@ type RequestSeed = {
   notes_for_admin: string;
   expires_in_hours: number;
   preferences: RequestPreferenceSeed[];
-  invited_users: Array<{
+  request_users: Array<{
     user_name: string;
     user_email: string;
     invited_status: InviteStatus;
@@ -68,7 +68,7 @@ const requestSeedRows: RequestSeed[] = [
       { dimensionKey: 'team_readiness', desiredScore: 3 },
       { dimensionKey: 'debrief_importance', desiredScore: 4 },
     ],
-    invited_users: [
+    request_users: [
       {
         user_name: 'Mia Wong',
         user_email: 'mia.wong+request1@popcolab.test',
@@ -127,7 +127,7 @@ const requestSeedRows: RequestSeed[] = [
       { dimensionKey: 'team_readiness', desiredScore: 4 },
       { dimensionKey: 'debrief_importance', desiredScore: 2 },
     ],
-    invited_users: [
+    request_users: [
       {
         user_name: 'Eva Garcia',
         user_email: 'eva.garcia+request2@popcolab.test',
@@ -184,7 +184,7 @@ const requestSeedRows: RequestSeed[] = [
       { dimensionKey: 'team_readiness', desiredScore: 5 },
       { dimensionKey: 'debrief_importance', desiredScore: 5 },
     ],
-    invited_users: [
+    request_users: [
       {
         user_name: 'Ava Singh',
         user_email: 'ava.singh+request3@popcolab.test',
@@ -519,10 +519,10 @@ export async function seedRequests(prisma: PrismaClient): Promise<void> {
       });
     }
 
-    await prisma.invitedUser.deleteMany({ where: { request_id: request.id } });
-    if (row.invited_users.length > 0) {
-      await prisma.invitedUser.createMany({
-        data: row.invited_users.map((invite, index) => ({
+    await prisma.requestUser.deleteMany({ where: { request_id: request.id } });
+    if (row.request_users.length > 0) {
+      await prisma.requestUser.createMany({
+        data: row.request_users.map((invite, index) => ({
           request_id: request.id,
           invited_status: invite.invited_status,
           invited_token: `seed-request-${request.id}-invite-${index + 1}`,
