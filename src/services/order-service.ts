@@ -425,8 +425,7 @@ function isQStashConfigured(): boolean {
   return Boolean(
     process.env.QSTASH_TOKEN &&
     process.env.QSTASH_ENDPOINT_PATH &&
-    (process.env.QSTASH_APP_URL ||
-      process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.NEXT_PUBLIC_APP_URL ||
       process.env.VERCEL_PROJECT_PRODUCTION_URL ||
       process.env.VERCEL_URL)
   );

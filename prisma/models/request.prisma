@@ -14,11 +14,12 @@ model Request {
   notes_for_admin     String?
   participant_count   Int?
   capacity_max        Int                 @default(-1)
-  preferred_date      DateTime?           @db.Timestamp(6)
+  deadline_date       DateTime?           @db.Timestamp(6)
   request_users       RequestUser[]
   proposals           Proposal[]
   user                User                @relation(fields: [user_id], references: [id])
   request_preferences RequestPreference[]
+  requestCalendars    Request_Calendar[]
 
   @@map("request")
 }

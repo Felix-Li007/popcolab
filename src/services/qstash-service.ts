@@ -145,6 +145,21 @@ async function handleRequestProcess(payload: RequestProcessPayload) {
     }
   }
 
+  if (messages.length === payload.batchSize) {
+    logInfo(
+      {
+        batchSize: payload.batchSize,
+        processedCount: processed.length,
+      },
+      'Request queue not empty, re-enqueue QStash task'
+    );
+
+    await publishQStashTask({
+      type: QSTASH_TASK_TYPE.REQUEST_QUEUE_PROCESS,
+      batchSize: payload.batchSize,
+    });
+  }
+
   return {
     ok: true,
     handled: true,

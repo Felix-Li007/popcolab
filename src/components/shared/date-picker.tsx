@@ -12,6 +12,7 @@ type Props = {
   defaultTime: string;
   triggerIcon?: 'chevron' | 'calendar';
   inputClassName?: string;
+  wrapperClassName?: string;
 };
 
 type CalendarCell = {
@@ -122,6 +123,7 @@ export default function DatePicker({
   defaultTime,
   triggerIcon = 'chevron',
   inputClassName,
+  wrapperClassName,
 }: Readonly<Props>) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const parsedValue = useMemo(() => parseDateTimeValue(value), [value]);
@@ -176,7 +178,12 @@ export default function DatePicker({
   const calendarCells = buildCalendarCells(viewDate, draftDate);
 
   return (
-    <div ref={rootRef} className={styles.filterField}>
+    <div
+      ref={rootRef}
+      className={[styles.filterField, wrapperClassName]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <label className={styles.srOnlyLabel} htmlFor={id}>
         {ariaLabel}
       </label>

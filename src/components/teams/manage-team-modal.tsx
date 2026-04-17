@@ -7,7 +7,6 @@ import {
   useState,
   useTransition,
 } from 'react';
-import { createPortal } from 'react-dom';
 import {
   updateTeamAction,
   removeTeamMemberAction,
@@ -16,6 +15,8 @@ import {
   type InviteToTeamState,
 } from '@/actions/team-actions';
 import type { UserTeamItem } from '@/services/user-team-service';
+import ModalShell from '@/components/shared/modal-shell';
+import { Button } from '@/ui';
 
 type Props = {
   open: boolean;
@@ -103,39 +104,22 @@ export default function ManageTeamModal({
     }
   }
 
-  if (!open || typeof document === 'undefined') return null;
+  if (!open) return null;
 
-  return createPortal(
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      onClick={e => {
-        if (e.target === e.currentTarget) onCloseAction();
-      }}
-      onKeyDown={e => {
-        if (e.key === 'Escape') onCloseAction();
-      }}
+  return (
+    <ModalShell
+      isOpen={open}
+      onClose={onCloseAction}
+      title="Manage Team"
+      subtitle={team.name}
+      panelClassName="max-w-[560px]"
+      bodyClassName="max-h-[90vh] p-0"
     >
-      <div className="w-full max-w-[560px] max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between bg-[#111827] px-6 py-4 rounded-t-2xl">
-          <div>
-            <h2 className="text-base font-bold text-white">✎ Manage Team</h2>
-            <p className="text-[11px] text-white/50 mt-0.5">{team.name}</p>
-          </div>
-          <button
-            onClick={onCloseAction}
-            className="text-gray-400 hover:text-white text-xl leading-none"
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Team details form */}
+      <div className="max-h-[90vh] overflow-y-auto">
         <form action={formAction}>
           <input type="hidden" name="teamId" value={team.id} />
 
-          <div className="px-6 pt-6 pb-4 flex flex-col gap-4">
+          <div className="px-2 py-2 flex flex-col gap-3">
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
               Team details
             </p>
@@ -209,26 +193,22 @@ export default function ManageTeamModal({
             )}
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
-            <button
+          <div className="flex justify-end gap-3 border-t border-gray-100 px-4 py-2">
+            <Button
               type="button"
               onClick={onCloseAction}
-              className="rounded-lg border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              variant="secondary"
+              size="md"
             >
               Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={pending}
-              className="rounded-lg bg-[#E91E8C] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7177a] disabled:opacity-60"
-            >
+            </Button>
+            <Button type="submit" disabled={pending}>
               {pending ? 'Saving…' : 'Save changes'}
-            </button>
+            </Button>
           </div>
         </form>
 
-        {/* Current members */}
-        <div className="px-6 pb-4 flex flex-col gap-3">
+        <div className="px-4 py-2 flex flex-col gap-3">
           <hr className="border-gray-100" />
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
             Current members
@@ -257,21 +237,22 @@ export default function ManageTeamModal({
                       <p className="text-[10px] text-gray-400">{m.email}</p>
                     </div>
                   </div>
-                  <button
+                  <Button
                     type="button"
                     disabled={removing}
                     onClick={() => handleRemoveMember(m.teamMateId, m.name)}
-                    className="rounded-md border border-red-200 px-2.5 py-1 text-[10px] font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+                    variant="secondary"
+                    size="xs"
+                    className="!min-w-0 border-red-200 !px-3 !text-red-500 hover:!bg-red-50"
                   >
                     Remove
-                  </button>
+                  </Button>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        {/* Invite members form */}
         <form action={inviteFormAction}>
           <input type="hidden" name="teamId" value={team.id} />
           <input type="hidden" name="teamName" value={team.name} />
@@ -284,7 +265,7 @@ export default function ManageTeamModal({
             ])}
           />
 
-          <div className="px-6 pb-6 flex flex-col gap-3">
+          <div className="px-4 py-2 flex flex-col gap-3">
             <hr className="border-gray-100" />
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
               Invite members
@@ -294,7 +275,6 @@ export default function ManageTeamModal({
             </p>
 
             <div className="flex flex-col gap-1">
-              {}
               <div
                 role="group"
                 className="flex min-h-[44px] flex-wrap gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-2 cursor-text"
@@ -337,18 +317,19 @@ export default function ManageTeamModal({
             </div>
 
             <div className="flex justify-end">
-              <button
+              <Button
                 type="submit"
                 disabled={invitePending}
-                className="rounded-lg bg-[#111827] px-5 py-2 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+                variant="primary"
+                size="md"
+                className="!bg-[#111827] hover:!bg-gray-800"
               >
                 {invitePending ? 'Sending…' : '✉ Send Invites'}
-              </button>
+              </Button>
             </div>
           </div>
         </form>
       </div>
-    </div>,
-    document.body
+    </ModalShell>
   );
 }

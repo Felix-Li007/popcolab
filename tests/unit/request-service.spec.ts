@@ -17,10 +17,17 @@ jest.mock('@/libs/prisma-client', () => ({
 }));
 
 jest.mock('@/libs/prisma/client', () => ({
+  CalendarStatus: {
+    LOCKED: 'LOCKED',
+    BLOCKED: 'BLOCKED',
+  },
   InviteStatus: {
     pending: 'pending',
     accepted: 'accepted',
     rejected: 'rejected',
+  },
+  ProcessStatus: {
+    COMPLETED: 'COMPLETED',
   },
   ProposalStatus: {
     PENDING: 'PENDING',

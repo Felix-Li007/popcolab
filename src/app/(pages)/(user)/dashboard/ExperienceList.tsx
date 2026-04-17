@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { showBookingUnavailable } from '@/utils/booking-unavailable';
 type Experience = {
   id: number;
   experienceTitle: string;
@@ -101,12 +102,13 @@ export default function ExperienceList() {
               >
                 View Info
               </Link>
-              <Link
-                href={`/dashboard/experiences/${exp.id}/checkout`}
+              <button
+                type="button"
+                onClick={() => showBookingUnavailable(exp.experienceTitle)}
                 className="flex-1 text-center bg-linear-to-r from-pink-500 to-pink-600 text-white py-2 rounded-lg font-semibold hover:from-pink-600 hover:to-pink-700 text-sm transition-all"
               >
                 Book Now
-              </Link>
+              </button>
             </div>
           </div>
 

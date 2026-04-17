@@ -54,6 +54,10 @@ function getColor(index: number): string {
   return AVATAR_COLORS[index % AVATAR_COLORS.length];
 }
 
+function normalizeIdentityValue(value: string | null | undefined): string {
+  return value?.trim().toLowerCase() ?? '';
+}
+
 function getInitials(
   firstName: string | null,
   lastName: string | null,
@@ -527,8 +531,12 @@ export async function respondToTeamInvite(
   if (!invite) throw new Error('Invite not found.');
   if (invite.status !== TeamInviteStatus.pending) return;
 
-  const emailMatch = invite.email === userEmail;
-  const usernameMatch = invite.username && user?.user_name === invite.username;
+  const emailMatch =
+    normalizeIdentityValue(invite.email) === normalizeIdentityValue(userEmail);
+  const usernameMatch =
+    !!invite.username &&
+    normalizeIdentityValue(user?.user_name) ===
+      normalizeIdentityValue(invite.username);
   if (!emailMatch && !usernameMatch) throw new Error('Not authorised.');
 
   const nextStatus =

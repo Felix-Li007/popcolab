@@ -77,8 +77,6 @@ export default function PaginationBar({
   nextHref,
   variant = 'default',
 }: Readonly<Props>) {
-  if (totalPages <= 1) return null;
-
   const variantStyles = VARIANT_STYLES[variant];
   const prevDisabled = page <= 1;
   const nextDisabled = page >= totalPages;

@@ -12,7 +12,6 @@ function normalizeAppUrl(rawUrl: string): string {
 
 export function getQStashAppUrl(): string {
   const rawUrl =
-    process.env.QSTASH_APP_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.VERCEL_PROJECT_PRODUCTION_URL ||
     process.env.VERCEL_URL;

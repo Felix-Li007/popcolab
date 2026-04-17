@@ -4,6 +4,9 @@ jest.mock('@/libs/prisma-client', () => ({
       findUnique: jest.fn(),
       update: jest.fn(),
     },
+    proposal: {
+      findUnique: jest.fn(),
+    },
     experience: {
       findFirst: jest.fn(),
     },
@@ -29,6 +32,7 @@ jest.mock('@/libs/prisma/client', () => ({
 jest.mock('@/utils/logging-util', () => ({
   logger: {
     info: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
@@ -36,10 +40,18 @@ jest.mock('@/services/recommend-service', () => ({
   getRequestExperiences: jest.fn(),
 }));
 
+jest.mock('@/services/notification-service', () => ({
+  enqueueRequestChangedNotification: jest.fn(),
+}));
+
 import { ProposalStatus } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { REQUEST_STATUS } from '@/constants/request-status';
-import { createFittedProposal } from '@/services/proposal-service';
+import {
+  approveAdminProposal,
+  createFittedProposal,
+} from '@/services/proposal-service';
+import { enqueueRequestChangedNotification } from '@/services/notification-service';
 import { getRequestExperiences } from '@/services/recommend-service';
 import { REQUEST_QUEUE_TRIGGER } from '@/types/queue-job';
 import { logger } from '@/utils/logging-util';
@@ -49,6 +61,9 @@ type PrismaMock = {
     findUnique: jest.Mock;
     update: jest.Mock;
   };
+  proposal: {
+    findUnique: jest.Mock;
+  };
   $transaction: jest.Mock;
 };
 
@@ -56,11 +71,20 @@ const prismaMock = prisma as unknown as PrismaMock;
 const getRequestExperiencesMock = getRequestExperiences as jest.MockedFunction<
   typeof getRequestExperiences
 >;
+const enqueueRequestChangedNotificationMock =
+  enqueueRequestChangedNotification as jest.MockedFunction<
+    typeof enqueueRequestChangedNotification
+  >;
 const loggerMock = logger as unknown as {
   info: jest.Mock;
+  warn: jest.Mock;
 };
 
 describe('proposal-service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('throws when the request cannot be found', async () => {
     prismaMock.request.findUnique.mockResolvedValue(null);
 
@@ -73,7 +97,7 @@ describe('proposal-service', () => {
     ).rejects.toThrow('Request 123 not found.');
   });
 
-  test('returns existing proposal and updates request to matched when active proposal exists', async () => {
+  test('returns existing proposal without changing request status when active proposal exists', async () => {
     prismaMock.request.findUnique.mockResolvedValue({
       id: 10,
       budget_min: null,
@@ -95,24 +119,22 @@ describe('proposal-service', () => {
       reason: 'active_proposal_exists',
       proposalId: 77,
     });
-    expect(prismaMock.request.update).toHaveBeenCalledWith({
-      where: { id: 10 },
-      data: {
-        request_status: REQUEST_STATUS.MATCHED,
-      },
-    });
+    expect(prismaMock.request.update).not.toHaveBeenCalled();
   });
 
   test('creates proposals from recommendation results', async () => {
     const tx = {
-      proposal: {
-        create: jest
-          .fn()
-          .mockResolvedValueOnce({ id: 901, experience_id: 55 })
-          .mockResolvedValueOnce({ id: 902, experience_id: 56 }),
-      },
       request: {
-        update: jest.fn().mockResolvedValue({ id: 30 }),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 30,
+          proposals: [],
+        }),
+      },
+      proposal: {
+        create: jest.fn().mockResolvedValue({ id: 901 }),
+      },
+      proposalExperience: {
+        create: jest.fn().mockResolvedValueOnce({}).mockResolvedValueOnce({}),
       },
     };
 
@@ -154,47 +176,150 @@ describe('proposal-service', () => {
     });
 
     expect(getRequestExperiencesMock).toHaveBeenCalledWith(30, [], 10);
-    expect(tx.proposal.create).toHaveBeenNthCalledWith(1, {
+    expect(tx.proposal.create).toHaveBeenCalledWith({
       data: {
         request_id: 30,
-        experience_id: 55,
         proposal_status: ProposalStatus.PENDING,
         objective_alignment: 'source:request',
+      },
+      select: {
+        id: true,
+      },
+    });
+    expect(tx.proposalExperience.create).toHaveBeenNthCalledWith(1, {
+      data: {
+        proposal_id: 901,
+        experience_id: 55,
         base_score: 81,
         risk_adjustment: 18,
         rationale_desc: 'Very similar to request preferences',
       },
-      select: {
-        id: true,
-        experience_id: true,
-      },
     });
-    expect(tx.proposal.create).toHaveBeenNthCalledWith(2, {
+    expect(tx.proposalExperience.create).toHaveBeenNthCalledWith(2, {
       data: {
-        request_id: 30,
+        proposal_id: 901,
         experience_id: 56,
-        proposal_status: ProposalStatus.PENDING,
-        objective_alignment: 'source:request',
         base_score: 70,
         risk_adjustment: -5,
         rationale_desc: 'Similar to request preferences',
-      },
-      select: {
-        id: true,
-        experience_id: true,
       },
     });
     expect(result).toEqual({
       created: true,
       proposalId: 901,
     });
+    expect(prismaMock.request.update).not.toHaveBeenCalled();
+    expect(enqueueRequestChangedNotificationMock).not.toHaveBeenCalled();
     expect(loggerMock.info).toHaveBeenCalledWith(
       {
         requestId: 30,
-        proposalIds: [901, 902],
+        proposalIds: [901],
         experienceIds: [55, 56],
-        proposalCount: 2,
+        proposalCount: 1,
         trigger: REQUEST_QUEUE_TRIGGER.INVITED_CONFIRMED,
+      },
+      'Proposal generated from queue job'
+    );
+  });
+
+  test('only keeps the top 3 recommended experiences in one proposal', async () => {
+    const tx = {
+      request: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 33,
+          proposals: [],
+        }),
+      },
+      proposal: {
+        create: jest.fn().mockResolvedValue({ id: 904 }),
+      },
+      proposalExperience: {
+        create: jest
+          .fn()
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({})
+          .mockResolvedValueOnce({}),
+      },
+    };
+
+    prismaMock.request.findUnique.mockResolvedValue({
+      id: 33,
+      request_status: REQUEST_STATUS.OPENED,
+      proposals: [],
+    });
+    getRequestExperiencesMock.mockResolvedValue([
+      {
+        experience: { id: 101 } as never,
+        score: 0.98,
+        reason: 'Top match 1',
+        recommendationSource: 'request',
+      },
+      {
+        experience: { id: 102 } as never,
+        score: 0.95,
+        reason: 'Top match 2',
+        recommendationSource: 'request',
+      },
+      {
+        experience: { id: 103 } as never,
+        score: 0.92,
+        reason: 'Top match 3',
+        recommendationSource: 'request',
+      },
+      {
+        experience: { id: 104 } as never,
+        score: 0.89,
+        reason: 'Should be trimmed out',
+        recommendationSource: 'request',
+      },
+    ]);
+    prismaMock.$transaction.mockImplementation(async callback => callback(tx));
+
+    const result = await createFittedProposal({
+      requestId: 33,
+      trigger: REQUEST_QUEUE_TRIGGER.REQUEST_EXPIRED,
+      queuedAt: '2026-03-09T12:00:00.000Z',
+    });
+
+    expect(tx.proposalExperience.create).toHaveBeenCalledTimes(3);
+    expect(tx.proposalExperience.create).toHaveBeenNthCalledWith(1, {
+      data: {
+        proposal_id: 904,
+        experience_id: 101,
+        base_score: 98,
+        risk_adjustment: 0,
+        rationale_desc: 'Top match 1',
+      },
+    });
+    expect(tx.proposalExperience.create).toHaveBeenNthCalledWith(2, {
+      data: {
+        proposal_id: 904,
+        experience_id: 102,
+        base_score: 95,
+        risk_adjustment: 0,
+        rationale_desc: 'Top match 2',
+      },
+    });
+    expect(tx.proposalExperience.create).toHaveBeenNthCalledWith(3, {
+      data: {
+        proposal_id: 904,
+        experience_id: 103,
+        base_score: 92,
+        risk_adjustment: 0,
+        rationale_desc: 'Top match 3',
+      },
+    });
+    expect(result).toEqual({
+      created: true,
+      proposalId: 904,
+    });
+    expect(loggerMock.info).toHaveBeenCalledWith(
+      {
+        requestId: 33,
+        proposalIds: [904],
+        experienceIds: [101, 102, 103],
+        proposalCount: 1,
+        trigger: REQUEST_QUEUE_TRIGGER.REQUEST_EXPIRED,
       },
       'Proposal generated from queue job'
     );
@@ -223,11 +348,17 @@ describe('proposal-service', () => {
 
   test('creates proposal even when breakdown is missing', async () => {
     const tx = {
-      proposal: {
-        create: jest.fn().mockResolvedValue({ id: 903, experience_id: 66 }),
-      },
       request: {
-        update: jest.fn().mockResolvedValue({ id: 32 }),
+        findUnique: jest.fn().mockResolvedValue({
+          id: 32,
+          proposals: [],
+        }),
+      },
+      proposal: {
+        create: jest.fn().mockResolvedValue({ id: 903 }),
+      },
+      proposalExperience: {
+        create: jest.fn().mockResolvedValue({}),
       },
     };
 
@@ -255,22 +386,130 @@ describe('proposal-service', () => {
     expect(tx.proposal.create).toHaveBeenCalledWith({
       data: {
         request_id: 32,
-        experience_id: 66,
         proposal_status: ProposalStatus.PENDING,
         objective_alignment: 'source:request',
-        base_score: 66,
-        risk_adjustment: 0,
-        rationale_desc: 'Recommended based on your interests',
       },
       select: {
         id: true,
-        experience_id: true,
+      },
+    });
+    expect(tx.proposalExperience.create).toHaveBeenCalledWith({
+      data: {
+        proposal_id: 903,
+        experience_id: 66,
+        base_score: 66,
+        risk_adjustment: 0,
+        rationale_desc: 'Recommended based on your interests',
       },
     });
 
     expect(result).toEqual({
       created: true,
       proposalId: 903,
+    });
+    expect(prismaMock.request.update).not.toHaveBeenCalled();
+  });
+
+  test('skips creation when a concurrent active proposal is found inside the transaction', async () => {
+    const tx = {
+      request: {
+        findUnique: jest.fn().mockResolvedValue({
+          id: 50,
+          proposals: [{ id: 777 }],
+        }),
+      },
+      proposal: {
+        create: jest.fn(),
+      },
+      proposalExperience: {
+        create: jest.fn(),
+      },
+    };
+
+    prismaMock.request.findUnique.mockResolvedValue({
+      id: 50,
+      request_status: REQUEST_STATUS.PENDING,
+      proposals: [],
+    });
+    getRequestExperiencesMock.mockResolvedValue([
+      {
+        experience: { id: 88 } as never,
+        score: 0.8,
+        reason: 'Recommended option',
+        recommendationSource: 'request',
+      },
+    ]);
+    prismaMock.$transaction.mockImplementation(async callback => callback(tx));
+
+    const result = await createFittedProposal({
+      requestId: 50,
+      trigger: REQUEST_QUEUE_TRIGGER.REQUEST_EXPIRED,
+      queuedAt: '2026-03-09T12:00:00.000Z',
+    });
+
+    expect(result).toEqual({
+      created: false,
+      reason: 'active_proposal_exists',
+      proposalId: 777,
+    });
+    expect(tx.proposal.create).not.toHaveBeenCalled();
+    expect(tx.proposalExperience.create).not.toHaveBeenCalled();
+  });
+
+  test('approves proposal and marks request as matched', async () => {
+    prismaMock.proposal.findUnique.mockResolvedValue({
+      id: 41,
+      proposal_status: ProposalStatus.PENDING,
+      request: {
+        id: 12,
+        request_status: REQUEST_STATUS.PENDING,
+        objective_category: 'Team Bonding',
+        user: {
+          id: 9,
+          email: 'owner@example.com',
+          user_name: 'owner',
+          profile: {
+            first_name: 'Owner',
+            last_name: 'User',
+          },
+        },
+      },
+    });
+
+    const tx = {
+      proposal: {
+        update: jest.fn().mockResolvedValue({ id: 41 }),
+      },
+      request: {
+        update: jest.fn().mockResolvedValue({ id: 12 }),
+      },
+    };
+    prismaMock.$transaction.mockImplementation(async callback => callback(tx));
+
+    const result = await approveAdminProposal(41);
+
+    expect(result).toEqual({
+      success: true,
+      message:
+        'Proposal approved, request status updated, and notifications queued.',
+    });
+    expect(tx.proposal.update).toHaveBeenCalledWith({
+      where: { id: 41 },
+      data: {
+        proposal_status: ProposalStatus.APPROVED,
+        reject_notes: null,
+      },
+    });
+    expect(tx.request.update).toHaveBeenCalledWith({
+      where: { id: 12 },
+      data: {
+        request_status: REQUEST_STATUS.MATCHED,
+      },
+    });
+    expect(enqueueRequestChangedNotificationMock).toHaveBeenCalledWith({
+      requestId: 12,
+      previousStatus: REQUEST_STATUS.PENDING,
+      nextStatus: REQUEST_STATUS.MATCHED,
     });
   });
 });

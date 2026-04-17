@@ -24,6 +24,7 @@ export type ProposalView = {
   id: number;
   status: 'pending' | 'approved' | 'accepted' | 'rejected';
   objectiveAlignment: string;
+  rejectNotes: string | null;
   rationale: string;
   baseScore: number;
   riskAdjustment: number;

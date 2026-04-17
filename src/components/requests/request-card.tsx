@@ -1,20 +1,21 @@
 'use client';
 
 import { useTransition } from 'react';
-import Link from 'next/link';
-import type { UserRequestItem } from '@/services/user-request-service';
+import { useRouter } from 'next/navigation';
+import type { UserRequestItem } from '@/services/request-service';
 import type { RequestAttendeesSummary } from '@/services/request-attendee-service';
-import {
-  acceptProposalAction,
-  cancelRequestAction,
-} from '@/actions/request-actions';
+import { Badge, Button } from '@/ui';
+import { cancelRequestAction } from '@/actions/request-actions';
 import AttendeePersonalityPanel from './attendee-personality-panel';
 
-const STATUS_MAP: Record<string, { label: string; className: string }> = {
-  OPENED: { label: 'Submitted', className: 'bg-violet-100 text-violet-700' },
-  PENDING: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
-  MATCHED: { label: 'Under Review', className: 'bg-amber-100 text-amber-700' },
-  CLOSED: { label: 'Closed', className: 'bg-gray-100 text-gray-600' },
+const STATUS_MAP: Record<
+  string,
+  { label: string; variant: React.ComponentProps<typeof Badge>['variant'] }
+> = {
+  OPENED: { label: 'OPENED', variant: 'secondary' },
+  PENDING: { label: 'PENDING', variant: 'warning' },
+  MATCHED: { label: 'MATCHED', variant: 'info' },
+  CLOSED: { label: 'CLOSED', variant: 'default' },
 };
 
 function formatDate(d: Date | null): string {
@@ -40,43 +41,44 @@ function timeAgo(d: Date): string {
 type Props = {
   request: UserRequestItem;
   attendeeSummary: RequestAttendeesSummary;
-  onReject: (proposalId: number) => void;
   onResubmit: () => void;
 };
 
 export default function RequestCard({
   request,
   attendeeSummary,
-  onReject,
   onResubmit,
 }: Props) {
-  const [accepting, startAccept] = useTransition();
   const [cancelling, startCancel] = useTransition();
+  const router = useRouter();
   const status = STATUS_MAP[request.status] ?? {
     label: request.status,
-    className: 'bg-gray-100 text-gray-600',
+    variant: 'default' as const,
   };
 
   const isUnderReview = request.status === 'PENDING';
   const isMatched = request.status === 'MATCHED';
   const isClosed = request.status === 'CLOSED';
+  const matchedProposal = isMatched ? request.proposal : null;
+  const acceptedProposal =
+    isClosed && request.proposal?.status === 'ACCEPTED'
+      ? request.proposal
+      : null;
+  const hasAcceptedProposal = Boolean(acceptedProposal);
 
   const borderColor = isMatched
-    ? 'border-amber-200'
+    ? 'border-amber-200/80'
     : isClosed
       ? 'border-gray-200'
       : 'border-gray-200';
 
-  function handleAccept() {
-    if (!request.proposal) return;
-    startAccept(async () => {
-      await acceptProposalAction(request.proposal!.id);
-    });
-  }
-
   return (
     <div
-      className={`bg-white border ${borderColor} rounded-xl p-5 flex flex-col gap-3`}
+      className={`border ${borderColor} rounded-[1.75rem] p-5 flex flex-col gap-3 shadow-[0_18px_40px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.92)] ${
+        isMatched
+          ? 'bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(255,251,241,0.84))] backdrop-blur-xl'
+          : 'bg-white'
+      }`}
     >
       {/* Top row */}
       <div className="flex items-start justify-between gap-3">
@@ -88,11 +90,17 @@ export default function RequestCard({
             Submitted {timeAgo(request.createdAt)}
           </p>
         </div>
-        <span
-          className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full ${status.className}`}
+        <Badge
+          size="xs"
+          variant={status.variant}
+          className={
+            isMatched
+              ? 'border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(219,234,254,0.88))] text-blue-700 shadow-[0_10px_22px_rgba(59,130,246,0.14),inset_0_1px_0_rgba(255,255,255,0.92)] backdrop-blur-xl'
+              : ''
+          }
         >
           {status.label}
-        </span>
+        </Badge>
       </div>
 
       {/* Meta */}
@@ -136,72 +144,103 @@ export default function RequestCard({
         </p>
       )}
 
-      {isMatched && request.proposal && (
-        <>
-          <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2.5">
-            <p className="text-[9px] font-bold text-amber-800 uppercase tracking-wide mb-1">
+      {isMatched && matchedProposal && (
+        <div className="space-y-3 border-t border-white/70 pt-3">
+          <div className="relative overflow-hidden rounded-[1.3rem] border border-amber-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.82),rgba(255,248,230,0.8)_58%,rgba(255,255,255,0.72))] px-4 py-3.5 shadow-[0_20px_35px_rgba(245,158,11,0.08),0_8px_18px_rgba(236,72,153,0.06),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl">
+            <div className="pointer-events-none absolute inset-x-6 top-0 h-10 rounded-full bg-white/45 blur-2xl" />
+            <p className="relative mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-amber-800">
               ✨ A proposal is ready for your review
             </p>
-            <p className="text-[11px] text-amber-800 leading-relaxed">
-              {request.proposal.rationale}
+            <p className="relative text-[11px] leading-relaxed text-amber-900">
+              {matchedProposal.rationale}
             </p>
           </div>
-          <div className="flex gap-2 pt-1">
-            <button
-              disabled={accepting}
-              onClick={handleAccept}
-              className="flex-1 rounded-lg bg-[#E91E8C] py-2 text-xs font-semibold text-white hover:bg-[#c7177a] disabled:opacity-50"
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={() =>
+                router.push(`/dashboard/proposals/${matchedProposal.id}`)
+              }
+              variant="secondary"
+              size="sm"
+              className="!rounded-full !border !border-[#f3b7cc] !bg-white !text-[#ef4444] !shadow-none hover:!border-[#ee9fbc] hover:!bg-[#fff5f7] hover:!text-[#ef4444]"
             >
-              {accepting ? 'Confirming…' : '✓ Accept & Confirm'}
-            </button>
-            <button
-              onClick={() => onReject(request.proposal!.id)}
-              className="flex-1 rounded-lg bg-gray-50 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-100 border border-gray-200"
+              View Proposal
+            </Button>
+            <Button
+              onClick={() => router.push(`/dashboard/requests/${request.id}`)}
+              variant="secondary"
+              size="sm"
+              className="!rounded-full !border !border-[#f3b7cc] !bg-white !text-[#ef4444] !shadow-none hover:!border-[#ee9fbc] hover:!bg-[#fff5f7] hover:!text-[#ef4444]"
             >
-              ✕ Reject with Feedback
-            </button>
+              View Details
+            </Button>
           </div>
-        </>
+        </div>
       )}
 
       {isClosed && (
         <>
-          <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
+          <div className="bg-gray-50 border border-gray-200 rounded-[1.25rem] px-3 py-2.5">
             <p className="text-[9px] font-bold text-gray-600 uppercase tracking-wide mb-1">
               Closed
             </p>
             <p className="text-[11px] text-gray-600 leading-relaxed">
-              This request has been closed.
+              {hasAcceptedProposal
+                ? 'This request has been closed. You can still review the accepted proposal.'
+                : 'This request has been closed.'}
             </p>
           </div>
-          <button
-            onClick={onResubmit}
-            className="self-start rounded-lg border border-[#E91E8C] px-4 py-2 text-xs font-semibold text-[#E91E8C] hover:bg-pink-50"
-          >
-            ↺ Submit New Request
-          </button>
         </>
       )}
 
-      <div className="flex items-center gap-2">
-        <Link
-          href={`/dashboard/requests/${request.id}`}
-          className="rounded-lg border border-[#E91E8C] px-4 py-2 text-xs font-semibold text-[#E91E8C] hover:bg-pink-50 transition-colors"
-        >
-          View Details →
-        </Link>
+      <div className="flex flex-wrap items-center gap-2">
+        {acceptedProposal && (
+          <Button
+            onClick={() =>
+              router.push(`/dashboard/proposals/${acceptedProposal.id}`)
+            }
+            variant="secondary"
+            size="sm"
+            className="!rounded-full !border !border-[#f3b7cc] !bg-white !text-[#ef4444] !shadow-none hover:!border-[#ee9fbc] hover:!bg-[#fff5f7] hover:!text-[#ef4444]"
+          >
+            View Proposal
+          </Button>
+        )}
+        {isClosed && !hasAcceptedProposal && (
+          <Button
+            onClick={onResubmit}
+            variant="secondary"
+            size="sm"
+            className="!rounded-full !border !border-[#f3b7cc] !bg-white !text-[#ef4444] !shadow-none hover:!border-[#ee9fbc] hover:!bg-[#fff5f7] hover:!text-[#ef4444]"
+          >
+            Submit New Request
+          </Button>
+        )}
+        {!isMatched && (
+          <Button
+            onClick={() => router.push(`/dashboard/requests/${request.id}`)}
+            variant="secondary"
+            size="sm"
+            className="!rounded-full !border !border-[#f3b7cc] !bg-white !text-[#ef4444] !shadow-none hover:!border-[#ee9fbc] hover:!bg-[#fff5f7] hover:!text-[#ef4444]"
+          >
+            View Details
+          </Button>
+        )}
         {request.status === 'OPENED' && (
-          <button
+          <Button
             disabled={cancelling}
             onClick={() =>
               startCancel(async () => {
                 await cancelRequestAction(request.id);
               })
             }
-            className="rounded-lg border border-red-200 px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 disabled:opacity-50"
+            variant="secondary"
+            size="sm"
+            className="border-red-200 text-red-500 hover:bg-red-50 disabled:opacity-50"
           >
             {cancelling ? 'Cancelling…' : 'Cancel Request'}
-          </button>
+          </Button>
         )}
       </div>
 

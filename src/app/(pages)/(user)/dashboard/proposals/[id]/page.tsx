@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { upsertClerkUser } from '@/services/user-service';
-import { getUserProposalById } from '@/services/user-proposal-service';
+import { getUserProposalById } from '@/services/proposal-service';
 import UserProposalDetailContent from '@/components/proposals/user-proposal-detail-content';
 
 type Props = {

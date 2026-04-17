@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { upsertClerkUser } from '@/services/user-service';
-import { getUserRequests } from '@/services/user-request-service';
+import { getUserRequestById } from '@/services/request-service';
 import { getRequestAttendees } from '@/services/request-attendee-service';
 import RequestDetailContent from '@/components/requests/request-detail-content';
 
@@ -24,8 +24,7 @@ export default async function RequestDetailPage({ params }: Props) {
   const requestId = Number(requestIdRaw);
   if (Number.isNaN(requestId)) notFound();
 
-  const requests = await getUserRequests(userId);
-  const request = requests.find(r => r.id === requestId);
+  const request = await getUserRequestById(userId, requestId);
   if (!request) notFound();
 
   const attendeeSummary = await getRequestAttendees(requestId);

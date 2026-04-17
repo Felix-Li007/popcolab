@@ -33,14 +33,22 @@ export type AdminRequestProposalItem = {
   updatedAt: string;
 };
 
+export type AdminRequestScheduleItem = {
+  date: string;
+  startTime: string | null;
+  endTime: string | null;
+};
+
 export type AdminRequestPreferenceItem = {
   id: number;
   questionId: number;
   questionText: string | null;
   dimensionId: number | null;
   dimensionName: string | null;
+  categoryName: string | null;
   optionId: number | null;
   optionLabel: string | null;
+  optionValue: string | null;
   desiredValue: string;
   weightRate: string;
   createdAt: string;
@@ -59,6 +67,8 @@ export type AdminRequestListItem = {
   capacityMax: number;
   constraintMode: string;
   preferredDate: string | null;
+  preferredDateTimes: AdminRequestScheduleItem[];
+  deadlineDate: string | null;
   expiredAt: string | null;
   notesForAdmin: string | null;
   createdAt: string;

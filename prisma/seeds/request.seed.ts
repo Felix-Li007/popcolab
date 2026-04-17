@@ -230,6 +230,12 @@ function addDays(date: Date, days: number) {
   return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
+function atTime(date: Date, hours: number, minutes = 0) {
+  const value = new Date(date);
+  value.setHours(hours, minutes, 0, 0);
+  return value;
+}
+
 async function resolveRequestSeedUserId(
   prisma: PrismaClient
 ): Promise<number | null> {
@@ -371,7 +377,6 @@ async function upsertRequest(
     participant_count: row.participant_count,
     capacity_max: row.capacity_max,
     constraint_mode: row.constraint_mode,
-    preferred_date: addDays(new Date(), row.preferred_in_days),
     notes_for_admin: row.notes_for_admin,
     expired_at: addHours(new Date(), row.expires_in_hours),
   };
@@ -404,37 +409,6 @@ async function upsertRequest(
     data: requestData,
     select: { id: true },
   });
-}
-
-async function resolveExperienceIdByTitle(
-  prisma: PrismaClient,
-  titles: string[]
-): Promise<Map<string, number>> {
-  const rows = await prisma.experience.findMany({
-    where: {
-      experience_title: {
-        in: titles,
-      },
-    },
-    select: {
-      id: true,
-      experience_title: true,
-    },
-  });
-
-  const idByTitle = new Map<string, number>();
-  for (const row of rows) {
-    idByTitle.set(row.experience_title, row.id);
-  }
-
-  const missing = titles.filter(title => !idByTitle.has(title));
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing experiences for request proposal seed: ${missing.join(', ')}`
-    );
-  }
-
-  return idByTitle;
 }
 
 function buildProposalExperienceTitles(params: {
@@ -501,6 +475,7 @@ export async function seedRequests(prisma: PrismaClient): Promise<void> {
 
   for (const row of requestSeedRows) {
     const request = await upsertRequest(prisma, userId, row);
+    const preferredDate = addDays(new Date(), row.preferred_in_days);
 
     await prisma.requestPreference.deleteMany({
       where: { request_id: request.id },
@@ -518,6 +493,18 @@ export async function seedRequests(prisma: PrismaClient): Promise<void> {
         })),
       });
     }
+
+    await prisma.request_Calendar.deleteMany({
+      where: { request_id: request.id },
+    });
+    await prisma.request_Calendar.create({
+      data: {
+        request_id: request.id,
+        preferred_date: preferredDate,
+        start_time: atTime(preferredDate, 9),
+        end_time: atTime(preferredDate, 10, 30),
+      },
+    });
 
     await prisma.requestUser.deleteMany({ where: { request_id: request.id } });
     if (row.request_users.length > 0) {

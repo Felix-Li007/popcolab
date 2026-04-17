@@ -37,7 +37,7 @@
 }
 
 .contentArea {
-  @apply overflow-auto max-h-[90vh];
+  @apply overflow-x-hidden overflow-y-auto max-h-[60vh];
 }
 
 .emptyState,
@@ -50,8 +50,12 @@
 }
 
 .notificationItem {
-  @apply p-3 transition-colors border-b border-current;
-  border-opacity: 0.08;
+  @apply px-3 py-2 transition-colors border-b border-current;
+  border-color: transparent;
+}
+
+.notificationItem:last-child {
+  border-bottom: none;
 }
 
 .msgTitle {
@@ -59,7 +63,7 @@
 }
 
 .msgBody {
-  @apply text-xs mt-1;
+  @apply text-xs mt-0.5;
 }
 
 .msgTime {
@@ -116,6 +120,14 @@
   );
 }
 
+.variantAdmin .notificationItem {
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--palette-shell-foreground) 10%,
+    transparent
+  );
+}
+
 .variantAdmin .msgTitle {
   color: var(--palette-shell-foreground);
 }
@@ -126,6 +138,18 @@
 
 .variantAdmin .msgTime {
   color: color-mix(in srgb, var(--palette-shell-foreground) 50%, transparent);
+}
+
+.variantAdmin .contentArea {
+  scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
+}
+
+.variantAdmin .contentArea::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.variantAdmin .contentArea::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.34);
 }
 
 .variantAdmin .unreadPulse {
@@ -187,6 +211,14 @@
   );
 }
 
+.variantUser .notificationItem {
+  border-bottom-color: color-mix(
+    in srgb,
+    var(--palette-foreground) 8%,
+    transparent
+  );
+}
+
 .variantUser .msgTitle {
   color: var(--palette-foreground);
 }
@@ -197,6 +229,18 @@
 
 .variantUser .msgTime {
   color: color-mix(in srgb, var(--palette-foreground) 40%, transparent);
+}
+
+.variantUser .contentArea {
+  scrollbar-color: rgba(15, 23, 42, 0.28) transparent;
+}
+
+.variantUser .contentArea::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.18);
+}
+
+.variantUser .contentArea::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.28);
 }
 
 .variantUser .unreadPulse {

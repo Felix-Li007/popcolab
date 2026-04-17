@@ -42,8 +42,8 @@ export default function Header({
     role: 'role_user',
     dataRole: 'role_user',
     displayLabel: 'User',
-    logoSrc: '/logo/logo-icon.png',
-    logoAlt: 'Pop CoLab logo',
+    logoSrc: '/logo/user/logo-full-h.png',
+    logoAlt: 'Pop CoLab user logo',
     footerLogoSrc: '/logo/user/logo-full-v.png',
     footerLogoAlt: 'Pop CoLab user footer logo',
   };
@@ -52,7 +52,12 @@ export default function Header({
     <header className={styles.headerContainer}>
       <div className={styles.headerWrapper}>
         <Link href="/" className={styles.logo}>
-          <RoleLogo branding={logoBranding} size={48} />
+          <RoleLogo
+            branding={logoBranding}
+            width={156}
+            height={52}
+            className="block h-[52px] w-auto object-contain"
+          />
         </Link>
 
         <nav className={styles.navDesktop}>

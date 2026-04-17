@@ -142,26 +142,6 @@ export default function TopnavMenu({
               </nav>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <div className="relative hidden sm:block">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="bg-white/10 text-white placeholder-white/50 text-xs px-3 py-1.5 rounded-full w-32 md:w-36 focus:outline-none focus:ring-1 focus:ring-white/30"
-                />
-                <svg
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
-              </div>
               <NotificationsBell />
               <div className="hidden sm:block w-px h-6 bg-white/20 mx-1" />
               <UserAvatar

@@ -3,6 +3,7 @@ model Proposal {
   request_id           Int
   proposal_status      ProposalStatus       @default(PENDING)
   objective_alignment  String               @db.VarChar(255)
+  reject_notes         String?              @db.Text
   created_at           DateTime             @default(now()) @db.Timestamp(6)
   updated_at           DateTime             @updatedAt @db.Timestamp(6)
   orders               Order[]

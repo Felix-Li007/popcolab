@@ -103,21 +103,6 @@ function formatBudget(min: number | null, max: number | null): string {
   return (min ?? max ?? 0).toLocaleString();
 }
 
-function getStatusBadge(status: AdminRequestListItem['status']) {
-  switch (status) {
-    case REQUEST_STATUS.OPENED:
-      return { label: 'OPENED', variant: 'secondary' as const };
-    case REQUEST_STATUS.PENDING:
-      return { label: 'PENDING', variant: 'warning' as const };
-    case REQUEST_STATUS.MATCHED:
-      return { label: 'MATCHED', variant: 'success' as const };
-    case REQUEST_STATUS.CLOSED:
-      return { label: 'CLOSED', variant: 'danger' as const };
-    default:
-      return { label: status, variant: 'default' as const };
-  }
-}
-
 function mapRequestUserToAdminUserItem(
   user: AdminRequestUserSummary
 ): AdminUserListItem {
@@ -335,7 +320,6 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                       <th>Budget</th>
                       <th>Delivery Method</th>
                       <th>Capacity Max</th>
-                      <th>Preferred Date</th>
                       <th>Duration Max</th>
                       <th>Invited Users</th>
                       <th>User</th>
@@ -347,11 +331,13 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                   </thead>
                   <tbody>
                     {pageData.items.map(request => {
-                      const status = getStatusBadge(request.status);
                       const allInvitedUsersResponded =
                         request.inviteSummary.total > 0 &&
                         request.inviteSummary.pending === 0;
-                      const canGenerate = allInvitedUsersResponded;
+                      const canGenerate =
+                        allInvitedUsersResponded &&
+                        request.status !== REQUEST_STATUS.PENDING &&
+                        request.status !== REQUEST_STATUS.CLOSED;
 
                       return (
                         <tr key={request.id} data-testid="admin-request-row">
@@ -365,7 +351,6 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                           </td>
                           <td>{request.deliveryMethod || '-'}</td>
                           <td>{request.capacityMax}</td>
-                          <td>{formatDateTime(request.preferredDate)}</td>
                           <td>{request.durationMax ?? '-'}</td>
                           <td>
                             <button
@@ -467,12 +452,16 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                           </td>
                           <td>{formatDateTime(request.createdAt)}</td>
                           <td>
-                            <Link
-                              href={`/admin/proposals?request_id=${request.id}`}
-                              className={styles.countLinkButton}
-                            >
-                              {request.proposalSummary.total}
-                            </Link>
+                            {request.proposalSummary.total > 0 ? (
+                              <Link
+                                href={`/admin/proposals?request_id=${request.id}`}
+                                className={styles.countLinkButton}
+                              >
+                                {request.proposalSummary.total}
+                              </Link>
+                            ) : (
+                              <span className={styles.requestCellSub}>0</span>
+                            )}
                           </td>
                           <td>
                             <div className="flex items-center gap-1.5">
@@ -497,7 +486,11 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                                 title={
                                   canGenerate
                                     ? 'Generate proposal'
-                                    : 'Generate is available after all invited users have responded, or when status is RETRYING.'
+                                    : request.status === REQUEST_STATUS.PENDING
+                                      ? 'Pending requests are already being processed.'
+                                      : request.status === REQUEST_STATUS.CLOSED
+                                        ? 'Closed requests cannot generate proposals.'
+                                        : 'Generate is available after all invited users have responded.'
                                 }
                               >
                                 {isGenerating ? 'Generating...' : 'Generate'}

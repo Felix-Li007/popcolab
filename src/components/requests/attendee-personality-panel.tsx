@@ -1,11 +1,12 @@
 'use client';
 
 import type { RequestAttendeesSummary } from '@/services/request-attendee-service';
+import { Badge } from '@/ui';
 
 const INVITE_STATUS_MAP = {
-  accepted: { label: 'Accepted', className: 'bg-emerald-100 text-emerald-700' },
-  pending: { label: 'Pending', className: 'bg-amber-100 text-amber-700' },
-  rejected: { label: 'Declined', className: 'bg-red-100 text-red-600' },
+  accepted: { label: 'Accepted', variant: 'success' as const },
+  pending: { label: 'Pending', variant: 'warning' as const },
+  rejected: { label: 'Declined', variant: 'danger' as const },
 };
 
 type Props = {
@@ -20,7 +21,7 @@ export default function AttendeePersonalityPanel({ summary }: Props) {
   const withPersonality = attendees.filter(a => a.personality !== null).length;
 
   return (
-    <div className="mt-3 border-t border-gray-100 pt-3 flex flex-col gap-3">
+    <div className="mt-3 flex flex-col gap-3 border-t border-white/70 pt-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-[9px] font-bold uppercase tracking-wide text-gray-400">
@@ -36,11 +37,11 @@ export default function AttendeePersonalityPanel({ summary }: Props) {
       {/* Dominant personality banner */}
       {dominantPersonality && (
         <div
-          className="rounded-lg px-3 py-2 flex items-center gap-2"
+          className="rounded-[1.35rem] px-3.5 py-2.5 flex items-center gap-2.5 shadow-[0_14px_26px_rgba(236,72,153,0.06),inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-xl"
           style={{
-            backgroundColor: dominantPersonality.accentColor
-              ? `${dominantPersonality.accentColor}18`
-              : 'rgb(243 244 246)',
+            background: dominantPersonality.accentColor
+              ? `linear-gradient(135deg, ${dominantPersonality.accentColor}14, rgba(255,255,255,0.7))`
+              : 'linear-gradient(135deg, rgba(243,244,246,0.9), rgba(255,255,255,0.72))',
             borderWidth: 1,
             borderStyle: 'solid',
             borderColor: dominantPersonality.accentColor
@@ -48,11 +49,20 @@ export default function AttendeePersonalityPanel({ summary }: Props) {
               : 'rgb(229 231 235)',
           }}
         >
-          <span className="text-xl leading-none">
-            {dominantPersonality.emoji}
-          </span>
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]"
+            style={{
+              background: dominantPersonality.accentColor
+                ? `linear-gradient(180deg, rgba(255,255,255,0.76), ${dominantPersonality.accentColor}24)`
+                : 'linear-gradient(180deg, rgba(255,255,255,0.82), rgba(243,244,246,0.92))',
+            }}
+          >
+            <span className="text-lg leading-none">
+              {dominantPersonality.emoji}
+            </span>
+          </div>
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-wide text-gray-500">
+            <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-gray-500">
               Group dominant personality
             </p>
             <p className="text-xs font-bold text-gray-800">
@@ -75,16 +85,16 @@ export default function AttendeePersonalityPanel({ summary }: Props) {
           return (
             <div
               key={attendee.email}
-              className="flex items-center justify-between gap-3"
+              className="flex items-center justify-between gap-3 rounded-[1rem] border border-white/60 bg-white/34 px-2.5 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] backdrop-blur-lg"
             >
               <div className="flex items-center gap-2 min-w-0">
                 {/* Avatar placeholder with emoji or initial */}
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-sm"
+                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
                   style={{
-                    backgroundColor: attendee.personality?.accentColor
-                      ? `${attendee.personality.accentColor}25`
-                      : 'rgb(243 244 246)',
+                    background: attendee.personality?.accentColor
+                      ? `linear-gradient(180deg, rgba(255,255,255,0.74), ${attendee.personality.accentColor}24)`
+                      : 'linear-gradient(180deg, rgba(255,255,255,0.84), rgb(243 244 246))',
                   }}
                 >
                   {attendee.personality?.emoji ? (
@@ -112,11 +122,9 @@ export default function AttendeePersonalityPanel({ summary }: Props) {
                 </div>
               </div>
 
-              <span
-                className={`shrink-0 text-[9px] font-bold px-2 py-0.5 rounded-full ${statusMeta.className}`}
-              >
+              <Badge size="xs" variant={statusMeta.variant}>
                 {statusMeta.label}
-              </span>
+              </Badge>
             </div>
           );
         })}

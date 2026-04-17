@@ -48,6 +48,7 @@ export type AdminProposalListItem = {
   experiences: AdminProposalExperienceItem[];
   status: 'pending' | 'approved' | 'accepted' | 'rejected';
   objectiveAlignment: string;
+  rejectNotes: string | null;
   rationale: string;
   baseScore: number;
   riskAdjustment: number;

@@ -49,8 +49,7 @@ export async function markAllAsRead(): Promise<void> {
   const userId = await getCurrentDbUserId();
   if (!userId) return;
 
-  await prisma.notification.updateMany({
-    where: { user_id: userId, read_at: null },
-    data: { read_at: new Date(), message_status: 'READ' },
+  await prisma.notification.deleteMany({
+    where: { user_id: userId },
   });
 }

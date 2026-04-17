@@ -174,6 +174,13 @@ export default function ProposalRow({ row }: Readonly<Props>) {
           </div>
         </div>
 
+        {row.proposal.rejectNotes ? (
+          <div className={styles.rejectNotesCallout}>
+            <p className={styles.rejectNotesLabel}>Reject Notes</p>
+            <p className={styles.rejectNotesText}>{row.proposal.rejectNotes}</p>
+          </div>
+        ) : null}
+
         <div className={styles.actionRow}>
           {canOperate ? (
             <>

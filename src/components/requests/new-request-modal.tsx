@@ -5,6 +5,8 @@ import {
   createRequestAction,
   type CreateRequestState,
 } from '@/actions/request-actions';
+import ModalShell from '@/components/shared/modal-shell';
+import { Button, Input, Select, TextArea } from '@/ui';
 import type { Question } from '@/types/question-type';
 import type { UserTeamItem } from '@/services/user-team-service';
 
@@ -50,6 +52,14 @@ function generateTimeOptions() {
 }
 
 const TIME_OPTIONS = generateTimeOptions();
+const MAX_PREFERRED_DATE_SLOTS = 3;
+
+type PreferredDateSlot = {
+  id: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+};
 
 type InviteEntry = { id: string; label: string; value: string };
 
@@ -62,7 +72,33 @@ type Props = Readonly<{
 
 const initial: CreateRequestState = {};
 
-const STEP_LABELS = ['General', 'Team Details', 'Invitations'];
+const TIME_SELECT_OPTIONS = [
+  { value: '', label: 'Select a time' },
+  ...TIME_OPTIONS,
+];
+const SOFT_TEXTAREA_CLASS =
+  '!rounded-2xl !border !border-slate-300/80 !bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(241,245,249,0.58))] px-4 py-3 text-sm !font-normal text-gray-700 placeholder:text-slate-400/90 !shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_14px_rgba(15,23,42,0.06)] !ring-0 focus:!border-teal-500/50 focus:!bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(236,253,245,0.62))] focus:!ring-[3px] focus:!ring-teal-500/15';
+const BUDGET_INPUT_WRAPPER_CLASS =
+  'rounded-full border border-slate-400/95 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(241,245,249,0.58))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_14px_rgba(15,23,42,0.06)] transition focus-within:border-teal-500/50 focus-within:bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(236,253,245,0.62))] focus-within:ring-[3px] focus-within:ring-teal-500/15';
+const BUDGET_INPUT_CLASS =
+  'h-9 w-full appearance-none !rounded-full !border-0 !bg-transparent px-3.5 text-xs !font-normal text-gray-700 placeholder:text-slate-400/90 !shadow-none !ring-0 focus:!bg-transparent focus:!ring-0';
+const WRAPPED_PILL_INPUT_WRAPPER_CLASS =
+  'rounded-full border border-slate-300/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(241,245,249,0.58))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_14px_rgba(15,23,42,0.06)] transition focus-within:border-teal-500/50 focus-within:bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(236,253,245,0.62))] focus-within:ring-[3px] focus-within:ring-teal-500/15';
+const WRAPPED_PILL_INPUT_CLASS =
+  'h-9 w-full appearance-none !rounded-full !border-0 !bg-transparent px-3.5 text-xs !font-normal text-gray-700 placeholder:text-slate-400/90 !shadow-none !ring-0 focus:!bg-transparent focus:!ring-0';
+const DATE_PILL_WRAPPER_CLASS =
+  'h-9 min-w-[7rem] rounded-full border border-slate-300/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(241,245,249,0.58))] shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_6px_14px_rgba(15,23,42,0.06)] transition focus-within:border-teal-500/40 focus-within:bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(236,253,245,0.62))] focus-within:ring-[3px] focus-within:ring-teal-500/15';
+const DATE_PILL_INPUT_CLASS =
+  'h-9 w-full appearance-none !rounded-full !border-0 !bg-transparent px-3.5 pr-8 text-xs !font-normal text-gray-700 !shadow-none !ring-0 focus:!bg-transparent focus:!ring-0';
+
+function createPreferredDateSlot(): PreferredDateSlot {
+  return {
+    id: `slot-${Math.random().toString(36).slice(2, 10)}`,
+    date: '',
+    startTime: '',
+    endTime: '',
+  };
+}
 
 export default function NewRequestModal({
   open,
@@ -74,17 +110,18 @@ export default function NewRequestModal({
     createRequestAction,
     initial
   );
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState(1);
   const wasPendingRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Step 1 state
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
   const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
-  const [step1Budget, setStep1Budget] = useState('');
-  const [step1StartDate, setStep1StartDate] = useState('');
-  const [step1StartTime, setStep1StartTime] = useState('');
-  const [step1EndTime, setStep1EndTime] = useState('');
+  const [step1BudgetMin, setStep1BudgetMin] = useState('');
+  const [step1BudgetMax, setStep1BudgetMax] = useState('');
+  const [step1PreferredDateSlots, setStep1PreferredDateSlots] = useState<
+    PreferredDateSlot[]
+  >([createPreferredDateSlot()]);
   const [step1Duration, setStep1Duration] = useState('');
   const [step1GroupSize, setStep1GroupSize] = useState('');
   const [step1Location, setStep1Location] = useState('');
@@ -270,9 +307,67 @@ export default function NewRequestModal({
     scrollRef.current?.scrollTo({ top: 0 });
   }
 
+  const leaderQuestionGroups = leaderQuestions.reduce<
+    Array<{ title: string; questions: Question[] }>
+  >((groups, question) => {
+    const title =
+      question.dimensions[0]?.categoryName?.trim() || 'Other Questions';
+    const existingGroup = groups.find(group => group.title === title);
+
+    if (existingGroup) {
+      existingGroup.questions.push(question);
+    } else {
+      groups.push({ title, questions: [question] });
+    }
+
+    return groups;
+  }, []);
+
+  const invitationsStep = leaderQuestionGroups.length + 2;
+  const totalSteps = invitationsStep;
+  const isGeneralStep = step === 1;
+  const isInvitationsStep = step === invitationsStep;
+  const isTeamDetailStep = step > 1 && step < invitationsStep;
+  const currentLeaderQuestionGroup = isTeamDetailStep
+    ? (leaderQuestionGroups[step - 2] ?? null)
+    : null;
+  const currentStepLabel = isGeneralStep
+    ? 'General'
+    : isInvitationsStep
+      ? 'Invitations'
+      : (currentLeaderQuestionGroup?.title ?? 'Team Details');
+
+  function updatePreferredDateSlot(
+    slotId: string,
+    field: 'date' | 'startTime' | 'endTime',
+    value: string
+  ) {
+    setStep1PreferredDateSlots(prev =>
+      prev.map(slot =>
+        slot.id === slotId ? { ...slot, [field]: value } : slot
+      )
+    );
+  }
+
+  function addPreferredDateSlot() {
+    setStep1PreferredDateSlots(prev =>
+      prev.length >= MAX_PREFERRED_DATE_SLOTS
+        ? prev
+        : [...prev, createPreferredDateSlot()]
+    );
+  }
+
+  function removePreferredDateSlot(slotId: string) {
+    setStep1PreferredDateSlots(prev =>
+      prev.length === 1
+        ? [createPreferredDateSlot()]
+        : prev.filter(slot => slot.id !== slotId)
+    );
+  }
+
   function handleNext() {
-    if (step === 2 && leaderQuestions.length > 0) {
-      const unanswered = leaderQuestions.filter(q => {
+    if (isTeamDetailStep && currentLeaderQuestionGroup) {
+      const unanswered = currentLeaderQuestionGroup.questions.filter(q => {
         const answer = memberAnswers[q.id!];
         if (q.type === 'multi_choice') {
           return !Array.isArray(answer) || answer.length === 0;
@@ -281,18 +376,19 @@ export default function NewRequestModal({
       });
       if (unanswered.length > 0) {
         setStep2Error(
-          `Please answer all ${unanswered.length === 1 ? 'the question' : `all ${unanswered.length} questions`} before continuing.`
+          `Please answer all ${unanswered.length === 1 ? 'the question' : `all ${unanswered.length} questions`} in ${currentLeaderQuestionGroup.title} before continuing.`
         );
         return;
       }
       setStep2Error('');
     }
-    setStep(prev => (prev === 1 ? 2 : 3) as 1 | 2 | 3);
+    setStep(prev => Math.min(prev + 1, totalSteps));
     scrollToTop();
   }
 
   function handleBack() {
-    setStep(prev => (prev === 3 ? 2 : 1) as 1 | 2 | 3);
+    setStep2Error('');
+    setStep(prev => Math.max(prev - 1, 1));
     scrollToTop();
   }
 
@@ -323,62 +419,63 @@ export default function NewRequestModal({
   if (!open) return null;
 
   // Serialise member answers for hidden input
-  const memberAnswersJson = JSON.stringify(
-    Object.fromEntries(
-      Object.entries(memberAnswers).map(([k, v]) => [
-        k,
-        Array.isArray(v) ? v.join('|') : v,
-      ])
-    )
+  const memberAnswersJson = JSON.stringify(memberAnswers);
+  const preferredDateSlotsJson = JSON.stringify(
+    step1PreferredDateSlots.map(({ date, startTime, endTime }) => ({
+      date,
+      startTime,
+      endTime,
+    }))
   );
 
   // Combine all invite values for hidden input
   const allInvites = [...individualInvites, ...teamInvites];
   const inviteValues = allInvites.map(i => i.value).join(',');
+  const progressPercent = `${(step / totalSteps) * 100}%`;
 
   return (
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-      onClick={e => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-      onKeyDown={e => {
-        if (e.key === 'Escape') onClose();
-      }}
+    <ModalShell
+      isOpen={open}
+      onClose={onClose}
+      title="New Request"
+      showHeader={false}
+      showCloseButton={false}
+      panelClassName="max-w-[880px] border-white/70 shadow-[0_24px_90px_rgba(15,23,42,0.22)]"
+      bodyClassName="!p-0"
     >
-      <div className="w-full max-w-[600px] max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl">
+      <div className="flex flex-col bg-[linear-gradient(180deg,#fff_0%,#fff8fc_100%)]">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between bg-[#111827] px-6 py-4 rounded-t-2xl">
-          <div>
-            <h2 className="text-base font-bold text-white">+ New Request</h2>
-            <p className="text-[11px] text-gray-400 mt-0.5">
-              Step {step} of 3 — {STEP_LABELS[step - 1]}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-white text-xl leading-none"
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Step indicator */}
-        <div className="flex border-b border-gray-100">
-          {STEP_LABELS.map((label, i) => (
-            <div
-              key={label}
-              className={`flex-1 py-2.5 text-center text-xs font-semibold border-b-2 -mb-px ${
-                step === i + 1
-                  ? 'border-[#E91E8C] text-[#E91E8C]'
-                  : 'border-transparent text-gray-400'
-              }`}
-            >
-              {i + 1}. {label}
+        <div className="sticky top-0 z-10 overflow-hidden rounded-t-2xl bg-[radial-gradient(circle_at_top_left,rgba(244,114,182,0.22),transparent_34%),linear-gradient(135deg,#111827_0%,#1f2937_55%,#3b0a45_100%)] px-6 pb-5 pt-5">
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.04),transparent)]" />
+          <div className="relative flex items-start justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-pink-100/90">
+                Request Planner
+              </div>
+              <p className="mt-3 text-xs text-slate-300">
+                Step {step} of {totalSteps}
+                <span className="mx-2 text-slate-500">•</span>
+                {currentStepLabel}
+              </p>
             </div>
-          ))}
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-lg leading-none text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+
+          <div className="relative mt-5">
+            <div className="h-1.5 rounded-full bg-white/10">
+              <div
+                className="h-1.5 rounded-full bg-[linear-gradient(90deg,#f9a8d4_0%,#ec4899_55%,#f97316_100%)] shadow-[0_0_18px_rgba(244,114,182,0.45)] transition-all duration-300"
+                style={{ width: progressPercent }}
+              />
+            </div>
+          </div>
         </div>
 
         <form action={formAction} className="flex flex-col flex-1 min-h-0">
@@ -395,10 +492,13 @@ export default function NewRequestModal({
           />
           <input type="hidden" name="memberAnswers" value={memberAnswersJson} />
           <input type="hidden" name="invites" value={inviteValues} />
-          <input type="hidden" name="budget" value={step1Budget} />
-          <input type="hidden" name="startDate" value={step1StartDate} />
-          <input type="hidden" name="startTime" value={step1StartTime} />
-          <input type="hidden" name="endTime" value={step1EndTime} />
+          <input type="hidden" name="budgetMin" value={step1BudgetMin} />
+          <input type="hidden" name="budgetMax" value={step1BudgetMax} />
+          <input
+            type="hidden"
+            name="preferredDateSlots"
+            value={preferredDateSlotsJson}
+          />
           <input type="hidden" name="duration" value={step1Duration} />
           <input type="hidden" name="groupSize" value={step1GroupSize} />
           <input type="hidden" name="location" value={step1Location} />
@@ -406,13 +506,16 @@ export default function NewRequestModal({
           <input type="hidden" name="proposalTime" value={step1ProposalTime} />
           <input type="hidden" name="anythingElse" value={step1AnythingElse} />
 
-          <div ref={scrollRef} className="flex-1 overflow-y-scroll">
+          <div
+            ref={scrollRef}
+            className="bg-[linear-gradient(180deg,rgba(255,255,255,0.72)_0%,rgba(255,247,251,0.82)_100%)]"
+          >
             {/* ── STEP 1 — General ── */}
             {step === 1 && (
-              <div className="p-6 flex flex-col gap-6">
+              <div className="p-5 flex flex-col gap-4">
                 {/* Q1 — Event type */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-3">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">
                     What type of event are you looking to create experiences
                     for? <span className="text-red-500">*</span>
                   </p>
@@ -479,16 +582,17 @@ export default function NewRequestModal({
                 <div>
                   <label
                     htmlFor="anythingElse"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
+                    className="block text-sm font-semibold text-gray-700 mb-1.5"
                   >
                     Anything else we should know?
                   </label>
-                  <textarea
+                  <TextArea
                     id="anythingElse"
                     rows={3}
+                    inputSize="sm"
                     value={step1AnythingElse}
                     onChange={e => setStep1AnythingElse(e.target.value)}
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white resize-none"
+                    className={SOFT_TEXTAREA_CLASS}
                   />
                 </div>
 
@@ -496,24 +600,59 @@ export default function NewRequestModal({
 
                 {/* Q4 — Budget */}
                 <div>
-                  <label
-                    htmlFor="budget"
-                    className="block text-sm font-semibold text-gray-700 mb-1"
-                  >
+                  <label className="block text-sm font-semibold text-gray-700 mb-0.5">
                     Estimated budget range?{' '}
                     <span className="font-normal text-gray-500">
                       Total or per person.
                     </span>{' '}
                     <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    id="budget"
-                    type="text"
-                    placeholder="e.g. $500–$1,000 total or $50 per person"
-                    value={step1Budget}
-                    onChange={e => setStep1Budget(e.target.value)}
-                    className="w-full mt-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                  />
+                  <div className="mt-1.5 grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label
+                        htmlFor="budgetMin"
+                        className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                      >
+                        Minimum budget
+                      </label>
+                      <div className={BUDGET_INPUT_WRAPPER_CLASS}>
+                        <Input
+                          id="budgetMin"
+                          type="number"
+                          min="0"
+                          step="1"
+                          inputMode="numeric"
+                          inputSize="sm"
+                          placeholder="e.g. 500"
+                          value={step1BudgetMin}
+                          onChange={e => setStep1BudgetMin(e.target.value)}
+                          className={BUDGET_INPUT_CLASS}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="budgetMax"
+                        className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                      >
+                        Maximum budget
+                      </label>
+                      <div className={BUDGET_INPUT_WRAPPER_CLASS}>
+                        <Input
+                          id="budgetMax"
+                          type="number"
+                          min="0"
+                          step="1"
+                          inputMode="numeric"
+                          inputSize="sm"
+                          placeholder="e.g. 1000"
+                          value={step1BudgetMax}
+                          onChange={e => setStep1BudgetMax(e.target.value)}
+                          className={BUDGET_INPUT_CLASS}
+                        />
+                      </div>
+                    </div>
+                  </div>
                   {state.fieldErrors?.budget && (
                     <p className="mt-1 text-[11px] text-red-600">
                       {state.fieldErrors?.budget}
@@ -525,106 +664,128 @@ export default function NewRequestModal({
 
                 {/* Q5 — Event details */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-3">
-                    Event details <span className="text-red-500">*</span>
-                  </p>
-                  <div className="flex flex-col gap-3">
-                    <div>
-                      <label
-                        htmlFor="startDate"
-                        className="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1"
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-gray-700">
+                      PREFERRED DATE <span className="text-red-500">*</span>
+                    </p>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={addPreferredDateSlot}
+                        disabled={
+                          step1PreferredDateSlots.length >=
+                          MAX_PREFERRED_DATE_SLOTS
+                        }
+                        className="rounded-full border border-pink-200 bg-pink-50 px-3 py-1 text-xs font-semibold text-pink-700 transition hover:bg-pink-100 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Date
-                      </label>
-                      <div className="relative">
-                        <input
-                          id="startDate"
-                          type="date"
-                          value={step1StartDate}
-                          onChange={e => setStep1StartDate(e.target.value)}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-                        />
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <rect
-                            x="3"
-                            y="4"
-                            width="18"
-                            height="18"
-                            rx="2"
-                            ry="2"
-                          />
-                          <line x1="16" y1="2" x2="16" y2="6" />
-                          <line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                      </div>
-                      {state.fieldErrors?.startDate && (
-                        <p className="mt-1 text-[11px] text-red-600">
-                          {state.fieldErrors.startDate}
-                        </p>
-                      )}
+                        + Add
+                      </button>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label
-                          htmlFor="startTime"
-                          className="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1"
-                        >
-                          Start time
-                        </label>
-                        <select
-                          id="startTime"
-                          value={step1StartTime}
-                          onChange={e => setStep1StartTime(e.target.value)}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                        >
-                          <option value="" disabled>
-                            Select a time
-                          </option>
-                          {TIME_OPTIONS.map(opt => (
-                            <option
-                              key={`start-${opt.value}`}
-                              value={opt.value}
+                  <div className="flex flex-col gap-3">
+                    {step1PreferredDateSlots.map((slot, index) => (
+                      <div
+                        key={slot.id}
+                        className="relative rounded-2xl border border-gray-200 bg-white/80 p-3.5 pr-14 shadow-sm"
+                      >
+                        {step1PreferredDateSlots.length > 1 ? (
+                          <button
+                            type="button"
+                            onClick={() => removePreferredDateSlot(slot.id)}
+                            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-white text-sm font-bold leading-none text-gray-400 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                            aria-label={`Remove preferred slot ${index + 1}`}
+                          >
+                            ×
+                          </button>
+                        ) : null}
+
+                        <div className="grid gap-2.5 md:grid-cols-[1.2fr_1fr_1fr]">
+                          <div>
+                            <label
+                              htmlFor={`preferredDate-${slot.id}`}
+                              className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
                             >
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="endTime"
-                          className="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1"
-                        >
-                          End time
-                        </label>
-                        <select
-                          id="endTime"
-                          value={step1EndTime}
-                          onChange={e => setStep1EndTime(e.target.value)}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                        >
-                          <option value="" disabled>
-                            Select a time
-                          </option>
-                          {TIME_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                              Date
+                            </label>
+                            <div
+                              className={`relative ${DATE_PILL_WRAPPER_CLASS}`}
+                            >
+                              <Input
+                                id={`preferredDate-${slot.id}`}
+                                type="date"
+                                inputSize="sm"
+                                value={slot.date}
+                                onChange={e =>
+                                  updatePreferredDateSlot(
+                                    slot.id,
+                                    'date',
+                                    e.target.value
+                                  )
+                                }
+                                className={`${DATE_PILL_INPUT_CLASS} w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
+                              />
+                            </div>
+                          </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label
+                              htmlFor={`preferredStartTime-${slot.id}`}
+                              className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                            >
+                              Start time
+                            </label>
+                            <Select
+                              id={`preferredStartTime-${slot.id}`}
+                              ariaLabel={`Preferred start time ${index + 1}`}
+                              name={`preferredStartTime-${slot.id}`}
+                              value={slot.startTime}
+                              onChange={e =>
+                                updatePreferredDateSlot(
+                                  slot.id,
+                                  'startTime',
+                                  e.target.value
+                                )
+                              }
+                              options={TIME_SELECT_OPTIONS}
+                              className="h-auto w-full min-w-0 rounded-lg px-3 py-2 text-sm font-medium text-gray-800"
+                            />
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor={`preferredEndTime-${slot.id}`}
+                              className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-gray-500"
+                            >
+                              End time
+                            </label>
+                            <Select
+                              id={`preferredEndTime-${slot.id}`}
+                              ariaLabel={`Preferred end time ${index + 1}`}
+                              name={`preferredEndTime-${slot.id}`}
+                              value={slot.endTime}
+                              onChange={e =>
+                                updatePreferredDateSlot(
+                                  slot.id,
+                                  'endTime',
+                                  e.target.value
+                                )
+                              }
+                              options={TIME_SELECT_OPTIONS}
+                              className="h-auto w-full min-w-0 rounded-lg px-3 py-2 text-sm font-medium text-gray-800"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {state.fieldErrors?.startDate && (
+                      <p className="mt-1 text-[11px] text-red-600">
+                        {state.fieldErrors.startDate}
+                      </p>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-2.5">
                       <div>
                         <label
                           htmlFor="duration"
@@ -632,15 +793,18 @@ export default function NewRequestModal({
                         >
                           Duration (hours)
                         </label>
-                        <input
-                          id="duration"
-                          type="number"
-                          min={1}
-                          placeholder="e.g. 2"
-                          value={step1Duration}
-                          onChange={e => setStep1Duration(e.target.value)}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                        />
+                        <div className={WRAPPED_PILL_INPUT_WRAPPER_CLASS}>
+                          <Input
+                            id="duration"
+                            type="number"
+                            min={1}
+                            inputSize="sm"
+                            placeholder="e.g. 2"
+                            value={step1Duration}
+                            onChange={e => setStep1Duration(e.target.value)}
+                            className={WRAPPED_PILL_INPUT_CLASS}
+                          />
+                        </div>
                       </div>
                       <div>
                         <label
@@ -649,15 +813,18 @@ export default function NewRequestModal({
                         >
                           Group size <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          id="groupSize"
-                          type="number"
-                          min={1}
-                          placeholder="e.g. 20"
-                          value={step1GroupSize}
-                          onChange={e => setStep1GroupSize(e.target.value)}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                        />
+                        <div className={WRAPPED_PILL_INPUT_WRAPPER_CLASS}>
+                          <Input
+                            id="groupSize"
+                            type="number"
+                            min={1}
+                            inputSize="sm"
+                            placeholder="e.g. 20"
+                            value={step1GroupSize}
+                            onChange={e => setStep1GroupSize(e.target.value)}
+                            className={WRAPPED_PILL_INPUT_CLASS}
+                          />
+                        </div>
                         {state.fieldErrors?.groupSize && (
                           <p className="mt-1 text-[11px] text-red-600">
                             {state.fieldErrors.groupSize}
@@ -673,14 +840,17 @@ export default function NewRequestModal({
                       >
                         Location
                       </label>
-                      <input
-                        id="location"
-                        type="text"
-                        placeholder="e.g. Downtown Winnipeg"
-                        value={step1Location}
-                        onChange={e => setStep1Location(e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                      />
+                      <div className={WRAPPED_PILL_INPUT_WRAPPER_CLASS}>
+                        <Input
+                          id="location"
+                          type="text"
+                          inputSize="sm"
+                          placeholder="e.g. Downtown Winnipeg"
+                          value={step1Location}
+                          onChange={e => setStep1Location(e.target.value)}
+                          className={WRAPPED_PILL_INPUT_CLASS}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -689,11 +859,11 @@ export default function NewRequestModal({
 
                 {/* Q6 — Proposal deadline */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-3">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">
                     Hard deadline for proposal?{' '}
                     <span className="text-red-500">*</span>
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div>
                       <label
                         htmlFor="eventDate"
@@ -701,34 +871,15 @@ export default function NewRequestModal({
                       >
                         Date
                       </label>
-                      <div className="relative">
-                        <input
+                      <div className={`relative ${DATE_PILL_WRAPPER_CLASS}`}>
+                        <Input
                           id="eventDate"
                           type="date"
+                          inputSize="sm"
                           value={step1EventDate}
                           onChange={e => setStep1EventDate(e.target.value)}
-                          className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 pr-9 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          className={`${DATE_PILL_INPUT_CLASS} w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                         />
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <rect
-                            x="3"
-                            y="4"
-                            width="18"
-                            height="18"
-                            rx="2"
-                            ry="2"
-                          />
-                          <line x1="16" y1="2" x2="16" y2="6" />
-                          <line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
                       </div>
                       {state.fieldErrors?.eventDate && (
                         <p className="mt-1 text-[11px] text-red-600">
@@ -743,21 +894,15 @@ export default function NewRequestModal({
                       >
                         Time
                       </label>
-                      <select
+                      <Select
                         id="proposalTime"
+                        ariaLabel="Proposal deadline time"
+                        name="proposalTimeSelect"
                         value={step1ProposalTime}
                         onChange={e => setStep1ProposalTime(e.target.value)}
-                        className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white"
-                      >
-                        <option value="" disabled>
-                          Select a time
-                        </option>
-                        {TIME_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
+                        options={TIME_SELECT_OPTIONS}
+                        className="h-auto w-full min-w-0 rounded-lg px-3 py-2 text-sm font-medium text-gray-800"
+                      />
                     </div>
                   </div>
                 </div>
@@ -771,131 +916,143 @@ export default function NewRequestModal({
             )}
 
             {/* ── STEP 2 — Team Details ── */}
-            {step === 2 && (
-              <div className="p-6 flex flex-col gap-6">
-                {leaderQuestions.length > 0 ? (
-                  <div className="flex flex-col gap-5">
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                      Team Personality Questions
-                    </p>
-                    {leaderQuestions.map((q, idx) => (
-                      <div key={q.id ?? idx}>
-                        <p className="text-sm font-semibold text-gray-700 mb-2">
-                          {q.text}
-                        </p>
-                        {q.description && (
-                          <p className="text-[11px] text-gray-400 mb-2">
-                            {q.description}
-                          </p>
-                        )}
+            {isTeamDetailStep && (
+              <div className="p-5 flex flex-col gap-4">
+                {currentLeaderQuestionGroup ? (
+                  <div className="flex flex-col gap-4">
+                    <section className="rounded-2xl border border-rose-100/80 bg-white/70 p-4 shadow-sm">
+                      <div className="flex flex-col gap-4">
+                        {currentLeaderQuestionGroup.questions.map((q, idx) => (
+                          <div key={q.id ?? idx}>
+                            <p className="text-sm font-semibold text-gray-700 mb-1.5">
+                              {q.text}
+                            </p>
+                            {q.description && (
+                              <p className="text-[11px] text-gray-400 mb-1.5">
+                                {q.description}
+                              </p>
+                            )}
 
-                        {/* Single choice */}
-                        {q.type === 'single_choice' && (
-                          <div className="flex flex-col gap-1.5">
-                            {q.options.map(opt => (
-                              <label
-                                key={opt.id}
-                                className="flex items-center gap-2 cursor-pointer"
-                              >
-                                <input
-                                  type="radio"
-                                  name={`mq_${q.id}`}
-                                  value={opt.value}
-                                  checked={memberAnswers[q.id!] === opt.value}
-                                  onChange={() =>
-                                    handleMemberAnswer(q.id!, opt.value, false)
-                                  }
-                                  className="accent-[#E91E8C] w-4 h-4"
-                                />
-                                <span className="text-sm text-gray-700">
-                                  {opt.label}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
+                            {q.type === 'single_choice' && (
+                              <div className="flex flex-col gap-1.5">
+                                {q.options.map(opt => (
+                                  <label
+                                    key={opt.id}
+                                    className="flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={`mq_${q.id}`}
+                                      value={opt.value}
+                                      checked={
+                                        memberAnswers[q.id!] === opt.value
+                                      }
+                                      onChange={() =>
+                                        handleMemberAnswer(
+                                          q.id!,
+                                          opt.value,
+                                          false
+                                        )
+                                      }
+                                      className="accent-[#E91E8C] w-4 h-4"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                                      {opt.label}
+                                    </span>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
 
-                        {/* Multi choice */}
-                        {q.type === 'multi_choice' && (
-                          <div className="flex flex-col gap-1.5">
-                            {q.options.map(opt => {
-                              const current =
-                                (memberAnswers[q.id!] as string[]) ?? [];
-                              return (
-                                <label
-                                  key={opt.id}
-                                  className="flex items-center gap-2 cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    value={opt.value}
-                                    checked={current.includes(opt.value)}
-                                    onChange={e =>
+                            {q.type === 'multi_choice' && (
+                              <div className="flex flex-col gap-1.5">
+                                {q.options.map(opt => {
+                                  const current =
+                                    (memberAnswers[q.id!] as string[]) ?? [];
+                                  return (
+                                    <label
+                                      key={opt.id}
+                                      className="flex items-center gap-2 cursor-pointer"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        value={opt.value}
+                                        checked={current.includes(opt.value)}
+                                        onChange={e =>
+                                          handleMemberAnswer(
+                                            q.id!,
+                                            opt.value,
+                                            true,
+                                            e.target.checked
+                                          )
+                                        }
+                                        className="accent-[#E91E8C] w-4 h-4"
+                                      />
+                                      <span className="text-sm text-gray-700">
+                                        {opt.label}
+                                      </span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {q.type === 'scale' && (
+                              <div className="flex items-center gap-2">
+                                {[1, 2, 3, 4, 5].map(n => (
+                                  <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() =>
                                       handleMemberAnswer(
                                         q.id!,
-                                        opt.value,
-                                        true,
-                                        e.target.checked
+                                        String(n),
+                                        false
                                       )
                                     }
-                                    className="accent-[#E91E8C] w-4 h-4"
-                                  />
-                                  <span className="text-sm text-gray-700">
-                                    {opt.label}
+                                    className={`w-10 h-10 rounded-lg border text-sm font-semibold transition-colors ${
+                                      memberAnswers[q.id!] === String(n)
+                                        ? 'bg-[#E91E8C] text-white border-[#E91E8C]'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:border-[#E91E8C]'
+                                    }`}
+                                  >
+                                    {n}
+                                  </button>
+                                ))}
+                                <div className="flex justify-between w-full ml-2">
+                                  <span className="text-[10px] text-gray-400">
+                                    Strongly Disagree
                                   </span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        )}
+                                  <span className="text-[10px] text-gray-400">
+                                    Strongly Agree
+                                  </span>
+                                </div>
+                              </div>
+                            )}
 
-                        {/* Scale */}
-                        {q.type === 'scale' && (
-                          <div className="flex items-center gap-2">
-                            {[1, 2, 3, 4, 5].map(n => (
-                              <button
-                                key={n}
-                                type="button"
-                                onClick={() =>
-                                  handleMemberAnswer(q.id!, String(n), false)
+                            {q.type === 'text_input' && (
+                              <TextArea
+                                rows={3}
+                                inputSize="sm"
+                                value={(memberAnswers[q.id!] as string) ?? ''}
+                                onChange={e =>
+                                  handleMemberAnswer(
+                                    q.id!,
+                                    e.target.value,
+                                    false
+                                  )
                                 }
-                                className={`w-10 h-10 rounded-lg border text-sm font-semibold transition-colors ${
-                                  memberAnswers[q.id!] === String(n)
-                                    ? 'bg-[#E91E8C] text-white border-[#E91E8C]'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-[#E91E8C]'
-                                }`}
-                              >
-                                {n}
-                              </button>
-                            ))}
-                            <div className="flex justify-between w-full ml-2">
-                              <span className="text-[10px] text-gray-400">
-                                Strongly Disagree
-                              </span>
-                              <span className="text-[10px] text-gray-400">
-                                Strongly Agree
-                              </span>
-                            </div>
+                                className={SOFT_TEXTAREA_CLASS}
+                              />
+                            )}
                           </div>
-                        )}
-
-                        {/* Text input */}
-                        {q.type === 'text_input' && (
-                          <textarea
-                            rows={3}
-                            value={(memberAnswers[q.id!] as string) ?? ''}
-                            onChange={e =>
-                              handleMemberAnswer(q.id!, e.target.value, false)
-                            }
-                            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800 outline-none focus:border-[#E91E8C] focus:bg-white resize-none"
-                          />
-                        )}
+                        ))}
                       </div>
-                    ))}
+                    </section>
                   </div>
                 ) : (
                   <p className="text-sm text-gray-400 text-center py-8">
-                    No team questions configured. Click Next to continue.
+                    No team questions configured for this category.
                   </p>
                 )}
 
@@ -908,16 +1065,17 @@ export default function NewRequestModal({
             )}
 
             {/* ── STEP 3 — Invitations ── */}
-            {step === 3 && (
-              <div className="p-6 flex flex-col gap-6">
+            {isInvitationsStep && (
+              <div className="p-5 flex flex-col gap-4">
                 {/* Individual invites */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-1">
-                    Invite Individuals <span className="text-red-500">*</span>
+                  <p className="text-sm font-semibold text-gray-700 mb-0.5">
+                    Invite Individuals
                   </p>
-                  <p className="text-[11px] text-gray-400 mb-3">
-                    Search by name or email, or paste multiple emails separated
-                    by commas to invite several people at once.
+                  <p className="text-[11px] text-gray-400 mb-2">
+                    Optional. Use this for extra people outside the selected
+                    team, or paste multiple emails separated by commas to add
+                    several people at once.
                   </p>
 
                   {individualInvites.length > 0 && (
@@ -1029,10 +1187,10 @@ export default function NewRequestModal({
 
                 {/* Team invites */}
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-1">
+                  <p className="text-sm font-semibold text-gray-700 mb-0.5">
                     Invite Teams <span className="text-red-500">*</span>
                   </p>
-                  <p className="text-[11px] text-gray-400 mb-3">
+                  <p className="text-[11px] text-gray-400 mb-2">
                     Invite an entire team — all members will receive an
                     invitation.
                   </p>
@@ -1128,72 +1286,86 @@ export default function NewRequestModal({
             )}
           </div>
           {/* Footer */}
-          <div className="flex justify-between gap-3 border-t border-gray-100 bg-white px-6 py-4 rounded-b-2xl shrink-0">
-            {step === 1 ? (
+          <div className="sticky bottom-0 z-10 mt-auto flex shrink-0 justify-between gap-3 border-t border-rose-100 bg-white/95 px-6 py-4 backdrop-blur-sm rounded-b-2xl">
+            {isGeneralStep ? (
               <>
-                <button
+                <Button
                   type="button"
                   onClick={onClose}
-                  className="rounded-lg border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                  variant="secondary"
+                  size="md"
+                  className="!rounded-full border-slate-200 text-slate-600"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={handleNext}
-                  className="rounded-lg bg-[#E91E8C] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7177a]"
+                  variant="primary"
+                  size="md"
+                  className="!rounded-full bg-[linear-gradient(135deg,#ec4899_0%,#db2777_55%,#be185d_100%)] shadow-[0_12px_28px_rgba(236,72,153,0.28)] hover:brightness-105"
                 >
                   Next →
-                </button>
+                </Button>
               </>
-            ) : step === 2 ? (
+            ) : !isInvitationsStep ? (
               <>
-                <button
+                <Button
                   type="button"
                   onClick={handleBack}
-                  className="rounded-lg border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                  variant="secondary"
+                  size="md"
+                  className="!rounded-full border-slate-200 text-slate-600"
                 >
                   ← Back
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={handleNext}
-                  className="rounded-lg bg-[#E91E8C] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7177a]"
+                  variant="primary"
+                  size="md"
+                  className="!rounded-full bg-[linear-gradient(135deg,#ec4899_0%,#db2777_55%,#be185d_100%)] shadow-[0_12px_28px_rgba(236,72,153,0.28)] hover:brightness-105"
                 >
                   Next →
-                </button>
+                </Button>
               </>
             ) : (
               <>
-                <button
+                <Button
                   type="button"
                   onClick={handleBack}
-                  className="rounded-lg border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                  variant="secondary"
+                  size="md"
+                  className="!rounded-full border-slate-200 text-slate-600"
                 >
                   ← Back
-                </button>
+                </Button>
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     type="button"
                     onClick={onClose}
-                    className="rounded-lg border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+                    variant="secondary"
+                    size="md"
+                    className="!rounded-full border-slate-200 text-slate-600"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="submit"
                     disabled={pending}
                     onClick={handleSubmitClick}
-                    className="rounded-lg bg-[#E91E8C] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7177a] disabled:opacity-60"
+                    variant="primary"
+                    size="md"
+                    className="!rounded-full bg-[linear-gradient(135deg,#ec4899_0%,#db2777_55%,#be185d_100%)] shadow-[0_12px_28px_rgba(236,72,153,0.28)] hover:brightness-105 disabled:opacity-60"
                   >
                     {pending ? 'Submitting…' : 'Submit Request →'}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}
           </div>
         </form>
       </div>
-    </div>
+    </ModalShell>
   );
 }

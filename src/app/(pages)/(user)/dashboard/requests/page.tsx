@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import { upsertClerkUser } from '@/services/user-service';
 import {
-  getUserRequests,
-  getRequestStats,
-} from '@/services/user-request-service';
+  getUserRequestsPage,
+  type UserRequestStatusFilter,
+} from '@/services/request-service';
 import { getQuestions } from '@/services/question-service';
 import { getUserTeams } from '@/services/user-team-service';
 import { getRequestAttendees } from '@/services/request-attendee-service';
@@ -12,7 +12,42 @@ import { FORM_NAME } from '@/types/question-type';
 import RequestsContent from '@/components/requests/requests-content';
 import type { RequestAttendeesSummary } from '@/services/request-attendee-service';
 
-export default async function RequestsPage() {
+type SearchParamsInput = {
+  status?: string;
+  user_email?: string;
+  created_from?: string;
+  created_to?: string;
+  page?: string;
+};
+
+type Props = {
+  searchParams?: Promise<SearchParamsInput> | SearchParamsInput;
+};
+
+function parseStatus(value: string | undefined): UserRequestStatusFilter {
+  if (
+    value === 'OPENED' ||
+    value === 'PENDING' ||
+    value === 'MATCHED' ||
+    value === 'CLOSED'
+  ) {
+    return value;
+  }
+
+  return 'all';
+}
+
+function parseDateParam(value: string | undefined): string {
+  return value && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : '';
+}
+
+function parsePositiveInt(value: string | undefined): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+export default async function RequestsPage({ searchParams }: Readonly<Props>) {
   const authContext = await getCurrentAuthContext();
   if (!authContext.isAuthenticated) redirect('/sign-in');
 
@@ -22,20 +57,28 @@ export default async function RequestsPage() {
       ?.emailAddress ?? '';
 
   const { userId } = await upsertClerkUser(clerkUser.id, email);
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const query = {
+    status: parseStatus(resolvedSearchParams.status),
+    userEmail: resolvedSearchParams.user_email?.trim() ?? '',
+    createdFrom: parseDateParam(resolvedSearchParams.created_from),
+    createdTo: parseDateParam(resolvedSearchParams.created_to),
+    page: parsePositiveInt(resolvedSearchParams.page) ?? 1,
+    pageSize: 8,
+  };
 
-  const [requests, stats, leaderQuestions, userTeams] = await Promise.all([
-    getUserRequests(userId),
-    getRequestStats(userId),
+  const [pageData, leaderQuestions, userTeams] = await Promise.all([
+    getUserRequestsPage(userId, query),
     getQuestions(FORM_NAME.REQUEST),
     getUserTeams(userId),
   ]);
 
   const attendeeSummaries = await Promise.all(
-    requests.map(r => getRequestAttendees(r.id))
+    pageData.items.map(r => getRequestAttendees(r.id))
   );
 
   const attendeeMap: Record<number, RequestAttendeesSummary> = {};
-  requests.forEach((r, i) => {
+  pageData.items.forEach((r, i) => {
     attendeeMap[r.id] = attendeeSummaries[i];
   });
 
@@ -44,8 +87,8 @@ export default async function RequestsPage() {
       <div className="dashboard-glass-inner">
         <div className="dashboard-glass-stack">
           <RequestsContent
-            requests={requests}
-            stats={stats}
+            pageData={pageData}
+            query={query}
             leaderQuestions={leaderQuestions}
             userTeams={userTeams}
             attendeeMap={attendeeMap}

@@ -269,7 +269,9 @@ describe('invitation-service', () => {
     prismaMock.requestUser.update.mockResolvedValue({ id: 88 });
     prismaMock.user.findUnique.mockResolvedValue({ id: 7 });
 
-    await expect(respondToInvitation('token-abc', 'accept')).resolves.toEqual({
+    await expect(
+      respondToInvitation('token-abc', 'accept', 'member@example.com')
+    ).resolves.toEqual({
       type: 'accepted',
       userEmail: 'member@example.com',
       authAction: 'sign-in',
@@ -294,7 +296,9 @@ describe('invitation-service', () => {
     prismaMock.requestUser.update.mockResolvedValue({ id: 89 });
     prismaMock.user.findUnique.mockResolvedValue(null);
 
-    await expect(respondToInvitation('token-new', 'accept')).resolves.toEqual({
+    await expect(
+      respondToInvitation('token-new', 'accept', 'new-user@example.com')
+    ).resolves.toEqual({
       type: 'accepted',
       userEmail: 'new-user@example.com',
       authAction: 'sign-up',
@@ -318,12 +322,12 @@ describe('invitation-service', () => {
     prismaMock.requestUser.update.mockResolvedValue({ id: 90 });
 
     await expect(
-      respondToInvitation('token-reject', 'reject')
+      respondToInvitation('token-reject', 'reject', 'reject@example.com')
     ).resolves.toEqual({
       type: 'rejected',
     });
     await expect(
-      respondToInvitation('token-expired', 'accept')
+      respondToInvitation('token-expired', 'accept', 'expired@example.com')
     ).resolves.toEqual({
       type: 'expired',
     });
@@ -338,7 +342,11 @@ describe('invitation-service', () => {
     });
 
     await expect(
-      respondToInvitation('token-already-rejected', 'accept')
+      respondToInvitation(
+        'token-already-rejected',
+        'accept',
+        'reject@example.com'
+      )
     ).resolves.toEqual({
       type: 'rejected',
     });
@@ -357,7 +365,11 @@ describe('invitation-service', () => {
     prismaMock.user.findUnique.mockResolvedValue({ id: 8 });
 
     await expect(
-      respondToInvitation('token-already-accepted', 'reject')
+      respondToInvitation(
+        'token-already-accepted',
+        'reject',
+        'accepted@example.com'
+      )
     ).resolves.toEqual({
       type: 'accepted',
       userEmail: 'accepted@example.com',
@@ -369,5 +381,22 @@ describe('invitation-service', () => {
       where: { email: 'accepted@example.com' },
       select: { id: true },
     });
+  });
+
+  test('respondToInvitation returns forbidden when no current user email is provided', async () => {
+    prismaMock.requestUser.findUnique.mockResolvedValue({
+      id: 94,
+      invited_status: InviteStatus.pending,
+      user_email: 'member@example.com',
+      expired_at: null,
+    });
+
+    await expect(
+      respondToInvitation('token-forbidden', 'accept')
+    ).resolves.toEqual({
+      type: 'forbidden',
+    });
+
+    expect(prismaMock.requestUser.update).not.toHaveBeenCalled();
   });
 });

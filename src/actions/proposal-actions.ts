@@ -80,9 +80,6 @@ export async function updateAdminProposalAction(
   _prev: ProposalEditState,
   formData: FormData
 ): Promise<ProposalEditState> {
-  const status = String(formData.get('status') ?? '')
-    .trim()
-    .toLowerCase();
   const objectiveAlignment = String(formData.get('objectiveAlignment') ?? '');
   const rationale = String(formData.get('rationale') ?? '');
   const baseScoreRaw = String(formData.get('baseScore') ?? '').trim();
@@ -92,7 +89,7 @@ export async function updateAdminProposalAction(
   const riskAdjustment = Number(riskAdjustmentRaw);
 
   const result = await updateAdminProposal(proposalId, {
-    status: status as 'pending' | 'approved' | 'accepted' | 'rejected',
+    status: 'pending',
     objectiveAlignment,
     rationale,
     baseScore,

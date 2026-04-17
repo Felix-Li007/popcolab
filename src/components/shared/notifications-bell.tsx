@@ -19,6 +19,7 @@ export default function NotificationsBell({
 }: NotificationsBellProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
   const [items, setItems] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -49,7 +50,7 @@ export default function NotificationsBell({
         const notifications = await fetchNotifications();
         if (!mounted) return;
         setItems(notifications);
-      } catch (err) {
+      } catch {
         if (!mounted) return;
         setItems([]);
       } finally {
@@ -95,6 +96,14 @@ export default function NotificationsBell({
   const variantClass =
     variant === 'admin' ? styles.variantAdmin : styles.variantUser;
   const unreadCountFinal = unreadCount || items.filter(i => !i.read_at).length;
+  const formatTimestamp = (value: string) =>
+    new Date(value).toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
 
   return (
     <div className={`${styles.container} ${variantClass}`} ref={containerRef}>
@@ -127,16 +136,20 @@ export default function NotificationsBell({
             type="button"
             onClick={async () => {
               try {
+                setMarkingAllRead(true);
                 await markAllAsRead();
                 setItems([]);
                 setUnreadCount(0);
               } catch {
                 /* ignore */
+              } finally {
+                setMarkingAllRead(false);
               }
             }}
             className={styles.clearButton}
+            disabled={markingAllRead}
           >
-            Clear
+            {markingAllRead ? 'Clearing...' : 'Clear'}
           </button>
         </div>
 
@@ -158,32 +171,28 @@ export default function NotificationsBell({
 
                 return (
                   <li key={n.id} className={styles.notificationItem}>
-                    <div className="flex items-start gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div
-                          className={`${styles.msgTitle} font-semibold text-sm truncate`}
-                        >
-                          {n.message_title}
-                        </div>
-                        <div
-                          className={`${styles.msgBody} text-xs truncate mt-1`}
-                        >
-                          {n.message_body}
-                        </div>
-                        {inviteToken && (
-                          <Link
-                            href={`/invite/${inviteToken}`}
-                            onClick={() => setOpen(false)}
-                            className="mt-2 inline-block rounded-full bg-[#E91E8C] px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#c7177a]"
-                          >
-                            View Invitation →
-                          </Link>
-                        )}
+                    <div className="min-w-0">
+                      <div
+                        className={`${styles.msgTitle} font-semibold text-sm truncate`}
+                      >
+                        {n.message_title}
                       </div>
                       <div
-                        className={`${styles.msgTime} text-[11px] ml-2 whitespace-nowrap`}
+                        className={`${styles.msgBody} text-xs mt-1 line-clamp-2`}
                       >
-                        {new Date(n.created_at).toLocaleDateString()}
+                        {n.message_body}
+                      </div>
+                      {inviteToken && (
+                        <Link
+                          href={`/invite/${inviteToken}`}
+                          onClick={() => setOpen(false)}
+                          className="mt-1.5 inline-block rounded-full bg-[#E91E8C] px-3 py-1 text-[11px] font-semibold text-white hover:bg-[#c7177a]"
+                        >
+                          View Invitation →
+                        </Link>
+                      )}
+                      <div className={`${styles.msgTime} text-[11px] mt-1.5`}>
+                        {formatTimestamp(n.created_at)}
                       </div>
                     </div>
                   </li>

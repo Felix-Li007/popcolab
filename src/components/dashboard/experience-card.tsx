@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Button from '@/ui/Button';
 import GalleryModel from '@/components/shared/gallery-model';
 import type { DashboardExperienceCardData } from '@/types/experience-dashboard-type';
+import { showBookingUnavailable } from '@/utils/booking-unavailable';
 import styles from '@/styles/dashboard/experience-card.module.css';
 
 function formatMoney(value: number | null) {
@@ -29,7 +29,6 @@ export default function ExperienceCard({
   featured?: boolean;
   onView?: () => void;
 }) {
-  const router = useRouter();
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const deliveryMethods = splitDeliveryMethods(exp.deliveryMethods);
@@ -182,9 +181,7 @@ export default function ExperienceCard({
         <Button
           variant="primary"
           size="sm"
-          onClick={() =>
-            router.push(`/dashboard/experiences/${exp.id}/checkout`)
-          }
+          onClick={() => showBookingUnavailable(exp.experienceTitle)}
           className={styles.bookButton}
         >
           Book Now

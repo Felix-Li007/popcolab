@@ -90,6 +90,7 @@ function groupItemsByRequest(
         id: item.id,
         status: item.status,
         objectiveAlignment: item.objectiveAlignment,
+        rejectNotes: item.rejectNotes,
         rationale: item.rationale,
         baseScore: item.baseScore,
         riskAdjustment: item.riskAdjustment,

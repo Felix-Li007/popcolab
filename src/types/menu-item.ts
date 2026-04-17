@@ -152,19 +152,23 @@ export const menuSection: MenuGroup[] = [
   {
     title: 'BUSINESS',
     items: [
-      {
-        label: 'Bookings',
-        href: '/admin/bookings',
-        countKey: 'bookings',
-        children: [
-          { label: 'Orders', href: '/admin/bookings', countKey: 'bookings' },
-          {
-            label: 'Payments',
-            href: '/admin/bookings/payments',
-            countKey: 'payments',
-          },
-        ],
-      },
+      // {
+      //   label: 'Bookings',
+      //   href: '/admin/bookings',
+      //   countKey: 'bookings',
+      //   children: [
+      //     {
+      //       label: 'Orders',
+      //       href: '/admin/bookings',
+      //       countKey: 'bookings',
+      //     },
+      //     {
+      //       label: 'Payments',
+      //       href: '/admin/bookings/payments',
+      //       countKey: 'payments',
+      //     },
+      //   ],
+      // },
       {
         label: 'Requests',
         href: '/admin/requests',

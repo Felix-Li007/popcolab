@@ -1,28 +1,109 @@
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/libs/prisma-client';
+import RoleLogo from '@/components/branding/role-logo';
+import { getCurrentAuthContext } from '@/services/clerk-service';
 import { getTeamInviteByToken } from '@/services/team-invite-service';
 import { getTestResult } from '@/services/response-service';
+import { upsertClerkUser } from '@/services/user-service';
+import { respondToTeamInvite } from '@/services/user-team-service';
 import { buildAuthPath } from '@/utils/url-helper';
 import { formatStoredPersonalityDate } from '@/utils/personality-time';
 import JoinPersonalityChoice from '@/components/teams/join-personality-choice';
+import type { RoleBranding } from '@/constants/role-branding';
 
 type PageProps = Readonly<{
   params: Promise<{ token: string }>;
 }>;
 
+const INVITE_PANEL_WIDTH_CLASS = 'max-w-[460px]';
+const USER_BRANDING: RoleBranding = {
+  role: 'role_user',
+  dataRole: 'role_user',
+  displayLabel: 'User',
+  logoSrc: '/logo/user/logo-full-h.png',
+  logoAlt: 'Pop CoLab user logo',
+  footerLogoSrc: '/logo/user/logo-full-v.png',
+  footerLogoAlt: 'Pop CoLab user footer logo',
+};
+
 const Logo = () => (
   <div className="bg-[#111827] px-8 py-7 text-center">
-    <div className="mb-1 flex items-center justify-center gap-2">
-      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E91E8C]">
-        <span className="text-xs font-bold text-white">PC</span>
-      </div>
-      <span className="text-base font-bold text-white">Pop CoLab</span>
+    <div className="mb-2 flex items-center justify-center">
+      <RoleLogo
+        branding={USER_BRANDING}
+        width={156}
+        height={52}
+        className="block h-[52px] w-auto object-contain"
+      />
     </div>
     <p className="text-xs text-gray-400">Rediscover the Power of Play</p>
   </div>
 );
+
+function InviteShell(
+  props: Readonly<{
+    children: React.ReactNode;
+    maxWidthClassName?: string;
+  }>
+) {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4">
+      <div
+        className={`w-full overflow-hidden rounded-2xl bg-white shadow-2xl ${props.maxWidthClassName ?? 'max-w-md'}`}
+      >
+        <Logo />
+        {props.children}
+      </div>
+    </main>
+  );
+}
+
+function InviteNotice(
+  props: Readonly<{
+    title: string;
+    description: React.ReactNode;
+    primaryHref: string;
+    primaryLabel: string;
+    secondaryHref?: string;
+    secondaryLabel?: string;
+  }>
+) {
+  return (
+    <InviteShell>
+      <div className="px-8 py-7">
+        <h1 className="mb-2 text-lg font-bold text-gray-800">{props.title}</h1>
+        <div className="mb-6 text-sm text-gray-500">{props.description}</div>
+        <div className="flex flex-col gap-3">
+          <Link
+            href={props.primaryHref}
+            className="block w-full rounded-lg bg-[#E91E8C] py-3 text-center text-sm font-semibold text-white hover:bg-[#c7177a]"
+          >
+            {props.primaryLabel}
+          </Link>
+          {props.secondaryHref && props.secondaryLabel ? (
+            <Link
+              href={props.secondaryHref}
+              className="text-center text-sm font-semibold text-[#E91E8C] hover:text-[#c7177a]"
+            >
+              {props.secondaryLabel}
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    </InviteShell>
+  );
+}
+
+function getPrimaryEmail(
+  clerkUser: NonNullable<
+    Awaited<ReturnType<typeof getCurrentAuthContext>>['user']
+  >
+): string {
+  return (
+    clerkUser.emailAddresses.find(
+      entry => entry.id === clerkUser.primaryEmailAddressId
+    )?.emailAddress ?? ''
+  );
+}
 
 export default async function TeamInviteLandingPage({ params }: PageProps) {
   const { token } = await params;
@@ -30,153 +111,149 @@ export default async function TeamInviteLandingPage({ params }: PageProps) {
 
   if (!invite) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4">
-        <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-          <Logo />
-          <div className="px-8 py-7">
-            <h1 className="mb-2 text-lg font-bold text-gray-800">
-              Invite not found
-            </h1>
-            <p className="mb-6 text-sm text-gray-500">
-              This invite link is invalid or has already been used.
-            </p>
-            <Link
-              href="/"
-              className="text-sm font-semibold text-[#E91E8C] hover:text-[#c7177a]"
-            >
-              Back to home
-            </Link>
-          </div>
-        </div>
-      </main>
+      <InviteNotice
+        title="Invite not found"
+        description="This invite link is invalid or has already been used."
+        primaryHref="/"
+        primaryLabel="Back to home"
+      />
+    );
+  }
+
+  if (invite.status === 'accepted') {
+    return (
+      <InviteNotice
+        title="Invite already used"
+        description="This invite link has already been used successfully and is no longer valid."
+        primaryHref="/dashboard/teams"
+        primaryLabel="Go to teams"
+      />
     );
   }
 
   if (invite.isExpired) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4">
-        <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
-          <Logo />
-          <div className="px-8 py-7">
-            <h1 className="mb-2 text-lg font-bold text-gray-800">
-              Invite expired
-            </h1>
-            <p className="mb-6 text-sm text-gray-500">
-              This invite link has expired. Ask your team lead to send a new
-              one.
-            </p>
-            <Link
-              href="/"
-              className="text-sm font-semibold text-[#E91E8C] hover:text-[#c7177a]"
-            >
-              Back to home
-            </Link>
-          </div>
-        </div>
-      </main>
+      <InviteNotice
+        title="Invite expired"
+        description="This invite link has expired. Ask your team lead to send a new one."
+        primaryHref="/"
+        primaryLabel="Back to home"
+      />
     );
   }
 
-  // If the user is already signed in, show the personality choice inline
-  // so they stay in the context of the team invite.
-  const { userId: clerkId } = await auth();
+  const authContext = await getCurrentAuthContext();
+  const clerkUser = authContext.user;
 
-  if (clerkId) {
-    const dbUser = await prisma.user.findUnique({
-      where: { clerk_id: clerkId },
-      select: {
-        id: true,
-        personality_complete: true,
-        profile: { select: { first_name: true } },
-      },
-    });
+  if (clerkUser) {
+    const email = getPrimaryEmail(clerkUser);
+    const { userId } = await upsertClerkUser(clerkUser.id, email);
 
-    if (dbUser) {
-      if (!dbUser.personality_complete) {
-        redirect('/test');
+    try {
+      await respondToTeamInvite(invite.id, userId, email, 'accept');
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Not authorised.') {
+        return (
+          <InviteNotice
+            title="This invite belongs to a different account"
+            description={
+              <>
+                <p className="mb-4">
+                  You&apos;re signed in as{' '}
+                  <strong>{email || 'your current account'}</strong>, but this
+                  team invite was sent to a different person.
+                </p>
+                {invite.email ? (
+                  <p>
+                    Expected invite email: <strong>{invite.email}</strong>
+                  </p>
+                ) : (
+                  <p>
+                    Please sign in with the invited account, then open this link
+                    again.
+                  </p>
+                )}
+              </>
+            }
+            primaryHref="/dashboard"
+            primaryLabel="Go to dashboard"
+            secondaryHref="/"
+            secondaryLabel="Back to home"
+          />
+        );
       }
 
-      const testResult = await getTestResult(dbUser.id);
-
-      if (!testResult) redirect('/test');
-
-      return (
-        <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4">
-          <div className="w-full max-w-[460px] overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <Logo />
-            <JoinPersonalityChoice
-              inviteId={invite.id}
-              teamName={invite.teamName}
-              inviterName={invite.inviterName}
-              firstName={dbUser.profile?.first_name ?? ''}
-              personality={testResult.personality}
-              assessedAt={formatStoredPersonalityDate(testResult.completedAt)}
-            />
-          </div>
-        </main>
-      );
+      throw error;
     }
+
+    const testResult = await getTestResult(userId);
+
+    return (
+      <InviteShell maxWidthClassName={INVITE_PANEL_WIDTH_CLASS}>
+        <JoinPersonalityChoice
+          teamName={invite.teamName}
+          inviterName={invite.inviterName}
+          firstName={clerkUser.firstName ?? ''}
+          personality={testResult?.personality ?? null}
+          assessedAt={formatStoredPersonalityDate(
+            testResult?.completedAt ?? null
+          )}
+        />
+      </InviteShell>
+    );
   }
 
-  // Unauthenticated — show sign-in / sign-up landing.
-  // Existing users go through personality check after sign-in.
-  // New users go through onboarding intake after sign-up.
   const continueUrl = invite.isExistingUser
     ? buildAuthPath({
         authAction: 'sign-in',
-        redirectPath:
-          '/onboarding/personality-choice?redirect=/dashboard/teams',
+        redirectPath: `/join/${token}`,
         email: invite.email || undefined,
       })
     : buildAuthPath({
         authAction: 'sign-up',
-        redirectPath: '/onboarding/intake',
+        redirectPath: `/join/${token}`,
         email: invite.email || undefined,
       });
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#1a1f2e] px-4">
-      <div className="w-full max-w-[460px] overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <Logo />
+    <InviteShell maxWidthClassName={INVITE_PANEL_WIDTH_CLASS}>
+      <div className="px-8 py-7">
+        <h1 className="mb-1 text-lg font-bold text-gray-800">
+          You&apos;ve been invited!
+        </h1>
+        <p className="mb-5 text-sm text-gray-500">
+          Continue to accept your invitation and access Pop CoLab
+        </p>
 
-        <div className="px-8 py-7">
-          <h1 className="mb-1 text-lg font-bold text-gray-800">
-            You&apos;ve been invited!
-          </h1>
-          <p className="mb-5 text-sm text-gray-500">
-            Continue to accept your invitation and access Pop CoLab
-          </p>
-
-          {/* Team context */}
-          <div className="mb-5 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
-            <span className="mt-0.5 text-xl">✉️</span>
-            <div>
-              <p className="text-sm font-bold text-green-800">
-                Invited to: {invite.teamName}
-              </p>
-              <p className="text-xs text-green-700">
-                By <strong>{invite.inviterName}</strong> · Pop CoLab
-              </p>
-            </div>
+        <div className="mb-5 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
+          <span className="mt-0.5 text-xl">✉️</span>
+          <div>
+            <p className="text-sm font-bold text-green-800">
+              Invited to: {invite.teamName}
+            </p>
+            <p className="text-xs text-green-700">
+              By <strong>{invite.inviterName}</strong> · Pop CoLab
+            </p>
           </div>
-
-          <p className="mb-5 text-xs text-gray-500">
-            Click Continue — you&apos;ll be asked to sign in or create an
-            account, then you&apos;ll automatically join the team.
-          </p>
-
-          <Link
-            href={continueUrl}
-            className="block w-full rounded-lg bg-[#E91E8C] py-3 text-center text-sm font-semibold text-white hover:bg-[#c7177a]"
-          >
-            Continue →
-          </Link>
-
-          <p className="mt-4 text-center text-xs text-gray-400">
-            Sign in or sign up handled securely by Clerk on the next screen
-          </p>
         </div>
+
+        <p className="mb-5 text-xs text-gray-500">
+          Click Continue to sign in or create an account. Once you&apos;re
+          authenticated, we&apos;ll add you to the team and then help you decide
+          what to do about your personality test.
+        </p>
+
+        <Link
+          href={continueUrl}
+          className="block w-full rounded-lg bg-[#E91E8C] py-3 text-center text-sm font-semibold text-white hover:bg-[#c7177a]"
+        >
+          Continue →
+        </Link>
+
+        <p className="mt-4 text-center text-xs text-gray-400">
+          Sign in or sign up handled securely by Clerk on the next screen
+        </p>
       </div>
-    </main>
+    </InviteShell>
   );
 }

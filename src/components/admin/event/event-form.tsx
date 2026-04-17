@@ -111,6 +111,29 @@ function getInitialDraftSchedules(event?: Event): DraftSchedule[] {
     });
 }
 
+function buildDraftScheduleFromCalendar(
+  calendar: NonNullable<Event['event_calendars']>[number]
+): DraftSchedule | null {
+  const eventDate = parseCalendarDateValue(calendar.event_date);
+  if (!eventDate) return null;
+
+  return {
+    id: `calendar-${calendar.id}`,
+    eventDate,
+    startTime: formatScheduleTimeValue(calendar.start_time),
+    endTime: formatScheduleTimeValue(calendar.end_time),
+  };
+}
+
+function isSameScheduleValue(left: DraftSchedule, right: DraftSchedule) {
+  return (
+    formatLocalDateValue(left.eventDate) ===
+      formatLocalDateValue(right.eventDate) &&
+    left.startTime === right.startTime &&
+    left.endTime === right.endTime
+  );
+}
+
 function getInitialGalleryInputs(event?: Event): EventGalleryInput[] {
   return [...(event?.event_galleries ?? [])]
     .sort((left, right) => {
@@ -372,8 +395,44 @@ function EventEditor({
           endTime: draftSchedule.endTime,
         };
 
-        setDraftSchedules(prev => [...prev, nextDraftSchedule]);
+        const persistedCalendarId = selectedDraftScheduleId?.startsWith(
+          'calendar-'
+        )
+          ? Number.parseInt(
+              selectedDraftScheduleId.replace('calendar-', ''),
+              10
+            )
+          : null;
+        const originalCalendar =
+          persistedCalendarId !== null
+            ? calendars.find(calendar => calendar.id === persistedCalendarId)
+            : null;
+        const originalDraftSchedule = originalCalendar
+          ? buildDraftScheduleFromCalendar(originalCalendar)
+          : null;
+
+        if (
+          selectedDraftScheduleId &&
+          originalDraftSchedule &&
+          !isSameScheduleValue(draftSchedule, originalDraftSchedule)
+        ) {
+          setDraftSchedules(prev => [
+            ...prev.map(schedule =>
+              schedule.id === selectedDraftScheduleId
+                ? originalDraftSchedule
+                : schedule
+            ),
+            nextDraftSchedule,
+          ]);
+        } else {
+          setDraftSchedules(prev => [...prev, nextDraftSchedule]);
+        }
+
         setSelectedDraftScheduleId(scheduleId);
+        setDraftSchedule({
+          ...nextDraftSchedule,
+          eventDate: new Date(nextDraftSchedule.eventDate),
+        });
       }}
       onDeleteDraftSchedule={removeSelectedDraftSchedule}
     />

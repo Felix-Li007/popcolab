@@ -16,6 +16,93 @@ import type {
   AdminProposalStatusCounts,
 } from '@/types/proposal-type';
 
+export type UserProposalItem = {
+  id: number;
+  requestId: number;
+  status: 'PENDING' | 'APPROVED' | 'ACCEPTED' | 'REJECTED';
+  experienceTitle: string;
+  deliveryMethod: string;
+  capacityMax: number;
+  rationale: string;
+  objectiveCategory: string;
+  experienceCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  score: number | null;
+  experiences: UserProposalCardExperience[];
+};
+
+export type UserProposalStatusFilter =
+  | 'all'
+  | 'PENDING'
+  | 'APPROVED'
+  | 'ACCEPTED'
+  | 'REJECTED';
+
+export type UserProposalStatusCounts = Record<
+  Exclude<UserProposalStatusFilter, 'all'>,
+  number
+>;
+
+export type UserProposalsPageQuery = {
+  status: UserProposalStatusFilter;
+  requestId: number | null;
+  createdFrom: string;
+  createdTo: string;
+  page: number;
+  pageSize: number;
+};
+
+export type UserProposalsPageData = {
+  items: UserProposalItem[];
+  totalItems: number;
+  totalPages: number;
+  currentPage: number;
+  statusCounts: UserProposalStatusCounts;
+};
+
+export type UserProposalCardExperience = {
+  id: number;
+  title: string;
+  deliveryMethods: string;
+  capacityMax: number;
+  durationMin: number;
+  durationMax: number;
+  startingPrice: number | null;
+};
+
+export type UserProposalExperienceDetail = {
+  id: number;
+  title: string;
+  deliveryMethods: string;
+  capacityMax: number;
+  durationMin: number;
+  durationMax: number;
+  startingPrice: number | null;
+  addingPrice: number | null;
+  rationale: string;
+  baseScore: number;
+  riskAdjustment: number;
+};
+
+export type UserProposalDetail = {
+  id: number;
+  requestId: number;
+  status: 'PENDING' | 'APPROVED' | 'ACCEPTED' | 'REJECTED';
+  objectiveAlignment: string;
+  createdAt: Date;
+  updatedAt: Date;
+  request: {
+    id: number;
+    objectiveCategory: string;
+    budgetMin: number | null;
+    budgetMax: number | null;
+    preferredDate: Date | null;
+    participantCount: number | null;
+  };
+  experiences: UserProposalExperienceDetail[];
+};
+
 export async function createFittedProposal(job: RequestQueueJob) {
   const request = await prisma.request.findUnique({
     where: { id: job.requestId },
@@ -45,24 +132,6 @@ export async function createFittedProposal(job: RequestQueueJob) {
 
   // 先判断是否已有proposal
   if (request.proposals.length > 0) {
-    if (
-      String(request.request_status).toUpperCase() !== REQUEST_STATUS.MATCHED
-    ) {
-      const previousStatus = String(request.request_status).toUpperCase();
-      await prisma.request.update({
-        where: { id: request.id },
-        data: {
-          request_status: REQUEST_STATUS.MATCHED as never,
-        },
-      });
-
-      await notifyRequestStatusChanged({
-        requestId: request.id,
-        previousStatus,
-        nextStatus: REQUEST_STATUS.MATCHED,
-      });
-    }
-
     return {
       created: false,
       reason: 'active_proposal_exists',
@@ -80,10 +149,27 @@ export async function createFittedProposal(job: RequestQueueJob) {
     };
   }
 
-  // ...rest of the logic remains unchanged for MATCHED/CLOSED/OPENED/PENDING
+  const topRecommendations = recommendations.slice(0, 3);
+  const primaryRecommendation = topRecommendations[0];
 
-  const createdProposals = await prisma.$transaction(async tx => {
+  const creationResult = await prisma.$transaction(async tx => {
     const txAny = tx as unknown as {
+      request: {
+        findUnique: (args: {
+          where: { id: number };
+          select: {
+            id: true;
+            proposals: {
+              where: {
+                proposal_status: {
+                  in: ProposalStatus[];
+                };
+              };
+              select: { id: true };
+            };
+          };
+        }) => Promise<{ id: number; proposals: Array<{ id: number }> } | null>;
+      };
       proposalExperience?: {
         create: (args: {
           data: {
@@ -105,104 +191,133 @@ export async function createFittedProposal(job: RequestQueueJob) {
     const hasProposalExperienceDelegate =
       typeof txAny.proposalExperience?.create === 'function';
 
-    const proposals = [] as Array<{ id: number; experienceId: number }>;
+    const activeRequest = await txAny.request.findUnique({
+      where: { id: request.id },
+      select: {
+        id: true,
+        proposals: {
+          where: {
+            proposal_status: {
+              in: [
+                ProposalStatus.PENDING,
+                ProposalStatus.APPROVED,
+                ProposalStatus.ACCEPTED,
+              ],
+            },
+          },
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
 
-    for (const recommendation of recommendations) {
+    if (!activeRequest) {
+      throw new Error(`Request ${request.id} not found.`);
+    }
+
+    if (activeRequest.proposals.length > 0) {
+      return {
+        created: false as const,
+        proposalId: activeRequest.proposals[0]?.id ?? null,
+        experienceIds: [] as number[],
+      };
+    }
+
+    if (!hasProposalExperienceDelegate) {
+      const baseScore =
+        primaryRecommendation.breakdown?.baseScore ??
+        primaryRecommendation.score;
+      const riskAdjustment =
+        (primaryRecommendation.breakdown?.debriefBoost ?? 0) +
+        (primaryRecommendation.breakdown?.opennessBoost ?? 0);
+
+      const created = await txAny.proposal.create({
+        data: {
+          // Backward-compatible path for older mocks using the legacy shape.
+          request_id: request.id,
+          experience_id: primaryRecommendation.experience.id,
+          proposal_status: ProposalStatus.PENDING,
+          objective_alignment: `source:${primaryRecommendation.recommendationSource}`,
+          base_score: Math.round(baseScore * 100),
+          risk_adjustment: Math.round(riskAdjustment * 100),
+          rationale_desc: primaryRecommendation.reason,
+        },
+        select: {
+          id: true,
+          experience_id: true,
+        },
+      });
+
+      return {
+        created: true as const,
+        proposalId: created.id,
+        experienceIds: [
+          created.experience_id ?? primaryRecommendation.experience.id,
+        ],
+      };
+    }
+
+    const createdProposal = await tx.proposal.create({
+      data: {
+        request_id: request.id,
+        proposal_status: ProposalStatus.PENDING,
+        objective_alignment: `source:${primaryRecommendation.recommendationSource}`,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    for (const recommendation of topRecommendations) {
       const baseScore =
         recommendation.breakdown?.baseScore ?? recommendation.score;
       const riskAdjustment =
         (recommendation.breakdown?.debriefBoost ?? 0) +
         (recommendation.breakdown?.opennessBoost ?? 0);
 
-      const normalizedBaseScore = Math.round(baseScore * 100);
-      const normalizedRiskAdjustment = Math.round(riskAdjustment * 100);
-
-      let createdId: number;
-      let experienceId = recommendation.experience.id;
-
-      if (hasProposalExperienceDelegate) {
-        const created = await tx.proposal.create({
-          data: {
-            request_id: request.id,
-            proposal_status: ProposalStatus.PENDING,
-            objective_alignment: `source:${recommendation.recommendationSource}`,
-          },
-          select: {
-            id: true,
-          },
-        });
-
-        createdId = created.id;
-      } else {
-        const created = await txAny.proposal.create({
-          data: {
-            // Backward-compatible path for unit-test mocks still stubbing legacy schema.
-            request_id: request.id,
-            experience_id: recommendation.experience.id,
-            proposal_status: ProposalStatus.PENDING,
-            objective_alignment: `source:${recommendation.recommendationSource}`,
-            base_score: normalizedBaseScore,
-            risk_adjustment: normalizedRiskAdjustment,
-            rationale_desc: recommendation.reason,
-          },
-          select: {
-            id: true,
-            experience_id: true,
-          },
-        });
-
-        createdId = created.id;
-        experienceId = created.experience_id ?? recommendation.experience.id;
-      }
-
-      if (hasProposalExperienceDelegate) {
-        await txAny.proposalExperience!.create({
-          data: {
-            proposal_id: createdId,
-            experience_id: recommendation.experience.id,
-            base_score: normalizedBaseScore,
-            risk_adjustment: normalizedRiskAdjustment,
-            rationale_desc: recommendation.reason,
-          },
-        });
-      }
-
-      proposals.push({
-        id: createdId,
-        experienceId,
+      await txAny.proposalExperience!.create({
+        data: {
+          proposal_id: createdProposal.id,
+          experience_id: recommendation.experience.id,
+          base_score: Math.round(baseScore * 100),
+          risk_adjustment: Math.round(riskAdjustment * 100),
+          rationale_desc: recommendation.reason,
+        },
       });
     }
 
-    await tx.request.update({
-      where: { id: request.id },
-      data: {
-        request_status: REQUEST_STATUS.MATCHED as never,
-      },
-    });
-
-    return proposals;
+    return {
+      created: true as const,
+      proposalId: createdProposal.id,
+      experienceIds: topRecommendations.map(
+        recommendation => recommendation.experience.id
+      ),
+    };
   });
+
+  if (!creationResult.created) {
+    return {
+      created: false,
+      reason: 'active_proposal_exists',
+      proposalId: creationResult.proposalId,
+    };
+  }
 
   logger.info(
     {
       requestId: job.requestId,
-      proposalCount: createdProposals.length,
-      proposalIds: createdProposals.map(proposal => proposal.id),
-      experienceIds: createdProposals.map(proposal => proposal.experienceId),
+      proposalCount: 1,
+      proposalIds: [creationResult.proposalId],
+      experienceIds: creationResult.experienceIds,
       trigger: job.trigger,
     },
     'Proposal generated from queue job'
   );
 
-  await notifyRequestStatusChanged({
-    requestId: request.id,
-    previousStatus: REQUEST_STATUS.PENDING,
-    nextStatus: REQUEST_STATUS.MATCHED,
-  });
-
   return {
     created: true,
-    proposalId: createdProposals[0]?.id ?? null,
+    proposalId: creationResult.proposalId,
   };
 }
 
@@ -226,57 +341,339 @@ function buildUserDisplayName(user: {
   );
 }
 
-async function notifyRequestStatusChanged(params: {
-  requestId: number;
-  previousStatus: string | null;
-  nextStatus: string;
-}) {
-  if (params.previousStatus === params.nextStatus) {
-    return;
+function toUserProposalStatus(
+  raw: ProposalStatus
+): 'PENDING' | 'APPROVED' | 'ACCEPTED' | 'REJECTED' {
+  return String(raw).toUpperCase() as
+    | 'PENDING'
+    | 'APPROVED'
+    | 'ACCEPTED'
+    | 'REJECTED';
+}
+
+function buildDefaultUserProposalStatusCounts(): UserProposalStatusCounts {
+  return {
+    PENDING: 0,
+    APPROVED: 0,
+    ACCEPTED: 0,
+    REJECTED: 0,
+  };
+}
+
+function buildUserProposalWhere(input: {
+  userId: number;
+  status: UserProposalStatusFilter;
+  requestId: number | null;
+  createdFrom: string;
+  createdTo: string;
+}): Prisma.ProposalWhereInput {
+  const clauses: Prisma.ProposalWhereInput[] = [
+    {
+      request: { user_id: input.userId },
+    },
+  ];
+
+  if (input.status !== 'all') {
+    clauses.push({
+      proposal_status: input.status as ProposalStatus,
+    });
   }
 
-  const request = await prisma.request.findUnique({
-    where: { id: params.requestId },
+  if (input.requestId !== null) {
+    clauses.push({
+      request_id: input.requestId,
+    });
+  }
+
+  if (input.createdFrom || input.createdTo) {
+    const createdAt: Prisma.DateTimeFilter = {};
+    if (input.createdFrom) {
+      createdAt.gte = new Date(`${input.createdFrom}T00:00:00.000Z`);
+    }
+    if (input.createdTo) {
+      createdAt.lte = new Date(`${input.createdTo}T23:59:59.999Z`);
+    }
+    clauses.push({
+      created_at: createdAt,
+    });
+  }
+
+  return clauses.length === 1 ? clauses[0] : { AND: clauses };
+}
+
+async function findUserProposalRows(
+  where: Prisma.ProposalWhereInput,
+  currentPage?: number,
+  pageSize?: number
+) {
+  return prisma.proposal.findMany({
+    where,
     select: {
       id: true,
-      objective_category: true,
-      user: {
+      proposal_status: true,
+      created_at: true,
+      updated_at: true,
+      proposal_experiences: {
+        select: {
+          rationale_desc: true,
+          base_score: true,
+          risk_adjustment: true,
+          experience: {
+            select: {
+              id: true,
+              experience_title: true,
+              delivery_methods: true,
+              capacity_max: true,
+              duration_min: true,
+              duration_max: true,
+              experience_pricing: {
+                select: {
+                  starting_price: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: [{ id: 'asc' }],
+      },
+      _count: {
+        select: { proposal_experiences: true },
+      },
+      request: {
         select: {
           id: true,
-          email: true,
-          user_name: true,
-          profile: {
+          objective_category: true,
+        },
+      },
+    },
+    ...(currentPage !== undefined && pageSize !== undefined
+      ? {
+          skip: (currentPage - 1) * pageSize,
+          take: pageSize,
+        }
+      : {}),
+    orderBy: { created_at: 'desc' },
+  });
+}
+
+function mapUserProposalItem(
+  proposal: Awaited<ReturnType<typeof findUserProposalRows>>[number]
+): UserProposalItem {
+  return {
+    id: proposal.id,
+    requestId: proposal.request.id,
+    status: toUserProposalStatus(proposal.proposal_status),
+    experienceTitle:
+      proposal.proposal_experiences[0]?.experience.experience_title ?? '-',
+    deliveryMethod:
+      proposal.proposal_experiences[0]?.experience.delivery_methods ?? '-',
+    capacityMax: proposal.proposal_experiences[0]?.experience.capacity_max ?? 0,
+    rationale: proposal.proposal_experiences[0]?.rationale_desc ?? '-',
+    objectiveCategory: proposal.request.objective_category,
+    experienceCount: proposal._count.proposal_experiences,
+    createdAt: proposal.created_at,
+    updatedAt: proposal.updated_at,
+    score:
+      proposal.proposal_experiences[0] !== undefined
+        ? Number(proposal.proposal_experiences[0].base_score) +
+          Number(proposal.proposal_experiences[0].risk_adjustment)
+        : null,
+    experiences: proposal.proposal_experiences.map(item => ({
+      id: item.experience.id,
+      title: item.experience.experience_title,
+      deliveryMethods: item.experience.delivery_methods,
+      capacityMax: item.experience.capacity_max,
+      durationMin: item.experience.duration_min,
+      durationMax: item.experience.duration_max,
+      startingPrice:
+        item.experience.experience_pricing?.starting_price !== null &&
+        item.experience.experience_pricing?.starting_price !== undefined
+          ? Number(item.experience.experience_pricing.starting_price)
+          : null,
+    })),
+  };
+}
+
+export async function getUserProposals(
+  userId: number
+): Promise<UserProposalItem[]> {
+  const proposals = await findUserProposalRows(
+    buildUserProposalWhere({
+      userId,
+      status: 'all',
+      requestId: null,
+      createdFrom: '',
+      createdTo: '',
+    })
+  );
+
+  return proposals.map(mapUserProposalItem);
+}
+
+export async function getUserProposalsPage(
+  userId: number,
+  query: UserProposalsPageQuery
+): Promise<UserProposalsPageData> {
+  const currentPage =
+    Number.isFinite(query.page) && query.page > 0 ? query.page : 1;
+  const pageSize =
+    Number.isFinite(query.pageSize) && query.pageSize > 0 ? query.pageSize : 8;
+
+  const where = buildUserProposalWhere({
+    userId,
+    status: query.status,
+    requestId: query.requestId,
+    createdFrom: query.createdFrom,
+    createdTo: query.createdTo,
+  });
+
+  const statusWhere = buildUserProposalWhere({
+    userId,
+    status: 'all',
+    requestId: query.requestId,
+    createdFrom: query.createdFrom,
+    createdTo: query.createdTo,
+  });
+
+  const [totalItems, rows, statusRows] = await Promise.all([
+    prisma.proposal.count({ where }),
+    findUserProposalRows(where, currentPage, pageSize),
+    prisma.proposal.groupBy({
+      by: ['proposal_status'],
+      where: statusWhere,
+      _count: {
+        id: true,
+      },
+    }),
+  ]);
+
+  const statusCounts = buildDefaultUserProposalStatusCounts();
+  statusRows.forEach(row => {
+    const normalizedStatus = String(row.proposal_status).toUpperCase();
+    if (normalizedStatus in statusCounts) {
+      statusCounts[normalizedStatus as keyof typeof statusCounts] =
+        row._count.id;
+    }
+  });
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+  return {
+    items: rows.map(mapUserProposalItem),
+    totalItems,
+    totalPages,
+    currentPage: Math.min(currentPage, totalPages),
+    statusCounts,
+  };
+}
+
+export async function getUserProposalById(
+  proposalId: number,
+  userId: number
+): Promise<UserProposalDetail | null> {
+  const proposal = await prisma.proposal.findFirst({
+    where: {
+      id: proposalId,
+      request: { user_id: userId },
+    },
+    select: {
+      id: true,
+      proposal_status: true,
+      objective_alignment: true,
+      created_at: true,
+      updated_at: true,
+      request: {
+        select: {
+          id: true,
+          objective_category: true,
+          budget_min: true,
+          budget_max: true,
+          participant_count: true,
+          requestCalendars: {
             select: {
-              first_name: true,
-              last_name: true,
+              preferred_date: true,
+            },
+            orderBy: [{ preferred_date: 'asc' }, { id: 'asc' }],
+            take: 1,
+          },
+        },
+      },
+      proposal_experiences: {
+        orderBy: { id: 'asc' },
+        select: {
+          rationale_desc: true,
+          base_score: true,
+          risk_adjustment: true,
+          experience: {
+            select: {
+              id: true,
+              experience_title: true,
+              delivery_methods: true,
+              capacity_max: true,
+              duration_min: true,
+              duration_max: true,
+              experience_pricing: {
+                select: {
+                  starting_price: true,
+                  adding_price: true,
+                },
+              },
             },
           },
         },
       },
-      proposals: {
-        orderBy: [{ id: 'desc' }],
-        select: {
-          id: true,
-        },
-        take: 1,
-      },
     },
   });
 
-  if (!request) return;
+  if (!proposal) return null;
 
-  try {
-    const { enqueueRequestChangedNotification } =
-      await import('@/services/notification-service');
+  return {
+    id: proposal.id,
+    requestId: proposal.request.id,
+    status: toUserProposalStatus(proposal.proposal_status),
+    objectiveAlignment: proposal.objective_alignment,
+    createdAt: proposal.created_at,
+    updatedAt: proposal.updated_at,
+    request: {
+      id: proposal.request.id,
+      objectiveCategory: proposal.request.objective_category,
+      budgetMin: proposal.request.budget_min
+        ? Number(proposal.request.budget_min)
+        : null,
+      budgetMax: proposal.request.budget_max
+        ? Number(proposal.request.budget_max)
+        : null,
+      preferredDate:
+        proposal.request.requestCalendars[0]?.preferred_date ?? null,
+      participantCount: proposal.request.participant_count,
+    },
+    experiences: proposal.proposal_experiences.map(pe => ({
+      id: pe.experience.id,
+      title: pe.experience.experience_title,
+      deliveryMethods: pe.experience.delivery_methods,
+      capacityMax: pe.experience.capacity_max,
+      durationMin: pe.experience.duration_min,
+      durationMax: pe.experience.duration_max,
+      startingPrice: pe.experience.experience_pricing?.starting_price
+        ? Number(pe.experience.experience_pricing.starting_price)
+        : null,
+      addingPrice: pe.experience.experience_pricing?.adding_price
+        ? Number(pe.experience.experience_pricing.adding_price)
+        : null,
+      rationale: pe.rationale_desc,
+      baseScore: Number(pe.base_score),
+      riskAdjustment: Number(pe.risk_adjustment),
+    })),
+  };
+}
 
-    await enqueueRequestChangedNotification({
-      requestId: request.id,
-      previousStatus: params.previousStatus,
-      nextStatus: params.nextStatus,
-    });
-  } catch {
-    // Proposal generation should continue even if notifications fail.
-  }
+export async function getPendingProposalCount(userId: number): Promise<number> {
+  return prisma.proposal.count({
+    where: {
+      request: { user_id: userId },
+      proposal_status: ProposalStatus.PENDING,
+    },
+  });
 }
 
 function buildProposalWhere(query: {
@@ -580,6 +977,7 @@ function mapProposalItem(
       row.proposal_status
     ).toLowerCase() as AdminProposalListItem['status'],
     objectiveAlignment: row.objective_alignment,
+    rejectNotes: row.reject_notes,
     rationale: primaryExperience?.rationale ?? '-',
     baseScore: primaryExperience?.baseScore ?? 0,
     riskAdjustment: primaryExperience?.riskAdjustment ?? 0,
@@ -822,6 +1220,7 @@ export async function updateAdminProposal(
     data: {
       proposal_status: normalized.status.toUpperCase() as ProposalStatus,
       objective_alignment: normalized.objectiveAlignment,
+      ...(normalized.status === 'approved' ? { reject_notes: null } : {}),
     },
   });
 
@@ -885,6 +1284,7 @@ export async function approveAdminProposal(id: number): Promise<{
       where: { id: proposal.id },
       data: {
         proposal_status: ProposalStatus.APPROVED,
+        reject_notes: null,
       },
     });
 

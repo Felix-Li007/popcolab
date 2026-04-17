@@ -2,6 +2,7 @@
 export const REQUEST_QUEUE_TRIGGER = {
   REQUEST_EXPIRED: 'request_expired',
   INVITED_CONFIRMED: 'invited_confirmed',
+  REQUEST_USERS_RESPONDED: 'request_users_responded',
   PROPOSAL_REJECTED: 'proposal_rejected',
 } as const;
 
@@ -116,16 +117,22 @@ export function isNotificationQueueJob(
   switch (job.type) {
     case NOTIFICATION_JOB_TYPE.EXPERIENCE_CREATED_EMAIL:
       return (
+        typeof job.experienceId === 'number' &&
+        Number.isInteger(job.experienceId) &&
         typeof job.experienceTitle === 'string' &&
         typeof job.experienceCategory === 'string'
       );
     case NOTIFICATION_JOB_TYPE.EVENT_CANCELED_EMAIL:
       return (
+        typeof job.eventId === 'number' &&
+        Number.isInteger(job.eventId) &&
         typeof job.eventTitle === 'string' &&
         typeof job.eventLocation === 'string'
       );
     case NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL:
       return (
+        typeof job.eventId === 'number' &&
+        Number.isInteger(job.eventId) &&
         typeof job.eventTitle === 'string' &&
         typeof job.eventLocation === 'string' &&
         typeof job.canceledDateLabel === 'string' &&
@@ -134,6 +141,8 @@ export function isNotificationQueueJob(
       );
     case NOTIFICATION_JOB_TYPE.EVENT_CREATED_EMAIL:
       return (
+        typeof job.eventId === 'number' &&
+        Number.isInteger(job.eventId) &&
         typeof job.eventTitle === 'string' &&
         typeof job.eventLocation === 'string'
       );

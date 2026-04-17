@@ -11,6 +11,7 @@ import {
   formatScheduleTimeValue,
   parseCalendarDateValue,
 } from '@/utils/event-schedule';
+import { showBookingUnavailable } from '@/utils/booking-unavailable';
 
 type EventCalendar = {
   id: number;
@@ -265,12 +266,13 @@ export default function EventDetailsPage() {
               )}
             </div>
 
-            <Link
-              href={`/dashboard/events/${event.id}/checkout`}
+            <button
+              type="button"
+              onClick={() => showBookingUnavailable(event.eventTitle)}
               className="mt-5 block w-full rounded-full bg-pink-medium py-3 text-center font-semibold text-white shadow-[0_16px_32px_rgba(219,39,119,0.22)] transition hover:-translate-y-px hover:bg-magenta"
             >
               Book an Event
-            </Link>
+            </button>
           </section>
         </aside>
       </div>

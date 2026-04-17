@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { showBookingUnavailable } from '@/utils/booking-unavailable';
 
 type Experience = {
   id: number;
@@ -141,12 +141,13 @@ function ExperienceCard({
         >
           View Info
         </button>
-        <Link
-          href={`/experiences/${exp.id}/checkout`}
+        <button
+          type="button"
+          onClick={() => showBookingUnavailable(exp.experienceTitle)}
           className="flex-1 py-2 px-4 bg-teal-500 text-white rounded font-semibold hover:bg-teal-600 text-center"
         >
           Book Now
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -188,12 +189,13 @@ function ExperienceModal({
           >
             Close
           </button>
-          <Link
-            href={`/experiences/${exp.id}/checkout`}
+          <button
+            type="button"
+            onClick={() => showBookingUnavailable(exp.experienceTitle)}
             className="py-2 px-4 bg-teal-500 text-white rounded hover:bg-teal-600"
           >
             Book Now
-          </Link>
+          </button>
         </div>
       </div>
     </div>

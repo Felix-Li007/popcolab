@@ -19,6 +19,22 @@ function formatDate(value: Date | null) {
   return new Date(value).toLocaleString();
 }
 
+function getUserPrimaryEmail(
+  authContext: Awaited<ReturnType<typeof getCurrentAuthContext>>
+) {
+  return (
+    authContext.user?.emailAddresses.find(
+      entry => entry.id === authContext.user?.primaryEmailAddressId
+    )?.emailAddress ??
+    authContext.user?.emailAddresses[0]?.emailAddress ??
+    ''
+  );
+}
+
+function normalizeEmail(value: string) {
+  return value.trim().toLowerCase();
+}
+
 export default async function InvitationPage({
   params,
   searchParams,
@@ -29,6 +45,11 @@ export default async function InvitationPage({
     getCurrentAuthContext(),
   ]);
   const invitation = await getInvitationByToken(token);
+  const currentUserEmail = getUserPrimaryEmail(authContext);
+  const isInvitationOwner =
+    !authContext.isAuthenticated ||
+    normalizeEmail(currentUserEmail) ===
+      normalizeEmail(invitation?.userEmail ?? '');
 
   if (!invitation) {
     return (
@@ -40,6 +61,35 @@ export default async function InvitationPage({
           <p className="mt-2 text-sm text-gray-500">
             This invitation link is invalid or no longer available.
           </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (authContext.isAuthenticated && !isInvitationOwner) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-2xl items-center px-4 py-16">
+        <div className="w-full rounded-[32px] border border-rose-200 bg-white p-8 shadow-sm">
+          <h1 className="text-2xl font-bold text-gray-900">Access denied</h1>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            This invitation belongs to <strong>{invitation.userEmail}</strong>.
+            Please sign in with the invited email address to view or respond to
+            this request.
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
+            <Link
+              href="/"
+              className="font-medium text-gray-500 hover:text-gray-900"
+            >
+              Back to home
+            </Link>
+            <Link
+              href="/sign-out"
+              className="font-medium text-teal-700 hover:text-teal-800"
+            >
+              Sign out and switch account
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -68,7 +118,9 @@ export default async function InvitationPage({
 
         {query.error ? (
           <p className="mt-5 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            Unable to process the invitation response. Please try again.
+            {query.error === 'forbidden'
+              ? 'This invitation belongs to a different user account.'
+              : 'Unable to process the invitation response. Please try again.'}
           </p>
         ) : null}
         {query.accepted ? (

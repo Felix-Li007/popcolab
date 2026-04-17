@@ -18,7 +18,6 @@ import {
 import {
   enqueueDateCanceledNotifications,
   enqueueEventCreatedNotifications,
-  getRemovedEventCalendars,
 } from '@/services/notification-service';
 import { getEventById, serializeEvent } from '@/services/event-service';
 import { sanitizeRichTextHtml } from '@/utils/html-sanitizer';
@@ -27,6 +26,7 @@ import { EVENT_CANCEL_MIN_LEAD_DAYS } from '@/constants/event-config';
 import {
   parseDateInputValue,
   formatDateForPrismaDateField,
+  formatLocalDateValue,
   formatTimeForPrismaTimeField,
   formatScheduleTimeValue,
   isAtLeastDaysAway,
@@ -127,6 +127,38 @@ function canCancelCalendar(calendar: { event_date: Date; start_time: Date }) {
   const startDateTime = getCalendarStartDateTime(calendar);
   if (!startDateTime) return false;
   return isAtLeastDaysAway(startDateTime, EVENT_CANCEL_MIN_LEAD_DAYS);
+}
+
+function buildExistingCalendarKey(calendar: {
+  event_date: Date;
+  start_time: Date;
+  end_time: Date;
+}) {
+  const parsedDate = parseCalendarDateValue(calendar.event_date);
+  const startTime = formatScheduleTimeValue(calendar.start_time);
+  const endTime = formatScheduleTimeValue(calendar.end_time);
+
+  if (!parsedDate || !startTime || !endTime) {
+    return null;
+  }
+
+  return `${formatLocalDateValue(parsedDate)}|${startTime}|${endTime}`;
+}
+
+function buildDraftCalendarKey(calendar: {
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+}) {
+  const parsedDate = parseDateInputValue(calendar.eventDate);
+  const startTime = formatScheduleTimeValue(calendar.startTime);
+  const endTime = formatScheduleTimeValue(calendar.endTime);
+
+  if (!parsedDate || !startTime || !endTime) {
+    return null;
+  }
+
+  return `${formatLocalDateValue(parsedDate)}|${startTime}|${endTime}`;
 }
 
 export async function uploadEventGalleryImageAction(formData: FormData) {
@@ -311,42 +343,92 @@ export async function updateEventAction(
       data.contentHtml !== undefined
         ? sanitizeRichTextHtml(data.contentHtml)
         : undefined;
-    const eventCalendarUpdate =
-      data.eventCalendars !== undefined
-        ? {
-            deleteMany: {},
-            create: data.eventCalendars.map(schedule => {
-              const parsedDate = parseDateInputValue(schedule.eventDate);
-              if (!parsedDate) throw new Error('Invalid event schedule');
+    const activeCalendars = getActiveEventCalendars(
+      existingEvent.event_calendars
+    );
 
-              const startTime = formatTimeForPrismaTimeField(
-                schedule.startTime
-              );
-              const endTime = formatTimeForPrismaTimeField(schedule.endTime);
+    const nextCalendarsWithKeys =
+      data.eventCalendars?.map(schedule => ({
+        schedule,
+        key: buildDraftCalendarKey(schedule),
+      })) ?? [];
 
-              if (!startTime || !endTime) {
-                throw new Error('Invalid event schedule');
-              }
+    const nextCalendarKeys = new Set(
+      nextCalendarsWithKeys
+        .map(item => item.key)
+        .filter((value): value is string => Boolean(value))
+    );
 
-              return {
-                event_date: formatDateForPrismaDateField(parsedDate),
-                start_time: startTime,
-                end_time: endTime,
-                date_status: DateStatus.VALID,
-              };
-            }),
-          }
-        : undefined;
+    const existingCalendarsByKey = new Map(
+      activeCalendars
+        .map(calendar => {
+          const key = buildExistingCalendarKey(calendar);
+          return key ? ([key, calendar] as const) : null;
+        })
+        .filter(
+          (
+            entry
+          ): entry is readonly [string, (typeof activeCalendars)[number]] =>
+            Boolean(entry)
+        )
+    );
 
     const removedCalendars =
       data.eventCalendars !== undefined
-        ? getRemovedEventCalendars({
-            previousCalendars: getActiveEventCalendars(
-              existingEvent.event_calendars
-            ),
-            nextCalendars: data.eventCalendars,
+        ? activeCalendars.filter(calendar => {
+            const key = buildExistingCalendarKey(calendar);
+            return key ? !nextCalendarKeys.has(key) : false;
           })
         : [];
+
+    const addedCalendars =
+      data.eventCalendars !== undefined
+        ? nextCalendarsWithKeys
+            .filter(
+              (
+                item
+              ): item is {
+                schedule: NonNullable<typeof data.eventCalendars>[number];
+                key: string;
+              } => Boolean(item.key)
+            )
+            .filter(item => !existingCalendarsByKey.has(item.key))
+            .map(item => item.schedule)
+        : [];
+
+    const eventCalendarUpdate =
+      data.eventCalendars !== undefined
+        ? {
+            ...(removedCalendars.length > 0 && {
+              updateMany: removedCalendars.map(calendar => ({
+                where: { id: calendar.id },
+                data: { date_status: DateStatus.CANCELLED },
+              })),
+            }),
+            ...(addedCalendars.length > 0 && {
+              create: addedCalendars.map(schedule => {
+                const parsedDate = parseDateInputValue(schedule.eventDate);
+                if (!parsedDate) throw new Error('Invalid event schedule');
+
+                const startTime = formatTimeForPrismaTimeField(
+                  schedule.startTime
+                );
+                const endTime = formatTimeForPrismaTimeField(schedule.endTime);
+
+                if (!startTime || !endTime) {
+                  throw new Error('Invalid event schedule');
+                }
+
+                return {
+                  event_date: formatDateForPrismaDateField(parsedDate),
+                  start_time: startTime,
+                  end_time: endTime,
+                  date_status: DateStatus.VALID,
+                };
+              }),
+            }),
+          }
+        : undefined;
 
     if (
       data.eventStatus === EventStatus.INACTIVE &&
@@ -359,13 +441,28 @@ export async function updateEventAction(
       };
     }
 
-    if (removedCalendars.length > 0) {
+    const blockedRemoval = removedCalendars.find(
+      calendar => !canCancelCalendar(calendar)
+    );
+
+    if (blockedRemoval) {
       return {
         success: false,
-        error:
-          'Use the dedicated cancel date action to cancel a specific event date.',
+        error: `Event dates can only be canceled at least ${EVENT_CANCEL_MIN_LEAD_DAYS} days before the scheduled start time.`,
       };
     }
+
+    const nextActiveCalendarCount =
+      data.eventCalendars !== undefined
+        ? activeCalendars.length -
+          removedCalendars.length +
+          addedCalendars.length
+        : activeCalendars.length;
+
+    const resolvedEventStatus =
+      data.eventCalendars !== undefined && nextActiveCalendarCount === 0
+        ? EventStatus.INACTIVE
+        : data.eventStatus;
 
     const eventGalleryUpdate =
       data.eventGalleries !== undefined
@@ -400,13 +497,14 @@ export async function updateEventAction(
         ...(data.contentHtml !== undefined && {
           contentHtml: sanitizedContentHtml || null,
         }),
-        ...(data.eventStatus && { eventStatus: data.eventStatus }),
+        ...(resolvedEventStatus && { eventStatus: resolvedEventStatus }),
         ...(data.capacity_max !== undefined && {
           capacity_max: data.capacity_max,
         }),
-        ...(eventCalendarUpdate && {
-          event_calendars: eventCalendarUpdate,
-        }),
+        ...(eventCalendarUpdate &&
+          Object.keys(eventCalendarUpdate).length > 0 && {
+            event_calendars: eventCalendarUpdate,
+          }),
         ...(eventGalleryUpdate && {
           event_galleries: eventGalleryUpdate,
         }),
@@ -420,6 +518,22 @@ export async function updateEventAction(
         event_pricing: true,
       },
     });
+
+    if (removedCalendars.length > 0) {
+      try {
+        await enqueueDateCanceledNotifications({
+          eventId: existingEvent.id,
+          eventTitle: event.eventTitle,
+          eventLocation: event.eventLocation,
+          canceledCalendars: removedCalendars,
+        });
+      } catch (notificationError) {
+        console.error(
+          'Failed to send event date cancellation notifications:',
+          notificationError
+        );
+      }
+    }
 
     revalidatePath('/admin/events');
     return { success: true, data: serializeEvent(event) };

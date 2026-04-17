@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import {
+  getInvitationByToken,
   respondToInvitation,
   sendRequestInvitations,
   type InvitationResponseAction,
@@ -60,6 +61,10 @@ function buildInvitationResponseRedirectPath(
   token: string,
   response: InvitationResponseResult
 ): string {
+  if (response.type === 'forbidden') {
+    return buildInvitationPath(token, { error: 'forbidden' });
+  }
+
   if (response.type === 'expired') {
     return buildInvitationPath(token, { expired: 1 });
   }
@@ -150,9 +155,34 @@ export async function respondToInvitationAction(
   }
 
   try {
+    const authContext = await getCurrentAuthContext();
+    const invitation = await getInvitationByToken(token);
+
+    if (!invitation) {
+      redirect(buildInvitationPath(token, { error: 1 }));
+    }
+
+    if (!authContext.isAuthenticated || !authContext.user) {
+      redirect(
+        buildAuthPath({
+          authAction: 'sign-in',
+          redirectPath: buildInvitationPath(token),
+          email: invitation.userEmail,
+        })
+      );
+    }
+
+    const currentUserEmail =
+      authContext.user?.emailAddresses.find(
+        entry => entry.id === authContext.user?.primaryEmailAddressId
+      )?.emailAddress ??
+      authContext.user?.emailAddresses[0]?.emailAddress ??
+      null;
+
     const response = await respondToInvitation(
       token,
-      action as InvitationResponseAction
+      action as InvitationResponseAction,
+      currentUserEmail
     );
     redirect(buildInvitationResponseRedirectPath(token, response));
   } catch {

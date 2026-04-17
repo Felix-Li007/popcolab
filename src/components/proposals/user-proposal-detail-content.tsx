@@ -4,19 +4,19 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { acceptProposalAction } from '@/actions/request-actions';
 import RejectProposalModal from '@/components/requests/reject-proposal-modal';
-import type { UserProposalDetail } from '@/services/user-proposal-service';
+import type { UserProposalDetail } from '@/services/proposal-service';
 
 const STATUS_MAP: Record<string, { label: string; className: string }> = {
-  pending: {
-    label: 'Awaiting Review',
+  PENDING: {
+    label: 'PENDING',
     className: 'bg-amber-100 text-amber-700',
   },
-  approved: {
-    label: 'Ready for You',
+  APPROVED: {
+    label: 'APPROVED',
     className: 'bg-emerald-100 text-emerald-700',
   },
-  accepted: { label: 'Accepted', className: 'bg-violet-100 text-violet-700' },
-  rejected: { label: 'Rejected', className: 'bg-red-100 text-red-600' },
+  ACCEPTED: { label: 'ACCEPTED', className: 'bg-violet-100 text-violet-700' },
+  REJECTED: { label: 'REJECTED', className: 'bg-red-100 text-red-600' },
 };
 
 function formatDate(d: Date | null): string {
@@ -53,12 +53,18 @@ export default function UserProposalDetailContent({ proposal }: Props) {
     className: 'bg-gray-100 text-gray-600',
   };
 
-  const isApproved = proposal.status === 'approved';
+  const isApproved = proposal.status === 'APPROVED';
 
   function handleAccept() {
     startAccept(async () => {
       await acceptProposalAction(proposal.id);
     });
+  }
+
+  function handleBook(experienceTitle: string) {
+    window.alert(
+      `Booking for "${experienceTitle}" is not available yet. Please contact support or check back later.`
+    );
   }
 
   return (
@@ -242,14 +248,22 @@ export default function UserProposalDetailContent({ proposal }: Props) {
                   </div>
                 </div>
 
-                {/* Score breakdown */}
-                <div className="mt-3 pt-3 border-t border-gray-100 flex gap-3">
-                  <span className="text-[10px] bg-gray-100 text-gray-600 rounded-full px-2.5 py-1 font-semibold">
-                    Base {exp.baseScore.toFixed(2)}
-                  </span>
-                  <span className="text-[10px] bg-gray-100 text-gray-600 rounded-full px-2.5 py-1 font-semibold">
-                    Risk adjustment {exp.riskAdjustment.toFixed(2)}
-                  </span>
+                <div className="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex gap-3">
+                    <span className="text-[10px] bg-gray-100 text-gray-600 rounded-full px-2.5 py-1 font-semibold">
+                      Base {exp.baseScore.toFixed(2)}
+                    </span>
+                    <span className="text-[10px] bg-gray-100 text-gray-600 rounded-full px-2.5 py-1 font-semibold">
+                      Risk adjustment {exp.riskAdjustment.toFixed(2)}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleBook(exp.title)}
+                    className="inline-flex items-center justify-center rounded-lg border border-[#E91E8C] bg-[#FFF4FA] px-4 py-2 text-xs font-semibold text-[#E91E8C] transition-colors hover:bg-pink-50"
+                  >
+                    Book
+                  </button>
                 </div>
               </div>
             );
@@ -286,7 +300,7 @@ export default function UserProposalDetailContent({ proposal }: Props) {
       )}
 
       {/* Readonly banners */}
-      {proposal.status === 'accepted' && (
+      {proposal.status === 'ACCEPTED' && (
         <div className="rounded-lg bg-violet-50 border border-violet-200 px-4 py-3">
           <p className="text-xs font-semibold text-violet-700">
             You accepted this proposal. Admin will follow up with next steps.
@@ -294,7 +308,7 @@ export default function UserProposalDetailContent({ proposal }: Props) {
         </div>
       )}
 
-      {proposal.status === 'rejected' && (
+      {proposal.status === 'REJECTED' && (
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
           <p className="text-xs font-semibold text-red-700">
             You rejected this proposal. Admin will review your feedback and may

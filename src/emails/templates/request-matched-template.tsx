@@ -8,7 +8,7 @@ export type RequestStatusChangedTemplateProps = {
 
 function formatStatusLabel(value: string | null) {
   if (!value) return null;
-  return value.toLowerCase().replaceAll('_', ' ');
+  return value.toUpperCase();
 }
 
 export function RequestStatusChangedEmail(

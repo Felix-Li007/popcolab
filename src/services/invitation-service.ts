@@ -6,10 +6,12 @@ import { InviteStatus, MessageType } from '@/libs/prisma/client';
 import { prisma } from '@/libs/prisma-client';
 import { sendResendEmail } from '@/services/resend-service';
 import { buildInvitationAbsoluteUrl } from '@/utils/url-helper';
+import { createModuleLogger } from '@/utils/logging-util';
 
 const USER_NAME_MAX_LENGTH = 50;
 const USER_EMAIL_MAX_LENGTH = 255;
 const INVITED_TOKEN_BYTES = 24;
+const logger = createModuleLogger(import.meta.url);
 
 export type InvitationRecipientInput = {
   userName: string;
@@ -24,6 +26,7 @@ export type InvitationRecipient = {
 export type InvitationResponseAction = 'accept' | 'reject';
 export type InvitationResponseResult =
   | { type: 'expired' }
+  | { type: 'forbidden' }
   | { type: 'rejected' }
   | {
       type: 'accepted';
@@ -73,6 +76,22 @@ function createInvitedToken(): string {
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+async function triggerProposalPreparationIfReady(requestUserId: number) {
+  try {
+    const { handleRequestUserResponded } =
+      await import('@/services/request-service');
+    await handleRequestUserResponded(requestUserId);
+  } catch (error) {
+    logger.error(
+      {
+        error,
+        requestUserId,
+      },
+      'Invitation response follow-up failed'
+    );
+  }
 }
 
 async function buildAcceptedInvitationResponse(
@@ -332,7 +351,8 @@ export async function getInvitationByToken(
 
 export async function respondToInvitation(
   token: string,
-  action: InvitationResponseAction
+  action: InvitationResponseAction,
+  currentUserEmail?: string | null
 ): Promise<InvitationResponseResult> {
   const invitation = await prisma.requestUser.findUnique({
     where: { invited_token: token },
@@ -346,6 +366,23 @@ export async function respondToInvitation(
 
   if (!invitation) {
     throw new Error('Invitation not found.');
+  }
+
+  const normalizedCurrentUserEmail =
+    typeof currentUserEmail === 'string'
+      ? normalizeEmail(currentUserEmail)
+      : '';
+  const normalizedInvitationEmail = normalizeEmail(invitation.user_email);
+
+  if (!normalizedCurrentUserEmail) {
+    return { type: 'forbidden' };
+  }
+
+  if (
+    normalizedCurrentUserEmail &&
+    normalizedCurrentUserEmail !== normalizedInvitationEmail
+  ) {
+    return { type: 'forbidden' };
   }
 
   const now = new Date();
@@ -367,6 +404,8 @@ export async function respondToInvitation(
         respond_at: now,
       },
     });
+
+    await triggerProposalPreparationIfReady(invitation.id);
 
     if (nextStatus === InviteStatus.rejected) {
       return { type: 'rejected' };

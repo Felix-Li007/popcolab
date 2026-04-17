@@ -58,7 +58,23 @@ function buildCalendarKey(calendar: EventCalendarSnapshot) {
     return null;
   }
 
-  return `${parsedDate.toISOString()}|${startTime}|${endTime}`;
+  return `${formatLocalDateValue(parsedDate)}|${startTime}|${endTime}`;
+}
+
+function buildDraftCalendarKey(calendar: {
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+}) {
+  const parsedDate = parseCalendarDateValue(calendar.eventDate);
+  const startTime = formatScheduleTimeValue(calendar.startTime);
+  const endTime = formatScheduleTimeValue(calendar.endTime);
+
+  if (!parsedDate || !startTime || !endTime) {
+    return null;
+  }
+
+  return `${formatLocalDateValue(parsedDate)}|${startTime}|${endTime}`;
 }
 
 function buildOrderSlotKey(slot: EventOrderSlot) {
@@ -366,6 +382,7 @@ class EventCreatedFlow extends NotificationFlow<RecipientWithOptionalId> {
     });
     this.queueJobType = NOTIFICATION_JOB_TYPE.EVENT_CREATED_EMAIL;
     this.queueJobPayload = () => ({
+      eventId: this.params.eventId,
       eventTitle: this.params.eventTitle,
       eventLocation: this.params.eventLocation,
     });
@@ -408,6 +425,7 @@ class EventCanceledFlow extends NotificationFlow<RecipientWithOptionalId> {
     });
     this.queueJobType = NOTIFICATION_JOB_TYPE.EVENT_CANCELED_EMAIL;
     this.queueJobPayload = () => ({
+      eventId: this.params.eventId,
       eventTitle: this.params.eventTitle,
       eventLocation: this.params.eventLocation,
     });
@@ -463,7 +481,7 @@ class DateCanceledFlow extends NotificationFlow<
     super(500);
     this.calendars = calendars;
     this.messageType = MessageType.DATE_CANCELED;
-    this.messageTitle = r => `Event date canceled: ${params.eventTitle}`;
+    this.messageTitle = () => `Event date canceled: ${params.eventTitle}`;
     this.messageBody = r =>
       `${params.eventTitle} on ${r.canceledDateLabel}${r.canceledTimeLabel ? ` ${r.canceledTimeLabel}` : ''} has been canceled.`;
     this.messageData = r => ({
@@ -476,6 +494,7 @@ class DateCanceledFlow extends NotificationFlow<
     });
     this.queueJobType = NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL;
     this.queueJobPayload = r => ({
+      eventId: params.eventId,
       eventTitle: params.eventTitle,
       eventLocation: params.eventLocation,
       canceledDateLabel: r.canceledDateLabel,
@@ -506,9 +525,7 @@ class DateCanceledFlow extends NotificationFlow<
 
 function formatRequestStatusForMessage(value: string | null) {
   const status = value ? toRequestStatus(value) : null;
-  return (
-    getRequestStatusLabel(status)?.toLowerCase() ?? value?.toLowerCase() ?? null
-  );
+  return getRequestStatusLabel(status) ?? value?.toUpperCase() ?? null;
 }
 
 type RequestChangedRecipient = RecipientWithOptionalId & {
@@ -648,14 +665,7 @@ export function getRemovedEventCalendars(params: {
 }): EventCalendarSnapshot[] {
   const nextCalendarKeys = new Set(
     params.nextCalendars
-      .map(calendar => {
-        const parsedDate = parseCalendarDateValue(calendar.eventDate);
-        if (!parsedDate || !calendar.startTime || !calendar.endTime) {
-          return null;
-        }
-
-        return `${parsedDate.toISOString()}|${calendar.startTime}|${calendar.endTime}`;
-      })
+      .map(calendar => buildDraftCalendarKey(calendar))
       .filter((value): value is string => Boolean(value))
   );
 
