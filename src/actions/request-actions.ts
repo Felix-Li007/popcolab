@@ -155,6 +155,8 @@ function parseMemberAnswers(
 async function resolveInviteEmails(
   inviteValues: string[]
 ): Promise<{ userName: string; userEmail: string }[]> {
+  // Invite selections may include direct email chips and whole-team entries.
+  // Normalize both sources into a single recipient list before deduping.
   const result: { userName: string; userEmail: string }[] = [];
 
   for (const v of inviteValues) {
@@ -228,6 +230,8 @@ export async function createRequestAction(
   const memberAnswersRaw =
     (formData.get('memberAnswers') as string)?.trim() || null;
 
+  // Validate the full multi-step payload before writing anything so the user
+  // gets field-level feedback instead of a partial request being created.
   const fieldErrors: CreateRequestState['fieldErrors'] = {};
 
   if (eventTypes.length === 0)

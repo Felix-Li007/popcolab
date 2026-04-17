@@ -131,6 +131,8 @@ export async function processNotificationQueueJob(job: NotificationQueueJob) {
   const resendFrom = getResendFromEmail();
   if (!resendFrom) throw new Error('RESEND_FROM_EMAIL is not configured.');
 
+  // Default to the date-canceled handler as a defensive fallback. In practice
+  // valid jobs should always resolve through their explicit type key first.
   const handler =
     notificationHandlers[job.type] ||
     notificationHandlers[NOTIFICATION_JOB_TYPE.EVENT_DATE_CANCELED_EMAIL];

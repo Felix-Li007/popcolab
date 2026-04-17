@@ -125,6 +125,7 @@ function buildDraftScheduleFromCalendar(
   };
 }
 
+// Compare schedule payloads by normalized display values rather than draft IDs.
 function isSameScheduleValue(left: DraftSchedule, right: DraftSchedule) {
   return (
     formatLocalDateValue(left.eventDate) ===
@@ -411,6 +412,8 @@ function EventEditor({
           ? buildDraftScheduleFromCalendar(originalCalendar)
           : null;
 
+        // When editing an existing persisted date, keep the original row intact
+        // and treat the modified draft as a brand-new date to add.
         if (
           selectedDraftScheduleId &&
           originalDraftSchedule &&

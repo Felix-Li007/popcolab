@@ -294,6 +294,8 @@ export async function enqueueRequestReady(
   trigger: RequestQueueTrigger,
   rejectedProposalId?: number
 ) {
+  // Central gate for async proposal generation. Every trigger funnels through
+  // the same readiness checks so admin and queue-driven flows stay consistent.
   const request = await prisma.request.findUnique({
     where: { id: requestId },
     select: {
@@ -358,6 +360,8 @@ export async function enqueueRequestReady(
     return { queued: false, reason: 'request_not_ready' } as const;
   }
 
+  // Flip the request into PENDING before queueing so the UI reflects that
+  // proposal generation is already underway.
   await prisma.request.update({
     where: { id: request.id },
     data: {
@@ -1120,6 +1124,8 @@ function selectUserRequestProposal(
     ReturnType<typeof findUserRequestRows>
   >[number]['proposals']
 ) {
+  // Prefer the accepted proposal when one exists so closed requests can still
+  // link users to the proposal they actually moved forward with.
   return (
     proposals.find(
       proposal => String(proposal.proposal_status).toUpperCase() === 'ACCEPTED'

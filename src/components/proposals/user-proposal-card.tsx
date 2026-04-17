@@ -79,7 +79,7 @@ export default function UserProposalCard({ proposal }: Props) {
 
   return (
     <div
-      className={`relative overflow-hidden border ${borderColor} rounded-[1.6rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.84))] p-5 flex flex-col gap-4 shadow-[0_18px_38px_rgba(15,23,42,0.06),0_6px_18px_rgba(233,30,140,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl`}
+      className={`relative overflow-hidden border ${borderColor} rounded-[1.6rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.84))] px-4 py-5 flex flex-col gap-4 shadow-[0_18px_38px_rgba(15,23,42,0.06),0_6px_18px_rgba(233,30,140,0.04),inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-xl`}
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-[linear-gradient(180deg,rgba(255,255,255,0.45),transparent)]" />
       <div className="pointer-events-none absolute left-6 top-0 h-px w-24 bg-white/85" />

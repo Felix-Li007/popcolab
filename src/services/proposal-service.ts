@@ -130,7 +130,7 @@ export async function createFittedProposal(job: RequestQueueJob) {
     throw new Error(`Request ${job.requestId} not found.`);
   }
 
-  // 先判断是否已有proposal
+  // Avoid creating a duplicate active proposal for the same request.
   if (request.proposals.length > 0) {
     return {
       created: false,
@@ -139,7 +139,7 @@ export async function createFittedProposal(job: RequestQueueJob) {
     };
   }
 
-  // 获取推荐结果
+  // Pull the best-fit experiences before building the proposal payload.
   const recommendations = await getRequestExperiences(request.id, [], 10);
   if (!recommendations || recommendations.length === 0) {
     return {
@@ -224,6 +224,8 @@ export async function createFittedProposal(job: RequestQueueJob) {
       };
     }
 
+    // Some tests still mock the legacy one-experience proposal shape. Keep
+    // this fallback path so older mocks can still exercise the action layer.
     if (!hasProposalExperienceDelegate) {
       const baseScore =
         primaryRecommendation.breakdown?.baseScore ??
@@ -258,6 +260,8 @@ export async function createFittedProposal(job: RequestQueueJob) {
       };
     }
 
+    // The current schema stores one proposal row plus separate
+    // proposal_experience rows for each recommended experience.
     const createdProposal = await tx.proposal.create({
       data: {
         request_id: request.id,

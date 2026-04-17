@@ -86,6 +86,8 @@ export default function ProposalEditForm({ proposal }: Readonly<Props>) {
   const hasSearchKeyword = trimmedKeyword.length > 0;
 
   function handleLoadExperienceList(page: number, keyword: string) {
+    // Keep candidate loading behind a transition so pagination and searches feel
+    // responsive without blocking the rest of the editor.
     startSearchTransition(async () => {
       try {
         const result = await listProposalExperienceCandidatesPageAction(
@@ -117,6 +119,8 @@ export default function ProposalEditForm({ proposal }: Readonly<Props>) {
     let cancelled = false;
 
     async function loadViewExperience() {
+      // The details drawer loads lazily so the main proposal form does not pay
+      // the cost of fetching every experience card up front.
       if (viewExperienceId === null) {
         setViewExperience(null);
         return;

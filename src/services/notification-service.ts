@@ -254,6 +254,8 @@ abstract class NotificationFlow<TRecipient extends RecipientWithOptionalId> {
 
       recipientCount += recipients.length;
 
+      // Persist in-app notifications only for recipients backed by a real user
+      // row. Email-only fallback recipients should still receive queue jobs.
       const toPersist = recipients.filter(
         r => typeof r.userId === 'number' && r.userId! > 0
       );
@@ -274,6 +276,8 @@ abstract class NotificationFlow<TRecipient extends RecipientWithOptionalId> {
         });
       }
 
+      // Queue email delivery separately so transient email failures do not block
+      // the in-app notification record from being created.
       await Promise.all(
         recipients.map(r =>
           enqueueNotificationQueueJob({
@@ -296,6 +300,8 @@ abstract class NotificationFlow<TRecipient extends RecipientWithOptionalId> {
     }
 
     try {
+      // One publish is enough: the processor drains the queue in batches after
+      // this flow has enqueued all recipient-specific jobs.
       await publishQStashTask({
         type: QSTASH_TASK_TYPE.NOTIFICATION_QUEUE_PROCESS,
         batchSize: 100,

@@ -334,6 +334,9 @@ export default function RequestContent({ pageData, query }: Readonly<Props>) {
                       const allInvitedUsersResponded =
                         request.inviteSummary.total > 0 &&
                         request.inviteSummary.pending === 0;
+                      // Manual generation is only valid once every invited user
+                      // has responded and the request is not already in-flight
+                      // or fully closed.
                       const canGenerate =
                         allInvitedUsersResponded &&
                         request.status !== REQUEST_STATUS.PENDING &&

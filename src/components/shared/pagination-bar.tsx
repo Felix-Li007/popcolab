@@ -13,10 +13,10 @@ type Props = {
 
 const VARIANT_STYLES = {
   default: {
-    wrap: 'px-3 py-2 border-t border-gray-100 flex items-center justify-between shrink-0',
+    wrap: 'px-3 py-1.5 border-t border-gray-100 flex items-center justify-between shrink-0',
     button:
-      'w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors',
-    icon: 'w-5 h-5',
+      'w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors',
+    icon: 'w-4 h-4',
     label: 'text-badge font-semibold text-foreground/65',
   },
   circle: {

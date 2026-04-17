@@ -347,6 +347,8 @@ export async function updateEventAction(
       existingEvent.event_calendars
     );
 
+    // Compare persisted and submitted schedules using normalized keys so
+    // edits, additions, and removals are resolved consistently.
     const nextCalendarsWithKeys =
       data.eventCalendars?.map(schedule => ({
         schedule,
@@ -381,6 +383,7 @@ export async function updateEventAction(
           })
         : [];
 
+    // Only create rows that are genuinely new; unchanged schedules stay as-is.
     const addedCalendars =
       data.eventCalendars !== undefined
         ? nextCalendarsWithKeys
@@ -459,6 +462,8 @@ export async function updateEventAction(
           addedCalendars.length
         : activeCalendars.length;
 
+    // If every active date is removed in the editor, the event should no longer
+    // remain active even when the form did not explicitly change the status.
     const resolvedEventStatus =
       data.eventCalendars !== undefined && nextActiveCalendarCount === 0
         ? EventStatus.INACTIVE

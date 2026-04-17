@@ -132,11 +132,11 @@ export default function UserProposalsContent({
         </div>
       </div>
 
-      <div className="rounded-[2rem] border border-white/80 bg-white/58 p-3 shadow-[0_16px_34px_rgba(15,23,42,0.05)] backdrop-blur-xl">
+      <div className="overflow-hidden rounded-[1.6rem] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.82),rgba(248,250,252,0.74))] px-3 pb-0 pt-3 shadow-[0_18px_40px_rgba(15,23,42,0.06),inset_0_1px_0_rgba(255,255,255,0.86)] backdrop-blur-xl sm:px-4 sm:pb-0 sm:pt-4">
         <form
           action="/dashboard/proposals"
           method="GET"
-          className="grid items-end gap-3 rounded-[1.4rem] border border-white/75 bg-white/80 p-3 xl:grid-cols-[220px_220px_minmax(340px,1fr)_auto]"
+          className="mx-[-0.75rem] grid items-end gap-3 p-3 sm:mx-[-1rem] xl:grid-cols-[220px_220px_minmax(340px,1fr)_auto]"
         >
           {query.status !== 'all' ? (
             <input type="hidden" name="status" value={query.status} />
@@ -200,7 +200,7 @@ export default function UserProposalsContent({
           </div>
         </form>
 
-        <div className="mt-1 rounded-[1.4rem] border border-white/70 bg-white/74 px-2.5 py-2">
+        <div className="mt-1">
           <div className="flex flex-wrap gap-2">
             {TABS.map(tab => {
               const count =
@@ -229,37 +229,35 @@ export default function UserProposalsContent({
           </div>
         </div>
 
-        <div className="mt-3 rounded-[1.7rem] border border-white/70 bg-white/55 p-3">
-          <div className="rounded-[1.5rem] border border-white/70 bg-white/40 p-3">
-            {pageData.items.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-gray-200/90 bg-white/55 py-16 text-center backdrop-blur-xl">
-                <p className="text-sm font-semibold text-gray-500">
-                  No proposals found.
-                </p>
-                <p className="mt-1 text-xs text-gray-400">
-                  Try another status, date range, or request ID.
-                </p>
-              </div>
-            ) : (
-              <div
-                className={`grid gap-4 ${
-                  pageData.items.length > 1 ? 'xl:grid-cols-2' : 'grid-cols-1'
-                }`}
-              >
-                {pageData.items.map(proposal => (
-                  <UserProposalCard key={proposal.id} proposal={proposal} />
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="mt-3">
+          {pageData.items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-gray-200/90 bg-white/55 py-16 text-center backdrop-blur-xl">
+              <p className="text-sm font-semibold text-gray-500">
+                No proposals found.
+              </p>
+              <p className="mt-1 text-xs text-gray-400">
+                Try another status, date range, or request ID.
+              </p>
+            </div>
+          ) : (
+            <div
+              className={`grid gap-4 ${
+                pageData.items.length > 1 ? 'xl:grid-cols-2' : 'grid-cols-1'
+              }`}
+            >
+              {pageData.items.map(proposal => (
+                <UserProposalCard key={proposal.id} proposal={proposal} />
+              ))}
+            </div>
+          )}
 
-          <div className="mt-3">
+          <div className="mx-[-0.75rem] mt-3 border-t border-white/70 px-3 pt-1 sm:mx-[-1rem] sm:px-4">
             <PaginationBar
               page={pageData.currentPage}
               totalPages={pageData.totalPages}
               prevHref={prevHref}
               nextHref={nextHref}
-              variant="dashboard"
+              variant="default"
             />
           </div>
         </div>
