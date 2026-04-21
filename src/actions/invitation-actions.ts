@@ -3,6 +3,7 @@
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { getCurrentAuthContext } from '@/services/clerk-service';
 import {
   getInvitationByToken,
@@ -185,7 +186,11 @@ export async function respondToInvitationAction(
       currentUserEmail
     );
     redirect(buildInvitationResponseRedirectPath(token, response));
-  } catch {
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
     redirect(buildInvitationPath(token, { error: 1 }));
   }
 }

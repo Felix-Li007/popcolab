@@ -100,6 +100,32 @@ function createPreferredDateSlot(): PreferredDateSlot {
   };
 }
 
+function buildSlotDateTime(date: string, time: string) {
+  return new Date(`${date}T${time}`);
+}
+
+function getPreferredDateSlotsError(slots: PreferredDateSlot[]) {
+  if (slots.length === 0) {
+    return 'Please add at least one preferred date and time slot.';
+  }
+
+  if (slots.some(slot => !slot.date || !slot.startTime || !slot.endTime)) {
+    return 'Please complete the date, start time, and end time for each preferred slot.';
+  }
+
+  if (
+    slots.some(
+      slot =>
+        buildSlotDateTime(slot.date, slot.endTime) <
+        buildSlotDateTime(slot.date, slot.startTime)
+    )
+  ) {
+    return 'Each preferred slot must end after its start time.';
+  }
+
+  return null;
+}
+
 export default function NewRequestModal({
   open,
   onClose,
@@ -432,6 +458,17 @@ export default function NewRequestModal({
   const allInvites = [...individualInvites, ...teamInvites];
   const inviteValues = allInvites.map(i => i.value).join(',');
   const progressPercent = `${(step / totalSteps) * 100}%`;
+  const preferredDateSlotsError = getPreferredDateSlotsError(
+    step1PreferredDateSlots
+  );
+  const preferredDateFieldError =
+    state.fieldErrors?.startDate && preferredDateSlotsError
+      ? preferredDateSlotsError
+      : null;
+  const eventDateFieldError =
+    state.fieldErrors?.eventDate && !step1EventDate
+      ? state.fieldErrors.eventDate
+      : null;
 
   return (
     <ModalShell
@@ -779,9 +816,9 @@ export default function NewRequestModal({
                       </div>
                     ))}
 
-                    {state.fieldErrors?.startDate && (
+                    {preferredDateFieldError && (
                       <p className="mt-1 text-[11px] text-red-600">
-                        {state.fieldErrors.startDate}
+                        {preferredDateFieldError}
                       </p>
                     )}
 
@@ -881,9 +918,9 @@ export default function NewRequestModal({
                           className={`${DATE_PILL_INPUT_CLASS} w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer`}
                         />
                       </div>
-                      {state.fieldErrors?.eventDate && (
+                      {eventDateFieldError && (
                         <p className="mt-1 text-[11px] text-red-600">
-                          {state.fieldErrors.eventDate}
+                          {eventDateFieldError}
                         </p>
                       )}
                     </div>
